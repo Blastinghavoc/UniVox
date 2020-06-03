@@ -287,6 +287,12 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 100.09, y: 0, z: 0}
+--- !u!4 &1038313623 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 400002, guid: c6453f8e1f814744d8b94e5a6d1f9942,
+    type: 3}
+  m_PrefabInstance: {fileID: 549956204}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1777791461
 GameObject:
   m_ObjectHideFlags: 0
@@ -336,6 +342,8 @@ MonoBehaviour:
   chunkPool:
     prefab: {fileID: 5697091069406414600, guid: 9bd18ceaff69a844299df4d590e1d694,
       type: 3}
+  Player: {fileID: 1038313623}
+  ChunkRadius: 1
 --- !u!114 &1777791464
 MonoBehaviour:
   m_ObjectHideFlags: 0
