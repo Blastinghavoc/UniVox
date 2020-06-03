@@ -37,5 +37,25 @@ public abstract class AbstractChunkData : IChunkData<VoxelData>
     public abstract VoxelData GetVoxelAtLocalCoordinates(Vector3Int coords);
 
     public abstract VoxelData GetVoxelAtLocalCoordinates(int x, int y, int z);
+
+    public bool TryGetVoxelAtLocalCoordinates(Vector3Int coords, out VoxelData vox)
+    {
+        return TryGetVoxelAtLocalCoordinates(coords.x, coords.y, coords.z, out vox);
+    }
+
+    public bool TryGetVoxelAtLocalCoordinates(int x, int y, int z, out VoxelData vox)
+    {
+        bool xValid = x >= 0 && x < Dimensions.x;
+        bool yValid = y >= 0 && y < Dimensions.y;
+        bool zValid = z >= 0 && z < Dimensions.z;
+
+        if (xValid && yValid && zValid)
+        {
+            vox = GetVoxelAtLocalCoordinates(x,y,z);
+            return true;
+        }
+        vox = default;
+        return false;
+    }
     #endregion
 }

@@ -12,12 +12,21 @@ public static class Directions {
     public const byte NumDirections = 6;
 
     public static readonly Vector3[] Vectors = new Vector3[]{
-            Vector3.up,
-            Vector3.down,
-            Vector3.forward,
-            Vector3.back,
-            Vector3.right,
-            Vector3.left,
-        };
+        Vector3.up,
+        Vector3.down,
+        Vector3.forward,
+        Vector3.back,
+        Vector3.right,
+        Vector3.left,
+    };
+
+    public static readonly Vector3Int[] IntVectors = new Vector3Int[] {
+        Vector3Int.up,
+        Vector3Int.down,
+        new Vector3Int(0,0,1),
+        new Vector3Int(0,0,-1),
+        Vector3Int.right,
+        Vector3Int.left,
+    };
 }
 

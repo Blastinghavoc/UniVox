@@ -24,6 +24,7 @@ public abstract class AbstractChunkManager<ChunkDataType,VoxelDataType> : MonoBe
 
     protected virtual void Start()
     {
+        //Enforce positioning of ChunkManager at the world origin
         transform.position = Vector3.zero;
         transform.rotation = Quaternion.Euler(0, 0, 0);
 
