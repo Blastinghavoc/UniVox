@@ -10,10 +10,17 @@ public abstract class AbstractChunkManager<ChunkDataType,VoxelDataType> : MonoBe
 {
     [SerializeField]
     private Vector3Int CHUNK_DIMENSIONS = new Vector3Int(32,32,32);
-    public IChunkProvider<ChunkDataType, VoxelDataType> chunkProvider;
-    public IChunkMesher<ChunkDataType, VoxelDataType> chunkMesher;
+
+    public AbstractProviderComponent<ChunkDataType, VoxelDataType> chunkProvider;
+    public AbstractMesherComponent<ChunkDataType, VoxelDataType> chunkMesher;
 
     public PrefabPool chunkPool;
+
+    protected virtual void Start()
+    {
+        chunkProvider = GetComponent<AbstractProviderComponent<ChunkDataType, VoxelDataType>>();
+        chunkMesher = GetComponent<AbstractMesherComponent<ChunkDataType, VoxelDataType>>();
+    }
 
     public void GenerateChunkWithID(Vector3Int chunkID) {
         

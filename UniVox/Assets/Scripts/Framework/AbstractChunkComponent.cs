@@ -12,8 +12,10 @@ public abstract class AbstractChunkComponent<ChunkDataType,VoxelDataType> : Mono
     public ChunkDataType Data;
 
     public MeshFilter meshFilter;
+    public MeshCollider meshCollider;
 
     public void SetMesh(Mesh mesh) {
         meshFilter.mesh = mesh;
+        meshCollider.sharedMesh = mesh;
     }
 }

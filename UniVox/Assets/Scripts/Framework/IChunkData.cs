@@ -14,6 +14,8 @@ public interface IChunkData<V> where V: IVoxelData
     V this[Vector3Int index] { get; set; }
 
     void SetVoxelAtLocalCoordinates(Vector3Int coords, V voxel);
+    void SetVoxelAtLocalCoordinates(int x, int y, int z, V voxel);
 
     V GetVoxelAtLocalCoordinates(Vector3Int coords);
+    V GetVoxelAtLocalCoordinates(int x, int y, int z);
 }

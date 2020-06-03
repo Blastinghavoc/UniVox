@@ -108,3 +108,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   meshFilter: {fileID: 4127103875275953788}
+  meshCollider: {fileID: 249239860000639409}
