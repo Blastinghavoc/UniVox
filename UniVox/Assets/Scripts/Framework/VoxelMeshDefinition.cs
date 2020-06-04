@@ -4,15 +4,18 @@ using System.Collections;
 [System.Serializable]
 public class VoxelMeshDefinition
 {
-    public VoxelFaceDefinition[] Faces;
     //All positional vertices in the mesh
     public Vector3[] AllVertices;
     //All UVs in the mesh
     public Vector2[] AllUvs;
     //All Normals in the mesh
     public Vector3[] AllNormals;
+    //Definitions for each face
+    public VoxelFaceDefinition[] Faces = new VoxelFaceDefinition[Directions.NumDirections];
 
 }
+
+[System.Serializable]
 public class VoxelFaceDefinition 
 {
     /// <summary>
