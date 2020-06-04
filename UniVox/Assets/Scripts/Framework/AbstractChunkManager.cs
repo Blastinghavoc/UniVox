@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Utilities.Pooling;
@@ -22,6 +23,9 @@ public abstract class AbstractChunkManager<ChunkDataType,VoxelDataType> : MonoBe
 
     protected Dictionary<Vector3Int, AbstractChunkComponent<ChunkDataType, VoxelDataType>> loadedChunks = new Dictionary<Vector3Int, AbstractChunkComponent<ChunkDataType, VoxelDataType>>();
 
+    //Current chunkID occupied by the Player transform
+    protected Vector3Int playerChunkID = Vector3Int.zero;
+
     protected virtual void Start()
     {
         //Enforce positioning of ChunkManager at the world origin
@@ -41,7 +45,15 @@ public abstract class AbstractChunkManager<ChunkDataType,VoxelDataType> : MonoBe
     /// By Default only loading chunks in two dimensions.
     /// </summary>
     protected void UpdatePlayerArea() {
-        var playerChunkID = WorldToChunkPosition(Player.position);
+        playerChunkID = WorldToChunkPosition(Player.position);
+
+        //Find all chunks outside the radius
+        var outside = loadedChunks.Where(pair => !InsideChunkRadius(pair.Key))
+            .Select(pair => pair)
+            .ToList();
+
+        //Deactivate all chunks outside the radius
+        outside.ForEach(pair => DeactivateChunk(pair.Value, pair.Key));
 
         for (int z = -ChunkRadius; z < ChunkRadius; z++)
         {
@@ -59,6 +71,12 @@ public abstract class AbstractChunkManager<ChunkDataType,VoxelDataType> : MonoBe
         }
     }
 
+    protected void DeactivateChunk(AbstractChunkComponent<ChunkDataType, VoxelDataType> chunkComponent,Vector3Int chunkID) 
+    {
+        loadedChunks.Remove(chunkID);
+        chunkPool.ReturnToPool(chunkComponent.gameObject);
+    }
+
     protected void GenerateChunkWithID(Vector3Int chunkID) 
     {
         
@@ -68,6 +86,7 @@ public abstract class AbstractChunkManager<ChunkDataType,VoxelDataType> : MonoBe
 
         Assert.IsNotNull(ChunkComponent);
 
+        ChunkComponent.name = $"Chunk ({chunkID.x},{chunkID.y},{chunkID.z})";
         ChunkComponent.transform.position = ChunkToWorldPosition(chunkID);
 
         //Add to set of loaded chunks
@@ -91,13 +110,29 @@ public abstract class AbstractChunkManager<ChunkDataType,VoxelDataType> : MonoBe
         return result;
     }
 
-    public Vector3 ChunkToWorldPosition(Vector3Int pos) 
+    public Vector3 ChunkToWorldPosition(Vector3Int chunkID) 
     {
         //ChunkManager must be located at world origin
         Assert.AreEqual(Vector3.zero, transform.position);
         Assert.AreEqual(Quaternion.Euler(0, 0, 0), transform.rotation);
 
-        Vector3 result = pos * CHUNK_DIMENSIONS; ;
+        Vector3 result = chunkID * CHUNK_DIMENSIONS; ;
         return result;
+    }
+
+    /// <summary>
+    /// Manhattan distance query returning true 
+    /// </summary>
+    /// <param name="chunkID"></param>
+    /// <returns></returns>
+    public bool InsideChunkRadius(Vector3Int chunkID) 
+    {
+        var displacement = playerChunkID - chunkID;
+        var absDisplacement = new Vector3Int(
+            Mathf.Abs(displacement.x), 
+            Mathf.Abs(displacement.y),
+            Mathf.Abs(displacement.z));
+        //Inside if all elements of the absolute displacement are less than or equal to the chunk radius
+        return absDisplacement.All(_ => _ <= ChunkRadius);
     }
 }
