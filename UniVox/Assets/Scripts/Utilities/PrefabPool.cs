@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Utilities.Pooling
+namespace Utils.Pooling
 {
     [System.Serializable]
     public class PrefabPool

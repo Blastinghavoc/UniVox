@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Utilities.Pooling
+namespace Utils.Pooling
 {
     public class ObjectPool<T>
     {

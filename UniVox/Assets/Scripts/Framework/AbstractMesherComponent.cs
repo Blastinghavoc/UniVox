@@ -37,12 +37,19 @@ public abstract class AbstractMesherComponent<ChunkDataType, VoxelDataType> : Mo
         }
 
         Mesh mesh = new Mesh();
+
+        if (vertices.Count >= ushort.MaxValue)
+        {
+            //Cope with bigger meshes
+            mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+        }
+
         mesh.vertices = vertices.ToArray();
         mesh.uv = uvs.ToArray();
         mesh.normals = normals.ToArray();
         mesh.triangles = indices.ToArray();
 
-        Debug.Log($"Generated mesh with {vertices.Count} vertices and {indices.Count/3} triangles");
+        //Debug.Log($"Generated mesh with {vertices.Count} vertices and {indices.Count/3} triangles");
 
         return mesh;
 
