@@ -581,6 +581,53 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2120146547
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2120146549}
+  - component: {fileID: 2120146548}
+  m_Layer: 0
+  m_Name: VoxelTypeManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2120146548
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2120146547}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a72e89093f7b8a443a3cc70de917d7c8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  VoxelMaterial: {fileID: 2100000, guid: e2ba7f0aeb4429d458c55c71042259b6, type: 2}
+  VoxelTypes:
+  - {fileID: 11400000, guid: a03c76065d9f24749ae1e10da8247535, type: 2}
+  - {fileID: 11400000, guid: da8f3cdeb3374df40a2e8e80b40a9e01, type: 2}
+--- !u!4 &2120146549
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2120146547}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -78.804985, y: -266.0976, z: 187.25089}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 5
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &2491222763031173089
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -654,6 +701,12 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 3839814877241860285, guid: 176d6024de2cf5a49bfccb79f5a83be2,
         type: 3}
+    - target: {fileID: 8166611295910324536, guid: e4924b752413e2444932f1f7c0e99bbc,
+        type: 3}
+      propertyPath: blockToPlace
+      value: 
+      objectReference: {fileID: 11400000, guid: a03c76065d9f24749ae1e10da8247535,
+        type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e4924b752413e2444932f1f7c0e99bbc, type: 3}
 --- !u!1001 &6061144536489384915
@@ -673,6 +726,11 @@ PrefabInstance:
       propertyPath: ChunkRadius
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: VoxelTypeManager
+      value: 
+      objectReference: {fileID: 2120146548}
     - target: {fileID: 6061144537135917621, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -743,5 +801,17 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 8
       objectReference: {fileID: 0}
+    - target: {fileID: 6061144537135917626, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: dirtType
+      value: 
+      objectReference: {fileID: 11400000, guid: a03c76065d9f24749ae1e10da8247535,
+        type: 2}
+    - target: {fileID: 6061144537135917626, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: grassType
+      value: 
+      objectReference: {fileID: 11400000, guid: da8f3cdeb3374df40a2e8e80b40a9e01,
+        type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 37b9cc2f16198bf4c84ddc72031aedb3, type: 3}

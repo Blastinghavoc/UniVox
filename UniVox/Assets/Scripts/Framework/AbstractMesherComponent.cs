@@ -2,14 +2,23 @@
 using System.Collections;
 using System.Collections.Generic;
 using System;
+using TypeData = VoxelTypeManager.VoxelTypeData;
 
 public abstract class AbstractMesherComponent<ChunkDataType, VoxelDataType> : MonoBehaviour, IChunkMesher<ChunkDataType, VoxelDataType> 
     where ChunkDataType: IChunkData<VoxelDataType>
     where VoxelDataType:IVoxelData
 {
+
+    protected VoxelTypeManager voxelTypeManager;
+
+    public virtual void Initialise(VoxelTypeManager voxelTypeManager) 
+    {
+        this.voxelTypeManager = voxelTypeManager;
+    }
+
     public Mesh CreateMesh(ChunkDataType chunk) {
         List<Vector3> vertices = new List<Vector3>();
-        List<Vector2> uvs = new List<Vector2>();
+        List<Vector3> uvs = new List<Vector3>();
         List<Vector3> normals = new List<Vector3>();
         List<int> indices = new List<int>();
 
@@ -27,7 +36,15 @@ public abstract class AbstractMesherComponent<ChunkDataType, VoxelDataType> : Mo
                 {
                     var voxelTypeID = chunk[x, y, z].TypeID;
 
-                    AddMeshDataForVoxel(chunk,voxelTypeID,new Vector3Int(x,y,z),vertices,uvs,normals,indices,ref currentIndex,ref positionOffset);
+                    if (voxelTypeID == VoxelTypeManager.AIR_ID)
+                    {
+                        continue;
+                    }
+
+                    var typeData = voxelTypeManager.GetData(voxelTypeID);
+
+                    AddMeshDataForVoxel(chunk, typeData, new Vector3Int(x,y,z),vertices,uvs,normals,indices,ref currentIndex,ref positionOffset);
+                    
 
                     positionOffset.z++;
                 }
@@ -45,7 +62,7 @@ public abstract class AbstractMesherComponent<ChunkDataType, VoxelDataType> : Mo
         }
 
         mesh.vertices = vertices.ToArray();
-        mesh.uv = uvs.ToArray();
+        mesh.SetUVs(0,uvs.ToArray());
         mesh.normals = normals.ToArray();
         mesh.triangles = indices.ToArray();
 
@@ -55,6 +72,52 @@ public abstract class AbstractMesherComponent<ChunkDataType, VoxelDataType> : Mo
 
     }
 
-    protected abstract void AddMeshDataForVoxel(ChunkDataType chunk,ushort voxelTypeID,Vector3Int position, List<Vector3> vertices, List<Vector2> uvs, List<Vector3> normals, List<int> indices, ref int currentIndex, ref Vector3 positionOffset);
+    protected virtual void AddMeshDataForVoxel(ChunkDataType chunk, TypeData voxelTypeData, Vector3Int position, List<Vector3> vertices, List<Vector3> uvs, List<Vector3> normals, List<int> indices, ref int currentIndex, ref Vector3 positionOffset) 
+    {
+        var meshDefinition = voxelTypeData.definition.meshDefinition;
+        ref var faceZs = ref voxelTypeData.zIndicesPerFace;
 
+        //Add single voxel's data
+        for (int i = 0; i < meshDefinition.Faces.Length; i++)
+        {
+            if (IncludeFace(chunk,position,i))
+            {
+                AddFace(meshDefinition,ref faceZs, i,vertices,uvs,normals,indices,ref currentIndex,ref positionOffset);
+            }
+        }
+    }
+
+    protected virtual bool IncludeFace(ChunkDataType chunk, Vector3Int position,int direction) 
+    {
+        return true;
+    }
+
+    protected void AddFace(SOMeshDefinition meshDefinition, ref float[] zIndicesPerFace, int direction, List<Vector3> vertices, List<Vector3> uvs, List<Vector3> normals, List<int> indices, ref int currentIndex, ref Vector3 positionOffset) 
+    {
+        var face = meshDefinition.Faces[direction];
+
+        foreach (var vertexID in face.UsedVertices)
+        {
+            vertices.Add(meshDefinition.AllVertices[vertexID] + positionOffset);
+        }
+
+        foreach (var UvID in face.UsedUvs)
+        {
+            var tmp = meshDefinition.AllUvs[UvID];
+            uvs.Add(new Vector3(tmp.x, tmp.y, zIndicesPerFace[direction]));
+        }
+
+        foreach (var NormalID in face.UsedNormals)
+        {
+            normals.Add(meshDefinition.AllNormals[NormalID]);
+        }
+
+        foreach (var TriangleIndex in face.Triangles)
+        {
+            indices.Add(currentIndex + TriangleIndex);
+        }
+
+        //Update indexing
+        currentIndex += face.UsedVertices.Length;
+    }
 }

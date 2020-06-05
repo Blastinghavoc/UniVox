@@ -18,6 +18,8 @@ public class VoxelMeshDefinition
 [System.Serializable]
 public class VoxelFaceDefinition 
 {
+    //Whether or not the face should be considered solid for the purposes of culling
+    public bool isSolid = true;
     /// <summary>
     /// These arrays are indices into the corresponding AllX arrays of the 
     /// owning VoxelMeshDefinition

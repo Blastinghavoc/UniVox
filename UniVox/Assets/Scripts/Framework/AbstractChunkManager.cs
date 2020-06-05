@@ -18,6 +18,8 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
     public AbstractProviderComponent<ChunkDataType, VoxelDataType> chunkProvider;
     public AbstractMesherComponent<ChunkDataType, VoxelDataType> chunkMesher;
 
+    public VoxelTypeManager VoxelTypeManager;
+
     public PrefabPool chunkPool;
 
     public Transform Player;
@@ -35,12 +37,20 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
         transform.position = Vector3.zero;
         transform.rotation = Quaternion.Euler(0, 0, 0);
 
+        Assert.IsNotNull(VoxelTypeManager,"Chunk Manager must have a reference to a Voxel Type Manager");
+        VoxelTypeManager.Initialise();
+
         //Create VoxelWorldInterface
         var worldInterface = gameObject.AddComponent<VoxelWorldInterface>();
-        worldInterface.Intialise(this);
+        worldInterface.Intialise(this,VoxelTypeManager);
 
         chunkProvider = GetComponent<AbstractProviderComponent<ChunkDataType, VoxelDataType>>();
         chunkMesher = GetComponent<AbstractMesherComponent<ChunkDataType, VoxelDataType>>();
+        Assert.IsNotNull(chunkProvider,"Chunk Manager must have a chunk provider component");
+        Assert.IsNotNull(chunkMesher, "Chunk Manager must have a chunk mesher component");
+
+        chunkProvider.Initialise(VoxelTypeManager);
+        chunkMesher.Initialise(VoxelTypeManager);
     }
 
     protected virtual void Update()
@@ -145,6 +155,7 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
                 }
             }
             chunkComponent.Data[localVoxelIndex] = newVox;
+            var tmp = chunkComponent.Data[localVoxelIndex];
             GenerateMesh(chunkComponent);
             return true;
         }

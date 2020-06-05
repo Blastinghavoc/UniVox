@@ -28,5 +28,15 @@ public static class Directions {
         Vector3Int.right,
         Vector3Int.left,
     };
+
+    public static readonly byte[] Oposite = new byte[]
+    {
+        DOWN,
+        UP,
+        SOUTH,
+        NORTH,
+        WEST,
+        EAST
+    };
 }
 

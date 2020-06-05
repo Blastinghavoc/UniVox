@@ -10,6 +10,7 @@ public class BlockPlacerComponent : MonoBehaviour
     public MouseButton PlaceButton = MouseButton.RightMouse;
 
     public GameObject IndicatorPrefab;
+    public SOVoxelTypeDefinition blockToPlace;
 
     private VoxelWorldInterface WorldInterface;
     private GameObject Indicator;
@@ -61,7 +62,7 @@ public class BlockPlacerComponent : MonoBehaviour
         {
             if (hitAnything)
             {
-                WorldInterface.PlaceVoxel(raycastHit.point + 0.1f * raycastHit.normal, 1);
+                WorldInterface.PlaceVoxel(raycastHit.point + 0.1f * raycastHit.normal, blockToPlace);
             }
         }
 

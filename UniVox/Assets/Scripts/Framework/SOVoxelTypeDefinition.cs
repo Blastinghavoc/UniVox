@@ -5,6 +5,6 @@ using System.Collections;
 public class SOVoxelTypeDefinition : ScriptableObject
 {
     public string DisplayName;
-    public Vector2[] TextureAtlasUvs = new Vector2[6];
-    public VoxelMeshDefinition meshDefinition = MeshDefinitions.Cube;
+    public Texture2D[] FaceTextures = new Texture2D[Directions.NumDirections];
+    public SOMeshDefinition meshDefinition;
 }

@@ -9,10 +9,12 @@ using UnityEngine.UIElements;
 public class VoxelWorldInterface : MonoBehaviour
 {
     protected IChunkManager chunkManager;
+    protected VoxelTypeManager voxelTypeManager;
 
-    public void Intialise(IChunkManager manager) 
+    public void Intialise(IChunkManager manager,VoxelTypeManager voxelTypeManager) 
     {
         chunkManager = manager;
+        this.voxelTypeManager = voxelTypeManager;
     }
 
     public void PlaceVoxel(Vector3 position, ushort voxelTypeID)
@@ -20,9 +22,14 @@ public class VoxelWorldInterface : MonoBehaviour
         chunkManager.TrySetVoxel(position, voxelTypeID);
     }
 
+    public void PlaceVoxel(Vector3 position, SOVoxelTypeDefinition voxelType)
+    {
+        chunkManager.TrySetVoxel(position, voxelTypeManager.GetId(voxelType));
+    }
+
     public void RemoveVoxel(Vector3 position)
     {
-        chunkManager.TrySetVoxel(position, 0,true);
+        chunkManager.TrySetVoxel(position, VoxelTypeManager.AIR_ID,true);
     }
 
     public Vector3 CenterOfVoxelAt(Vector3 position) 

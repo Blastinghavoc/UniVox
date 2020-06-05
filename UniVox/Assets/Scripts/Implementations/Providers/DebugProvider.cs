@@ -3,6 +3,18 @@ using System.Collections;
 
 public class DebugProvider : AbstractProviderComponent<AbstractChunkData,VoxelData>
 {
+    public SOVoxelTypeDefinition dirtType;
+    private ushort dirtID;
+    public SOVoxelTypeDefinition grassType;
+    private ushort grassID;
+
+    public override void Initialise(VoxelTypeManager voxelTypeManager)
+    {
+        base.Initialise(voxelTypeManager);
+        dirtID = voxelTypeManager.GetId(dirtType);
+        grassID = voxelTypeManager.GetId(grassType);
+    }
+
     public override AbstractChunkData ProvideChunkData(Vector3Int chunkID, Vector3Int chunkDimensions)
     {
         return HalfHeight(chunkID, chunkDimensions);
@@ -11,13 +23,22 @@ public class DebugProvider : AbstractProviderComponent<AbstractChunkData,VoxelDa
     private AbstractChunkData HalfHeight(Vector3Int chunkID, Vector3Int chunkDimensions) 
     {
         var ChunkData = new ArrayChunkData(chunkID, chunkDimensions);
+        var maxY = chunkDimensions.y / 2;
+
         for (int z = 0; z < chunkDimensions.z; z++)
         {
-            for (int y = 0; y < chunkDimensions.y / 2; y++)
+            for (int y = 0; y < maxY; y++)
             {
                 for (int x = 0; x < chunkDimensions.x; x++)
                 {
-                    ChunkData[x, y, z] = new VoxelData(1);
+                    if (y == maxY - 1)
+                    {
+                        ChunkData[x, y, z] = new VoxelData(grassID);
+                    }
+                    else
+                    {
+                        ChunkData[x, y, z] = new VoxelData(dirtID);  
+                    }
                 }
             }
         }
@@ -40,7 +61,7 @@ public class DebugProvider : AbstractProviderComponent<AbstractChunkData,VoxelDa
                     {
                         continue;
                     }
-                    ChunkData[x, y, z] = new VoxelData(1);
+                    ChunkData[x, y, z] = new VoxelData(dirtID);
                 }
             }
         }
