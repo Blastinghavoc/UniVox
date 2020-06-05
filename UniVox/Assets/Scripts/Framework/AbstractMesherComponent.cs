@@ -17,23 +17,23 @@ public abstract class AbstractMesherComponent<ChunkDataType, VoxelDataType> : Mo
 
         Vector3 positionOffset = Vector3.zero;
 
-        for (int z = 0; z < chunk.Dimensions.z; z++)
+        for (int x = 0; x < chunk.Dimensions.x; x++)
         {
             positionOffset.y = 0;//Reset offset before each vertical loop
             for (int y = 0; y < chunk.Dimensions.y; y++)
             {
-                positionOffset.x = 0;//Reset offset before each horizontal loop
-                for (int x = 0; x < chunk.Dimensions.x; x++)
+                positionOffset.z = 0;//Reset offset before each horizontal loop
+                for (int z = 0; z < chunk.Dimensions.z; z++)
                 {
                     var voxelTypeID = chunk[x, y, z].TypeID;
 
                     AddMeshDataForVoxel(chunk,voxelTypeID,new Vector3Int(x,y,z),vertices,uvs,normals,indices,ref currentIndex,ref positionOffset);
 
-                    positionOffset.x++;
+                    positionOffset.z++;
                 }
                 positionOffset.y++;
             }
-            positionOffset.z++;
+            positionOffset.x++;
         }
 
         Mesh mesh = new Mesh();
