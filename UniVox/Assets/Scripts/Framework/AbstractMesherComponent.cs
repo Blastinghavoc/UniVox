@@ -24,14 +24,10 @@ public abstract class AbstractMesherComponent<ChunkDataType, VoxelDataType> : Mo
 
         int currentIndex = 0;
 
-        Vector3 positionOffset = Vector3.zero;
-
         for (int x = 0; x < chunk.Dimensions.x; x++)
         {
-            positionOffset.y = 0;//Reset offset before each vertical loop
             for (int y = 0; y < chunk.Dimensions.y; y++)
             {
-                positionOffset.z = 0;//Reset offset before each horizontal loop
                 for (int z = 0; z < chunk.Dimensions.z; z++)
                 {
                     var voxelTypeID = chunk[x, y, z].TypeID;
@@ -43,14 +39,10 @@ public abstract class AbstractMesherComponent<ChunkDataType, VoxelDataType> : Mo
 
                     var typeData = voxelTypeManager.GetData(voxelTypeID);
 
-                    AddMeshDataForVoxel(chunk, typeData, new Vector3Int(x,y,z),vertices,uvs,normals,indices,ref currentIndex,ref positionOffset);
+                    AddMeshDataForVoxel(chunk, typeData, new Vector3Int(x,y,z),vertices,uvs,normals,indices,ref currentIndex);
                     
-
-                    positionOffset.z++;
                 }
-                positionOffset.y++;
             }
-            positionOffset.x++;
         }
 
         Mesh mesh = new Mesh();
@@ -72,7 +64,7 @@ public abstract class AbstractMesherComponent<ChunkDataType, VoxelDataType> : Mo
 
     }
 
-    protected virtual void AddMeshDataForVoxel(ChunkDataType chunk, TypeData voxelTypeData, Vector3Int position, List<Vector3> vertices, List<Vector3> uvs, List<Vector3> normals, List<int> indices, ref int currentIndex, ref Vector3 positionOffset) 
+    protected virtual void AddMeshDataForVoxel(ChunkDataType chunk, TypeData voxelTypeData, Vector3Int position, List<Vector3> vertices, List<Vector3> uvs, List<Vector3> normals, List<int> indices, ref int currentIndex) 
     {
         var meshDefinition = voxelTypeData.definition.meshDefinition;
         ref var faceZs = ref voxelTypeData.zIndicesPerFace;
@@ -82,7 +74,7 @@ public abstract class AbstractMesherComponent<ChunkDataType, VoxelDataType> : Mo
         {
             if (IncludeFace(chunk,position,i))
             {
-                AddFace(meshDefinition,ref faceZs, i,vertices,uvs,normals,indices,ref currentIndex,ref positionOffset);
+                AddFace(meshDefinition,ref faceZs, i,vertices,uvs,normals,indices,ref currentIndex,position);
             }
         }
     }
@@ -92,13 +84,13 @@ public abstract class AbstractMesherComponent<ChunkDataType, VoxelDataType> : Mo
         return true;
     }
 
-    protected void AddFace(SOMeshDefinition meshDefinition, ref float[] zIndicesPerFace, int direction, List<Vector3> vertices, List<Vector3> uvs, List<Vector3> normals, List<int> indices, ref int currentIndex, ref Vector3 positionOffset) 
+    protected void AddFace(SOMeshDefinition meshDefinition, ref float[] zIndicesPerFace, int direction, List<Vector3> vertices, List<Vector3> uvs, List<Vector3> normals, List<int> indices, ref int currentIndex, Vector3Int position) 
     {
         var face = meshDefinition.Faces[direction];
 
         foreach (var vertexID in face.UsedVertices)
         {
-            vertices.Add(meshDefinition.AllVertices[vertexID] + positionOffset);
+            vertices.Add(meshDefinition.AllVertices[vertexID] + position);
         }
 
         foreach (var UvID in face.UsedUvs)

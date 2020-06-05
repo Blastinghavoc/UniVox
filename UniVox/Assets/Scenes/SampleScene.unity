@@ -695,6 +695,31 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2491222762484586573, guid: e4924b752413e2444932f1f7c0e99bbc,
+        type: 3}
+      propertyPath: m_Interpolate
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2491222762492612297, guid: e4924b752413e2444932f1f7c0e99bbc,
+        type: 3}
+      propertyPath: movementSettings.JumpForce
+      value: 60
+      objectReference: {fileID: 0}
+    - target: {fileID: 2491222762492612297, guid: e4924b752413e2444932f1f7c0e99bbc,
+        type: 3}
+      propertyPath: advancedSettings.airControl
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2491222762492612297, guid: e4924b752413e2444932f1f7c0e99bbc,
+        type: 3}
+      propertyPath: mouseLook.MinimumX
+      value: -90
+      objectReference: {fileID: 0}
+    - target: {fileID: 2491222762494834829, guid: e4924b752413e2444932f1f7c0e99bbc,
+        type: 3}
+      propertyPath: m_Radius
+      value: 0.4
+      objectReference: {fileID: 0}
     - target: {fileID: 8166611295910324536, guid: e4924b752413e2444932f1f7c0e99bbc,
         type: 3}
       propertyPath: IndicatorPrefab

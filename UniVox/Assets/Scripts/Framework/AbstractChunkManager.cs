@@ -154,6 +154,7 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
                     return false;
                 }
             }
+            var tmp1 = chunkComponent.Data[localVoxelIndex];
             chunkComponent.Data[localVoxelIndex] = newVox;
             var tmp = chunkComponent.Data[localVoxelIndex];
             GenerateMesh(chunkComponent);
