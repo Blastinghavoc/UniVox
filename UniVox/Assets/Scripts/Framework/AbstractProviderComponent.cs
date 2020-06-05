@@ -1,16 +1,19 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public abstract class AbstractProviderComponent<ChunkDataType, VoxelDataType> : MonoBehaviour, IChunkProvider<ChunkDataType, VoxelDataType>
-    where ChunkDataType : IChunkData<VoxelDataType>
-    where VoxelDataType : IVoxelData
+namespace UniVox.Framework
 {
-    protected VoxelTypeManager voxelTypeManager;
-
-    public virtual void Initialise(VoxelTypeManager voxelTypeManager)
+    public abstract class AbstractProviderComponent<ChunkDataType, VoxelDataType> : MonoBehaviour, IChunkProvider<ChunkDataType, VoxelDataType>
+        where ChunkDataType : IChunkData<VoxelDataType>
+        where VoxelDataType : IVoxelData
     {
-        this.voxelTypeManager = voxelTypeManager;
-    }
+        protected VoxelTypeManager voxelTypeManager;
 
-    public abstract ChunkDataType ProvideChunkData(Vector3Int chunkID, Vector3Int chunkDimensions);
+        public virtual void Initialise(VoxelTypeManager voxelTypeManager)
+        {
+            this.voxelTypeManager = voxelTypeManager;
+        }
+
+        public abstract ChunkDataType ProvideChunkData(Vector3Int chunkID, Vector3Int chunkDimensions);
+    }
 }

@@ -1,12 +1,16 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UniVox.Framework;
 
-public struct VoxelData : IVoxelData
+namespace UniVox.Implementations.Common
 {
-    public ushort TypeID { get; set; }
-
-    public VoxelData(ushort typeID)
+    public struct VoxelData : IVoxelData
     {
-        TypeID = typeID;
+        public ushort TypeID { get; set; }
+
+        public VoxelData(ushort typeID)
+        {
+            TypeID = typeID;
+        }
     }
 }

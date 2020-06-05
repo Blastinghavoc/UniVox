@@ -1,8 +1,14 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using TypeData = VoxelTypeManager.VoxelTypeData;
+using TypeData = UniVox.Framework.VoxelTypeManager.VoxelTypeData;
+using UniVox.Framework;
+using UniVox.Implementations.ChunkData;
+using UniVox.Implementations.Common;
 
-public class NaiveMesher : AbstractMesherComponent<AbstractChunkData, VoxelData>
+namespace UniVox.Implementations.Meshers
 {
+    public class NaiveMesher : AbstractMesherComponent<AbstractChunkData, VoxelData>
+    {
+    }
 }

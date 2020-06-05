@@ -1,22 +1,28 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using TypeData = VoxelTypeManager.VoxelTypeData;
+using TypeData = UniVox.Framework.VoxelTypeManager.VoxelTypeData;
+using UniVox.Framework;
+using UniVox.Implementations.ChunkData;
+using UniVox.Implementations.Common;
 
-public class CullingMesher : AbstractMesherComponent<AbstractChunkData, VoxelData>
+namespace UniVox.Implementations.Meshers
 {
-    protected override bool IncludeFace(AbstractChunkData chunk, Vector3Int position, int direction)
+    public class CullingMesher : AbstractMesherComponent<AbstractChunkData, VoxelData>
     {
-        if (chunk.TryGetVoxelAtLocalCoordinates(position + Directions.IntVectors[direction], out VoxelData adjacent))
+        protected override bool IncludeFace(AbstractChunkData chunk, Vector3Int position, int direction)
         {
-            if (adjacent.TypeID == VoxelTypeManager.AIR_ID)
+            if (chunk.TryGetVoxelAtLocalCoordinates(position + Directions.IntVectors[direction], out VoxelData adjacent))
             {
-                return true;
+                if (adjacent.TypeID == VoxelTypeManager.AIR_ID)
+                {
+                    return true;
+                }
+                var adjacentData = voxelTypeManager.GetData(adjacent.TypeID);
+                //Exclude this face if adjacent face is solid
+                return !adjacentData.definition.meshDefinition.Faces[Directions.Oposite[direction]].isSolid;
             }
-            var adjacentData = voxelTypeManager.GetData(adjacent.TypeID);
-            //Exclude this face if adjacent face is solid
-            return !adjacentData.definition.meshDefinition.Faces[Directions.Oposite[direction]].isSolid;
+            return true;
         }
-        return true;
     }
 }

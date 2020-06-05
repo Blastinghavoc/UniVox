@@ -3,37 +3,41 @@ using System.Collections;
 using System;
 using UnityEngine.UIElements;
 
-/// <summary>
-/// Global interface to the voxel world
-/// </summary>
-public class VoxelWorldInterface : MonoBehaviour
+namespace UniVox.Framework
 {
-    protected IChunkManager chunkManager;
-    protected VoxelTypeManager voxelTypeManager;
 
-    public void Intialise(IChunkManager manager,VoxelTypeManager voxelTypeManager) 
+    /// <summary>
+    /// Global interface to the voxel world to be accessed by gameplay scripts
+    /// </summary>
+    public class VoxelWorldInterface : MonoBehaviour
     {
-        chunkManager = manager;
-        this.voxelTypeManager = voxelTypeManager;
-    }
+        protected IChunkManager chunkManager;
+        protected VoxelTypeManager voxelTypeManager;
 
-    public void PlaceVoxel(Vector3 position, ushort voxelTypeID)
-    {
-        chunkManager.TrySetVoxel(position, voxelTypeID);
-    }
+        public void Intialise(IChunkManager manager, VoxelTypeManager voxelTypeManager)
+        {
+            chunkManager = manager;
+            this.voxelTypeManager = voxelTypeManager;
+        }
 
-    public void PlaceVoxel(Vector3 position, SOVoxelTypeDefinition voxelType)
-    {
-        chunkManager.TrySetVoxel(position, voxelTypeManager.GetId(voxelType));
-    }
+        public void PlaceVoxel(Vector3 position, ushort voxelTypeID)
+        {
+            chunkManager.TrySetVoxel(position, voxelTypeID);
+        }
 
-    public void RemoveVoxel(Vector3 position)
-    {
-        chunkManager.TrySetVoxel(position, VoxelTypeManager.AIR_ID,true);
-    }
+        public void PlaceVoxel(Vector3 position, SOVoxelTypeDefinition voxelType)
+        {
+            chunkManager.TrySetVoxel(position, voxelTypeManager.GetId(voxelType));
+        }
 
-    public Vector3 CenterOfVoxelAt(Vector3 position) 
-    {
-        return chunkManager.SnapToVoxelCenter(position);
+        public void RemoveVoxel(Vector3 position)
+        {
+            chunkManager.TrySetVoxel(position, VoxelTypeManager.AIR_ID, true);
+        }
+
+        public Vector3 CenterOfVoxelAt(Vector3 position)
+        {
+            return chunkManager.SnapToVoxelCenter(position);
+        }
     }
 }

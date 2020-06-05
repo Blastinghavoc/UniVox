@@ -1,70 +1,77 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UniVox.Framework;
+using UniVox.Implementations.ChunkData;
+using UniVox.Implementations.Common;
 
-public class DebugProvider : AbstractProviderComponent<AbstractChunkData,VoxelData>
+namespace UniVox.Implementations.Providers
 {
-    public SOVoxelTypeDefinition dirtType;
-    private ushort dirtID;
-    public SOVoxelTypeDefinition grassType;
-    private ushort grassID;
-
-    public override void Initialise(VoxelTypeManager voxelTypeManager)
+    public class DebugProvider : AbstractProviderComponent<AbstractChunkData, VoxelData>
     {
-        base.Initialise(voxelTypeManager);
-        dirtID = voxelTypeManager.GetId(dirtType);
-        grassID = voxelTypeManager.GetId(grassType);
-    }
+        public SOVoxelTypeDefinition dirtType;
+        private ushort dirtID;
+        public SOVoxelTypeDefinition grassType;
+        private ushort grassID;
 
-    public override AbstractChunkData ProvideChunkData(Vector3Int chunkID, Vector3Int chunkDimensions)
-    {
-        return HalfHeight(chunkID, chunkDimensions);
-    }
-
-    private AbstractChunkData HalfHeight(Vector3Int chunkID, Vector3Int chunkDimensions) 
-    {
-        var ChunkData = new ArrayChunkData(chunkID, chunkDimensions);
-        var maxY = chunkDimensions.y / 2;
-
-        for (int z = 0; z < chunkDimensions.z; z++)
+        public override void Initialise(VoxelTypeManager voxelTypeManager)
         {
-            for (int y = 0; y < maxY; y++)
+            base.Initialise(voxelTypeManager);
+            dirtID = voxelTypeManager.GetId(dirtType);
+            grassID = voxelTypeManager.GetId(grassType);
+        }
+
+        public override AbstractChunkData ProvideChunkData(Vector3Int chunkID, Vector3Int chunkDimensions)
+        {
+            return HalfHeight(chunkID, chunkDimensions);
+        }
+
+        private AbstractChunkData HalfHeight(Vector3Int chunkID, Vector3Int chunkDimensions)
+        {
+            var ChunkData = new ArrayChunkData(chunkID, chunkDimensions);
+            var maxY = chunkDimensions.y / 2;
+
+            for (int z = 0; z < chunkDimensions.z; z++)
             {
-                for (int x = 0; x < chunkDimensions.x; x++)
+                for (int y = 0; y < maxY; y++)
                 {
-                    if (y == maxY - 1)
+                    for (int x = 0; x < chunkDimensions.x; x++)
                     {
-                        ChunkData[x, y, z] = new VoxelData(grassID);
-                    }
-                    else
-                    {
-                        ChunkData[x, y, z] = new VoxelData(dirtID);  
+                        if (y == maxY - 1)
+                        {
+                            ChunkData[x, y, z] = new VoxelData(grassID);
+                        }
+                        else
+                        {
+                            ChunkData[x, y, z] = new VoxelData(dirtID);
+                        }
                     }
                 }
             }
+            return ChunkData;
         }
-        return ChunkData;
-    }
 
-    private AbstractChunkData HalfLattice(Vector3Int chunkID, Vector3Int chunkDimensions) {
-        bool b = true;
-        var ChunkData = new ArrayChunkData(chunkID, chunkDimensions);
-        for (int z = 0; z < chunkDimensions.z; z++)
+        private AbstractChunkData HalfLattice(Vector3Int chunkID, Vector3Int chunkDimensions)
         {
-            b = !b;
-            for (int y = 0; y < chunkDimensions.y / 2; y++)
+            bool b = true;
+            var ChunkData = new ArrayChunkData(chunkID, chunkDimensions);
+            for (int z = 0; z < chunkDimensions.z; z++)
             {
                 b = !b;
-                for (int x = 0; x < chunkDimensions.x; x++)
+                for (int y = 0; y < chunkDimensions.y / 2; y++)
                 {
                     b = !b;
-                    if (b)
+                    for (int x = 0; x < chunkDimensions.x; x++)
                     {
-                        continue;
+                        b = !b;
+                        if (b)
+                        {
+                            continue;
+                        }
+                        ChunkData[x, y, z] = new VoxelData(dirtID);
                     }
-                    ChunkData[x, y, z] = new VoxelData(dirtID);
                 }
             }
+            return ChunkData;
         }
-        return ChunkData;
     }
 }

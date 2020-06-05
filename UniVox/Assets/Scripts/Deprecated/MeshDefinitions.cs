@@ -1,10 +1,14 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UniVox.Framework;
 
-public static class MeshDefinitions
+namespace UniVox.Deprecated
 {
-    public static VoxelMeshDefinition Cube = new VoxelMeshDefinition() {
-        AllVertices = new Vector3[8] {
+    public static class MeshDefinitions
+    {
+        public static VoxelMeshDefinition Cube = new VoxelMeshDefinition()
+        {
+            AllVertices = new Vector3[8] {
             new Vector3(0, 0, 0),//0
             new Vector3(0, 0, 1),//1
             new Vector3(1, 0, 0),//2
@@ -15,16 +19,16 @@ public static class MeshDefinitions
             new Vector3(1, 1, 1),//7
         },
 
-        AllUvs = new Vector2[] {
+            AllUvs = new Vector2[] {
             new Vector2(0, 0),
             new Vector2(1, 0),
             new Vector2(1, 1),
             new Vector2(0, 1),
         },
 
-        AllNormals = Directions.Vectors,//A Cube's normals are the cardinal direction vectors
+            AllNormals = Directions.Vectors,//A Cube's normals are the cardinal direction vectors
 
-        Faces = new VoxelFaceDefinition[] {
+            Faces = new VoxelFaceDefinition[] {
             new VoxelFaceDefinition(){ //UP
                UsedVertices = new int[]{6,4,5,7},
                UsedUvs = new int[]{ 0,1,2,3},
@@ -68,6 +72,7 @@ public static class MeshDefinitions
                 Triangles = new int[]{0,1,2,0,2,3},
             },
         }
-    };
+        };
 
+    }
 }

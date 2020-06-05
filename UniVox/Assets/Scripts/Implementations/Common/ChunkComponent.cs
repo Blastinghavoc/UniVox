@@ -1,6 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UniVox.Framework;
+using UniVox.Implementations.ChunkData;
 
-public class ChunkComponent : AbstractChunkComponent<AbstractChunkData, VoxelData>
+namespace UniVox.Implementations.Common
 {
+    public class ChunkComponent : AbstractChunkComponent<AbstractChunkData, VoxelData>
+    {
+    }
 }

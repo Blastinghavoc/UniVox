@@ -2,114 +2,118 @@
 using System.Collections;
 using System.Collections.Generic;
 using System;
-using TypeData = VoxelTypeManager.VoxelTypeData;
+using TypeData = UniVox.Framework.VoxelTypeManager.VoxelTypeData;
 
-public abstract class AbstractMesherComponent<ChunkDataType, VoxelDataType> : MonoBehaviour, IChunkMesher<ChunkDataType, VoxelDataType> 
-    where ChunkDataType: IChunkData<VoxelDataType>
-    where VoxelDataType:IVoxelData
+namespace UniVox.Framework
 {
-
-    protected VoxelTypeManager voxelTypeManager;
-
-    public virtual void Initialise(VoxelTypeManager voxelTypeManager) 
+    public abstract class AbstractMesherComponent<ChunkDataType, VoxelDataType> : MonoBehaviour, IChunkMesher<ChunkDataType, VoxelDataType>
+        where ChunkDataType : IChunkData<VoxelDataType>
+        where VoxelDataType : IVoxelData
     {
-        this.voxelTypeManager = voxelTypeManager;
-    }
 
-    public Mesh CreateMesh(ChunkDataType chunk) {
-        List<Vector3> vertices = new List<Vector3>();
-        List<Vector3> uvs = new List<Vector3>();
-        List<Vector3> normals = new List<Vector3>();
-        List<int> indices = new List<int>();
+        protected VoxelTypeManager voxelTypeManager;
 
-        int currentIndex = 0;
-
-        for (int x = 0; x < chunk.Dimensions.x; x++)
+        public virtual void Initialise(VoxelTypeManager voxelTypeManager)
         {
-            for (int y = 0; y < chunk.Dimensions.y; y++)
+            this.voxelTypeManager = voxelTypeManager;
+        }
+
+        public Mesh CreateMesh(ChunkDataType chunk)
+        {
+            List<Vector3> vertices = new List<Vector3>();
+            List<Vector3> uvs = new List<Vector3>();
+            List<Vector3> normals = new List<Vector3>();
+            List<int> indices = new List<int>();
+
+            int currentIndex = 0;
+
+            for (int x = 0; x < chunk.Dimensions.x; x++)
             {
-                for (int z = 0; z < chunk.Dimensions.z; z++)
+                for (int y = 0; y < chunk.Dimensions.y; y++)
                 {
-                    var voxelTypeID = chunk[x, y, z].TypeID;
-
-                    if (voxelTypeID == VoxelTypeManager.AIR_ID)
+                    for (int z = 0; z < chunk.Dimensions.z; z++)
                     {
-                        continue;
+                        var voxelTypeID = chunk[x, y, z].TypeID;
+
+                        if (voxelTypeID == VoxelTypeManager.AIR_ID)
+                        {
+                            continue;
+                        }
+
+                        var typeData = voxelTypeManager.GetData(voxelTypeID);
+
+                        AddMeshDataForVoxel(chunk, typeData, new Vector3Int(x, y, z), vertices, uvs, normals, indices, ref currentIndex);
+
                     }
+                }
+            }
 
-                    var typeData = voxelTypeManager.GetData(voxelTypeID);
+            Mesh mesh = new Mesh();
 
-                    AddMeshDataForVoxel(chunk, typeData, new Vector3Int(x,y,z),vertices,uvs,normals,indices,ref currentIndex);
-                    
+            if (vertices.Count >= ushort.MaxValue)
+            {
+                //Cope with bigger meshes
+                mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+            }
+
+            mesh.vertices = vertices.ToArray();
+            mesh.SetUVs(0, uvs.ToArray());
+            mesh.normals = normals.ToArray();
+            mesh.triangles = indices.ToArray();
+
+            //Debug.Log($"Generated mesh with {vertices.Count} vertices and {indices.Count/3} triangles");
+
+            return mesh;
+
+        }
+
+        protected virtual void AddMeshDataForVoxel(ChunkDataType chunk, TypeData voxelTypeData, Vector3Int position, List<Vector3> vertices, List<Vector3> uvs, List<Vector3> normals, List<int> indices, ref int currentIndex)
+        {
+            var meshDefinition = voxelTypeData.definition.meshDefinition;
+            ref var faceZs = ref voxelTypeData.zIndicesPerFace;
+
+            //Add single voxel's data
+            for (int i = 0; i < meshDefinition.Faces.Length; i++)
+            {
+                if (IncludeFace(chunk, position, i))
+                {
+                    AddFace(meshDefinition, ref faceZs, i, vertices, uvs, normals, indices, ref currentIndex, position);
                 }
             }
         }
 
-        Mesh mesh = new Mesh();
-
-        if (vertices.Count >= ushort.MaxValue)
+        protected virtual bool IncludeFace(ChunkDataType chunk, Vector3Int position, int direction)
         {
-            //Cope with bigger meshes
-            mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+            return true;
         }
 
-        mesh.vertices = vertices.ToArray();
-        mesh.SetUVs(0,uvs.ToArray());
-        mesh.normals = normals.ToArray();
-        mesh.triangles = indices.ToArray();
-
-        //Debug.Log($"Generated mesh with {vertices.Count} vertices and {indices.Count/3} triangles");
-
-        return mesh;
-
-    }
-
-    protected virtual void AddMeshDataForVoxel(ChunkDataType chunk, TypeData voxelTypeData, Vector3Int position, List<Vector3> vertices, List<Vector3> uvs, List<Vector3> normals, List<int> indices, ref int currentIndex) 
-    {
-        var meshDefinition = voxelTypeData.definition.meshDefinition;
-        ref var faceZs = ref voxelTypeData.zIndicesPerFace;
-
-        //Add single voxel's data
-        for (int i = 0; i < meshDefinition.Faces.Length; i++)
+        protected void AddFace(SOMeshDefinition meshDefinition, ref float[] zIndicesPerFace, int direction, List<Vector3> vertices, List<Vector3> uvs, List<Vector3> normals, List<int> indices, ref int currentIndex, Vector3Int position)
         {
-            if (IncludeFace(chunk,position,i))
+            var face = meshDefinition.Faces[direction];
+
+            foreach (var vertexID in face.UsedVertices)
             {
-                AddFace(meshDefinition,ref faceZs, i,vertices,uvs,normals,indices,ref currentIndex,position);
+                vertices.Add(meshDefinition.AllVertices[vertexID] + position);
             }
+
+            foreach (var UvID in face.UsedUvs)
+            {
+                var tmp = meshDefinition.AllUvs[UvID];
+                uvs.Add(new Vector3(tmp.x, tmp.y, zIndicesPerFace[direction]));
+            }
+
+            foreach (var NormalID in face.UsedNormals)
+            {
+                normals.Add(meshDefinition.AllNormals[NormalID]);
+            }
+
+            foreach (var TriangleIndex in face.Triangles)
+            {
+                indices.Add(currentIndex + TriangleIndex);
+            }
+
+            //Update indexing
+            currentIndex += face.UsedVertices.Length;
         }
-    }
-
-    protected virtual bool IncludeFace(ChunkDataType chunk, Vector3Int position,int direction) 
-    {
-        return true;
-    }
-
-    protected void AddFace(SOMeshDefinition meshDefinition, ref float[] zIndicesPerFace, int direction, List<Vector3> vertices, List<Vector3> uvs, List<Vector3> normals, List<int> indices, ref int currentIndex, Vector3Int position) 
-    {
-        var face = meshDefinition.Faces[direction];
-
-        foreach (var vertexID in face.UsedVertices)
-        {
-            vertices.Add(meshDefinition.AllVertices[vertexID] + position);
-        }
-
-        foreach (var UvID in face.UsedUvs)
-        {
-            var tmp = meshDefinition.AllUvs[UvID];
-            uvs.Add(new Vector3(tmp.x, tmp.y, zIndicesPerFace[direction]));
-        }
-
-        foreach (var NormalID in face.UsedNormals)
-        {
-            normals.Add(meshDefinition.AllNormals[NormalID]);
-        }
-
-        foreach (var TriangleIndex in face.Triangles)
-        {
-            indices.Add(currentIndex + TriangleIndex);
-        }
-
-        //Update indexing
-        currentIndex += face.UsedVertices.Length;
     }
 }
