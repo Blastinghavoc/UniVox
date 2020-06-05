@@ -432,6 +432,11 @@ PrefabInstance:
       propertyPath: Player
       value: 
       objectReference: {fileID: 1038313623}
+    - target: {fileID: 2981057896917559129, guid: 55373a8976e0c014e90e0bb7e64d046a,
+        type: 3}
+      propertyPath: MaxChunksPerUpdate
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2981057896917559131, guid: 55373a8976e0c014e90e0bb7e64d046a,
         type: 3}
       propertyPath: m_Name
@@ -756,6 +761,11 @@ PrefabInstance:
       propertyPath: VoxelTypeManager
       value: 
       objectReference: {fileID: 2120146548}
+    - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: MaxChunksPerUpdate
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6061144537135917621, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: m_LocalPosition.x

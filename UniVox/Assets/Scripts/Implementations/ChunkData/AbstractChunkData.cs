@@ -14,6 +14,9 @@ namespace UniVox.Implementations.ChunkData
     {
         public Vector3Int ChunkID { get; set; }
         public Vector3Int Dimensions { get; set; }
+        public bool ModifiedSinceGeneration { get; set; } = false;
+
+        public bool FullyGenerated { get; set; } = false;
 
         public AbstractChunkData(Vector3Int ID, Vector3Int chunkDimensions)
         {
@@ -24,24 +27,28 @@ namespace UniVox.Implementations.ChunkData
         #region Indexers
         public VoxelData this[Vector3Int index]
         {
-            get { return GetVoxelAtLocalCoordinates(index); }
-            set { SetVoxelAtLocalCoordinates(index, value); }
+            get { return this[index.x, index.y, index.z]; }
+            set { this[index.x, index.y, index.z] = value; }
         }
         public VoxelData this[int i, int j, int k]
         {
-            get { return GetVoxelAtLocalCoordinates(i, j, k); }
-            set { SetVoxelAtLocalCoordinates(i, j, k, value); }
+            get { 
+                return GetVoxelAtLocalCoordinates(i, j, k); 
+            }
+            set { 
+                SetVoxelAtLocalCoordinates(i, j, k, value);
+                if (FullyGenerated)
+                {
+                    ModifiedSinceGeneration = true;
+                }
+            }
         }
         #endregion
+        protected abstract void SetVoxelAtLocalCoordinates(int x, int y, int z, VoxelData voxel);
+
+        protected abstract VoxelData GetVoxelAtLocalCoordinates(int x, int y, int z);
 
         #region Abstract implementation of interface methods
-        public abstract void SetVoxelAtLocalCoordinates(Vector3Int coords, VoxelData voxel);
-
-        public abstract void SetVoxelAtLocalCoordinates(int x, int y, int z, VoxelData voxel);
-
-        public abstract VoxelData GetVoxelAtLocalCoordinates(Vector3Int coords);
-
-        public abstract VoxelData GetVoxelAtLocalCoordinates(int x, int y, int z);
 
         public bool TryGetVoxelAtLocalCoordinates(Vector3Int coords, out VoxelData vox)
         {

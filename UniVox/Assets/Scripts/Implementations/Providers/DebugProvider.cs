@@ -20,7 +20,7 @@ namespace UniVox.Implementations.Providers
             grassID = voxelTypeManager.GetId(grassType);
         }
 
-        public override AbstractChunkData ProvideChunkData(Vector3Int chunkID, Vector3Int chunkDimensions)
+        public override AbstractChunkData GenerateChunkData(Vector3Int chunkID, Vector3Int chunkDimensions)
         {
             return HalfHeight(chunkID, chunkDimensions);
         }

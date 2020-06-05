@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -10,27 +11,45 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
     where ChunkDataType : IChunkData<VoxelDataType>
     where VoxelDataType : IVoxelData
 {
-    [SerializeField]
-    private Vector3Int CHUNK_DIMENSIONS = new Vector3Int(32, 32, 32);
+    #region Shown in inspector
 
-    [SerializeField]
-    private int VOXEL_SIZE = 1;
+    #region Runtime Constants
+    [SerializeField] private Vector3Int chunkDimensions = new Vector3Int(32, 32, 32);
+    public Vector3Int ChunkDimensions { get => chunkDimensions; }
 
-    public AbstractProviderComponent<ChunkDataType, VoxelDataType> chunkProvider;
-    public AbstractMesherComponent<ChunkDataType, VoxelDataType> chunkMesher;
+    [SerializeField] private int voxelSize = 1;
+    protected int VoxelSize { get => voxelSize; }
+    #endregion
 
-    public VoxelTypeManager VoxelTypeManager;
+    [SerializeField] protected VoxelTypeManager VoxelTypeManager;
 
-    public PrefabPool chunkPool;
+    [SerializeField] protected PrefabPool chunkPool = null;
 
-    public Transform Player;
+    [SerializeField] protected Transform Player;
+
     [Range(0, 100)]
-    public int ChunkRadius;
+    [SerializeField] protected int ChunkRadius;
+
+    /// <summary>
+    /// Controls how many chunks can be generated and meshed per update
+    /// </summary>
+    [Range(1, 100)]
+    [SerializeField] protected ushort MaxChunksPerUpdate = 1;
+    #endregion
+
+
+    protected AbstractProviderComponent<ChunkDataType, VoxelDataType> chunkProvider;
+    protected AbstractMesherComponent<ChunkDataType, VoxelDataType> chunkMesher;
 
     protected Dictionary<Vector3Int, AbstractChunkComponent<ChunkDataType, VoxelDataType>> loadedChunks = new Dictionary<Vector3Int, AbstractChunkComponent<ChunkDataType, VoxelDataType>>();
 
     //Current chunkID occupied by the Player transform
     protected Vector3Int playerChunkID = Vector3Int.zero;
+
+    private Queue<AbstractChunkComponent<ChunkDataType, VoxelDataType>> NeedDataQueue = new Queue<AbstractChunkComponent<ChunkDataType, VoxelDataType>>();
+    private Queue<AbstractChunkComponent<ChunkDataType, VoxelDataType>> NeedMeshingQueue = new Queue<AbstractChunkComponent<ChunkDataType, VoxelDataType>>();
+
+
 
     protected virtual void Start()
     {
@@ -52,6 +71,11 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
 
         chunkProvider.Initialise(VoxelTypeManager);
         chunkMesher.Initialise(VoxelTypeManager);
+
+        //Immediately request generation of the chunk the player is in
+        RequestRegenerationOfChunk(WorldToChunkPosition(Player.position));
+
+        StartCoroutine(ProcessQueues());
     }
 
     protected virtual void Update()
@@ -82,45 +106,133 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
             for (int x = -ChunkRadius; x < ChunkRadius; x++)
             {
                 var chunkID = playerChunkID + new Vector3Int(x, 0, z);
-                if (!loadedChunks.ContainsKey(chunkID))
-                {
-                    GenerateChunkWithID(chunkID);
-                }
+                RequestRegenerationOfChunk(chunkID);//Request that this chunk should exist
             }
             //}
+        }
+    }
+
+    /// <summary>
+    /// Each frame generates data and/or meshes for any Chunk Components 
+    /// that need it, up to a limit of MaxChunksPerUpdate.
+    /// Always generates data first, then does meshing, so that a single
+    /// chunk can receive data and a mesh in the same update.
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator ProcessQueues() 
+    {
+        while (gameObject.activeSelf)
+        {
+            for (int i = 0; i < MaxChunksPerUpdate && NeedDataQueue.Count > 0; i++)
+            {
+                var ChunkComponent = NeedDataQueue.Dequeue();
+
+                if (ChunkComponent.status == ChunkStatus.Deactivated)
+                {
+                    continue;
+                }
+
+                GenerateData(ChunkComponent);
+                ChunkComponent.status = ChunkStatus.ReadyForMesh;
+                NextStep(ChunkComponent);
+            }
+
+            for (int i = 0; i < MaxChunksPerUpdate && NeedMeshingQueue.Count > 0; i++)
+            {
+                var ChunkComponent = NeedMeshingQueue.Dequeue();
+
+                if (ChunkComponent.status == ChunkStatus.Deactivated)
+                {
+                    continue;
+                }
+
+                GenerateMesh(ChunkComponent);
+                ChunkComponent.status = ChunkStatus.Complete;
+            }
+
+            yield return null;
         }
     }
 
     protected void DeactivateChunk(AbstractChunkComponent<ChunkDataType, VoxelDataType> chunkComponent, Vector3Int chunkID)
     {
         loadedChunks.Remove(chunkID);
+
+        //Return modified data to the provider
+        if (chunkComponent.Data != null && chunkComponent.Data.ModifiedSinceGeneration)
+        {
+            chunkProvider.AddModifiedChunkData(chunkID, chunkComponent.Data);
+        }
+
+        chunkComponent.status = ChunkStatus.Deactivated;
+
+        //Return chunk gameobject to pool
         chunkPool.ReturnToPool(chunkComponent.gameObject);
     }
 
-    protected void GenerateChunkWithID(Vector3Int chunkID)
+    /// <summary>
+    /// Starts the process of (re)generating and meshing a chunk
+    /// if it doesn't already exist.
+    /// </summary>
+    /// <param name="chunkID"></param>
+    protected void RequestRegenerationOfChunk(Vector3Int chunkID, AbstractChunkComponent<ChunkDataType, VoxelDataType> ChunkComponent = null)
     {
+        if (ChunkComponent == null)
+        {
+            if (!loadedChunks.TryGetValue(chunkID, out ChunkComponent))
+            {
+                //Get a new Chunk GameObject to house the generated Chunk data.
+                var ChunkObject = chunkPool.Next(transform);
+                ChunkComponent = ChunkObject.GetComponent<AbstractChunkComponent<ChunkDataType, VoxelDataType>>();
+                ChunkComponent.Initialise(chunkID, ChunkToWorldPosition(chunkID));
+                //Add to set of loaded chunks
+                loadedChunks[chunkID] = ChunkComponent;
+            }
+        }
 
-        //Get a new Chunk GameObject to house the generated Chunk data.
-        var ChunkObject = chunkPool.Next(transform);
-        var ChunkComponent = ChunkObject.GetComponent<AbstractChunkComponent<ChunkDataType, VoxelDataType>>();
+        NextStep(ChunkComponent);
 
-        Assert.IsNotNull(ChunkComponent);
-
-        ChunkComponent.name = $"Chunk ({chunkID.x},{chunkID.y},{chunkID.z})";
-        ChunkComponent.transform.position = ChunkToWorldPosition(chunkID);
-
-        //Add to set of loaded chunks
-        loadedChunks[chunkID] = ChunkComponent;
-
-        ChunkComponent.Data = chunkProvider.ProvideChunkData(chunkID, CHUNK_DIMENSIONS);
-
-        GenerateMesh(ChunkComponent);
     }
 
-    protected void GenerateMesh(AbstractChunkComponent<ChunkDataType, VoxelDataType> ChunkComponent) {
+    /// <summary>
+    /// Sets up the next step in the chunk creation process
+    /// </summary>
+    /// <param name="ChunkComponent"></param>
+    private void NextStep(AbstractChunkComponent<ChunkDataType, VoxelDataType> ChunkComponent) {
+        switch (ChunkComponent.status)
+        {
+            case ChunkStatus.ReadyForData:
+                {
+                    //This is a newly created chunk, schedule it 
+                    ChunkComponent.status = ChunkStatus.ScheduledForData;
+                    NeedDataQueue.Enqueue(ChunkComponent);
+                }
+                break;
+            case ChunkStatus.ScheduledForData://Already scheduled, and will be processed in due course
+                break;
+            case ChunkStatus.ReadyForMesh:
+                {
+                    //Has data, needs mesh
+                    ChunkComponent.status = ChunkStatus.ScheduledForMesh;
+                    NeedMeshingQueue.Enqueue(ChunkComponent);
+                }
+                break;
+            case ChunkStatus.ScheduledForMesh://Already scheduled, and will be processed in due course
+                break;
+            case ChunkStatus.Complete:
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void GenerateMesh(AbstractChunkComponent<ChunkDataType, VoxelDataType> ChunkComponent) {
         ChunkComponent.SetMesh(chunkMesher.CreateMesh(ChunkComponent.Data));
     }
 
+    private void GenerateData(AbstractChunkComponent<ChunkDataType, VoxelDataType> ChunkComponent) {
+        ChunkComponent.Data = chunkProvider.ProvideChunkData(ChunkComponent.ChunkID, ChunkDimensions);
+    }
 
     /// <summary>
     /// Manhattan distance query returning true 
@@ -155,10 +267,11 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
                     return false;
                 }
             }
-            var tmp1 = chunkComponent.Data[localVoxelIndex];
             chunkComponent.Data[localVoxelIndex] = newVox;
-            var tmp = chunkComponent.Data[localVoxelIndex];
-            GenerateMesh(chunkComponent);
+
+            chunkComponent.status = ChunkStatus.ReadyForMesh;
+            RequestRegenerationOfChunk(chunkID, chunkComponent);//regenerate the chunk mesh
+
             return true;
         }
         return false;
@@ -177,7 +290,7 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
         floor.z = Mathf.FloorToInt(pos.z);
 
         //Result is elementwise integer division by the Chunk dimensions
-        var result = floor.ElementWise((a, b) => Mathf.FloorToInt(a / (float)b), CHUNK_DIMENSIONS);
+        var result = floor.ElementWise((a, b) => Mathf.FloorToInt(a / (float)b), ChunkDimensions);
 
         return result;
     }
@@ -194,11 +307,11 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
         floor.z = Mathf.FloorToInt(pos.z);
 
         //Result is elementwise integer division by the Chunk dimensions
-        var result = floor.ElementWise((a, b) => Mathf.FloorToInt(a / (float)b), CHUNK_DIMENSIONS);
+        var result = floor.ElementWise((a, b) => Mathf.FloorToInt(a / (float)b), ChunkDimensions);
 
-        var remainder = floor.ElementWise((a, b) => a % b, CHUNK_DIMENSIONS);
+        var remainder = floor.ElementWise((a, b) => a % b, ChunkDimensions);
         //Local block index is the remainder, with negatives adjusted
-        localVoxelIndex = remainder.ElementWise((a, b) => a < 0 ? b + a : a, CHUNK_DIMENSIONS);
+        localVoxelIndex = remainder.ElementWise((a, b) => a < 0 ? b + a : a, ChunkDimensions);
 
         return result;
     }
@@ -209,13 +322,13 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
         Assert.AreEqual(Vector3.zero, transform.position);
         Assert.AreEqual(Quaternion.Euler(0, 0, 0), transform.rotation);
 
-        Vector3 result = chunkID * CHUNK_DIMENSIONS;
+        Vector3 result = chunkID * ChunkDimensions;
         return result;
     }
 
     public Vector3 SnapToVoxelCenter(Vector3 pos)
     {
-        var result = pos.ElementWise(_ => Mathf.Floor(_) + VOXEL_SIZE/2.0f);
+        var result = pos.ElementWise(_ => Mathf.Floor(_) + VoxelSize/2.0f);
         return result;
     }
 

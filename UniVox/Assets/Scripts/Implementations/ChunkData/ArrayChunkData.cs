@@ -21,22 +21,12 @@ namespace UniVox.Implementations.ChunkData
             voxels = new VoxelData[chunkDimensions.x, chunkDimensions.y, chunkDimensions.z];
         }
 
-        public override VoxelData GetVoxelAtLocalCoordinates(Vector3Int coords)
-        {
-            return voxels[coords.x, coords.y, coords.z];
-        }
-
-        public override VoxelData GetVoxelAtLocalCoordinates(int x, int y, int z)
+        protected override VoxelData GetVoxelAtLocalCoordinates(int x, int y, int z)
         {
             return voxels[x, y, z];
         }
 
-        public override void SetVoxelAtLocalCoordinates(Vector3Int coords, VoxelData voxel)
-        {
-            voxels[coords.x, coords.y, coords.z] = voxel;
-        }
-
-        public override void SetVoxelAtLocalCoordinates(int x, int y, int z, VoxelData voxel)
+        protected override void SetVoxelAtLocalCoordinates(int x, int y, int z, VoxelData voxel)
         {
             voxels[x, y, z] = voxel;
         }
