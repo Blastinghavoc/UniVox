@@ -359,12 +359,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1035334669}
   m_CullTransparentMesh: 0
---- !u!4 &1038313623 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 2491222762481690383, guid: e4924b752413e2444932f1f7c0e99bbc,
-    type: 3}
-  m_PrefabInstance: {fileID: 2491222763031173089}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1118149253
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -431,7 +425,7 @@ PrefabInstance:
         type: 3}
       propertyPath: Player
       value: 
-      objectReference: {fileID: 1038313623}
+      objectReference: {fileID: 1446491237}
     - target: {fileID: 2981057896917559129, guid: 55373a8976e0c014e90e0bb7e64d046a,
         type: 3}
       propertyPath: MaxChunksPerUpdate
@@ -449,6 +443,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 55373a8976e0c014e90e0bb7e64d046a, type: 3}
+--- !u!54 &1446491237 stripped
+Rigidbody:
+  m_CorrespondingSourceObject: {fileID: 2491222762484586573, guid: e4924b752413e2444932f1f7c0e99bbc,
+    type: 3}
+  m_PrefabInstance: {fileID: 2491222763031173089}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1456567345
 GameObject:
   m_ObjectHideFlags: 0
@@ -705,6 +705,11 @@ PrefabInstance:
       propertyPath: m_Interpolate
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 2491222762484586573, guid: e4924b752413e2444932f1f7c0e99bbc,
+        type: 3}
+      propertyPath: m_UseGravity
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2491222762492612297, guid: e4924b752413e2444932f1f7c0e99bbc,
         type: 3}
       propertyPath: movementSettings.JumpForce
@@ -750,7 +755,7 @@ PrefabInstance:
         type: 3}
       propertyPath: Player
       value: 
-      objectReference: {fileID: 1038313623}
+      objectReference: {fileID: 1446491237}
     - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: ChunkRadius
@@ -765,6 +770,11 @@ PrefabInstance:
         type: 3}
       propertyPath: MaxChunksPerUpdate
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: MaxGeneratedPerUpdate
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 6061144537135917621, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}

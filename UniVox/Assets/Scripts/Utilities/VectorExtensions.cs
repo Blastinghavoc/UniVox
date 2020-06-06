@@ -17,6 +17,18 @@ public static class VectorExtensions
     }
 
     /// <summary>
+    /// Returns true if all elements of the vector satisfy the condition,
+    /// with the elements of the second vector as arguments.
+    /// </summary>
+    /// <param name=""></param>
+    /// <param name="condition"></param>
+    /// <returns></returns>
+    public static bool All(this Vector3Int v1, Func<int,int, bool> condition,Vector3Int v2)
+    {
+        return condition(v1.x,v2.x) && condition(v1.y,v2.y) && condition(v1.z,v2.z);
+    }
+
+    /// <summary>
     /// Returns the result of applying the operation to each element of the 
     /// input vector.
     /// </summary>
