@@ -13,16 +13,51 @@ namespace UniVox.Implementations.Providers
         public SOVoxelTypeDefinition grassType;
         private ushort grassID;
 
-        public override void Initialise(VoxelTypeManager voxelTypeManager)
+        public override void Initialise(VoxelTypeManager voxelTypeManager,IChunkManager chunkManager)
         {
-            base.Initialise(voxelTypeManager);
+            base.Initialise(voxelTypeManager,chunkManager);
             dirtID = voxelTypeManager.GetId(dirtType);
             grassID = voxelTypeManager.GetId(grassType);
         }
 
         public override AbstractChunkData GenerateChunkData(Vector3Int chunkID, Vector3Int chunkDimensions)
         {
-            return HalfHeight(chunkID, chunkDimensions);
+            return FlatWorld(chunkID,chunkDimensions);
+            //return HalfHeight(chunkID, chunkDimensions);
+        }
+
+        private AbstractChunkData FlatWorld(Vector3Int chunkID, Vector3Int chunkDimensions) 
+        {
+            var ChunkData = new ArrayChunkData(chunkID, chunkDimensions);
+
+            int groundHeight = 0;
+            int chunkYCuttoff = (groundHeight + chunkDimensions.y)/chunkDimensions.y;
+
+            var chunkPosition = chunkManager.ChunkToWorldPosition(chunkID);
+
+            if (chunkID.y < chunkYCuttoff)//Chunks above the cuttof are just pure air
+            {
+                for (int z = 0; z < chunkDimensions.z; z++)
+                {
+                    for (int y = 0; y < chunkDimensions.y; y++)
+                    {
+                        for (int x = 0; x < chunkDimensions.x; x++)
+                        {
+                            var height = y + chunkPosition.y;
+                            if (height == groundHeight)
+                            {
+                                ChunkData[x, y, z] = new VoxelData(grassID);
+                            }
+                            else if (height < groundHeight)
+                            {
+                                ChunkData[x, y, z] = new VoxelData(dirtID);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return ChunkData;
         }
 
         private AbstractChunkData HalfHeight(Vector3Int chunkID, Vector3Int chunkDimensions)

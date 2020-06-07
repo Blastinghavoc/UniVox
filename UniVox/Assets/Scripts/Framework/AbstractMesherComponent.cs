@@ -11,6 +11,8 @@ namespace UniVox.Framework
         where VoxelDataType : IVoxelData
     {
 
+        public bool IsMeshDependentOnNeighbourChunks { get; protected set; } = false;
+
         protected VoxelTypeManager voxelTypeManager;
         protected IChunkManager chunkManager;
 

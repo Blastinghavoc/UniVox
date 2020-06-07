@@ -87,7 +87,7 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
         Assert.IsNotNull(chunkProvider,"Chunk Manager must have a chunk provider component");
         Assert.IsNotNull(chunkMesher, "Chunk Manager must have a chunk mesher component");
 
-        chunkProvider.Initialise(VoxelTypeManager);
+        chunkProvider.Initialise(VoxelTypeManager,this);
         chunkMesher.Initialise(VoxelTypeManager,this);
 
         //Immediately request generation of the chunk the player is in
@@ -114,7 +114,11 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
         playerChunkID = WorldToChunkPosition(Player.position);
 
         //Find all chunks outside the radius
-        var outside = loadedChunks.Where(pair => !InsideChunkRadius(pair.Key,dataChunksRadii))
+        var outside = loadedChunks.Where(pair => { 
+            //DEBUG flag the chunks
+            pair.Value.inMeshRadius = InsideChunkRadius(pair.Key, meshedChunksRadii);
+            return !InsideChunkRadius(pair.Key, dataChunksRadii);
+            })
             .Select(pair => pair.Value)
             .ToList();
 
@@ -161,17 +165,26 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
                 NextStep(ChunkComponent);
             }
 
-            for (int i = 0; i < MaxMeshedPerUpdate && NeedMeshingQueue.Count > 0; i++)
+            for (int i = 0; i < MaxMeshedPerUpdate && NeedMeshingQueue.Count > 0;)
             {
                 var ChunkComponent = NeedMeshingQueue.Dequeue();
 
-                Assert.IsTrue(InsideChunkRadius(ChunkComponent.ChunkID, meshedChunksRadii),
-                    $"Chunk {ChunkComponent.ChunkID} was in the mesh queue but is outside the mesh radius");
+                if (!InsideChunkRadius(ChunkComponent.ChunkID, meshedChunksRadii))
+                {
+                    ChunkComponent.Status = ChunkStatus.WaitingForNeighbourData;
+                    ChunkComponent.TargetStatus = ChunkStatus.WaitingForNeighbourData;
+                    //Don't bother meshing this chunk
+                    Debug.Log($"Skipped meshing for chunk {ChunkComponent.ChunkID} as it was outside the meshing radius");
+                    continue;
+                }
 
                 //Generate mesh
                 ChunkComponent.SetMesh(chunkMesher.CreateMesh(ChunkComponent.Data));
 
                 ChunkComponent.Status = ChunkStatus.Complete;
+
+                //Increment
+                i++;
             }
 
             yield return null;
@@ -203,10 +216,14 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
     }
 
     /// <summary>
-    /// Starts the process of (re)generating and meshing a chunk
-    /// if it doesn't already exist.
+    /// Starts the process of (re)generating a chunk.
+    /// The target status effects how far in the process the generation should proceed,
+    /// so one can generate a chunk with just data (no mesh) by setting the target to
+    /// WaitingForNeighbourData
     /// </summary>
     /// <param name="chunkID"></param>
+    /// <param name="ChunkComponent"></param>
+    /// <param name="targetStatus"></param>
     protected void RequestRegenerationOfChunk(Vector3Int chunkID, AbstractChunkComponent<ChunkDataType, VoxelDataType> ChunkComponent = null,ChunkStatus targetStatus = ChunkStatus.Complete)
     {
         if (ChunkComponent == null)
@@ -227,9 +244,6 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
 
         //Update the target status if it is a later state than the chunks current target.
         ChunkComponent.TargetStatus = (targetStatus > ChunkComponent.TargetStatus) ? targetStatus: ChunkComponent.TargetStatus;
-
-        //DEBUG
-        ChunkComponent.inMeshRadius = InsideChunkRadius(ChunkComponent.ChunkID, meshedChunksRadii);
 
         NextStep(ChunkComponent);
 
@@ -316,10 +330,6 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
         return allHaveData;
     }
 
-    private void GenerateData(AbstractChunkComponent<ChunkDataType, VoxelDataType> ChunkComponent) {
-        ChunkComponent.Data = chunkProvider.ProvideChunkData(ChunkComponent.ChunkID, ChunkDimensions);
-    }
-
     /// <summary>
     /// Manhattan distance query returning true of the chunk ID is 
     /// within the given radii of the player chunk in each axis
@@ -333,6 +343,81 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
 
         //Inside if all elements of the absolute displacement are less than or equal to the chunk radius
         return absDisplacement.All((a, b) => a <= b, Radii);
+    }
+
+    #region Get/Set voxels
+
+    /// <summary>
+    /// What to do when a voxel value is set
+    /// </summary>
+    /// <param name="previousTypeID"></param>
+    /// <param name="newTypeID"></param>
+    /// <param name="chunkComponent"></param>
+    /// <param name="localVoxelIndex"></param>
+    protected void OnVoxelSet(ushort previousTypeID,ushort newTypeID, AbstractChunkComponent<ChunkDataType, VoxelDataType> chunkComponent, Vector3Int localVoxelIndex) 
+    {
+        if (previousTypeID == newTypeID)
+        {
+            return;//Nothing has changed
+        }
+
+        var chunkID = chunkComponent.ChunkID;
+
+        //The neighbouring chunk(s) may need remeshing
+        if (chunkMesher.IsMeshDependentOnNeighbourChunks)
+        {
+            foreach (var dir in GetBordersVoxelIsOn(localVoxelIndex))
+            {
+                var neighbourChunkID = chunkID + dir;
+                if (loadedChunks.TryGetValue(chunkID+dir,out var neighbourComponent))
+                {
+                    if (neighbourComponent.Status == ChunkStatus.Complete)
+                    {
+                        //Request re-meshing of the adjacent chunk
+                        neighbourComponent.Status = ChunkStatus.ReadyForMesh;
+                        RequestRegenerationOfChunk(neighbourChunkID, neighbourComponent);  
+                    }
+                }
+            }
+        }
+
+        //The chunk that changed will need remeshing
+        chunkComponent.Status = ChunkStatus.ReadyForMesh;
+        RequestRegenerationOfChunk(chunkID, chunkComponent);//regenerate the chunk mesh
+
+    }
+
+    /// <summary>
+    /// Returns a list of directions such that the given voxel index 
+    /// shares a face with another chunk in that direction.
+    /// List is empty for indices that are not on the edge of the chunk
+    /// </summary>
+    /// <param name="localVoxelIndex"></param>
+    /// <returns></returns>
+    private List<Vector3Int> GetBordersVoxelIsOn(Vector3Int localVoxelIndex) 
+    {
+        List<Vector3Int> borderDirections = new List<Vector3Int>();
+
+        //If voxel is an interior voxel, it is not on any borders
+        if (localVoxelIndex.All((a,b)=>a > 0 && a < b-1,ChunkDimensions))
+        {
+            return borderDirections;
+        }
+        
+        for (int i = 0; i < Directions.NumDirections; i++)
+        {
+            var dir = Directions.IntVectors[i];
+            var adjacentIndex = localVoxelIndex + dir;
+            if (adjacentIndex.Any((a,b)=> a < 0 || a >= b ,ChunkDimensions))
+            {
+                /* If any of the adjacent index components are outside the chunk dimensions,
+                 * then the voxel is on the border in the current direction
+                */
+                borderDirections.Add(dir);
+            }
+        }
+
+        return borderDirections;
     }
 
     public bool TrySetVoxel(Vector3 worldPos, ushort voxelTypeID,bool overrideExisting)
@@ -350,18 +435,21 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
 
             var newVox = default(VoxelDataType);
             newVox.TypeID = voxelTypeID;
+
+            ushort prevID = chunkComponent.Data[localVoxelIndex].TypeID;
+
             if (!overrideExisting)
             {
                 //Disallow setting voxel if one already exists
-                if (chunkComponent.Data[localVoxelIndex].TypeID != VoxelTypeManager.AIR_ID)
+                if (prevID != VoxelTypeManager.AIR_ID)
                 {
                     return false;
                 }
             }
+
             chunkComponent.Data[localVoxelIndex] = newVox;
 
-            chunkComponent.Status = ChunkStatus.ReadyForMesh;
-            RequestRegenerationOfChunk(chunkID, chunkComponent);//regenerate the chunk mesh
+            OnVoxelSet(prevID, voxelTypeID, chunkComponent, localVoxelIndex);            
 
             return true;
         }
@@ -394,6 +482,8 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
         }
         return false;
     }
+
+    #endregion
 
     #region position conversion methods
     public Vector3Int WorldToChunkPosition(Vector3 pos)

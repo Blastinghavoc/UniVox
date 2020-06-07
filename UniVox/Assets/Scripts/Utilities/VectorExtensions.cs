@@ -29,6 +29,30 @@ public static class VectorExtensions
     }
 
     /// <summary>
+    /// Returns true iif any of the elements of the vector satisfy the condition
+    /// </summary>
+    /// <param name="v"></param>
+    /// <param name="condition"></param>
+    /// <returns></returns>
+    public static bool Any(this Vector3Int v, Func<int, bool> condition) 
+    { 
+        return condition(v.x) || condition(v.y) || condition(v.z);
+    }
+
+    /// <summary>
+    /// Returns true iff any of the elements of the vector satisfy the condition,
+    /// with the elements of the second vector as arguments.
+    /// </summary>
+    /// <param name="v1"></param>
+    /// <param name="condition"></param>
+    /// <param name="v2"></param>
+    /// <returns></returns>
+    public static bool Any(this Vector3Int v1, Func<int,int,bool> condition,Vector3Int v2)
+    {
+        return condition(v1.x,v2.x) || condition(v1.y,v2.y) || condition(v1.z,v2.z);
+    }
+
+    /// <summary>
     /// Returns the result of applying the operation to each element of the 
     /// input vector.
     /// </summary>

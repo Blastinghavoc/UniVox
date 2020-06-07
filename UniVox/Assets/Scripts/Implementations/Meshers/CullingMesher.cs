@@ -7,6 +7,13 @@ namespace UniVox.Implementations.Meshers
 {
     public class CullingMesher : AbstractMesherComponent<AbstractChunkData, VoxelData>
     {
+        public override void Initialise(VoxelTypeManager voxelTypeManager, IChunkManager chunkManager) 
+        {
+            base.Initialise(voxelTypeManager, chunkManager);
+            //Culling mesher depends on neighbouring chunks for meshing
+            IsMeshDependentOnNeighbourChunks = true;
+        }
+
         protected override bool IncludeFace(AbstractChunkData chunk, Vector3Int position, int direction)
         {
             var adjacentVoxelIndex = position + Directions.IntVectors[direction];            

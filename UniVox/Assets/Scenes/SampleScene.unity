@@ -776,6 +776,16 @@ PrefabInstance:
       propertyPath: MaxGeneratedPerUpdate
       value: 6
       objectReference: {fileID: 0}
+    - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: chunkRadiusX
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: chunkRadiusZ
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 6061144537135917621, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: m_LocalPosition.x

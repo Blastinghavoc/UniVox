@@ -9,6 +9,7 @@ namespace UniVox.Framework
         where VoxelDataType : IVoxelData
     {
         protected VoxelTypeManager voxelTypeManager;
+        protected IChunkManager chunkManager;
 
         /// <summary>
         /// Chunk Data for chunks that are not active, but have been modified.
@@ -17,9 +18,10 @@ namespace UniVox.Framework
         /// </summary>
         protected Dictionary<Vector3Int, ChunkDataType> ModifiedChunkData = new Dictionary<Vector3Int, ChunkDataType>();
 
-        public virtual void Initialise(VoxelTypeManager voxelTypeManager)
+        public virtual void Initialise(VoxelTypeManager voxelTypeManager,IChunkManager chunkManager)
         {
             this.voxelTypeManager = voxelTypeManager;
+            this.chunkManager = chunkManager;
         }
 
         //Add or replace modified data for the given chunk
