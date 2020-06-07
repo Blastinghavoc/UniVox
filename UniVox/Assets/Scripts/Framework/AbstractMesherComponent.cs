@@ -12,10 +12,12 @@ namespace UniVox.Framework
     {
 
         protected VoxelTypeManager voxelTypeManager;
+        protected IChunkManager chunkManager;
 
-        public virtual void Initialise(VoxelTypeManager voxelTypeManager)
+        public virtual void Initialise(VoxelTypeManager voxelTypeManager,IChunkManager chunkManager)
         {
             this.voxelTypeManager = voxelTypeManager;
+            this.chunkManager = chunkManager;
         }
 
         public Mesh CreateMesh(ChunkDataType chunk)

@@ -28,5 +28,6 @@ namespace UniVox.Framework
 
         bool TryGetVoxelAtLocalCoordinates(Vector3Int coords, out V vox);
         bool TryGetVoxelAtLocalCoordinates(int x, int y, int z, out V vox);
+
     }
 }

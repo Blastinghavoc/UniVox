@@ -88,7 +88,7 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
         Assert.IsNotNull(chunkMesher, "Chunk Manager must have a chunk mesher component");
 
         chunkProvider.Initialise(VoxelTypeManager);
-        chunkMesher.Initialise(VoxelTypeManager);
+        chunkMesher.Initialise(VoxelTypeManager,this);
 
         //Immediately request generation of the chunk the player is in
         RequestRegenerationOfChunk(WorldToChunkPosition(Player.position));
@@ -353,7 +353,7 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
             if (!overrideExisting)
             {
                 //Disallow setting voxel if one already exists
-                if (chunkComponent.Data[localVoxelIndex].TypeID != 0)
+                if (chunkComponent.Data[localVoxelIndex].TypeID != VoxelTypeManager.AIR_ID)
                 {
                     return false;
                 }
@@ -362,6 +362,33 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
 
             chunkComponent.Status = ChunkStatus.ReadyForMesh;
             RequestRegenerationOfChunk(chunkID, chunkComponent);//regenerate the chunk mesh
+
+            return true;
+        }
+        return false;
+    }
+
+    public bool TryGetVoxel(Vector3 worldPos,out ushort voxelTypeID)
+    {
+        Vector3Int localVoxelIndex;
+        var chunkID = WorldToChunkPosition(worldPos, out localVoxelIndex);
+
+        return TryGetVoxel(chunkID, localVoxelIndex, out voxelTypeID);
+    }
+
+    public bool TryGetVoxel(Vector3Int chunkID,Vector3Int localVoxelIndex, out ushort voxelTypeID)
+    {
+        voxelTypeID = VoxelTypeManager.AIR_ID;
+
+        if (loadedChunks.TryGetValue(chunkID, out var chunkComponent))
+        {
+            if (!chunkComponent.DataValid)
+            {
+                //Data is not valid to be read
+                return false;
+            }
+
+            voxelTypeID = chunkComponent.Data[localVoxelIndex].TypeID;
 
             return true;
         }
@@ -400,11 +427,23 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
         //Result is elementwise integer division by the Chunk dimensions
         var result = floor.ElementWise((a, b) => Mathf.FloorToInt(a / (float)b), ChunkDimensions);
 
-        var remainder = floor.ElementWise((a, b) => a % b, ChunkDimensions);
-        //Local block index is the remainder, with negatives adjusted
-        localVoxelIndex = remainder.ElementWise((a, b) => a < 0 ? b + a : a, ChunkDimensions);
+        localVoxelIndex = LocalVoxelIndexOfPosition(floor);
 
         return result;
+    }
+
+    /// <summary>
+    /// Returns the local voxel index of some position, but not the chunk ID
+    /// of the chunk containing that position. Intended to be used when you 
+    /// already know the chunkID containing the position.
+    /// </summary>
+    /// <param name="position"></param>
+    /// <returns></returns>
+    public Vector3Int LocalVoxelIndexOfPosition(Vector3Int position) 
+    {
+        var remainder = position.ElementWise((a, b) => a % b, ChunkDimensions);
+        //Local voxel index is the remainder, with negatives adjusted
+        return remainder.ElementWise((a, b) => a < 0 ? b + a : a, ChunkDimensions);
     }
 
     public Vector3 ChunkToWorldPosition(Vector3Int chunkID)
@@ -422,6 +461,8 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
         var result = pos.ElementWise(_ => Mathf.Floor(_) + VoxelSize/2.0f);
         return result;
     }
+
+    
 
     #endregion
 }

@@ -1,7 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
-using TypeData = UniVox.Framework.VoxelTypeManager.VoxelTypeData;
 using UniVox.Framework;
 using UniVox.Implementations.ChunkData;
 using UniVox.Implementations.Common;
@@ -12,17 +9,41 @@ namespace UniVox.Implementations.Meshers
     {
         protected override bool IncludeFace(AbstractChunkData chunk, Vector3Int position, int direction)
         {
-            if (chunk.TryGetVoxelAtLocalCoordinates(position + Directions.IntVectors[direction], out VoxelData adjacent))
-            {
-                if (adjacent.TypeID == VoxelTypeManager.AIR_ID)
-                {
-                    return true;
-                }
-                var adjacentData = voxelTypeManager.GetData(adjacent.TypeID);
-                //Exclude this face if adjacent face is solid
-                return !adjacentData.definition.meshDefinition.Faces[Directions.Oposite[direction]].isSolid;
+            var adjacentVoxelIndex = position + Directions.IntVectors[direction];            
+
+            if (chunk.TryGetVoxelAtLocalCoordinates(adjacentVoxelIndex, out VoxelData adjacentVoxel))
+            {//If adjacent voxel is in the chunk
+
+                return IncludeFaceOfAdjacentWithID(adjacentVoxel.TypeID, direction);
             }
+            else
+            {
+                //If adjacent voxel is in the neighbouring chunk
+
+                var neighbourChunkIndex = chunk.ChunkID + Directions.IntVectors[direction];
+                var localIndexOfAdjacentVoxelInNeighbour = chunkManager.LocalVoxelIndexOfPosition(adjacentVoxelIndex);
+
+                if (chunkManager.TryGetVoxel(neighbourChunkIndex, localIndexOfAdjacentVoxelInNeighbour, out var adjacentVoxelTypeID))
+                {
+                    return IncludeFaceOfAdjacentWithID(adjacentVoxelTypeID, direction);
+                }
+
+            }
+            //Adjacent voxel cannot be found, assume the face must be included
             return true;
+        }
+
+        private bool IncludeFaceOfAdjacentWithID(ushort voxelTypeID,int direction) 
+        {
+            if (voxelTypeID == VoxelTypeManager.AIR_ID)
+            {
+                //Include the face if the adjacent voxel is air
+                return true;
+            }
+            var adjacentData = voxelTypeManager.GetData(voxelTypeID);
+
+            //Exclude this face if adjacent face is solid
+            return !adjacentData.definition.meshDefinition.Faces[Directions.Oposite[direction]].isSolid;
         }
     }
 }
