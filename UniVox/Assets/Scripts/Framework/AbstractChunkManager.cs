@@ -5,6 +5,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UniVox.Framework;
+using UniVox.Framework.ChunkPipeline;
 using Utils.FSM;
 using Utils.Pooling;
 
@@ -51,25 +52,21 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
     #endregion
 
 
-    protected AbstractProviderComponent<ChunkDataType, VoxelDataType> chunkProvider;
-    protected AbstractMesherComponent<ChunkDataType, VoxelDataType> chunkMesher;
+    public AbstractProviderComponent<ChunkDataType, VoxelDataType> chunkProvider { get; protected set; }
+    public AbstractMesherComponent<ChunkDataType, VoxelDataType> chunkMesher { get; protected set; }
 
     protected Dictionary<Vector3Int, AbstractChunkComponent<ChunkDataType, VoxelDataType>> loadedChunks = new Dictionary<Vector3Int, AbstractChunkComponent<ChunkDataType, VoxelDataType>>();
 
     //Current chunkID occupied by the Player transform
     protected Vector3Int playerChunkID = Vector3Int.zero;
 
-    private Queue<AbstractChunkComponent<ChunkDataType, VoxelDataType>> NeedDataQueue = new Queue<AbstractChunkComponent<ChunkDataType, VoxelDataType>>();
-
-    private Queue<AbstractChunkComponent<ChunkDataType, VoxelDataType>> NeedMeshingQueue = new Queue<AbstractChunkComponent<ChunkDataType, VoxelDataType>>();
-
+    private ChunkPipelineManager<ChunkDataType, VoxelDataType> chunkPipeline;
+   
     protected virtual void Start()
     {
         meshedChunksRadii = new Vector3Int(chunkRadiusX,chunkRadiusY,chunkRadiusZ);
         //Chunks can exist as just data one chunk further away than the meshed chunks
         dataChunksRadii = meshedChunksRadii + new Vector3Int(1, 1, 1);
-
-        //SetupChunkStatePipeline();
 
         //Enforce positioning of ChunkManager at the world origin
         transform.position = Vector3.zero;
@@ -89,6 +86,9 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
 
         chunkProvider.Initialise(VoxelTypeManager,this);
         chunkMesher.Initialise(VoxelTypeManager,this);
+
+        chunkPipeline = new ChunkPipelineManager<ChunkDataType, VoxelDataType>(this, GetChunkComponent, MaxGeneratedPerUpdate,
+            MaxMeshedPerUpdate, MaxMeshedPerUpdate);
 
         //Immediately request generation of the chunk the player is in
         RequestRegenerationOfChunk(WorldToChunkPosition(Player.position));
@@ -159,7 +159,7 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
                     $"Chunk {ChunkComponent.ChunkID} was in the Need Data Queue without being Scheduled For Data");
 
                 //Generate data
-                ChunkComponent.Data = chunkProvider.ProvideChunkData(ChunkComponent.ChunkID, ChunkDimensions);
+                ChunkComponent.Data = chunkProvider.ProvideChunkData(ChunkComponent.ChunkID);
 
                 ChunkComponent.Status = ChunkStatus.WaitingForNeighbourData;
                 NextStep(ChunkComponent);
@@ -189,6 +189,15 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
 
             yield return null;
         }
+    }
+
+    private AbstractChunkComponent<ChunkDataType,VoxelDataType> GetChunkComponent(Vector3Int chunkID) 
+    {
+        if (loadedChunks.TryGetValue(chunkID, out var chunkComponent))
+        {
+            return chunkComponent;
+        }
+        throw new Exception($"Tried to get a chunk component that for chunk ID {chunkID} that is not loaded");
     }
 
     protected void TryToDeactivate(AbstractChunkComponent<ChunkDataType, VoxelDataType> chunkComponent)
@@ -223,8 +232,8 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
     /// </summary>
     /// <param name="chunkID"></param>
     /// <param name="ChunkComponent"></param>
-    /// <param name="targetStatus"></param>
-    protected void RequestRegenerationOfChunk(Vector3Int chunkID, AbstractChunkComponent<ChunkDataType, VoxelDataType> ChunkComponent = null,ChunkStatus targetStatus = ChunkStatus.Complete)
+    /// <param name="targetStage"></param>
+    protected void RequestRegenerationOfChunk(Vector3Int chunkID,int targetStage, AbstractChunkComponent<ChunkDataType, VoxelDataType> ChunkComponent = null)
     {
         if (ChunkComponent == null)
         {
@@ -237,15 +246,14 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
                 //Add to set of loaded chunks
                 loadedChunks[chunkID] = ChunkComponent;
 
-                Assert.AreEqual(ChunkStatus.ReadyForData, ChunkComponent.Status);
-                Assert.AreEqual(ChunkStatus.ReadyForData, ChunkComponent.TargetStatus);
+                chunkPipeline.AddChunk(chunkID, targetStage);
+                return;
+
             }
         }
 
-        //Update the target status if it is a later state than the chunks current target.
-        ChunkComponent.TargetStatus = (targetStatus > ChunkComponent.TargetStatus) ? targetStatus: ChunkComponent.TargetStatus;
-
-        NextStep(ChunkComponent);
+        chunkPipeline.SetTarget(chunkID, targetStage);
+        
 
     }
 

@@ -22,29 +22,25 @@ namespace UniVox.Framework
         //DEBUG
         public bool inMeshRadius = false;
 
-        private ChunkStatus _status;
-        public ChunkStatus Status { get => _status;
-            set { _status = value;  UpdateDataValidity(); }
-        }
-        public ChunkStatus TargetStatus { get; set; }//The status that the chunk has been requested to be in
-
         public bool DataValid { get; private set; }
 
         public void Initialise(Vector3Int id, Vector3 position) 
         {
-            Status = ChunkStatus.ReadyForData;
-            //Chunks have no target status when initialised
-            TargetStatus = ChunkStatus.ReadyForData;
             ChunkID = id;
             this.name = $"Chunk ({id.x},{id.y},{id.z})";
             transform.position = position;
 
-            SetMesh(null);
+            SetRenderMesh(null);
+            SetCollisionMesh(null);
         }
 
-        public void SetMesh(Mesh mesh)
+        public void SetRenderMesh(Mesh mesh) 
         {
             meshFilter.mesh = mesh;
+        }
+
+        public void SetCollisionMesh(Mesh mesh) 
+        {
             meshCollider.sharedMesh = mesh;
         }
 

@@ -30,13 +30,13 @@ namespace UniVox.Framework
             ModifiedChunkData[chunkID] = data;
         }
 
-        public ChunkDataType ProvideChunkData(Vector3Int chunkID, Vector3Int chunkDimensions) 
+        public ChunkDataType ProvideChunkData(Vector3Int chunkID) 
         {
             if (ModifiedChunkData.TryGetValue(chunkID,out var data))
             {
                 return data;
             }
-            data = GenerateChunkData(chunkID, chunkDimensions);
+            data = GenerateChunkData(chunkID, chunkManager.ChunkDimensions);
             data.FullyGenerated = true;
             return data;
         }
