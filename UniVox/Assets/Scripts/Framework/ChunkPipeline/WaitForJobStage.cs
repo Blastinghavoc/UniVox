@@ -7,15 +7,16 @@ namespace UniVox.Framework.ChunkPipeline
 {
     public class WaitForJobStage<T> : WaitingPipelineStage
     {
-        Dictionary<Vector3Int, AbstractPipelineJob<T>> jobs;
+        Dictionary<Vector3Int, AbstractPipelineJob<T>> jobs = new Dictionary<Vector3Int, AbstractPipelineJob<T>>();
 
         protected Func<Vector3Int, AbstractPipelineJob<T>> makeJob;
         protected Action<Vector3Int, T> onJobDone;
 
-        public WaitForJobStage(string name, int order, Func<Vector3Int, AbstractPipelineJob<T>> makeJob, Action<Vector3Int, T> onJobDone) : base(name, order)
+        public WaitForJobStage(string name, int order, Func<Vector3Int, int, bool> nextStageCondition, Func<Vector3Int, AbstractPipelineJob<T>> makeJob, Action<Vector3Int, T> onJobDone) : base(name, order)
         {
             this.makeJob = makeJob;
             this.onJobDone = onJobDone;
+            NextStageCondition = nextStageCondition;
             WaitEndedCondition = JobDone;
         }
 
@@ -45,6 +46,12 @@ namespace UniVox.Framework.ChunkPipeline
             {
                 jobs.Add(item, makeJob(item));
             }
+        }
+
+        public override void Add(Vector3Int incoming)
+        {
+            base.Add(incoming);
+            jobs.Add(incoming, makeJob(incoming));
         }
     }
 }

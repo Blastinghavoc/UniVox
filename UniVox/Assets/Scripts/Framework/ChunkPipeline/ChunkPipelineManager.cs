@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 using UniVox.Framework.ChunkPipeline.VirtualJobs;
+using UnityEngine.Assertions;
 
 namespace UniVox.Framework.ChunkPipeline
 {
@@ -17,22 +18,26 @@ namespace UniVox.Framework.ChunkPipeline
 
         private Func<Vector3Int, AbstractChunkComponent<ChunkDataType, VoxelDataType>> getChunkComponent;
 
+        private Action<Vector3Int, int> createNewChunkWithTarget;
+
         //Possible target stages
         public int DataStage { get; private set; }
         public int RenderedStage { get; private set; }
         public int CompleteStage { get; private set; }
 
         public ChunkPipelineManager(AbstractChunkManager<ChunkDataType, VoxelDataType> chunkManager,
-            Func<Vector3Int,AbstractChunkComponent<ChunkDataType,VoxelDataType>> getChunkComponent
-            ,int maxDataPerUpdate,int maxMeshPerUpdate,int maxCollisionPerUpdate) 
+            Func<Vector3Int,AbstractChunkComponent<ChunkDataType,VoxelDataType>> getChunkComponent,
+            Action<Vector3Int, int> createNewChunkWithTarget,
+            int maxDataPerUpdate,int maxMeshPerUpdate,int maxCollisionPerUpdate) 
         {
             this.chunkManager = chunkManager;
             this.getChunkComponent = getChunkComponent;
+            this.createNewChunkWithTarget = createNewChunkWithTarget;
 
             int i = 0;
 
-            stages.Add(new RateLimitedPipelineStage("ScheduledForData",i++,maxDataPerUpdate));
-            stages.Add(new WaitForJobStage<ChunkDataType>("GeneratingData", i++, makeDataGenJob,
+            stages.Add(new RateLimitedPipelineStage("ScheduledForData",i++,maxDataPerUpdate,TargetStageGreaterThanCurrent,NextStageFreeForChunk));
+            stages.Add(new WaitForJobStage<ChunkDataType>("GeneratingData", i++, TargetStageGreaterThanCurrent, makeDataGenJob,
                 (cId, dat) => getChunkComponent(cId).Data = dat)) ;
             DataStage = i;
             stages.Add(new PipelineStage("GotData",i++));
@@ -47,14 +52,14 @@ namespace UniVox.Framework.ChunkPipeline
                 stages[DataStage].NextStageCondition = ShouldScheduleForNext;
             }
 
-            stages.Add(new RateLimitedPipelineStage("ScheduledForMesh",i++,maxMeshPerUpdate));
-            stages.Add(new WaitForJobStage<Mesh>("GeneratingMesh",i++,makeMeshingJob,
+            stages.Add(new RateLimitedPipelineStage("ScheduledForMesh",i++,maxMeshPerUpdate, TargetStageGreaterThanCurrent, NextStageFreeForChunk));
+            stages.Add(new WaitForJobStage<Mesh>("GeneratingMesh",i++, TargetStageGreaterThanCurrent, makeMeshingJob,
                 (cId,mesh)=>getChunkComponent(cId).SetRenderMesh(mesh)));
             RenderedStage = i;
             stages.Add(new PipelineStage("GotMesh",i++, ShouldScheduleForNext));
 
-            stages.Add(new RateLimitedPipelineStage("ScheduledForCollisionMesh",i++,maxCollisionPerUpdate));
-            stages.Add(new WaitForJobStage<Mesh>("ApplyingCollisionMesh",i++,makeCollisionMeshingJob,
+            stages.Add(new RateLimitedPipelineStage("ScheduledForCollisionMesh",i++,maxCollisionPerUpdate, TargetStageGreaterThanCurrent, NextStageFreeForChunk));
+            stages.Add(new WaitForJobStage<Mesh>("ApplyingCollisionMesh",i++, TargetStageGreaterThanCurrent, makeCollisionMeshingJob,
                 (cId,mesh)=>getChunkComponent(cId).SetCollisionMesh(mesh)));
             CompleteStage = i;
             //Final stage "nextStageCondition" is always false
@@ -100,20 +105,142 @@ namespace UniVox.Framework.ChunkPipeline
         public void AddChunk(Vector3Int chunkId, int targetStage) 
         {
             chunkStageMap.Add(chunkId, new ChunkStageData() { targetStage = targetStage});
-            //TODO add chunk to first stage
+            //Add to first stage
+            stages[0].Add(chunkId);
         }
 
         public void SetTarget(Vector3Int chunkId, int targetStage) 
         {
-            if(chunkStageMap.TryGetValue(chunkId,out var stageData))                
+            if (targetStage != DataStage && targetStage != RenderedStage && targetStage != CompleteStage)
             {
-                stageData.targetStage = targetStage;
+                throw new ArgumentOutOfRangeException("Target stage was not one of the valid target stages");
+            }
+
+            var stageData = GetStageData(chunkId);
+
+            var prevTarget = stageData.targetStage;
+            stageData.targetStage = targetStage;
+
+            //Upgrade
+            if (targetStage > prevTarget)
+            {
+                if (stageData.WorkInProgress)
+                {
+                    //The existing work will reach the new target
+                }
+                else
+                {
+                    //Must restart work from previous max
+                    ReenterAtStage(chunkId, stageData.maxStage,stageData);
+                }
+            }
+            else if (targetStage < prevTarget)
+            {
+                var prevMax = stageData.maxStage;
+                stageData.maxStage = Math.Min(targetStage, stageData.maxStage);
+
+                if (stageData.maxStage < prevMax)
+                {
+                    //Downgrading the maximum state of the chunk
+
+                    var chunkComponent = getChunkComponent(chunkId);
+                    if (stageData.maxStage < CompleteStage)
+                    {
+                        chunkComponent.RemoveCollisionMesh();
+                    }
+                    if (stageData.maxStage < RenderedStage)
+                    {
+                        chunkComponent.RemoveCollisionMesh();
+                    }
+
+                    //Ensure min stage isn't greater than max
+                    stageData.minStage = Math.Min(stageData.minStage, stageData.maxStage);
+                }
+                else {
+                    /* target has decreased, but the chunk never reached a higher stage than that,
+                     * so nothing extra has to be done. Work in progress will stop at the new target
+                    */
+                }
+
+            }
+
+            // if targets are equal, no work to be done.
+
+        }
+
+        /// <summary>
+        /// Re-enter the chunk id at an earlier stage
+        /// </summary>
+        /// <param name="chunkID"></param>
+        /// <param name="stage"></param>
+        public void ReenterAtStage(Vector3Int chunkID,int stage) 
+        {
+            ReenterAtStage(chunkID, stage, GetStageData(chunkID));
+        }
+
+        /// <summary>
+        /// Private version of above
+        /// </summary>
+        /// <param name="chunkID"></param>
+        /// <param name="stage"></param>
+        /// <param name="stageData"></param>
+        private void ReenterAtStage(Vector3Int chunkID, int stage, ChunkStageData stageData) 
+        {
+            if (stage > stageData.maxStage)
+            {
+                throw new ArgumentOutOfRangeException($"Cannot reenter chunk id {chunkID} at stage {stage} because it has" +
+                    $"never previously reached that stage. The current max stage is {stageData.maxStage}");
+            }
+
+            var stageToEnter = stages[stage];
+            if (!stageToEnter.Contains(chunkID))
+            {
+                //Potentially update min
+                stageData.minStage = Math.Min(stage, stageData.minStage);
+
+                stageToEnter.Add(chunkID);
             }
         }
 
         public void RemoveChunk(Vector3Int chunkId) 
         {
             chunkStageMap.Remove(chunkId);
+        }
+
+        public int GetMaxStage(Vector3Int chunkId) 
+        {
+            var stageData = GetStageData(chunkId);
+            return stageData.maxStage;
+        }
+
+        public int GetTargetStage(Vector3Int chunkId) 
+        {
+            var stageData = GetStageData(chunkId);
+            return stageData.targetStage;
+        }
+
+        public bool ChunkDataReadable(Vector3Int chunkId) 
+        {
+            var stageData = GetStageData(chunkId);
+            return ChunkDataReadable(stageData);
+        }
+
+        /// <summary>
+        /// Get the stage data for a chunk, under the assumption that it exists.
+        /// An exception is thrown if it does not exist.
+        /// </summary>
+        /// <param name="chunkID"></param>
+        /// <returns></returns>
+        private ChunkStageData GetStageData(Vector3Int chunkID) 
+        {
+            if (chunkStageMap.TryGetValue(chunkID, out var stageData))
+            {
+                return stageData;
+            }
+            else
+            {
+                throw new ArgumentOutOfRangeException($"Chunk id {chunkID} is not present in the pipeline");
+            }
         }
 
         private bool ChunkDataReadable(ChunkStageData stageData) 
@@ -148,18 +275,37 @@ namespace UniVox.Framework.ChunkPipeline
             foreach (var dir in Directions.IntVectors)
             {
                 var neighbourID = chunkID + dir;
-                if (!chunkStageMap.TryGetValue(neighbourID, out var neighbourStageData) || !ChunkDataReadable(neighbourStageData))
+
+                if (!chunkStageMap.TryGetValue(neighbourID, out var neighbourStageData))
                 {
-                    //The data for this neighbour is not available
-
-                    allHaveData = false;
-
-                    //TODO generate the missing chunk
-                    
+                    //The chunk does not exist at all, generate it to the data stage
+                    createNewChunkWithTarget(neighbourID, DataStage);
                 }
+                else if (!ChunkDataReadable(neighbourStageData))
+                {
+                    allHaveData = false;
+                    /* data is not currently readable, but the existence of the chunk in the stage map
+                     * implies that it is just waiting to generate its data, so it does not need 
+                     * to be created or have its target changed
+                     */
+                    Assert.IsTrue(neighbourStageData.targetStage >= DataStage);
+                }               
 
             }
             return allHaveData;
+        }
+
+        /// <summary>
+        /// Wait function that causes a chunk to wait in a stage until the next stage
+        /// does not contain it.
+        /// As with all wait functions, True indicates the wait is over
+        /// </summary>
+        /// <param name="chunkID"></param>
+        /// <param name="currentStage"></param>
+        /// <returns></returns>
+        private bool NextStageFreeForChunk(Vector3Int chunkID, int currentStage) 
+        {
+            return !NextStageContainsChunk(chunkID, currentStage);
         }
 
         private bool ShouldScheduleForNext(Vector3Int chunkID, int currentStage) 
@@ -192,6 +338,8 @@ namespace UniVox.Framework.ChunkPipeline
             public int maxStage = 0;
             public int minStage = 0;
             public int targetStage;
+
+            public bool WorkInProgress { get => minStage < maxStage; }
         }
 
     }

@@ -64,5 +64,10 @@ namespace UniVox.Framework.ChunkPipeline
         {
             chunkIdsInStage.UnionWith(incoming);
         }
+
+        public virtual void Add(Vector3Int incoming) 
+        {
+            chunkIdsInStage.Add(incoming);
+        }
     }
 }

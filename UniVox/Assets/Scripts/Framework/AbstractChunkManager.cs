@@ -29,13 +29,8 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
 
     [SerializeField] protected Rigidbody Player;
 
-    [Range(0, 100)]
-    [SerializeField] private int chunkRadiusX = 1;
-    [Range(0, 100)]
-    [SerializeField] private int chunkRadiusY = 1;
-    [Range(0, 100)]
-    [SerializeField] private int chunkRadiusZ = 1;
-    protected Vector3Int meshedChunksRadii;
+    [SerializeField] protected Vector3Int collidableChunksRadii;
+    [SerializeField] protected Vector3Int renderedChunksRadii;
     protected Vector3Int dataChunksRadii;
 
     /// <summary>
@@ -64,9 +59,11 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
    
     protected virtual void Start()
     {
-        meshedChunksRadii = new Vector3Int(chunkRadiusX,chunkRadiusY,chunkRadiusZ);
-        //Chunks can exist as just data one chunk further away than the meshed chunks
-        dataChunksRadii = meshedChunksRadii + new Vector3Int(1, 1, 1);
+        Assert.IsTrue(renderedChunksRadii.All((a, b) => a >= b, collidableChunksRadii),
+            "The rendering radii must be at least as large as the collidable radii");
+
+        //Chunks can exist as just data one chunk further away than the rendered chunks
+        dataChunksRadii = renderedChunksRadii + new Vector3Int(1, 1, 1);
 
         //Enforce positioning of ChunkManager at the world origin
         transform.position = Vector3.zero;
@@ -87,21 +84,24 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
         chunkProvider.Initialise(VoxelTypeManager,this);
         chunkMesher.Initialise(VoxelTypeManager,this);
 
-        chunkPipeline = new ChunkPipelineManager<ChunkDataType, VoxelDataType>(this, GetChunkComponent, MaxGeneratedPerUpdate,
-            MaxMeshedPerUpdate, MaxMeshedPerUpdate);
+        chunkPipeline = new ChunkPipelineManager<ChunkDataType, VoxelDataType>(this,
+            GetChunkComponent,
+            SetTargetStageOfChunk, 
+            MaxGeneratedPerUpdate,
+            MaxMeshedPerUpdate, 
+            MaxMeshedPerUpdate);
 
         //Immediately request generation of the chunk the player is in
-        RequestRegenerationOfChunk(WorldToChunkPosition(Player.position));
-
-        StartCoroutine(ProcessQueues());
+        SetTargetStageOfChunk(WorldToChunkPosition(Player.position), chunkPipeline.CompleteStage);
     }
 
     protected virtual void Update()
     {
         UpdatePlayerArea();
-        if (!loadedChunks.TryGetValue(playerChunkID,out var chunkComponent) || chunkComponent.Status != ChunkStatus.Complete)
+        if (!loadedChunks.TryGetValue(playerChunkID,out var chunkComponent) || 
+            !chunkPipeline.GetMaxStage(playerChunkID).Equals(chunkPipeline.CompleteStage))
         {
-            //Freeze player if the chunk isn't ready for them
+            //Freeze player if the chunk isn't ready for them (doesn't exist or doesn't have collision mesh)
             Player.velocity = Vector3.zero;
         }
     }
@@ -113,82 +113,30 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
     {
         playerChunkID = WorldToChunkPosition(Player.position);
 
-        //Find all chunks outside the radius
-        var outside = loadedChunks.Where(pair => { 
-            //DEBUG flag the chunks
-            pair.Value.inMeshRadius = InsideChunkRadius(pair.Key, meshedChunksRadii);
-            return !InsideChunkRadius(pair.Key, dataChunksRadii);
-            })
-            .Select(pair => pair.Value)
-            .ToList();
 
-        //Deactivate all chunks outside the radius
-        outside.ForEach(_ => TryToDeactivate(_));
+        List<Vector3Int> deactivate = new List<Vector3Int>();
 
-        for (int z = -meshedChunksRadii.z; z <= meshedChunksRadii.z; z++)
+        foreach (var chunkID in loadedChunks.Keys)
         {
-            for (int y = -meshedChunksRadii.y; y <= meshedChunksRadii.y; y++)
+            if (InsideChunkRadius(chunkID, collidableChunksRadii))
             {
-                for (int x = -meshedChunksRadii.x; x <= meshedChunksRadii.x; x++)
-                {
-                    var chunkID = playerChunkID + new Vector3Int(x, y, z);
-
-                    RequestRegenerationOfChunk(chunkID);//Request that this chunk should exist
-                }
+                SetTargetStageOfChunk(chunkID, chunkPipeline.CompleteStage);//Request that this chunk should be complete
+            }
+            else if (InsideChunkRadius(chunkID, renderedChunksRadii))
+            {
+                SetTargetStageOfChunk(chunkID, chunkPipeline.RenderedStage);//Request that this chunk should be rendered
+            }
+            else if (InsideChunkRadius(chunkID, dataChunksRadii))
+            {
+                SetTargetStageOfChunk(chunkID, chunkPipeline.DataStage);//Request that this chunk should be just data
+            }
+            else 
+            {
+                deactivate.Add(chunkID);
             }
         }
-    }
 
-    /// <summary>
-    /// Each frame generates data and/or meshes for any Chunk Components 
-    /// that need it, up to a limit of MaxChunksPerUpdate.
-    /// Always generates data first, then does meshing, so that a single
-    /// chunk can receive data and a mesh in the same update.
-    /// </summary>
-    /// <returns></returns>
-    private IEnumerator ProcessQueues() 
-    {
-        yield return new WaitForEndOfFrame();
-        while (gameObject.activeSelf)
-        {
-            for (int i = 0; i < MaxGeneratedPerUpdate && NeedDataQueue.Count > 0; i++)
-            {
-                var ChunkComponent = NeedDataQueue.Dequeue();
-
-                Assert.AreEqual(ChunkStatus.ScheduledForData, ChunkComponent.Status,
-                    $"Chunk {ChunkComponent.ChunkID} was in the Need Data Queue without being Scheduled For Data");
-
-                //Generate data
-                ChunkComponent.Data = chunkProvider.ProvideChunkData(ChunkComponent.ChunkID);
-
-                ChunkComponent.Status = ChunkStatus.WaitingForNeighbourData;
-                NextStep(ChunkComponent);
-            }
-
-            for (int i = 0; i < MaxMeshedPerUpdate && NeedMeshingQueue.Count > 0;)
-            {
-                var ChunkComponent = NeedMeshingQueue.Dequeue();
-
-                if (!InsideChunkRadius(ChunkComponent.ChunkID, meshedChunksRadii))
-                {
-                    ChunkComponent.Status = ChunkStatus.WaitingForNeighbourData;
-                    ChunkComponent.TargetStatus = ChunkStatus.WaitingForNeighbourData;
-                    //Don't bother meshing this chunk
-                    Debug.Log($"Skipped meshing for chunk {ChunkComponent.ChunkID} as it was outside the meshing radius");
-                    continue;
-                }
-
-                //Generate mesh
-                ChunkComponent.SetMesh(chunkMesher.CreateMesh(ChunkComponent.Data));
-
-                ChunkComponent.Status = ChunkStatus.Complete;
-
-                //Increment
-                i++;
-            }
-
-            yield return null;
-        }
+        deactivate.ForEach(_ => Deactivate(_));
     }
 
     private AbstractChunkComponent<ChunkDataType,VoxelDataType> GetChunkComponent(Vector3Int chunkID) 
@@ -200,142 +148,66 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
         throw new Exception($"Tried to get a chunk component that for chunk ID {chunkID} that is not loaded");
     }
 
-    protected void TryToDeactivate(AbstractChunkComponent<ChunkDataType, VoxelDataType> chunkComponent)
+    protected void Deactivate(Vector3Int chunkID)
     {
-        if (chunkComponent.Status == ChunkStatus.ScheduledForData ||
-            chunkComponent.Status == ChunkStatus.ScheduledForData)
+        if (loadedChunks.TryGetValue(chunkID, out var chunkComponent))
         {
-            //Cannot be deactivated right now, as it is currently queued for processing.
-            //Set the target status so that it can be deactivated as soon as possible
-            chunkComponent.TargetStatus = ChunkStatus.Deactivated;
-            return;
-            //Whatever requested the deactivation can do so again later
+            chunkPipeline.RemoveChunk(chunkID);
+
+            //Return modified data to the provider
+            if (chunkComponent.Data != null && chunkComponent.Data.ModifiedSinceGeneration)
+            {
+                chunkProvider.AddModifiedChunkData(chunkComponent.ChunkID, chunkComponent.Data);
+            }
+
+            loadedChunks.Remove(chunkID);
+
+            //Return chunk gameobject to pool
+            chunkPool.ReturnToPool(chunkComponent.gameObject);
+
+        }
+        else
+        {
+            throw new ArgumentException($"Cannot deactivate chunk {chunkID} as it is already inactive or nonexistent");
         }
 
-        loadedChunks.Remove(chunkComponent.ChunkID);
-
-        //Return modified data to the provider
-        if (chunkComponent.Data != null && chunkComponent.Data.ModifiedSinceGeneration)
-        {
-            chunkProvider.AddModifiedChunkData(chunkComponent.ChunkID, chunkComponent.Data);
-        }
-
-        //Return chunk gameobject to pool
-        chunkPool.ReturnToPool(chunkComponent.gameObject);
     }
 
     /// <summary>
-    /// Starts the process of (re)generating a chunk.
-    /// The target status effects how far in the process the generation should proceed,
-    /// so one can generate a chunk with just data (no mesh) by setting the target to
-    /// WaitingForNeighbourData
+    /// Sets the target stage of a chunk, creating it if it did not exist
     /// </summary>
     /// <param name="chunkID"></param>
-    /// <param name="ChunkComponent"></param>
     /// <param name="targetStage"></param>
-    protected void RequestRegenerationOfChunk(Vector3Int chunkID,int targetStage, AbstractChunkComponent<ChunkDataType, VoxelDataType> ChunkComponent = null)
+    protected void SetTargetStageOfChunk(Vector3Int chunkID,int targetStage)
     {
-        if (ChunkComponent == null)
-        {
-            if (!loadedChunks.TryGetValue(chunkID, out ChunkComponent))
-            {
-                //Get a new Chunk GameObject to house the generated Chunk data.
-                var ChunkObject = chunkPool.Next(transform);
-                ChunkComponent = ChunkObject.GetComponent<AbstractChunkComponent<ChunkDataType, VoxelDataType>>();
-                ChunkComponent.Initialise(chunkID, ChunkToWorldPosition(chunkID));
-                //Add to set of loaded chunks
-                loadedChunks[chunkID] = ChunkComponent;
-
-                chunkPipeline.AddChunk(chunkID, targetStage);
-                return;
-
-            }
-        }
-
-        chunkPipeline.SetTarget(chunkID, targetStage);
         
+        if (!loadedChunks.TryGetValue(chunkID, out var ChunkComponent))
+        {
+            //Get a new Chunk GameObject to house the generated Chunk data.
+            var ChunkObject = chunkPool.Next(transform);
+            ChunkComponent = ChunkObject.GetComponent<AbstractChunkComponent<ChunkDataType, VoxelDataType>>();
+            ChunkComponent.Initialise(chunkID, ChunkToWorldPosition(chunkID));
+            //Add to set of loaded chunks
+            loadedChunks[chunkID] = ChunkComponent;
+
+            chunkPipeline.AddChunk(chunkID, targetStage);
+            return;
+
+        }        
+
+        chunkPipeline.SetTarget(chunkID, targetStage);        
 
     }
 
     /// <summary>
-    /// Sets up the next step in the chunk creation process
+    /// Cause the chunk with the given ID to be re-enterred into the pipeline at an
+    /// earlier stage.
     /// </summary>
-    /// <param name="ChunkComponent"></param>
-    private void NextStep(AbstractChunkComponent<ChunkDataType, VoxelDataType> ChunkComponent) {
-        if (ChunkComponent.Status == ChunkComponent.TargetStatus)
-        {
-            return;//The chunk does not want to take any further steps at this time
-        }
-
-        //If the chunk is supposed to be deactivated, do so
-        if (ChunkComponent.TargetStatus == ChunkStatus.Deactivated)
-        {
-            TryToDeactivate(ChunkComponent);
-        }
-
-        switch (ChunkComponent.Status)
-        {
-            case ChunkStatus.ReadyForData:
-                {
-                    //This is a newly created chunk, schedule it 
-                    ChunkComponent.Status = ChunkStatus.ScheduledForData;
-                    NeedDataQueue.Enqueue(ChunkComponent);
-                }
-                break;
-            case ChunkStatus.ScheduledForData://Already scheduled, and will be processed in due course
-                break;
-            case ChunkStatus.WaitingForNeighbourData:
-                {                    
-                    if (DoNeighboursHaveData(ChunkComponent.ChunkID,ChunkComponent.TargetStatus==ChunkStatus.Complete))
-                    {
-                        //All neighbours have data, so chunk is ready for mesh
-                        ChunkComponent.Status = ChunkStatus.ReadyForMesh;
-                        //Move on to further steps if desired
-                        NextStep(ChunkComponent);
-                    }
-                    //If neighbours do not have data, keep waiting
-                }
-                break;
-            case ChunkStatus.ReadyForMesh:
-                {
-                    //Has data, needs mesh
-                    ChunkComponent.Status = ChunkStatus.ScheduledForMesh;
-                    NeedMeshingQueue.Enqueue(ChunkComponent);
-                }
-                break;
-            case ChunkStatus.ScheduledForMesh://Already scheduled, and will be processed in due course
-                break;
-            case ChunkStatus.Complete:
-                break;
-            default:
-                break;
-        }
-    }
-
-    /// <summary>
-    /// Returns true iff all 6 direct neighbours of the chunk
-    /// have data ready, optionally requests the generation of data
-    /// for them if not.
-    /// </summary>
-    /// <param name="ChunkID"></param>
-    /// <returns></returns>
-    private bool DoNeighboursHaveData(Vector3Int ChunkID,bool RequestGenerationIfMissing = false) 
+    /// <param name="chunkID"></param>
+    /// <param name="stage"></param>
+    protected void RedoChunkFromStage(Vector3Int chunkID, int stage) 
     {
-        bool allHaveData = true;
-        foreach (var dir in Directions.IntVectors)
-        {
-            var neighbour = ChunkID + dir;
-            if (!loadedChunks.TryGetValue(neighbour, out var chunkComponent) || !chunkComponent.DataValid)
-            {
-                allHaveData = false;
-                if (RequestGenerationIfMissing)
-                {
-                    RequestRegenerationOfChunk(neighbour, chunkComponent, ChunkStatus.WaitingForNeighbourData);
-                }
-            }
-
-        }
-        return allHaveData;
+        chunkPipeline.ReenterAtStage(chunkID, stage);
     }
 
     /// <summary>
@@ -377,22 +249,23 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
             foreach (var dir in GetBordersVoxelIsOn(localVoxelIndex))
             {
                 var neighbourChunkID = chunkID + dir;
-                if (loadedChunks.TryGetValue(chunkID+dir,out var neighbourComponent))
+                if (loadedChunks.TryGetValue(neighbourChunkID, out var neighbourComponent))
                 {
-                    if (neighbourComponent.Status == ChunkStatus.Complete)
+                    
+                    if (chunkPipeline.GetTargetStage(neighbourChunkID) >= chunkPipeline.RenderedStage)
                     {
-                        //Request re-meshing of the adjacent chunk
-                        neighbourComponent.Status = ChunkStatus.ReadyForMesh;
-                        RequestRegenerationOfChunk(neighbourChunkID, neighbourComponent);  
+                        //The neighbour chunk will need remeshing
+                        RedoChunkFromStage(neighbourChunkID, chunkPipeline.DataStage);
                     }
                 }
             }
         }
 
-        //The chunk that changed will need remeshing
-        chunkComponent.Status = ChunkStatus.ReadyForMesh;
-        RequestRegenerationOfChunk(chunkID, chunkComponent);//regenerate the chunk mesh
-
+        if (chunkPipeline.GetTargetStage(chunkID) >= chunkPipeline.RenderedStage)
+        {
+            //The chunk that changed will need remeshing if its target stage has a mesh
+            RedoChunkFromStage(chunkID, chunkPipeline.DataStage);
+        }
     }
 
     /// <summary>
@@ -435,9 +308,9 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
 
         if (loadedChunks.TryGetValue(chunkID,out var chunkComponent))
         {
-            if (chunkComponent.Status != ChunkStatus.Complete)
+            if (chunkPipeline.GetMaxStage(chunkID) < chunkPipeline.CompleteStage)
             {
-                //Disallow edits to incomplete chunks
+                //Disallow edits to incomplete chunks (those without collision meshes)
                 return false;
             }
 
@@ -478,7 +351,7 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
 
         if (loadedChunks.TryGetValue(chunkID, out var chunkComponent))
         {
-            if (!chunkComponent.DataValid)
+            if (!chunkPipeline.ChunkDataReadable(chunkID))
             {
                 //Data is not valid to be read
                 return false;
