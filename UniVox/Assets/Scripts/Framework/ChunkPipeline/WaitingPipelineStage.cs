@@ -39,7 +39,7 @@ namespace UniVox.Framework.ChunkPipeline
                 {
                     terminatingTmp.Add(item);
                 }
-                //Always remove
+                //Always remove if moving on or terminating
                 return true;
 
             });

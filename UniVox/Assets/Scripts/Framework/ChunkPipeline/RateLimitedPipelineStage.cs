@@ -32,19 +32,15 @@ namespace UniVox.Framework.ChunkPipeline
 
             int movedOn = 0;
 
-            //Go through all the chunk ids in the stage until the maximum number have been moved on
+            /* Go through all the chunk ids in the stage, ensuring that any that should terminate do so,
+             * but limiting the number that can move on.
+             */
             foreach (var item in chunkIdsInStage)
             {
-                if (movedOn >= maxPerUpdate)
-                {
-                    //Stop when the max number of chunks have been moved on
-                    break;
-                }
-
                 if (NextStageCondition(item, Order))
                 {
                     //The chunk would ordinarily be able to move on, but we need to check the wait condition first
-                    if (WaitEndedCondition(item, Order))
+                    if (movedOn < maxPerUpdate &&  WaitEndedCondition(item, Order))
                     {                        
                         movingOn.Add(item);
                         movedOn++;
