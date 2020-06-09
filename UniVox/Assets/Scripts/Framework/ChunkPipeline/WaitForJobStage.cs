@@ -44,14 +44,18 @@ namespace UniVox.Framework.ChunkPipeline
             base.AddAll(incoming);
             foreach (var item in incoming)
             {
-                jobs.Add(item, makeJob(item));
+                var job = makeJob(item);
+                jobs.Add(item, job);
+                job.Start();
             }
         }
 
         public override void Add(Vector3Int incoming)
         {
             base.Add(incoming);
-            jobs.Add(incoming, makeJob(incoming));
+            var job = makeJob(incoming);
+            jobs.Add(incoming, job);
+            job.Start();
         }
     }
 }

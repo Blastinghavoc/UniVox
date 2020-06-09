@@ -119,7 +119,12 @@ namespace UniVox.Framework.ChunkPipeline
             var stageData = GetStageData(chunkId);
 
             var prevTarget = stageData.targetStage;
-            stageData.targetStage = targetStage;
+
+            if (prevTarget == targetStage)
+            {
+                //If targets equal, no work to be done
+                return;
+            }
 
             //Upgrade
             if (targetStage > prevTarget)
@@ -164,7 +169,7 @@ namespace UniVox.Framework.ChunkPipeline
 
             }
 
-            // if targets are equal, no work to be done.
+            stageData.targetStage = targetStage;
 
         }
 
@@ -280,6 +285,7 @@ namespace UniVox.Framework.ChunkPipeline
                 {
                     //The chunk does not exist at all, generate it to the data stage
                     createNewChunkWithTarget(neighbourID, DataStage);
+                    allHaveData = false;
                 }
                 else if (!ChunkDataReadable(neighbourStageData))
                 {
@@ -320,7 +326,7 @@ namespace UniVox.Framework.ChunkPipeline
                 return false;
             }
 
-            return stages[currentStage].Contains(chunkID);
+            return stages[currentStage+1].Contains(chunkID);
         }
 
 
@@ -339,7 +345,7 @@ namespace UniVox.Framework.ChunkPipeline
             public int minStage = 0;
             public int targetStage;
 
-            public bool WorkInProgress { get => minStage < maxStage; }
+            public bool WorkInProgress { get => minStage < targetStage || minStage < maxStage; }
         }
 
     }

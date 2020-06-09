@@ -98,11 +98,19 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
     protected virtual void Update()
     {
         UpdatePlayerArea();
-        if (!loadedChunks.TryGetValue(playerChunkID,out var chunkComponent) || 
+
+        chunkPipeline.Update();
+
+        if (!loadedChunks.TryGetValue(playerChunkID, out var chunkComponent) ||
             !chunkPipeline.GetMaxStage(playerChunkID).Equals(chunkPipeline.CompleteStage))
         {
             //Freeze player if the chunk isn't ready for them (doesn't exist or doesn't have collision mesh)
-            Player.velocity = Vector3.zero;
+            Player.constraints |= RigidbodyConstraints.FreezePosition;
+        }
+        else 
+        {
+            //Remove constraints
+            Player.constraints &= ~RigidbodyConstraints.FreezePosition;
         }
     }
 
