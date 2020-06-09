@@ -47,8 +47,8 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
     #endregion
 
 
-    public AbstractProviderComponent<ChunkDataType, VoxelDataType> chunkProvider { get; protected set; }
-    public AbstractMesherComponent<ChunkDataType, VoxelDataType> chunkMesher { get; protected set; }
+    protected AbstractProviderComponent<ChunkDataType, VoxelDataType> chunkProvider { get; set; }
+    protected AbstractMesherComponent<ChunkDataType, VoxelDataType> chunkMesher { get; set; }
 
     protected Dictionary<Vector3Int, AbstractChunkComponent<ChunkDataType, VoxelDataType>> loadedChunks = new Dictionary<Vector3Int, AbstractChunkComponent<ChunkDataType, VoxelDataType>>();
 
@@ -84,7 +84,9 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
         chunkProvider.Initialise(VoxelTypeManager,this);
         chunkMesher.Initialise(VoxelTypeManager,this);
 
-        chunkPipeline = new ChunkPipelineManager<ChunkDataType, VoxelDataType>(this,
+        chunkPipeline = new ChunkPipelineManager<ChunkDataType, VoxelDataType>(
+            chunkProvider,
+            chunkMesher,
             GetChunkComponent,
             SetTargetStageOfChunk, 
             MaxGeneratedPerUpdate,

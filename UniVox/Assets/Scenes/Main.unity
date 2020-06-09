@@ -753,69 +753,14 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
-      propertyPath: Player
-      value: 
-      objectReference: {fileID: 1446491237}
-    - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: ChunkRadius
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
       propertyPath: VoxelTypeManager
       value: 
       objectReference: {fileID: 2120146548}
     - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
-      propertyPath: MaxChunksPerUpdate
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: MaxGeneratedPerUpdate
-      value: 6
-      objectReference: {fileID: 0}
-    - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: chunkRadiusX
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: chunkRadiusZ
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: collidableChunksRadii.x
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: collidableChunksRadii.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: collidableChunksRadii.z
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: renderedChunksRadii.x
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: renderedChunksRadii.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: renderedChunksRadii.z
-      value: 2
-      objectReference: {fileID: 0}
+      propertyPath: Player
+      value: 
+      objectReference: {fileID: 1446491237}
     - target: {fileID: 6061144537135917621, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -876,27 +821,5 @@ PrefabInstance:
       propertyPath: m_Name
       value: CullingDebugWorld
       objectReference: {fileID: 0}
-    - target: {fileID: 6061144537135917622, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6061144537135917622, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: m_Layer
-      value: 8
-      objectReference: {fileID: 0}
-    - target: {fileID: 6061144537135917626, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: dirtType
-      value: 
-      objectReference: {fileID: 11400000, guid: a03c76065d9f24749ae1e10da8247535,
-        type: 2}
-    - target: {fileID: 6061144537135917626, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: grassType
-      value: 
-      objectReference: {fileID: 11400000, guid: da8f3cdeb3374df40a2e8e80b40a9e01,
-        type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 37b9cc2f16198bf4c84ddc72031aedb3, type: 3}

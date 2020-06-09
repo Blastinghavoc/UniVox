@@ -12,11 +12,12 @@ namespace UniVox.Framework.ChunkPipeline
         where VoxelDataType : IVoxelData
     {
         private List<PipelineStage> stages = new List<PipelineStage>();
-        private AbstractChunkManager<ChunkDataType,VoxelDataType> chunkManager;
+        private IChunkProvider<ChunkDataType, VoxelDataType> chunkProvider;
+        private IChunkMesher<ChunkDataType, VoxelDataType> chunkMesher;
 
         private Dictionary<Vector3Int, ChunkStageData> chunkStageMap = new Dictionary<Vector3Int, ChunkStageData>();
 
-        private Func<Vector3Int, AbstractChunkComponent<ChunkDataType, VoxelDataType>> getChunkComponent;
+        private Func<Vector3Int, IChunkComponent<ChunkDataType, VoxelDataType>> getChunkComponent;
 
         private Action<Vector3Int, int> createNewChunkWithTarget;
 
@@ -25,12 +26,14 @@ namespace UniVox.Framework.ChunkPipeline
         public int RenderedStage { get; private set; }
         public int CompleteStage { get; private set; }
 
-        public ChunkPipelineManager(AbstractChunkManager<ChunkDataType, VoxelDataType> chunkManager,
-            Func<Vector3Int,AbstractChunkComponent<ChunkDataType,VoxelDataType>> getChunkComponent,
+        public ChunkPipelineManager(IChunkProvider<ChunkDataType, VoxelDataType> chunkProvider,
+            IChunkMesher<ChunkDataType, VoxelDataType> chunkMesher,
+            Func<Vector3Int,IChunkComponent<ChunkDataType,VoxelDataType>> getChunkComponent,
             Action<Vector3Int, int> createNewChunkWithTarget,
             int maxDataPerUpdate,int maxMeshPerUpdate,int maxCollisionPerUpdate) 
         {
-            this.chunkManager = chunkManager;
+            this.chunkProvider = chunkProvider;
+            this.chunkMesher = chunkMesher;
             this.getChunkComponent = getChunkComponent;
             this.createNewChunkWithTarget = createNewChunkWithTarget;
 
@@ -42,7 +45,7 @@ namespace UniVox.Framework.ChunkPipeline
             DataStage = i;
             stages.Add(new PipelineStage("GotData",i++));
 
-            if (chunkManager.chunkMesher.IsMeshDependentOnNeighbourChunks)
+            if (chunkMesher.IsMeshDependentOnNeighbourChunks)
             {
                 DataStage = i;
                 stages.Add(new WaitingPipelineStage("WaitingForNeighbourData",i++, ShouldScheduleForNext,(cId,_)=>NeighboursHaveData(cId)));
@@ -155,7 +158,7 @@ namespace UniVox.Framework.ChunkPipeline
                     }
                     if (stageData.maxStage < RenderedStage)
                     {
-                        chunkComponent.RemoveCollisionMesh();
+                        chunkComponent.RemoveRenderMesh();
                     }
 
                     //Ensure min stage isn't greater than max
@@ -218,6 +221,12 @@ namespace UniVox.Framework.ChunkPipeline
             return stageData.maxStage;
         }
 
+        public int GetMinStage(Vector3Int chunkId)
+        {
+            var stageData = GetStageData(chunkId);
+            return stageData.minStage;
+        }
+
         public int GetTargetStage(Vector3Int chunkId) 
         {
             var stageData = GetStageData(chunkId);
@@ -255,12 +264,12 @@ namespace UniVox.Framework.ChunkPipeline
 
         private AbstractPipelineJob<ChunkDataType> makeDataGenJob(Vector3Int chunkID) 
         {
-            return new BasicDataGenerationJob<ChunkDataType, VoxelDataType>(chunkManager.chunkProvider, chunkID);
+            return new BasicDataGenerationJob<ChunkDataType, VoxelDataType>(chunkProvider, chunkID);
         }
 
         private AbstractPipelineJob<Mesh> makeMeshingJob(Vector3Int chunkID) 
         {
-            return new BasicMeshGenerationJob<ChunkDataType, VoxelDataType>(chunkManager.chunkMesher, getChunkComponent(chunkID).Data);
+            return new BasicMeshGenerationJob<ChunkDataType, VoxelDataType>(chunkMesher, getChunkComponent(chunkID).Data);
         }
 
         private AbstractPipelineJob<Mesh> makeCollisionMeshingJob(Vector3Int chunkID) 

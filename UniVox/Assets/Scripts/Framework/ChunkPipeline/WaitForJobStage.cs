@@ -37,6 +37,11 @@ namespace UniVox.Framework.ChunkPipeline
                 onJobDone(item,jobs[item].Result);
                 jobs.Remove(item);
             }
+            foreach (var item in terminating)
+            {
+                //Do NOT execute onJobDone, the result is discarded
+                jobs.Remove(item);
+            }
         }
 
         public override void AddAll(List<Vector3Int> incoming)

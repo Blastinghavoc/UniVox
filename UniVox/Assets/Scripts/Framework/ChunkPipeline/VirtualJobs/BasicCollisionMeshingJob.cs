@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace UniVox.Framework.ChunkPipeline.VirtualJobs
 {
@@ -6,16 +7,17 @@ namespace UniVox.Framework.ChunkPipeline.VirtualJobs
             where ChunkDataType : IChunkData<VoxelDataType>
             where VoxelDataType : IVoxelData
     {
-        AbstractChunkComponent<ChunkDataType, VoxelDataType> chunkComponent;
+        IChunkComponent<ChunkDataType, VoxelDataType> chunkComponent;
 
-        public BasicCollisionMeshingJob(AbstractChunkComponent<ChunkDataType,VoxelDataType> chunkComponent) 
+        public BasicCollisionMeshingJob(IChunkComponent<ChunkDataType,VoxelDataType> chunkComponent) 
         {
             this.chunkComponent = chunkComponent;
         }
 
         public override void Start()
         {
-            Result = chunkComponent.meshFilter.mesh;
+            //Using the render mesh as the collision mesh
+            Result = chunkComponent.GetRenderMesh();
             Done = true;
         }
     }
