@@ -423,14 +423,14 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2981057896917559129, guid: 55373a8976e0c014e90e0bb7e64d046a,
         type: 3}
+      propertyPath: VoxelTypeManager
+      value: 
+      objectReference: {fileID: 2120146548}
+    - target: {fileID: 2981057896917559129, guid: 55373a8976e0c014e90e0bb7e64d046a,
+        type: 3}
       propertyPath: Player
       value: 
       objectReference: {fileID: 1446491237}
-    - target: {fileID: 2981057896917559129, guid: 55373a8976e0c014e90e0bb7e64d046a,
-        type: 3}
-      propertyPath: MaxChunksPerUpdate
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 2981057896917559131, guid: 55373a8976e0c014e90e0bb7e64d046a,
         type: 3}
       propertyPath: m_Name
@@ -563,6 +563,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1998389611}
+  - component: {fileID: 1998389612}
+  - component: {fileID: 1998389613}
   m_Layer: 0
   m_Name: VoxelWorlds
   m_TagString: Untagged
@@ -586,6 +588,31 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1998389612
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1998389610}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba908ec600f321b44a91c42f099f6994, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1998389613
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1998389610}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 32eac55ea901bda42994e68b8ed6814a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  TestMode: 1
 --- !u!1 &2120146547
 GameObject:
   m_ObjectHideFlags: 0
@@ -820,6 +847,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: CullingDebugWorld
+      objectReference: {fileID: 0}
+    - target: {fileID: 6061144537135917622, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 37b9cc2f16198bf4c84ddc72031aedb3, type: 3}

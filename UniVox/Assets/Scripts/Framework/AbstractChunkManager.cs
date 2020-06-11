@@ -72,8 +72,8 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
         Assert.IsNotNull(VoxelTypeManager,"Chunk Manager must have a reference to a Voxel Type Manager");
         VoxelTypeManager.Initialise();
 
-        //Create VoxelWorldInterface
-        var worldInterface = gameObject.AddComponent<VoxelWorldInterface>();
+        //Initialise VoxelWorldInterface
+        var worldInterface = FindObjectOfType<VoxelWorldInterface>();
         worldInterface.Intialise(this,VoxelTypeManager);
 
         chunkProvider = GetComponent<AbstractProviderComponent<ChunkDataType, VoxelDataType>>();
@@ -123,30 +123,62 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
     {
         playerChunkID = WorldToChunkPosition(Player.position);
 
+        //Deactivate any chunks that are outside the data radius
+        var deactivate = loadedChunks.Select((pair) => pair.Key)
+            .Where((id) => !InsideChunkRadius(id, dataChunksRadii))
+            .ToList();
+        
+        deactivate.ForEach(Deactivate);
 
-        List<Vector3Int> deactivate = new List<Vector3Int>();
-
-        foreach (var chunkID in loadedChunks.Keys)
+        for (int x = -dataChunksRadii.x; x <= dataChunksRadii.x; x++)
         {
-            if (InsideChunkRadius(chunkID, collidableChunksRadii))
+            for (int y = -dataChunksRadii.y; y <= dataChunksRadii.y; y++)
             {
-                SetTargetStageOfChunk(chunkID, chunkPipeline.CompleteStage);//Request that this chunk should be complete
-            }
-            else if (InsideChunkRadius(chunkID, renderedChunksRadii))
-            {
-                SetTargetStageOfChunk(chunkID, chunkPipeline.RenderedStage);//Request that this chunk should be rendered
-            }
-            else if (InsideChunkRadius(chunkID, dataChunksRadii))
-            {
-                SetTargetStageOfChunk(chunkID, chunkPipeline.DataStage);//Request that this chunk should be just data
-            }
-            else 
-            {
-                deactivate.Add(chunkID);
+                for (int z = -dataChunksRadii.z; z <= dataChunksRadii.z; z++)
+                {
+                    var chunkID = playerChunkID + new Vector3Int(x, y, z);
+
+                    if (InsideChunkRadius(chunkID, collidableChunksRadii))
+                    {
+                        SetTargetStageOfChunk(chunkID, chunkPipeline.CompleteStage);//Request that this chunk should be complete
+                    }
+                    else if (InsideChunkRadius(chunkID, renderedChunksRadii))
+                    {
+                        SetTargetStageOfChunk(chunkID, chunkPipeline.RenderedStage);//Request that this chunk should be rendered
+                    }
+                    else
+                    {
+                        SetTargetStageOfChunk(chunkID, chunkPipeline.DataStage);//Request that this chunk should be just data
+                    }
+
+                }
             }
         }
 
-        deactivate.ForEach(_ => Deactivate(_));
+
+        //List<Vector3Int> deactivate = new List<Vector3Int>();
+
+        //foreach (var chunkID in loadedChunks.Keys)
+        //{
+        //    if (InsideChunkRadius(chunkID, collidableChunksRadii))
+        //    {
+        //        SetTargetStageOfChunk(chunkID, chunkPipeline.CompleteStage);//Request that this chunk should be complete
+        //    }
+        //    else if (InsideChunkRadius(chunkID, renderedChunksRadii))
+        //    {
+        //        SetTargetStageOfChunk(chunkID, chunkPipeline.RenderedStage);//Request that this chunk should be rendered
+        //    }
+        //    else if (InsideChunkRadius(chunkID, dataChunksRadii))
+        //    {
+        //        SetTargetStageOfChunk(chunkID, chunkPipeline.DataStage);//Request that this chunk should be just data
+        //    }
+        //    else 
+        //    {
+        //        deactivate.Add(chunkID);
+        //    }
+        //}
+
+        //deactivate.ForEach(_ => Deactivate(_));
     }
 
     private AbstractChunkComponent<ChunkDataType,VoxelDataType> GetChunkComponent(Vector3Int chunkID) 

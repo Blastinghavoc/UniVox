@@ -12,13 +12,13 @@ GameObject:
   - component: {fileID: 2981057896917559129}
   - component: {fileID: 2981057896917559127}
   - component: {fileID: 2981057896917559126}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: NaiveDebugWorld
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2981057896917559128
 Transform:
   m_ObjectHideFlags: 0
@@ -45,12 +45,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d42a63e2b96aa434099f553379b8493a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  CHUNK_DIMENSIONS: {x: 32, y: 32, z: 32}
+  chunkDimensions: {x: 32, y: 32, z: 32}
+  voxelSize: 1
+  VoxelTypeManager: {fileID: 0}
   chunkPool:
     prefab: {fileID: 5697091069406414600, guid: 9bd18ceaff69a844299df4d590e1d694,
       type: 3}
   Player: {fileID: 0}
-  ChunkRadius: 2
+  collidableChunksRadii: {x: 1, y: 1, z: 1}
+  renderedChunksRadii: {x: 2, y: 1, z: 2}
+  MaxGeneratedPerUpdate: 6
+  MaxMeshedPerUpdate: 1
 --- !u!114 &2981057896917559127
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -63,6 +68,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9edb96263ac8fb54b8913a432ff2bdae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  dirtType: {fileID: 11400000, guid: a03c76065d9f24749ae1e10da8247535, type: 2}
+  grassType: {fileID: 11400000, guid: da8f3cdeb3374df40a2e8e80b40a9e01, type: 2}
 --- !u!114 &2981057896917559126
 MonoBehaviour:
   m_ObjectHideFlags: 0
