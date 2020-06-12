@@ -237,6 +237,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 30e047e87ad74324ca36fe70903481fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  WalkDistance: 100
 --- !u!114 &1852027631
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -262,8 +263,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32eac55ea901bda42994e68b8ed6814a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  TestMode: 1
-  TestResultPath: C:\Users\Jacob Taylor.MSI\Downloads\testResults.csv
+  TestResultPath: C:\Users\Jacob Taylor.MSI\source\repos\Masters Project\UniVox\TestResults\testResults.csv
 --- !u!4 &1852027633
 Transform:
   m_ObjectHideFlags: 0
