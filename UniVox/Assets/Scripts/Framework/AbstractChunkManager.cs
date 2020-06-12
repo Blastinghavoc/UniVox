@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PerformanceTesting;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ using UniVox.Framework.ChunkPipeline;
 using Utils.FSM;
 using Utils.Pooling;
 
-public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoBehaviour, IChunkManager 
+public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoBehaviour, IChunkManager, ITestableChunkManager 
     where ChunkDataType : IChunkData<VoxelDataType>
     where VoxelDataType : IVoxelData
 {
@@ -25,7 +26,8 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
 
     [SerializeField] protected VoxelTypeManager VoxelTypeManager;
 
-    [SerializeField] protected PrefabPool chunkPool = null;
+    [SerializeField] protected GameObject chunkPrefab;
+    protected PrefabPool chunkPool;
 
     [SerializeField] protected Rigidbody Player;
 
@@ -50,14 +52,15 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
     protected AbstractProviderComponent<ChunkDataType, VoxelDataType> chunkProvider { get; set; }
     protected AbstractMesherComponent<ChunkDataType, VoxelDataType> chunkMesher { get; set; }
 
-    protected Dictionary<Vector3Int, AbstractChunkComponent<ChunkDataType, VoxelDataType>> loadedChunks = new Dictionary<Vector3Int, AbstractChunkComponent<ChunkDataType, VoxelDataType>>();
+    protected Dictionary<Vector3Int, AbstractChunkComponent<ChunkDataType, VoxelDataType>> loadedChunks;
 
-    //Current chunkID occupied by the Player transform
-    protected Vector3Int playerChunkID = Vector3Int.zero;
+    //Current chunkID occupied by the Player
+    protected Vector3Int playerChunkID;
+    protected Vector3Int prevPlayerChunkID;
 
-    private ChunkPipelineManager<ChunkDataType, VoxelDataType> chunkPipeline;
-   
-    protected virtual void Start()
+    private ChunkPipelineManager<ChunkDataType, VoxelDataType> pipeline;
+
+    public virtual void Initialise() 
     {
         Assert.IsTrue(renderedChunksRadii.All((a, b) => a >= b, collidableChunksRadii),
             "The rendering radii must be at least as large as the collidable radii");
@@ -69,42 +72,57 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
         transform.position = Vector3.zero;
         transform.rotation = Quaternion.Euler(0, 0, 0);
 
-        Assert.IsNotNull(VoxelTypeManager,"Chunk Manager must have a reference to a Voxel Type Manager");
+        loadedChunks = new Dictionary<Vector3Int, AbstractChunkComponent<ChunkDataType, VoxelDataType>>();
+
+        chunkPool = new PrefabPool() { prefab = chunkPrefab};
+
+        Assert.IsNotNull(VoxelTypeManager, "Chunk Manager must have a reference to a Voxel Type Manager");
         VoxelTypeManager.Initialise();
 
         //Initialise VoxelWorldInterface
         var worldInterface = FindObjectOfType<VoxelWorldInterface>();
-        worldInterface.Intialise(this,VoxelTypeManager);
+        worldInterface.Intialise(this, VoxelTypeManager);
 
         chunkProvider = GetComponent<AbstractProviderComponent<ChunkDataType, VoxelDataType>>();
         chunkMesher = GetComponent<AbstractMesherComponent<ChunkDataType, VoxelDataType>>();
-        Assert.IsNotNull(chunkProvider,"Chunk Manager must have a chunk provider component");
+        Assert.IsNotNull(chunkProvider, "Chunk Manager must have a chunk provider component");
         Assert.IsNotNull(chunkMesher, "Chunk Manager must have a chunk mesher component");
 
-        chunkProvider.Initialise(VoxelTypeManager,this);
-        chunkMesher.Initialise(VoxelTypeManager,this);
+        chunkProvider.Initialise(VoxelTypeManager, this);
+        chunkMesher.Initialise(VoxelTypeManager, this);
 
-        chunkPipeline = new ChunkPipelineManager<ChunkDataType, VoxelDataType>(
+        pipeline = new ChunkPipelineManager<ChunkDataType, VoxelDataType>(
             chunkProvider,
             chunkMesher,
             GetChunkComponent,
-            SetTargetStageOfChunk, 
+            SetTargetStageOfChunk,
             MaxGeneratedPerUpdate,
-            MaxMeshedPerUpdate, 
+            MaxMeshedPerUpdate,
             MaxMeshedPerUpdate);
 
+        Player.position = new Vector3(5, 17, 5);
+        Player.velocity = Vector3.zero;
+
+        playerChunkID = WorldToChunkPosition(Player.position);
         //Immediately request generation of the chunk the player is in
-        SetTargetStageOfChunk(WorldToChunkPosition(Player.position), chunkPipeline.CompleteStage);
+        SetTargetStageOfChunk(playerChunkID, pipeline.CompleteStage);
+        UpdatePlayerArea();
     }
 
     protected virtual void Update()
     {
-        UpdatePlayerArea();
+        prevPlayerChunkID = playerChunkID;
+        playerChunkID = WorldToChunkPosition(Player.position);
 
-        chunkPipeline.Update();
+        if (playerChunkID != prevPlayerChunkID)
+        {
+            UpdatePlayerArea();
+        }
+
+        pipeline.Update();
 
         if (!loadedChunks.TryGetValue(playerChunkID, out var chunkComponent) ||
-            !chunkPipeline.GetMaxStage(playerChunkID).Equals(chunkPipeline.CompleteStage))
+            !pipeline.GetMaxStage(playerChunkID).Equals(pipeline.CompleteStage))
         {
             //Freeze player if the chunk isn't ready for them (doesn't exist or doesn't have collision mesh)
             Player.constraints |= RigidbodyConstraints.FreezePosition;
@@ -121,8 +139,6 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
     /// </summary>
     protected void UpdatePlayerArea()
     {
-        playerChunkID = WorldToChunkPosition(Player.position);
-
         //Deactivate any chunks that are outside the data radius
         var deactivate = loadedChunks.Select((pair) => pair.Key)
             .Where((id) => !InsideChunkRadius(id, dataChunksRadii))
@@ -140,45 +156,20 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
 
                     if (InsideChunkRadius(chunkID, collidableChunksRadii))
                     {
-                        SetTargetStageOfChunk(chunkID, chunkPipeline.CompleteStage);//Request that this chunk should be complete
+                        SetTargetStageOfChunk(chunkID, pipeline.CompleteStage);//Request that this chunk should be complete
                     }
                     else if (InsideChunkRadius(chunkID, renderedChunksRadii))
                     {
-                        SetTargetStageOfChunk(chunkID, chunkPipeline.RenderedStage);//Request that this chunk should be rendered
+                        SetTargetStageOfChunk(chunkID, pipeline.RenderedStage);//Request that this chunk should be rendered
                     }
                     else
                     {
-                        SetTargetStageOfChunk(chunkID, chunkPipeline.DataStage);//Request that this chunk should be just data
+                        SetTargetStageOfChunk(chunkID, pipeline.DataStage);//Request that this chunk should be just data
                     }
 
                 }
             }
         }
-
-
-        //List<Vector3Int> deactivate = new List<Vector3Int>();
-
-        //foreach (var chunkID in loadedChunks.Keys)
-        //{
-        //    if (InsideChunkRadius(chunkID, collidableChunksRadii))
-        //    {
-        //        SetTargetStageOfChunk(chunkID, chunkPipeline.CompleteStage);//Request that this chunk should be complete
-        //    }
-        //    else if (InsideChunkRadius(chunkID, renderedChunksRadii))
-        //    {
-        //        SetTargetStageOfChunk(chunkID, chunkPipeline.RenderedStage);//Request that this chunk should be rendered
-        //    }
-        //    else if (InsideChunkRadius(chunkID, dataChunksRadii))
-        //    {
-        //        SetTargetStageOfChunk(chunkID, chunkPipeline.DataStage);//Request that this chunk should be just data
-        //    }
-        //    else 
-        //    {
-        //        deactivate.Add(chunkID);
-        //    }
-        //}
-
-        //deactivate.ForEach(_ => Deactivate(_));
     }
 
     private AbstractChunkComponent<ChunkDataType,VoxelDataType> GetChunkComponent(Vector3Int chunkID) 
@@ -194,7 +185,7 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
     {
         if (loadedChunks.TryGetValue(chunkID, out var chunkComponent))
         {
-            chunkPipeline.RemoveChunk(chunkID);
+            pipeline.RemoveChunk(chunkID);
 
             //Return modified data to the provider
             if (chunkComponent.Data != null && chunkComponent.Data.ModifiedSinceGeneration)
@@ -232,12 +223,12 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
             //Add to set of loaded chunks
             loadedChunks[chunkID] = ChunkComponent;
 
-            chunkPipeline.AddChunk(chunkID, targetStage);
+            pipeline.AddChunk(chunkID, targetStage);
             return;
 
         }        
 
-        chunkPipeline.SetTarget(chunkID, targetStage);        
+        pipeline.SetTarget(chunkID, targetStage);        
 
     }
 
@@ -249,7 +240,7 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
     /// <param name="stage"></param>
     protected void RedoChunkFromStage(Vector3Int chunkID, int stage) 
     {
-        chunkPipeline.ReenterAtStage(chunkID, stage);
+        pipeline.ReenterAtStage(chunkID, stage);
     }
 
     /// <summary>
@@ -294,19 +285,19 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
                 if (loadedChunks.TryGetValue(neighbourChunkID, out var neighbourComponent))
                 {
                     
-                    if (chunkPipeline.GetTargetStage(neighbourChunkID) >= chunkPipeline.RenderedStage)
+                    if (pipeline.GetTargetStage(neighbourChunkID) >= pipeline.RenderedStage)
                     {
                         //The neighbour chunk will need remeshing
-                        RedoChunkFromStage(neighbourChunkID, chunkPipeline.DataStage);
+                        RedoChunkFromStage(neighbourChunkID, pipeline.DataStage);
                     }
                 }
             }
         }
 
-        if (chunkPipeline.GetTargetStage(chunkID) >= chunkPipeline.RenderedStage)
+        if (pipeline.GetTargetStage(chunkID) >= pipeline.RenderedStage)
         {
             //The chunk that changed will need remeshing if its target stage has a mesh
-            RedoChunkFromStage(chunkID, chunkPipeline.DataStage);
+            RedoChunkFromStage(chunkID, pipeline.DataStage);
         }
     }
 
@@ -350,7 +341,7 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
 
         if (loadedChunks.TryGetValue(chunkID,out var chunkComponent))
         {
-            if (chunkPipeline.GetMaxStage(chunkID) < chunkPipeline.CompleteStage)
+            if (pipeline.GetMaxStage(chunkID) < pipeline.CompleteStage)
             {
                 //Disallow edits to incomplete chunks (those without collision meshes)
                 return false;
@@ -393,7 +384,7 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
 
         if (loadedChunks.TryGetValue(chunkID, out var chunkComponent))
         {
-            if (!chunkPipeline.ChunkDataReadable(chunkID))
+            if (!pipeline.ChunkDataReadable(chunkID))
             {
                 //Data is not valid to be read
                 return false;
@@ -474,8 +465,37 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
         var result = pos.ElementWise(_ => Mathf.Floor(_) + VoxelSize/2.0f);
         return result;
     }
+    #endregion
 
-    
+    #region Test facilitating methods
+
+
+    public bool AllChunksInTargetState()
+    {
+        for (int x = -dataChunksRadii.x; x <= dataChunksRadii.x; x++)
+        {
+            for (int y = -dataChunksRadii.y; y <= dataChunksRadii.y; y++)
+            {
+                for (int z = -dataChunksRadii.z; z <= dataChunksRadii.z; z++)
+                {
+                    var chunkID = playerChunkID + new Vector3Int(x, y, z);
+
+                    if (pipeline.GetMinStage(chunkID) != pipeline.GetTargetStage(chunkID))
+                    {
+                        return false;
+                    }
+
+                }
+            }
+        }
+
+        return true;
+    }
+
+    public Rigidbody GetPlayer() 
+    {
+        return Player;
+    }
 
     #endregion
 }

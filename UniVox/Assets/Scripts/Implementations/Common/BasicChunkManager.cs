@@ -6,9 +6,9 @@ namespace UniVox.Implementations.Common
 {
     public class BasicChunkManager : AbstractChunkManager<AbstractChunkData, VoxelData>
     {
-        protected override void Start()
+        public override void Initialise()
         {
-            base.Start();            
+            base.Initialise();            
         }
     }
 }

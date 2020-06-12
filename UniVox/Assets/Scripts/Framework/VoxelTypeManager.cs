@@ -18,9 +18,9 @@ namespace UniVox.Framework
 
         [SerializeField] private SOVoxelTypeDefinition[] VoxelTypes = new SOVoxelTypeDefinition[1];
 
-        private Dictionary<SOVoxelTypeDefinition, ushort> DefinitionToIDMap = new Dictionary<SOVoxelTypeDefinition, ushort>();
+        private Dictionary<SOVoxelTypeDefinition, ushort> DefinitionToIDMap;
 
-        private List<VoxelTypeData> typeData = new List<VoxelTypeData>();
+        private List<VoxelTypeData> typeData;
 
         //Ensure that default initialisation of a VoxelData instance is Air
         public const ushort AIR_ID = 0;
@@ -31,6 +31,9 @@ namespace UniVox.Framework
             {
                 return;
             }
+
+            DefinitionToIDMap = new Dictionary<SOVoxelTypeDefinition, ushort>();
+            typeData = new List<VoxelTypeData>();
 
             Debug.Log($"Generating texture array for {VoxelTypes.Length} voxel types");
 

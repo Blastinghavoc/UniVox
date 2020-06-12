@@ -48,9 +48,8 @@ MonoBehaviour:
   chunkDimensions: {x: 32, y: 32, z: 32}
   voxelSize: 1
   VoxelTypeManager: {fileID: 0}
-  chunkPool:
-    prefab: {fileID: 5697091069406414600, guid: 9bd18ceaff69a844299df4d590e1d694,
-      type: 3}
+  chunkPrefab: {fileID: 5697091069406414600, guid: 9bd18ceaff69a844299df4d590e1d694,
+    type: 3}
   Player: {fileID: 0}
   collidableChunksRadii: {x: 1, y: 1, z: 1}
   renderedChunksRadii: {x: 2, y: 1, z: 2}

@@ -44,6 +44,11 @@ namespace UnityStandardAssets.CrossPlatformInput
 			}
 		}
 
+		public static void SetActiveInputMethod(VirtualInput virtualInput) 
+		{
+			activeInput = virtualInput;
+		}
+
 		public static bool AxisExists(string name)
 		{
 			return activeInput.AxisExists(name);
