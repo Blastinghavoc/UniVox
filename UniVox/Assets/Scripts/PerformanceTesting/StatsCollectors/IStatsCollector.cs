@@ -1,10 +1,15 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace PerformanceTesting
 {
     public interface IStatsCollector
     {
-        string[] ToCSVLines();
+        void Update();
+
+        string VariableName { get; }
+
+        List<string> Data { get; }
     }
 }

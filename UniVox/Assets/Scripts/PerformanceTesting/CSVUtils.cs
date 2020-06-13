@@ -19,5 +19,15 @@ namespace PerformanceTesting
             //sb.AppendLine();
             return sb.ToString();
         }
+
+        public static List<string> ListToStringList<T>(List<T> list) 
+        {
+            List<string> stringList = new List<string>(list.Count);
+            foreach (var item in list)
+            {
+                stringList.Add(item.ToString());
+            }
+            return stringList;
+        }
     }
 }

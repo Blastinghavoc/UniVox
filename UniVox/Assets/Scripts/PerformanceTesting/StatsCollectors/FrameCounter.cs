@@ -6,7 +6,12 @@ namespace PerformanceTesting
 {
     public class FrameCounter:IStatsCollector
     {
+
         public List<float> FrameTimesMillis { get; private set; } = new List<float>();
+
+        public string VariableName { get; } = "FrameTimeMillis";
+
+        public List<string> Data { get => CSVUtils.ListToStringList(FrameTimesMillis); }
 
         public string[] ToCSVLines()
         {

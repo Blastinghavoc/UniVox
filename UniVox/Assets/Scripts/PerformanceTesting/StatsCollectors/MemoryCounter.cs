@@ -12,25 +12,19 @@ namespace PerformanceTesting
 
         public long BaseLine { get; private set; }
 
+        public string VariableName { get; } = "MemoryUsageBytes";
+
+        public List<string> Data { get => CSVUtils.ListToStringList(memoryPerFrame); }
+
         public MemoryCounter()         
         {
             BaseLine = Profiler.GetTotalAllocatedMemoryLong();
         }
 
         public void Update()
-        {
+        {            
             memoryPerFrame.Add(Profiler.GetTotalAllocatedMemoryLong() - BaseLine);
         }
 
-        public string[] ToCSVLines()
-        {
-            return new string[]
-            {
-                "Baseline memory:",
-                BaseLine.ToString(),
-                "MemoryBytesPerFrame:",
-                CSVUtils.MakeCSVString(memoryPerFrame),
-            };
-        }
     }
 }

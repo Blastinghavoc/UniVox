@@ -2,23 +2,20 @@
 using System.Collections;
 using UniVox.Framework;
 using System.Collections.Generic;
+using System.Linq;
+using UniVox.Implementations.ChunkData;
+using UniVox.Implementations.Common;
+using UnityEngine.Assertions;
 
 namespace PerformanceTesting
 {
-    public class WalkForwardTest : MonoBehaviour, IPerformanceTest
+    public class WalkForwardTest : AbstractPerformanceTest
     {
-        public string TestName { get; private set; } = "WalkForward";
-
         public float WalkDistance = 100;
 
-        private FrameCounter frameCounter;
-        private MemoryCounter memoryCounter;
-
-        private float timeToCompleteWorld;
-        private float timeToCompleteWalk;
-
-        public IEnumerator Run(ITestableChunkManager chunkManager)
-        {       
+        public override IEnumerator Run(ITestableChunkManager chunkManager)
+        {
+            ResetLog();
 
             var startTime = Time.unscaledTime;
 
@@ -30,13 +27,12 @@ namespace PerformanceTesting
                 yield return null;
             }
 
-            timeToCompleteWorld = Time.unscaledTime - startTime;
+            var timeToCompleteWorld = Time.unscaledTime - startTime;
 
             yield return new WaitForSecondsRealtime(1);
 
             //Start the real test, recording frame time and memory while walking forward
-            frameCounter = new FrameCounter();
-            memoryCounter = new MemoryCounter();
+            ResetPerFrameCounters();
 
             var player = chunkManager.GetPlayer();
 
@@ -51,32 +47,14 @@ namespace PerformanceTesting
             //Wait until they've walked far enough
             while (Vector3.SqrMagnitude(player.position-startpos) < distanceSqr)
             {
-                frameCounter.Update();
-                memoryCounter.Update();
+                UpdatePerFrameCounters();
                 yield return null;
             }
 
-            timeToCompleteWalk = Time.unscaledTime - startTime;
-
-        }
-
-        public string[] GetCSVLines()
-        {
-            List<string> lines = new List<string>();
-
-            lines.Add($"Took {timeToCompleteWorld} seconds to complete world, and an additional {timeToCompleteWalk} seconds to walk {WalkDistance} meters");
-
-            foreach (var line in frameCounter.ToCSVLines())
-            {
-                lines.Add(line);
-            }
-
-            foreach (var line in memoryCounter.ToCSVLines())
-            {
-                lines.Add(line);
-            }
-
-            return lines.ToArray();
+            var timeToCompleteWalk = Time.unscaledTime - startTime;
+            Log($"Took {timeToCompleteWorld} seconds to complete world, and an additional {timeToCompleteWalk} seconds to walk {WalkDistance} meters");
+            Log($"Frame time stats while walking: Min {frameCounter.FrameTimesMillis.Min()}, Max {frameCounter.FrameTimesMillis.Max()}, Mean {frameCounter.FrameTimesMillis.Average()}");
+            Log($"Peak memory usage while walking: {memoryCounter.memoryPerFrame.Max()}");
         }
 
     }

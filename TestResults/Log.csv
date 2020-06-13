@@ -1,0 +1,64 @@
+
+
+
+Test FirstNFrames_R0:
+
+With chunk manager NaiveDebugWorld took 13.74329 seconds
+Memory usage baseline: 85806672
+Recorded 100 frames over a total time of 13.72781s, with a peak memory usage of 1242532240
+
+With chunk manager CullingDebugWorld took 2.881082 seconds
+Memory usage baseline: 85418456
+Recorded 100 frames over a total time of 2.87787s, with a peak memory usage of 7439744
+
+Finished after total time of 20.7768
+
+
+
+Test WalkForward_R0:
+
+With chunk manager NaiveDebugWorld took 31.31182 seconds
+Memory usage baseline: 1326095424
+Took 9.882629 seconds to complete world, and an additional 20.4013 seconds to walk 100 meters
+Frame time stats while walking: Min 4.8662, Max 1370.702, Mean 61.6702
+Peak memory usage while walking: 897970896
+
+With chunk manager CullingDebugWorld took 20.3018 seconds
+Memory usage baseline: 93222184
+Took 2.78949 seconds to complete world, and an additional 16.50685 seconds to walk 100 meters
+Frame time stats while walking: Min 4.6045, Max 101.4998, Mean 6.033144
+Peak memory usage while walking: 5807832
+
+Finished after total time of 55.83515
+
+
+
+Test PlaceDelete1Block_R0:
+
+With chunk manager NaiveDebugWorld took 11.96242 seconds
+Memory usage baseline: 1326101984
+Grace period 10 frames
+Took 37.51373 millis to break 1 blocks, and another 35.27069 millis to put them back
+
+With chunk manager CullingDebugWorld took 4.022316 seconds
+Memory usage baseline: 93249152
+Grace period 10 frames
+Took 88.92822 millis to break 1 blocks, and another 80.89447 millis to put them back
+
+Finished after total time of 20.32755
+
+
+
+Test PlaceDeleteManyBlocks_R0:
+
+With chunk manager NaiveDebugWorld took 16.64179 seconds
+Memory usage baseline: 1326103136
+Grace period 10 frames
+Took 1727.425 millis to break 27000 blocks, and another 2358.772 millis to put them back
+
+With chunk manager CullingDebugWorld took 5.486115 seconds
+Memory usage baseline: 93225232
+Grace period 10 frames
+Took 426.8188 millis to break 27000 blocks, and another 456.8329 millis to put them back
+
+Finished after total time of 26.85788
