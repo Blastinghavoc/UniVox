@@ -334,6 +334,15 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
         return borderDirections;
     }
 
+    public ReadOnlyChunkData<VoxelDataType> GetReadOnlyChunkData(Vector3Int chunkID) 
+    {
+        if (loadedChunks.TryGetValue(chunkID,out var chunkComponent))
+        {
+            return new ReadOnlyChunkData<VoxelDataType>(chunkComponent.Data);
+        }
+        return null;    
+    }
+
     public bool TrySetVoxel(Vector3 worldPos, ushort voxelTypeID,bool overrideExisting)
     {
         Vector3Int localVoxelIndex;

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using UniVox.Framework;
 using UniVox.Implementations.ChunkData;
 using UniVox.Implementations.Common;
@@ -7,14 +8,14 @@ namespace UniVox.Implementations.Meshers
 {
     public class CullingMesher : AbstractMesherComponent<AbstractChunkData, VoxelData>
     {
-        public override void Initialise(VoxelTypeManager voxelTypeManager, IChunkManager chunkManager) 
+        public override void Initialise(VoxelTypeManager voxelTypeManager, AbstractChunkManager<AbstractChunkData,VoxelData> chunkManager) 
         {
             base.Initialise(voxelTypeManager, chunkManager);
             //Culling mesher depends on neighbouring chunks for meshing
             IsMeshDependentOnNeighbourChunks = true;
         }
 
-        protected override bool IncludeFace(AbstractChunkData chunk, Vector3Int position, int direction)
+        protected override bool IncludeFace(AbstractChunkData chunk, Vector3Int position, int direction, List<ReadOnlyChunkData<VoxelData>> neighbourData)
         {
             var adjacentVoxelIndex = position + Directions.IntVectors[direction];            
 
@@ -27,12 +28,13 @@ namespace UniVox.Implementations.Meshers
             {
                 //If adjacent voxel is in the neighbouring chunk
 
-                var neighbourChunkIndex = chunk.ChunkID + Directions.IntVectors[direction];
                 var localIndexOfAdjacentVoxelInNeighbour = chunkManager.LocalVoxelIndexOfPosition(adjacentVoxelIndex);
 
-                if (chunkManager.TryGetVoxel(neighbourChunkIndex, localIndexOfAdjacentVoxelInNeighbour, out var adjacentVoxelTypeID))
+                var neighbourChunkData = neighbourData[direction];
+
+                if (neighbourChunkData.TryGetVoxelAtLocalCoordinates(localIndexOfAdjacentVoxelInNeighbour,out var adjacentVoxelData))
                 {
-                    return IncludeFaceOfAdjacentWithID(adjacentVoxelTypeID, direction);
+                    return IncludeFaceOfAdjacentWithID(adjacentVoxelData.TypeID, direction);
                 }
 
             }

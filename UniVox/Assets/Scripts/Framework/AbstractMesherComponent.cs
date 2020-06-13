@@ -14,9 +14,9 @@ namespace UniVox.Framework
         public bool IsMeshDependentOnNeighbourChunks { get; protected set; } = false;
 
         protected VoxelTypeManager voxelTypeManager;
-        protected IChunkManager chunkManager;
+        protected AbstractChunkManager<ChunkDataType,VoxelDataType> chunkManager;
 
-        public virtual void Initialise(VoxelTypeManager voxelTypeManager,IChunkManager chunkManager)
+        public virtual void Initialise(VoxelTypeManager voxelTypeManager, AbstractChunkManager<ChunkDataType, VoxelDataType> chunkManager)
         {
             this.voxelTypeManager = voxelTypeManager;
             this.chunkManager = chunkManager;
@@ -28,6 +28,17 @@ namespace UniVox.Framework
             List<Vector3> uvs = new List<Vector3>();
             List<Vector3> normals = new List<Vector3>();
             List<int> indices = new List<int>();
+
+            List< ReadOnlyChunkData < VoxelDataType >> neighbourData = new List<ReadOnlyChunkData<VoxelDataType>>();
+            //Cache neighbour data if necessary
+            if (IsMeshDependentOnNeighbourChunks)
+            {
+                for (int i = 0; i < Directions.NumDirections; i++)
+                {
+                    var neighbourID = chunk.ChunkID + Directions.IntVectors[i];
+                    neighbourData.Add(chunkManager.GetReadOnlyChunkData(neighbourID));
+                }
+            }
 
             int currentIndex = 0;
 
@@ -46,7 +57,7 @@ namespace UniVox.Framework
 
                         var typeData = voxelTypeManager.GetData(voxelTypeID);
 
-                        AddMeshDataForVoxel(chunk, typeData, new Vector3Int(x, y, z), vertices, uvs, normals, indices, ref currentIndex);
+                        AddMeshDataForVoxel(chunk, typeData, new Vector3Int(x, y, z), vertices, uvs, normals, indices, ref currentIndex,neighbourData);
 
                     }
                 }
@@ -71,7 +82,7 @@ namespace UniVox.Framework
 
         }
 
-        protected virtual void AddMeshDataForVoxel(ChunkDataType chunk, TypeData voxelTypeData, Vector3Int position, List<Vector3> vertices, List<Vector3> uvs, List<Vector3> normals, List<int> indices, ref int currentIndex)
+        protected virtual void AddMeshDataForVoxel(ChunkDataType chunk, TypeData voxelTypeData, Vector3Int position, List<Vector3> vertices, List<Vector3> uvs, List<Vector3> normals, List<int> indices, ref int currentIndex, List<ReadOnlyChunkData<VoxelDataType>> neighbourData)
         {
             var meshDefinition = voxelTypeData.definition.meshDefinition;
             ref var faceZs = ref voxelTypeData.zIndicesPerFace;
@@ -79,14 +90,14 @@ namespace UniVox.Framework
             //Add single voxel's data
             for (int i = 0; i < meshDefinition.Faces.Length; i++)
             {
-                if (IncludeFace(chunk, position, i))
+                if (IncludeFace(chunk, position, i,neighbourData))
                 {
                     AddFace(meshDefinition, ref faceZs, i, vertices, uvs, normals, indices, ref currentIndex, position);
                 }
             }
         }
 
-        protected virtual bool IncludeFace(ChunkDataType chunk, Vector3Int position, int direction)
+        protected virtual bool IncludeFace(ChunkDataType chunk, Vector3Int position, int direction, List<ReadOnlyChunkData<VoxelDataType>> neighbourData)
         {
             return true;
         }
