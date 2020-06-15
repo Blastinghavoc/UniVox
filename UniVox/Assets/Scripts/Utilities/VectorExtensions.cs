@@ -77,6 +77,20 @@ public static class VectorExtensions
         return new Vector3Int(operation(v1.x,v2.x), operation(v1.y,v2.y), operation(v1.z,v2.z));
     }
 
+    /// <summary>
+    /// Used to unpack a Vector3Int
+    /// </summary>
+    /// <param name="v"></param>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <param name="z"></param>
+    public static void Deconstruct(this Vector3Int v, out int x, out int y ,out int z) 
+    {
+        x = v.x;
+        y = v.y;
+        z = v.z;
+    }
+
     #endregion
 
     #region Vector3
@@ -104,6 +118,16 @@ public static class VectorExtensions
     public static Vector3 ElementWise(this Vector3 v1, Func<float, float, float> operation, Vector3 v2)
     {
         return new Vector3(operation(v1.x, v2.x), operation(v1.y, v2.y), operation(v1.z, v2.z));
+    }
+
+    /// <summary>
+    /// Cast to int vector
+    /// </summary>
+    /// <param name="v"></param>
+    /// <returns></returns>
+    public static Vector3Int ToInt(this Vector3 v) 
+    {
+        return new Vector3Int((int)v.x, (int)v.y, (int)v.z);
     }
     #endregion
 

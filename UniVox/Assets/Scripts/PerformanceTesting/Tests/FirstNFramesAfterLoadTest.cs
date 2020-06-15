@@ -30,7 +30,8 @@ namespace PerformanceTesting
                 yield return null;
             }
 
-            Log($"Recorded {frameCounter.FrameTimesMillis.Count} frames over a total time of {frameCounter.FrameTimesMillis.Sum()/1000}s, with a peak memory usage of {memoryCounter.memoryPerFrame.Max()}");
+            Log($"Recorded {frameCounter.FrameTimesMillis.Count} frames");
+            Log($"Peak memory usage of {memoryCounter.memoryPerFrame.Max()}");
 
         }
     }

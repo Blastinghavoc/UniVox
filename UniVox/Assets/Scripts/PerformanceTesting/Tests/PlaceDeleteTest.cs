@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Linq;
 using UnityEngine;
 using UniVox.Framework;
 
@@ -90,7 +91,10 @@ namespace PerformanceTesting
             var allReplacedTime = Time.unscaledTime - startTime;
             //DONE
             Log($"Grace period {gracePeriodFrames} frames");
-            Log($"Took {allBrokenTime*1000} millis to break {cubeDimension*cubeDimension*cubeDimension} blocks, and another {allReplacedTime*1000} millis to put them back");
+            Log($"Num Blocks: {cubeDimension * cubeDimension * cubeDimension}");
+            Log($"Break time millis: {allBrokenTime * 1000}");
+            Log($"Place time millis: {allReplacedTime * 1000}");
+            Log($"Peak memory: {memoryCounter.memoryPerFrame.Max()}");
 
         }
     }

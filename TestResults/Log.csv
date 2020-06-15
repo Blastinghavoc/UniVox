@@ -3,62 +3,254 @@
 
 Test FirstNFrames_R0:
 
-With chunk manager NaiveDebugWorld took 15.06696 seconds
-Memory usage baseline: 94128857
-Recorded 100 frames over a total time of 15.049s, with a peak memory usage of 1242501721
+With chunk manager NaiveDebugWorld took 19.54974 seconds
+Memory usage baseline: 69801217
+Recorded 100 frames over a total time of 19.53257s, with a peak memory usage of 1243357969
 
-With chunk manager CullingDebugWorld took 2.528173 seconds
-Memory usage baseline: 93086218
-Recorded 100 frames over a total time of 2.527528s, with a peak memory usage of 6795736
+With chunk manager CullingDebugWorld took 2.3424 seconds
+Memory usage baseline: 69889042
+Recorded 100 frames over a total time of 2.342116s, with a peak memory usage of 6785408
 
-Finished after total time of 21.75941
+Finished after total time of 26.20982
+
+
+
+Test FirstNFrames_R1:
+
+With chunk manager NaiveDebugWorld took 11.3534 seconds
+Memory usage baseline: 70316482
+Recorded 100 frames over a total time of 11.31978s, with a peak memory usage of 1240290016
+
+With chunk manager CullingDebugWorld took 2.307873 seconds
+Memory usage baseline: 71698162
+Recorded 100 frames over a total time of 2.308562s, with a peak memory usage of 6783344
+
+Finished after total time of 17.79083
+
+
+
+Test FirstNFrames_R2:
+
+With chunk manager NaiveDebugWorld took 12.85973 seconds
+Memory usage baseline: 71545842
+Recorded 100 frames over a total time of 12.82742s, with a peak memory usage of 1240272960
+
+With chunk manager CullingDebugWorld took 2.287422 seconds
+Memory usage baseline: 71482162
+Recorded 100 frames over a total time of 2.286994s, with a peak memory usage of 6993008
+
+Finished after total time of 19.41181
+
+
+
+Test FirstNFrames_R3:
+
+With chunk manager NaiveDebugWorld took 10.68586 seconds
+Memory usage baseline: 71547570
+Recorded 100 frames over a total time of 10.65422s, with a peak memory usage of 1240273736
+
+With chunk manager CullingDebugWorld took 2.323212 seconds
+Memory usage baseline: 71491074
+Recorded 100 frames over a total time of 2.32265s, with a peak memory usage of 6993232
+
+Finished after total time of 17.25793
 
 
 
 Test WalkForward_R0:
 
-With chunk manager NaiveDebugWorld took 34.03133 seconds
-Memory usage baseline: 1333810930
-Took 11.8587 seconds to complete world, and an additional 21.14181 seconds to walk 100 meters
-Frame time stats while walking: Min 5.4331, Max 1415.419, Mean 65.07747
-Peak memory usage while walking: 897967728
+With chunk manager NaiveDebugWorld took 31.95778 seconds
+Memory usage baseline: 1311831426
+Took 10.78348 seconds to complete world, and an additional 20.14806 seconds to walk 100 meters
+Frame time stats while walking: Min 5.063, Max 1185.738, Mean 61.07795
+Peak memory usage while walking: 897969752
 
-With chunk manager CullingDebugWorld took 19.75825 seconds
-Memory usage baseline: 101005546
-Took 2.232155 seconds to complete world, and an additional 16.51983 seconds to walk 100 meters
-Frame time stats while walking: Min 4.7047, Max 63.8547, Mean 6.04418
-Peak memory usage while walking: 5882104
+With chunk manager CullingDebugWorld took 19.76887 seconds
+Memory usage baseline: 79002890
+Took 2.244217 seconds to complete world, and an additional 16.5199 seconds to walk 100 meters
+Frame time stats while walking: Min 4.6467, Max 65.35641, Mean 5.895512
+Peak memory usage while walking: 4580744
 
-Finished after total time of 58.09678
+Finished after total time of 56.0092
+
+
+
+Test WalkForward_R1:
+
+With chunk manager NaiveDebugWorld took 31.98108 seconds
+Memory usage baseline: 1311851538
+Took 10.43164 seconds to complete world, and an additional 20.51862 seconds to walk 100 meters
+Frame time stats while walking: Min 5.0374, Max 1319.268, Mean 62.74751
+Peak memory usage while walking: 897971704
+
+With chunk manager CullingDebugWorld took 19.74843 seconds
+Memory usage baseline: 79009098
+Took 2.237793 seconds to complete world, and an additional 16.50478 seconds to walk 100 meters
+Frame time stats while walking: Min 4.6839, Max 66.5463, Mean 5.829877
+Peak memory usage while walking: 4578384
+
+Finished after total time of 55.93805
+
+
+
+Test WalkForward_R2:
+
+With chunk manager NaiveDebugWorld took 31.81606 seconds
+Memory usage baseline: 1311859546
+Took 10.53413 seconds to complete world, and an additional 20.25229 seconds to walk 100 meters
+Frame time stats while walking: Min 5.7232, Max 1269.094, Mean 62.16114
+Peak memory usage while walking: 897964088
+
+With chunk manager CullingDebugWorld took 19.7545 seconds
+Memory usage baseline: 78735018
+Took 2.236359 seconds to complete world, and an additional 16.51239 seconds to walk 100 meters
+Frame time stats while walking: Min 4.6435, Max 69.2001, Mean 5.82022
+Peak memory usage while walking: 4856168
+
+Finished after total time of 55.74182
+
+
+
+Test WalkForward_R3:
+
+With chunk manager NaiveDebugWorld took 32.28369 seconds
+Memory usage baseline: 1311863282
+Took 10.87872 seconds to complete world, and an additional 20.37646 seconds to walk 100 meters
+Frame time stats while walking: Min 5.433, Max 1427.461, Mean 61.58345
+Peak memory usage while walking: 897967464
+
+With chunk manager CullingDebugWorld took 19.75314 seconds
+Memory usage baseline: 79019250
+Took 2.239014 seconds to complete world, and an additional 16.50732 seconds to walk 100 meters
+Frame time stats while walking: Min 4.6912, Max 69.8829, Mean 5.847358
+Peak memory usage while walking: 4575848
+
+Finished after total time of 56.32568
 
 
 
 Test PlaceDelete1Block_R0:
 
-With chunk manager NaiveDebugWorld took 11.88918 seconds
-Memory usage baseline: 1333819130
+With chunk manager NaiveDebugWorld took 11.48581 seconds
+Memory usage baseline: 1311869586
 Grace period 10 frames
-Took 38.68866 millis to break 1 blocks, and another 40.63416 millis to put them back
+Took 38.57422 millis to break 1 blocks, and another 36.19385 millis to put them back
 
-With chunk manager CullingDebugWorld took 3.383682 seconds
-Memory usage baseline: 101022218
+With chunk manager CullingDebugWorld took 3.435669 seconds
+Memory usage baseline: 79047682
 Grace period 10 frames
-Took 62.63733 millis to break 1 blocks, and another 61.42426 millis to put them back
+Took 62.68311 millis to break 1 blocks, and another 61.43188 millis to put them back
 
-Finished after total time of 19.52465
+Finished after total time of 19.16028
+
+
+
+Test PlaceDelete1Block_R1:
+
+With chunk manager NaiveDebugWorld took 11.77698 seconds
+Memory usage baseline: 1311870818
+Grace period 10 frames
+Took 35.43091 millis to break 1 blocks, and another 39.03198 millis to put them back
+
+With chunk manager CullingDebugWorld took 3.431122 seconds
+Memory usage baseline: 79077122
+Grace period 10 frames
+Took 68.32886 millis to break 1 blocks, and another 61.21826 millis to put them back
+
+Finished after total time of 19.44757
+
+
+
+Test PlaceDelete1Block_R2:
+
+With chunk manager NaiveDebugWorld took 11.42569 seconds
+Memory usage baseline: 1311875930
+Grace period 10 frames
+Took 37.75024 millis to break 1 blocks, and another 37.323 millis to put them back
+
+With chunk manager CullingDebugWorld took 3.443878 seconds
+Memory usage baseline: 79066570
+Grace period 10 frames
+Took 64.54468 millis to break 1 blocks, and another 61.12671 millis to put them back
+
+Finished after total time of 19.05118
+
+
+
+Test PlaceDelete1Block_R3:
+
+With chunk manager NaiveDebugWorld took 11.92911 seconds
+Memory usage baseline: 1311879642
+Grace period 10 frames
+Took 36.8042 millis to break 1 blocks, and another 35.67505 millis to put them back
+
+With chunk manager CullingDebugWorld took 3.439453 seconds
+Memory usage baseline: 78753474
+Grace period 10 frames
+Took 61.64551 millis to break 1 blocks, and another 62.25586 millis to put them back
+
+Finished after total time of 19.68988
 
 
 
 Test PlaceDeleteManyBlocks_R0:
 
-With chunk manager NaiveDebugWorld took 15.80952 seconds
-Memory usage baseline: 1333820634
+With chunk manager NaiveDebugWorld took 17.14609 seconds
+Memory usage baseline: 1311879098
 Grace period 10 frames
-Took 1525.124 millis to break 27000 blocks, and another 2132.996 millis to put them back
+Took 2662.659 millis to break 27000 blocks, and another 1757.599 millis to put them back
 
-With chunk manager CullingDebugWorld took 3.98307 seconds
-Memory usage baseline: 101041018
+With chunk manager CullingDebugWorld took 3.971008 seconds
+Memory usage baseline: 78773578
 Grace period 10 frames
-Took 290.6265 millis to break 27000 blocks, and another 325.1495 millis to put them back
+Took 287.9944 millis to break 27000 blocks, and another 330.4138 millis to put them back
 
-Finished after total time of 24.4272
+Finished after total time of 25.97711
+
+
+
+Test PlaceDeleteManyBlocks_R1:
+
+With chunk manager NaiveDebugWorld took 14.86191 seconds
+Memory usage baseline: 1311887042
+Grace period 10 frames
+Took 1677.399 millis to break 27000 blocks, and another 1685.577 millis to put them back
+
+With chunk manager CullingDebugWorld took 3.949432 seconds
+Memory usage baseline: 78786378
+Grace period 10 frames
+Took 287.0789 millis to break 27000 blocks, and another 327.6367 millis to put them back
+
+Finished after total time of 23.42773
+
+
+
+Test PlaceDeleteManyBlocks_R2:
+
+With chunk manager NaiveDebugWorld took 14.65598 seconds
+Memory usage baseline: 1311894994
+Grace period 10 frames
+Took 1742.676 millis to break 27000 blocks, and another 1689.88 millis to put them back
+
+With chunk manager CullingDebugWorld took 4.069519 seconds
+Memory usage baseline: 78788530
+Grace period 10 frames
+Took 334.9304 millis to break 27000 blocks, and another 335.7544 millis to put them back
+
+Finished after total time of 23.49475
+
+
+
+Test PlaceDeleteManyBlocks_R3:
+
+With chunk manager NaiveDebugWorld took 16.09299 seconds
+Memory usage baseline: 1311898570
+Grace period 10 frames
+Took 1899.048 millis to break 27000 blocks, and another 1683.289 millis to put them back
+
+With chunk manager CullingDebugWorld took 3.95401 seconds
+Memory usage baseline: 78793674
+Grace period 10 frames
+Took 290.9546 millis to break 27000 blocks, and another 324.1882 millis to put them back
+
+Finished after total time of 24.65488

@@ -17,8 +17,6 @@ namespace PerformanceTesting
         {
             ResetLog();
 
-            var startTime = Time.unscaledTime;
-
             chunkManager.Initialise();
 
             //Wait until all chunks are complete
@@ -26,8 +24,6 @@ namespace PerformanceTesting
             {
                 yield return null;
             }
-
-            var timeToCompleteWorld = Time.unscaledTime - startTime;
 
             yield return new WaitForSecondsRealtime(1);
 
@@ -39,7 +35,7 @@ namespace PerformanceTesting
             var startpos = player.position;
             var distanceSqr = WalkDistance * WalkDistance;
 
-            startTime = Time.unscaledTime;
+            var startTime = Time.unscaledTime;
 
             //Force the player to walk forward
             TestFacilitator.virtualPlayer.SetAxis("Vertical", 1);
@@ -52,9 +48,9 @@ namespace PerformanceTesting
             }
 
             var timeToCompleteWalk = Time.unscaledTime - startTime;
-            Log($"Took {timeToCompleteWorld} seconds to complete world, and an additional {timeToCompleteWalk} seconds to walk {WalkDistance} meters");
-            Log($"Frame time stats while walking: Min {frameCounter.FrameTimesMillis.Min()}, Max {frameCounter.FrameTimesMillis.Max()}, Mean {frameCounter.FrameTimesMillis.Average()}");
-            Log($"Peak memory usage while walking: {memoryCounter.memoryPerFrame.Max()}");
+            Log($"Took {timeToCompleteWalk} seconds to walk {WalkDistance} meters");
+            Log($"Frame time stats: Min {frameCounter.FrameTimesMillis.Min()}, Max {frameCounter.FrameTimesMillis.Max()}, Mean {frameCounter.FrameTimesMillis.Average()}");
+            Log($"Peak memory usage: {memoryCounter.memoryPerFrame.Max()}");
         }
 
     }

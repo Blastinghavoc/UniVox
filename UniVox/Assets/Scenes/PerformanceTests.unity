@@ -218,6 +218,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: TestFacilitator
       objectReference: {fileID: 0}
+    - target: {fileID: 1891284302693198494, guid: be7499a4df5757f4dab9c9b5c0bc5cd8,
+        type: 3}
+      propertyPath: NumRepeats
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 1891284302693198495, guid: be7499a4df5757f4dab9c9b5c0bc5cd8,
         type: 3}
       propertyPath: m_LocalPosition.x
