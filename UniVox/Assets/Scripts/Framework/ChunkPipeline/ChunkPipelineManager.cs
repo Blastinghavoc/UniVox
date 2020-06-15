@@ -30,6 +30,7 @@ namespace UniVox.Framework.ChunkPipeline
             IChunkMesher<ChunkDataType, VoxelDataType> chunkMesher,
             Func<Vector3Int,IChunkComponent<ChunkDataType,VoxelDataType>> getChunkComponent,
             Action<Vector3Int, int> createNewChunkWithTarget,
+            Func<Vector3Int,float> getPriorityOfChunk,
             int maxDataPerUpdate,int maxMeshPerUpdate,int maxCollisionPerUpdate) 
         {
             this.chunkProvider = chunkProvider;
@@ -39,7 +40,7 @@ namespace UniVox.Framework.ChunkPipeline
 
             int i = 0;
 
-            stages.Add(new RateLimitedPipelineStage("ScheduledForData",i++,maxDataPerUpdate,TargetStageGreaterThanCurrent,NextStageFreeForChunk));
+            stages.Add(new PrioritizedStage("ScheduledForData",i++,maxDataPerUpdate,TargetStageGreaterThanCurrent,NextStageFreeForChunk, getPriorityOfChunk));
             stages.Add(new WaitForJobStage<ChunkDataType>("GeneratingData", i++, TargetStageGreaterThanCurrent, makeDataGenJob,
                 (cId, dat) => getChunkComponent(cId).Data = dat)) ;
             DataStage = i;
@@ -48,20 +49,20 @@ namespace UniVox.Framework.ChunkPipeline
             if (chunkMesher.IsMeshDependentOnNeighbourChunks)
             {
                 DataStage = i;
-                stages.Add(new WaitingPipelineStage("WaitingForNeighbourData",i++, ShouldScheduleForNext,(cId,_)=>NeighboursHaveData(cId)));
+                stages.Add(new WaitingStage("WaitingForNeighbourData",i++, ShouldScheduleForNext,(cId,_)=>NeighboursHaveData(cId)));
             }
             else
             {
                 stages[DataStage].NextStageCondition = ShouldScheduleForNext;
             }
 
-            stages.Add(new RateLimitedPipelineStage("ScheduledForMesh",i++,maxMeshPerUpdate, TargetStageGreaterThanCurrent, NextStageFreeForChunk));
+            stages.Add(new PrioritizedStage("ScheduledForMesh",i++,maxMeshPerUpdate, TargetStageGreaterThanCurrent, NextStageFreeForChunk, getPriorityOfChunk));
             stages.Add(new WaitForJobStage<Mesh>("GeneratingMesh",i++, TargetStageGreaterThanCurrent, makeMeshingJob,
                 (cId,mesh)=>getChunkComponent(cId).SetRenderMesh(mesh)));
             RenderedStage = i;
             stages.Add(new PipelineStage("GotMesh",i++, ShouldScheduleForNext));
 
-            stages.Add(new RateLimitedPipelineStage("ScheduledForCollisionMesh",i++,maxCollisionPerUpdate, TargetStageGreaterThanCurrent, NextStageFreeForChunk));
+            stages.Add(new PrioritizedStage("ScheduledForCollisionMesh",i++,maxCollisionPerUpdate, TargetStageGreaterThanCurrent, NextStageFreeForChunk, getPriorityOfChunk));
             stages.Add(new WaitForJobStage<Mesh>("ApplyingCollisionMesh",i++, TargetStageGreaterThanCurrent, makeCollisionMeshingJob,
                 (cId,mesh)=>getChunkComponent(cId).SetCollisionMesh(mesh)));
             CompleteStage = i;

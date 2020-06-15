@@ -5,7 +5,7 @@ using UniVox.Framework.ChunkPipeline.VirtualJobs;
 
 namespace UniVox.Framework.ChunkPipeline
 {
-    public class WaitForJobStage<T> : WaitingPipelineStage
+    public class WaitForJobStage<T> : WaitingStage
     {
         Dictionary<Vector3Int, AbstractPipelineJob<T>> jobs = new Dictionary<Vector3Int, AbstractPipelineJob<T>>();
 

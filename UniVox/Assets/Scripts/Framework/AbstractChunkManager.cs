@@ -96,6 +96,7 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
             chunkMesher,
             GetChunkComponent,
             SetTargetStageOfChunk,
+            GetPriorityOfChunk,
             MaxGeneratedPerUpdate,
             MaxMeshedPerUpdate,
             MaxMeshedPerUpdate);
@@ -256,6 +257,18 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
 
         //Inside if all elements of the absolute displacement are less than or equal to the chunk radius
         return absDisplacement.All((a, b) => a <= b, Radii);
+    }
+
+    /// <summary>
+    /// Get a priority for a chunk, that is equal to the manhattan distance 
+    /// from the player to the chunk
+    /// </summary>
+    /// <param name="chunkID"></param>
+    /// <returns></returns>
+    private float GetPriorityOfChunk(Vector3Int chunkID) 
+    {
+        var absDisplacement = (playerChunkID - chunkID).ElementWise(Mathf.Abs);
+        return absDisplacement.x + absDisplacement.y + absDisplacement.z;
     }
 
     #region Get/Set voxels

@@ -9,7 +9,7 @@ namespace UniVox.Framework.ChunkPipeline
     /// the waiting option allows the chunk to remain held by the stage until some
     /// condition is met.
     /// </summary>
-    public class WaitingPipelineStage : PipelineStage
+    public class WaitingStage : PipelineStage
     {
         /// <summary>
         /// If the condition is met, the wait has ended. Otherwise the chunk neither continues nor terminates at this stage
@@ -49,11 +49,11 @@ namespace UniVox.Framework.ChunkPipeline
 
         }
 
-        public WaitingPipelineStage(string name, int order) : base(name, order)
+        public WaitingStage(string name, int order) : base(name, order)
         {
         }
 
-        public WaitingPipelineStage(string name, int order, Func<Vector3Int, int, bool> nextStageCondition, Func<Vector3Int, int, bool> waitEndedCondition) : base(name, order, nextStageCondition)
+        public WaitingStage(string name, int order, Func<Vector3Int, int, bool> nextStageCondition, Func<Vector3Int, int, bool> waitEndedCondition) : base(name, order, nextStageCondition)
         {
             WaitEndedCondition = waitEndedCondition;
         }

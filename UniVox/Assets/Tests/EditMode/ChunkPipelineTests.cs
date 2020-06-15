@@ -75,6 +75,7 @@ namespace Tests
 
         MockMesher mockMesher;
         MockProvider mockProvider;
+        Vector3Int mockPlayChunkID;
 
         Dictionary<Vector3Int, MockChunkComponent> mockComponentStorage;
 
@@ -89,6 +90,12 @@ namespace Tests
             mockComponentStorage.Add(id,new MockChunkComponent() { ChunkID = id});
         }
 
+        float MockGetPriorityOfChunk(Vector3Int chunkID)
+        {
+            var absDisplacement = (mockPlayChunkID - chunkID).ElementWise(Mathf.Abs);
+            return absDisplacement.x + absDisplacement.y + absDisplacement.z;
+        }
+
         ChunkPipelineManager<AbstractChunkData,VoxelData> pipeline;
 
 
@@ -99,6 +106,7 @@ namespace Tests
             mockMesher = new MockMesher();
             mockProvider = new MockProvider();
             mockComponentStorage = new Dictionary<Vector3Int, MockChunkComponent>();
+            mockPlayChunkID = Vector3Int.zero;
         }
 
         [Test] 
@@ -109,6 +117,7 @@ namespace Tests
                 mockMesher,
                 mockGetComponent,
                 mockCreateNewChunkWithTarget,
+                MockGetPriorityOfChunk,
                 6,
                 1,
                 1
@@ -136,6 +145,7 @@ namespace Tests
                mockMesher,
                mockGetComponent,
                mockCreateNewChunkWithTarget,
+               MockGetPriorityOfChunk,
                6,
                1,
                1
@@ -169,6 +179,7 @@ namespace Tests
                mockMesher,
                mockGetComponent,
                mockCreateNewChunkWithTarget,
+               MockGetPriorityOfChunk,
                6,
                1,
                1
@@ -215,6 +226,7 @@ namespace Tests
                mockMesher,
                mockGetComponent,
                mockCreateNewChunkWithTarget,
+               MockGetPriorityOfChunk,
                6,
                1,
                1
@@ -257,6 +269,7 @@ namespace Tests
               mockMesher,
               mockGetComponent,
               mockCreateNewChunkWithTarget,
+              MockGetPriorityOfChunk,
               6,
               1,
               1
@@ -296,6 +309,7 @@ namespace Tests
               mockMesher,
               mockGetComponent,
               mockCreateNewChunkWithTarget,
+              MockGetPriorityOfChunk,
               6,
               1,
               1
@@ -331,6 +345,45 @@ namespace Tests
 
         }
 
+        [Test]
+        public void PriorityCorrectOrderTest() 
+        {
+            pipeline = new ChunkPipelineManager<AbstractChunkData, VoxelData>(
+              mockProvider,
+              mockMesher,
+              mockGetComponent,
+              mockCreateNewChunkWithTarget,
+              MockGetPriorityOfChunk,
+              1,
+              1,
+              1
+              );
+
+            var first = new Vector3Int(0, 0, 0);            
+            var second = new Vector3Int(0, 1, 0);            
+            var third = new Vector3Int(10, 0, 0);            
+
+            //Adding chunks in reverse order that I expect them to come out
+            mockCreateNewChunkWithTarget(third, pipeline.CompleteStage);
+            mockCreateNewChunkWithTarget(second, pipeline.CompleteStage);
+            mockCreateNewChunkWithTarget(first, pipeline.CompleteStage);
+
+            pipeline.Update();
+
+            AssertChunkStages(first, pipeline.CompleteStage, pipeline.CompleteStage, pipeline.CompleteStage);
+            AssertChunkStages(second, 0, 0, pipeline.CompleteStage);
+            AssertChunkStages(third, 0, 0, pipeline.CompleteStage);
+
+            pipeline.Update();
+
+            AssertChunkStages(second, pipeline.CompleteStage, pipeline.CompleteStage, pipeline.CompleteStage);
+            AssertChunkStages(third, 0, 0, pipeline.CompleteStage);
+
+            pipeline.Update();
+
+            AssertChunkStages(third, pipeline.CompleteStage, pipeline.CompleteStage, pipeline.CompleteStage);
+        }
+
         // A Test behaves as an ordinary method
         [Test]
         public void ChunkPipelineTestsSimplePasses()
@@ -346,6 +399,20 @@ namespace Tests
             // Use the Assert class to test conditions.
             // Use yield to skip a frame.
             yield return null;
+        }
+
+        /// <summary>
+        /// Asserts that the chunk ID has the correct min max and target stages
+        /// in the pipeline
+        /// </summary>
+        /// <param name="min"></param>
+        /// <param name="max"></param>
+        /// <param name="target"></param>
+        private void AssertChunkStages(Vector3Int id,int min,int max,int target) 
+        {
+            Assert.AreEqual(min, pipeline.GetMinStage(id));
+            Assert.AreEqual(max, pipeline.GetMaxStage(id));
+            Assert.AreEqual(target, pipeline.GetTargetStage(id));
         }
     }
 }

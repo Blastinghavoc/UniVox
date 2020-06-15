@@ -9,17 +9,17 @@ namespace UniVox.Framework.ChunkPipeline
     /// A stage that limits how many can go onto the next stage per update.
     /// Optionally also allows chunks to wait for a particular condition as well.
     /// </summary>
-    public class RateLimitedPipelineStage : WaitingPipelineStage
+    public class RateLimitedStage : WaitingStage
     {
-        private int maxPerUpdate = 1;
+        protected int maxPerUpdate = 1;
 
-        public RateLimitedPipelineStage(string name, int order,int maxPerUpdate) : base(name, order)
+        public RateLimitedStage(string name, int order,int maxPerUpdate) : base(name, order)
         {
             Assert.IsTrue(maxPerUpdate > 0);
             this.maxPerUpdate = maxPerUpdate;
         }
 
-        public RateLimitedPipelineStage(string name, int order, int maxPerUpdate, Func<Vector3Int, int, bool> nextStageCondition, Func<Vector3Int, int, bool> waitEndedCondition) : base(name, order,nextStageCondition,waitEndedCondition)
+        public RateLimitedStage(string name, int order, int maxPerUpdate, Func<Vector3Int, int, bool> nextStageCondition, Func<Vector3Int, int, bool> waitEndedCondition) : base(name, order,nextStageCondition,waitEndedCondition)
         {
             Assert.IsTrue(maxPerUpdate > 0);
             this.maxPerUpdate = maxPerUpdate;
