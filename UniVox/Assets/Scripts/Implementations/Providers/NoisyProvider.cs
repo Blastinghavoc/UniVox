@@ -14,7 +14,7 @@ namespace UniVox.Implementations.Providers
         public int SeaLevel = 0;
         public float Density = 0.5f;
         public float MaxHeight = 32;
-        public Vector2 BiomeScale = new Vector2(10, 10);
+        public float HeightmapScale = 1;
 
         public NoiseSettings noiseSettings;
 
@@ -22,6 +22,8 @@ namespace UniVox.Implementations.Providers
         private ushort dirtID;
         public SOVoxelTypeDefinition grassType;
         private ushort grassID;
+        public SOVoxelTypeDefinition stoneType;
+        private ushort stoneID;
 
         private FastNoise noise;
 
@@ -30,6 +32,7 @@ namespace UniVox.Implementations.Providers
             base.Initialise(voxelTypeManager, chunkManager);
             dirtID = voxelTypeManager.GetId(dirtType);
             grassID = voxelTypeManager.GetId(grassType);
+            stoneID = voxelTypeManager.GetId(stoneType);
 
             noise = new FastNoise(Seed);
             noiseSettings.ApplyTo(noise);
@@ -86,7 +89,7 @@ namespace UniVox.Implementations.Providers
 
         private float CalculateHeightMapAt(int x, int z) 
         {
-            float rawHeightmap = noise.GetSimplexFractal(x, z) * MaxHeight;// * noise.GetSimplex(x*BiomeScale.x,z*BiomeScale.y);
+            float rawHeightmap = noise.GetSimplexFractal(x * HeightmapScale, z * HeightmapScale) * MaxHeight;
 
             //add the raw heightmap to the base ground height
             return SeaLevel + rawHeightmap;
@@ -107,21 +110,8 @@ namespace UniVox.Implementations.Providers
                 return id;
             }
 
-            //3d noise for caves and overhangs and such
-            //float caveNoise = noise.GetPerlinFractal(x * 5f, y * 10f, z * 5f);
+            //3D noise for caves
             float caveNoise = noise.GetPerlinFractal(x * 5f, y * 10f, z * 5f);
-            //float caveMask =1- Mathf.Clamp(Mathf.InverseLerp(-128, 128, y),0,1);
-
-            //stone layer heightmap
-            //float simplexStone1 = noise.GetSimplex(x * 1f, z * 1f) * 10;
-            //float simplexStone2 = (noise.GetSimplex(x * 5f, z * 5f) + .5f) * 20 * (noise.GetSimplex(x * .3f, z * .3f) + .5f);
-
-            //float stoneHeightMap = simplexStone1 + simplexStone2;
-            //float baseStoneHeight = TerrainChunk.chunkHeight * .25f + stoneHeightMap;
-
-
-            //float cliffThing = noise.GetSimplex(x * 1f, z * 1f, y) * 10;
-            //float cliffThingMask = noise.GetSimplex(x * .4f, z * .4f) + .3f;
 
 
             if (caveNoise > Density)
@@ -136,7 +126,14 @@ namespace UniVox.Implementations.Providers
             }
             else
             {
-                id = dirtID;
+                if (y < height -4)
+                {
+                    id = stoneID;
+                }
+                else
+                {
+                    id = dirtID;
+                }
             }
 
             return id;

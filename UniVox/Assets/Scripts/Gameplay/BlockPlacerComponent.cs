@@ -11,6 +11,7 @@ namespace UniVox.Gameplay
         public float MaxPlacementDistance = 10;
         public MouseButton BreakButton = MouseButton.LeftMouse;
         public MouseButton PlaceButton = MouseButton.RightMouse;
+        public MouseButton PickButton = MouseButton.MiddleMouse;
 
         public GameObject IndicatorPrefab;
         public SOVoxelTypeDefinition blockToPlace;
@@ -67,6 +68,17 @@ namespace UniVox.Gameplay
                 if (hitAnything)
                 {
                     WorldInterface.PlaceVoxel(raycastHit.point + 0.1f * raycastHit.normal, blockToPlace);
+                }
+            }
+
+            if (Input.GetMouseButtonDown((int)PickButton))
+            {
+                if (hitAnything)
+                {
+                    if (WorldInterface.TryGetVoxelType(raycastHit.point + -0.1f * raycastHit.normal,out var voxelType))
+                    {
+                        blockToPlace = voxelType;
+                    }
                 }
             }
 

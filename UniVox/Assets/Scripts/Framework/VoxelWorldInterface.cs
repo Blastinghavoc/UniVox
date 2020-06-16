@@ -39,5 +39,16 @@ namespace UniVox.Framework
         {
             return chunkManager.SnapToVoxelCenter(position);
         }
+
+        public bool TryGetVoxelType(Vector3 position,out SOVoxelTypeDefinition voxelType) 
+        {
+            voxelType = null;
+            if (chunkManager.TryGetVoxel(position,out var voxelID))
+            {
+                voxelType = voxelTypeManager.GetDefinition(voxelID);
+                return true;
+            }
+            return false;
+        }
     }
 }

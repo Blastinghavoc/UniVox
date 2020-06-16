@@ -98,6 +98,18 @@ namespace UniVox.Framework
             throw new IndexOutOfRangeException($"No id has been generated for the voxel type {def.DisplayName}");
         }
 
+        public SOVoxelTypeDefinition GetDefinition(ushort id) 
+        {
+            try
+            {
+                return typeData[id].definition;
+            }
+            catch (IndexOutOfRangeException e)
+            {
+                throw new IndexOutOfRangeException($"No voxel type exists for id {id}",e);
+            }
+        }
+
         public void CreateTextureArray(Dictionary<Texture2D, int> SourceTextures, RectInt commonTexSize)
         {
             //REF: Based on https://medium.com/@calebfaith/how-to-use-texture-arrays-in-unity-a830ae04c98b
