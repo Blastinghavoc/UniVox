@@ -139,6 +139,22 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: a8aff50ee8c68ea4192732a3ece092b4,
         type: 2}
+    - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
+      propertyPath: bedrockType
+      value: 
+      objectReference: {fileID: 11400000, guid: 3b5947e841c3a4845b8c9cbf0efbbebc,
+        type: 2}
+    - target: {fileID: 398304577423018871, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: VoxelTypes.Array.size
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 398304577423018871, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: VoxelTypes.Array.data[3]
+      value: 
+      objectReference: {fileID: 11400000, guid: 3b5947e841c3a4845b8c9cbf0efbbebc,
+        type: 2}
     - target: {fileID: 398304577439083000, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -199,5 +215,31 @@ PrefabInstance:
       propertyPath: m_Name
       value: GameSceneObjects
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    - target: {fileID: 5880167504519198129, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: limitWorldHeight
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5880167504519198129, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: verticalChunkLimit
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 5880167504519198129, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: renderedChunksRadii.y
+      value: 16
+      objectReference: {fileID: 0}
+    - target: {fileID: 5880167504519198129, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: MaxGeneratedPerUpdate
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 6215028733184748506, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: MaxPlacementDistance
+      value: 10
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 7098989206605223936, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 579d24a84d9385447b0eb6819a968722, type: 3}

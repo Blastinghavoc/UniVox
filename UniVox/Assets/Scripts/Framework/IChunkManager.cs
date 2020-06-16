@@ -11,6 +11,10 @@ namespace UniVox.Framework
         Vector3Int LocalVoxelIndexOfPosition(Vector3Int position);
         Vector3 SnapToVoxelCenter(Vector3 pos);
 
+        bool IsWorldHeightLimited { get; }
+        int MaxChunkY { get; }
+        int MinChunkY { get;}
+
         void Initialise();
 
         bool TrySetVoxel(Vector3 worldPos, ushort voxelTypeID, bool overrideExisting = false);

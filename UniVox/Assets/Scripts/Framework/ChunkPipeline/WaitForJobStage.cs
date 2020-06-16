@@ -50,8 +50,17 @@ namespace UniVox.Framework.ChunkPipeline
             foreach (var item in incoming)
             {
                 var job = makeJob(item);
-                jobs.Add(item, job);
-                job.Start();
+                //DEBUG
+                try
+                {
+                    jobs.Add(item, job);
+                    job.Start();
+                }
+                catch (ArgumentException e)
+                {
+                    throw new ArgumentException($"Chunk {item} in incoming list already existed in stage {Name}" +
+                        $". The existing job status was {jobs[item].Done}",e);
+                }
             }
         }
 

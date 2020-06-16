@@ -15,6 +15,7 @@ MonoBehaviour:
   MaxPlacementDistance: 10
   BreakButton: 0
   PlaceButton: 1
+  PickButton: 2
   IndicatorPrefab: {fileID: 3839814877241860285, guid: 176d6024de2cf5a49bfccb79f5a83be2,
     type: 3}
   blockToPlace: {fileID: 11400000, guid: a03c76065d9f24749ae1e10da8247535, type: 2}
@@ -27,7 +28,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 100006, guid: c6453f8e1f814744d8b94e5a6d1f9942, type: 3}
       propertyPath: m_Name
-      value: RigidBodyFPSController
+      value: Player
       objectReference: {fileID: 0}
     - target: {fileID: 100006, guid: c6453f8e1f814744d8b94e5a6d1f9942, type: 3}
       propertyPath: m_IsActive
@@ -101,10 +102,14 @@ PrefabInstance:
       propertyPath: mouseLook.MinimumX
       value: -90
       objectReference: {fileID: 0}
+    - target: {fileID: 11400004, guid: c6453f8e1f814744d8b94e5a6d1f9942, type: 3}
+      propertyPath: m_Capsule
+      value: 
+      objectReference: {fileID: 2491222762494834829}
     - target: {fileID: 13600000, guid: c6453f8e1f814744d8b94e5a6d1f9942, type: 3}
       propertyPath: m_Material
       value: 
-      objectReference: {fileID: 13400000, guid: f941472e1a40c714f81c8d0c21efa3dd,
+      objectReference: {fileID: 13400000, guid: 47d73b29784380947accf21df42742f8,
         type: 2}
     - target: {fileID: 13600000, guid: c6453f8e1f814744d8b94e5a6d1f9942, type: 3}
       propertyPath: m_Radius
@@ -115,6 +120,12 @@ PrefabInstance:
 --- !u!1 &2491222762481335083 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 100006, guid: c6453f8e1f814744d8b94e5a6d1f9942,
+    type: 3}
+  m_PrefabInstance: {fileID: 2491222762481302925}
+  m_PrefabAsset: {fileID: 0}
+--- !u!136 &2491222762494834829 stripped
+CapsuleCollider:
+  m_CorrespondingSourceObject: {fileID: 13600000, guid: c6453f8e1f814744d8b94e5a6d1f9942,
     type: 3}
   m_PrefabInstance: {fileID: 2491222762481302925}
   m_PrefabAsset: {fileID: 0}

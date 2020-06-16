@@ -108,6 +108,7 @@ namespace UniVox.Framework.ChunkPipeline
 
         public void AddChunk(Vector3Int chunkId, int targetStage) 
         {
+            Assert.IsFalse(chunkStageMap.ContainsKey(chunkId));
             chunkStageMap.Add(chunkId, new ChunkStageData() { targetStage = targetStage});
             //Add to first stage
             stages[0].Add(chunkId);

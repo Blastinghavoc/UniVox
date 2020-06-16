@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UniVox.Implementations.ChunkData;
 
 namespace UniVox.Framework
 {
@@ -35,7 +36,8 @@ namespace UniVox.Framework
             if (ModifiedChunkData.TryGetValue(chunkID,out var data))
             {
                 return data;
-            }
+            }           
+
             data = GenerateChunkData(chunkID, chunkManager.ChunkDimensions);
             data.FullyGenerated = true;
             return data;

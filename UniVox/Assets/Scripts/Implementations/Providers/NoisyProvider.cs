@@ -25,7 +25,12 @@ namespace UniVox.Implementations.Providers
         public SOVoxelTypeDefinition stoneType;
         private ushort stoneID;
 
+        public SOVoxelTypeDefinition bedrockType;
+        private ushort bedrockID;
+
         private FastNoise noise;
+
+        private int minY = int.MinValue;
 
         public override void Initialise(VoxelTypeManager voxelTypeManager, IChunkManager chunkManager)
         {
@@ -33,14 +38,25 @@ namespace UniVox.Implementations.Providers
             dirtID = voxelTypeManager.GetId(dirtType);
             grassID = voxelTypeManager.GetId(grassType);
             stoneID = voxelTypeManager.GetId(stoneType);
+            bedrockID = voxelTypeManager.GetId(bedrockType);
 
             noise = new FastNoise(Seed);
             noiseSettings.ApplyTo(noise);
+
+            if (chunkManager.IsWorldHeightLimited)
+            {
+                minY = chunkManager.MinChunkY * chunkManager.ChunkDimensions.y;
+            }
 
         }
 
         public override AbstractChunkData GenerateChunkData(Vector3Int chunkID, Vector3Int chunkDimensions)
         {
+            if (chunkID.y < chunkManager.MinChunkY || chunkID.y > chunkManager.MaxChunkY)
+            {
+                return new EmptyChunkData(chunkID, chunkManager.ChunkDimensions);
+            }
+
             var chunkPosition = chunkManager.ChunkToWorldPosition(chunkID).ToInt();
 
             var ChunkData = new ArrayChunkData(chunkID, chunkDimensions);
@@ -110,9 +126,14 @@ namespace UniVox.Implementations.Providers
                 return id;
             }
 
+            if (y == minY )
+            {
+                id = bedrockID;
+                return id;
+            }
+
             //3D noise for caves
             float caveNoise = noise.GetPerlinFractal(x * 5f, y * 10f, z * 5f);
-
 
             if (caveNoise > Density)
             {
@@ -131,10 +152,11 @@ namespace UniVox.Implementations.Providers
                     id = stoneID;
                 }
                 else
-                {
+                {                    
                     id = dirtID;
                 }
             }
+
 
             return id;
         }

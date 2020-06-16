@@ -22,6 +22,19 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
 
     [SerializeField] private int voxelSize = 1;
     protected int VoxelSize { get => voxelSize; }
+
+    [SerializeField] protected Vector3Int collidableChunksRadii;
+    [SerializeField] protected Vector3Int renderedChunksRadii;
+    protected Vector3Int dataChunksRadii;
+
+    //Should the world height be limited (like minecraft)
+    [SerializeField] protected bool limitWorldHeight;
+    //Vertical chunk limit of 8 -> max chunkid Y coordinate is 7, min -8
+    [SerializeField] protected int verticalChunkLimit;
+    public bool IsWorldHeightLimited { get =>limitWorldHeight; }
+    public int MaxChunkY { get { return (limitWorldHeight) ? verticalChunkLimit - 1 : int.MaxValue; } }
+    public int MinChunkY { get { return (limitWorldHeight) ? -verticalChunkLimit : int.MinValue; } }
+
     #endregion
 
     [SerializeField] protected VoxelTypeManager VoxelTypeManager;
@@ -31,9 +44,6 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
 
     [SerializeField] protected Rigidbody Player;
 
-    [SerializeField] protected Vector3Int collidableChunksRadii;
-    [SerializeField] protected Vector3Int renderedChunksRadii;
-    protected Vector3Int dataChunksRadii;
 
     /// <summary>
     /// Controls how many chunks can be generated and meshed per update
@@ -66,7 +76,7 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
             "The rendering radii must be at least as large as the collidable radii");
 
         //Chunks can exist as just data one chunk further away than the rendered chunks
-        dataChunksRadii = renderedChunksRadii + new Vector3Int(1, 1, 1);
+        dataChunksRadii = renderedChunksRadii + new Vector3Int(1, 1, 1);        
 
         //Enforce positioning of ChunkManager at the world origin
         transform.position = Vector3.zero;
@@ -125,8 +135,12 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
         if (!loadedChunks.TryGetValue(playerChunkID, out var chunkComponent) ||
             !pipeline.GetMaxStage(playerChunkID).Equals(pipeline.CompleteStage))
         {
-            //Freeze player if the chunk isn't ready for them (doesn't exist or doesn't have collision mesh)
-            Player.constraints |= RigidbodyConstraints.FreezePosition;
+            if (playerChunkID.y > MinChunkY && playerChunkID.y < MaxChunkY)
+            {
+                //Freeze player if the chunk isn't ready for them (doesn't exist or doesn't have collision mesh)
+                //But only if the chunk is within the world limits
+                Player.constraints |= RigidbodyConstraints.FreezePosition;
+            }
         }
         else 
         {
@@ -214,6 +228,20 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
     /// <param name="targetStage"></param>
     protected void SetTargetStageOfChunk(Vector3Int chunkID,int targetStage)
     {
+        if (chunkID.y > MaxChunkY || chunkID.y < MinChunkY)
+        {
+            if (chunkID.y == MaxChunkY +1 || chunkID.y == MinChunkY -1)
+            {
+                //Chunks 1 chunk outside the vertical range may only be data chunks.
+                targetStage = pipeline.DataStage;
+            }
+            else
+            {
+                //Anything further outside the range is not allowed.
+                return;
+            }
+        }
+
         
         if (!loadedChunks.TryGetValue(chunkID, out var ChunkComponent))
         {
