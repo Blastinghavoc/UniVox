@@ -8,6 +8,7 @@ using UnityEngine;
 using UnityEngine.TestTools;
 using UniVox.Framework;
 using UniVox.Framework.ChunkPipeline;
+using UniVox.Framework.ChunkPipeline.VirtualJobs;
 using UniVox.Implementations.ChunkData;
 using UniVox.Implementations.Common;
 
@@ -15,29 +16,46 @@ namespace Tests
 {
     public class ChunkPipelineTests
     {
-        class MockMesher : IChunkMesher<AbstractChunkData, VoxelData>
+        class MockMesher : IChunkMesher<VoxelData>
         {
             public bool IsMeshDependentOnNeighbourChunks { get; set; } = false;
 
-            public Mesh CreateMesh(AbstractChunkData chunk)
+            Func<Vector3Int, MockChunkComponent> mockGetComponent;
+
+            public MockMesher(Func<Vector3Int,MockChunkComponent> mockGetComponent) 
+            {
+                this.mockGetComponent = mockGetComponent;
+            }
+
+            public Mesh CreateMesh(IChunkData<VoxelData> chunk)
             {
                 return new Mesh();
             }
-        }
 
-        class MockProvider : IChunkProvider<AbstractChunkData, VoxelData>
-        {
-            public AbstractChunkData ProvideChunkData(Vector3Int chunkID)
+            public AbstractPipelineJob<Mesh> CreateMeshJob(Vector3Int chunkID)
             {
-                return new ArrayChunkData(chunkID, new Vector3Int(1, 1, 1));
+                return new BasicFunctionJob<Mesh>(() => CreateMesh(mockGetComponent(chunkID).Data));
             }
         }
 
-        class MockChunkComponent : IChunkComponent<AbstractChunkData, VoxelData>
+        class MockProvider : IChunkProvider<VoxelData>
+        {
+            public IChunkData<VoxelData> ProvideChunkData(Vector3Int chunkID)
+            {
+                return new ArrayChunkData(chunkID, new Vector3Int(1, 1, 1));
+            }
+
+            public AbstractPipelineJob<IChunkData<VoxelData>> ProvideChunkDataJob(Vector3Int chunkID)
+            {
+                return new BasicFunctionJob<IChunkData<VoxelData>>(() => ProvideChunkData(chunkID));
+            }
+        }
+
+        class MockChunkComponent : IChunkComponent<VoxelData>
         {
             public Vector3Int ChunkID { get; set; }
 
-            public AbstractChunkData Data { get; set; }
+            public IChunkData<VoxelData> Data { get; set; }
 
             public Mesh RenderMesh { get; set; }
 
@@ -96,14 +114,14 @@ namespace Tests
             return absDisplacement.x + absDisplacement.y + absDisplacement.z;
         }
 
-        ChunkPipelineManager<AbstractChunkData,VoxelData> pipeline;
+        ChunkPipelineManager<VoxelData> pipeline;
 
 
         [SetUp]
         public void Reset()
         {
             EditorSceneManager.NewScene(NewSceneSetup.EmptyScene);
-            mockMesher = new MockMesher();
+            mockMesher = new MockMesher(mockGetComponent);
             mockProvider = new MockProvider();
             mockComponentStorage = new Dictionary<Vector3Int, MockChunkComponent>();
             mockPlayChunkID = Vector3Int.zero;
@@ -112,7 +130,7 @@ namespace Tests
         [Test] 
         public void CompletePassNoChunkDependencies() 
         {
-            pipeline = new ChunkPipelineManager<AbstractChunkData, VoxelData>(
+            pipeline = new ChunkPipelineManager<VoxelData>(
                 mockProvider,
                 mockMesher,
                 mockGetComponent,
@@ -140,7 +158,7 @@ namespace Tests
         {
             mockMesher.IsMeshDependentOnNeighbourChunks = true;
 
-            pipeline = new ChunkPipelineManager<AbstractChunkData, VoxelData>(
+            pipeline = new ChunkPipelineManager<VoxelData>(
                mockProvider,
                mockMesher,
                mockGetComponent,
@@ -174,7 +192,7 @@ namespace Tests
         [Test]
         public void SetTargetHigherThanCurrentNoWIP() 
         {
-            pipeline = new ChunkPipelineManager<AbstractChunkData, VoxelData>(
+            pipeline = new ChunkPipelineManager<VoxelData>(
                mockProvider,
                mockMesher,
                mockGetComponent,
@@ -221,7 +239,7 @@ namespace Tests
         [Test]
         public void SetTargetHigherThanCurrentWithWIP() 
         {
-            pipeline = new ChunkPipelineManager<AbstractChunkData, VoxelData>(
+            pipeline = new ChunkPipelineManager<VoxelData>(
                mockProvider,
                mockMesher,
                mockGetComponent,
@@ -264,7 +282,7 @@ namespace Tests
         [Test]
         public void SetTargetLowerThanCurrentAndMax() 
         {
-            pipeline = new ChunkPipelineManager<AbstractChunkData, VoxelData>(
+            pipeline = new ChunkPipelineManager<VoxelData>(
               mockProvider,
               mockMesher,
               mockGetComponent,
@@ -304,7 +322,7 @@ namespace Tests
         [Test]
         public void SetTargetLowerThanCurrentGreaterThanMax() 
         {
-            pipeline = new ChunkPipelineManager<AbstractChunkData, VoxelData>(
+            pipeline = new ChunkPipelineManager<VoxelData>(
               mockProvider,
               mockMesher,
               mockGetComponent,
@@ -348,7 +366,7 @@ namespace Tests
         [Test]
         public void PriorityCorrectOrderTest() 
         {
-            pipeline = new ChunkPipelineManager<AbstractChunkData, VoxelData>(
+            pipeline = new ChunkPipelineManager<VoxelData>(
               mockProvider,
               mockMesher,
               mockGetComponent,

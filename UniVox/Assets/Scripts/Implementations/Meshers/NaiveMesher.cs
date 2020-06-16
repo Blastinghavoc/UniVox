@@ -8,7 +8,7 @@ using UniVox.Implementations.Common;
 
 namespace UniVox.Implementations.Meshers
 {
-    public class NaiveMesher : AbstractMesherComponent<AbstractChunkData, VoxelData>
+    public class NaiveMesher : AbstractMesherComponent<VoxelData>
     {
     }
 }

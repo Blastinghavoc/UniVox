@@ -6,7 +6,7 @@ using UniVox.Implementations.Common;
 
 namespace UniVox.Implementations.Providers
 {
-    public class DebugProvider : AbstractProviderComponent<AbstractChunkData, VoxelData>
+    public class DebugProvider : AbstractProviderComponent<VoxelData>
     {
         public SOVoxelTypeDefinition dirtType;
         private ushort dirtID;
@@ -20,7 +20,7 @@ namespace UniVox.Implementations.Providers
             grassID = voxelTypeManager.GetId(grassType);
         }
 
-        public override AbstractChunkData GenerateChunkData(Vector3Int chunkID, Vector3Int chunkDimensions)
+        public override IChunkData<VoxelData> GenerateChunkData(Vector3Int chunkID, Vector3Int chunkDimensions)
         {
             return FlatWorld(chunkID,chunkDimensions);
             //return HalfHeight(chunkID, chunkDimensions);

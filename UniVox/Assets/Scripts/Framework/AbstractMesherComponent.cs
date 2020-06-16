@@ -3,33 +3,33 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 using TypeData = UniVox.Framework.VoxelTypeManager.VoxelTypeData;
+using UniVox.Framework.ChunkPipeline.VirtualJobs;
 
 namespace UniVox.Framework
 {
-    public abstract class AbstractMesherComponent<ChunkDataType, VoxelDataType> : MonoBehaviour, IChunkMesher<ChunkDataType, VoxelDataType>
-        where ChunkDataType : IChunkData<VoxelDataType>
-        where VoxelDataType : IVoxelData
+    public abstract class AbstractMesherComponent<V> : MonoBehaviour, IChunkMesher<V>
+        where V : IVoxelData
     {
 
         public bool IsMeshDependentOnNeighbourChunks { get; protected set; } = false;
 
         protected VoxelTypeManager voxelTypeManager;
-        protected AbstractChunkManager<ChunkDataType,VoxelDataType> chunkManager;
+        protected AbstractChunkManager<V> chunkManager;
 
-        public virtual void Initialise(VoxelTypeManager voxelTypeManager, AbstractChunkManager<ChunkDataType, VoxelDataType> chunkManager)
+        public virtual void Initialise(VoxelTypeManager voxelTypeManager, AbstractChunkManager<V> chunkManager)
         {
             this.voxelTypeManager = voxelTypeManager;
             this.chunkManager = chunkManager;
         }
 
-        public Mesh CreateMesh(ChunkDataType chunk)
+        public Mesh CreateMesh(IChunkData<V> chunk)
         {
             List<Vector3> vertices = new List<Vector3>();
             List<Vector3> uvs = new List<Vector3>();
             List<Vector3> normals = new List<Vector3>();
             List<int> indices = new List<int>();
 
-            List< ReadOnlyChunkData < VoxelDataType >> neighbourData = new List<ReadOnlyChunkData<VoxelDataType>>();
+            List< ReadOnlyChunkData < V >> neighbourData = new List<ReadOnlyChunkData<V>>();
             //Cache neighbour data if necessary
             if (IsMeshDependentOnNeighbourChunks)
             {
@@ -82,7 +82,7 @@ namespace UniVox.Framework
 
         }
 
-        protected virtual void AddMeshDataForVoxel(ChunkDataType chunk, TypeData voxelTypeData, Vector3Int position, List<Vector3> vertices, List<Vector3> uvs, List<Vector3> normals, List<int> indices, ref int currentIndex, List<ReadOnlyChunkData<VoxelDataType>> neighbourData)
+        protected virtual void AddMeshDataForVoxel(IChunkData<V> chunk, TypeData voxelTypeData, Vector3Int position, List<Vector3> vertices, List<Vector3> uvs, List<Vector3> normals, List<int> indices, ref int currentIndex, List<ReadOnlyChunkData<V>> neighbourData)
         {
             var meshDefinition = voxelTypeData.definition.meshDefinition;
             ref var faceZs = ref voxelTypeData.zIndicesPerFace;
@@ -97,7 +97,7 @@ namespace UniVox.Framework
             }
         }
 
-        protected virtual bool IncludeFace(ChunkDataType chunk, Vector3Int position, int direction, List<ReadOnlyChunkData<VoxelDataType>> neighbourData)
+        protected virtual bool IncludeFace(IChunkData<V> chunk, Vector3Int position, int direction, List<ReadOnlyChunkData<V>> neighbourData)
         {
             return true;
         }
@@ -129,6 +129,11 @@ namespace UniVox.Framework
 
             //Update indexing
             currentIndex += face.UsedVertices.Length;
+        }
+
+        public AbstractPipelineJob<Mesh> CreateMeshJob(Vector3Int chunkID)
+        {
+            return new BasicFunctionJob<Mesh>(() => CreateMesh(chunkManager.GetReadOnlyChunkData(chunkID)));
         }
     }
 }

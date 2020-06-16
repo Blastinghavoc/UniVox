@@ -6,16 +6,16 @@ using UniVox.Implementations.Common;
 
 namespace UniVox.Implementations.Meshers
 {
-    public class CullingMesher : AbstractMesherComponent<AbstractChunkData, VoxelData>
+    public class CullingMesher : AbstractMesherComponent<VoxelData>
     {
-        public override void Initialise(VoxelTypeManager voxelTypeManager, AbstractChunkManager<AbstractChunkData,VoxelData> chunkManager) 
+        public override void Initialise(VoxelTypeManager voxelTypeManager, AbstractChunkManager<VoxelData> chunkManager) 
         {
             base.Initialise(voxelTypeManager, chunkManager);
             //Culling mesher depends on neighbouring chunks for meshing
             IsMeshDependentOnNeighbourChunks = true;
         }
 
-        protected override bool IncludeFace(AbstractChunkData chunk, Vector3Int position, int direction, List<ReadOnlyChunkData<VoxelData>> neighbourData)
+        protected override bool IncludeFace(IChunkData<VoxelData> chunk, Vector3Int position, int direction, List<ReadOnlyChunkData<VoxelData>> neighbourData)
         {
             var adjacentVoxelIndex = position + Directions.IntVectors[direction];            
 

@@ -1,11 +1,14 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UniVox.Framework.ChunkPipeline.VirtualJobs;
 
 namespace UniVox.Framework
 {
-    public interface IChunkMesher<ChunkDataType, V> where ChunkDataType : IChunkData<V> where V : IVoxelData
+    public interface IChunkMesher<V> where V : IVoxelData
     {
         bool IsMeshDependentOnNeighbourChunks { get; }
-        Mesh CreateMesh(ChunkDataType chunk);
+        Mesh CreateMesh(IChunkData<V> chunk);
+
+        AbstractPipelineJob<Mesh> CreateMeshJob(Vector3Int chunkID);
     }
 }

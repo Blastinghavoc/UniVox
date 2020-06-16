@@ -10,8 +10,7 @@ using UniVox.Framework.ChunkPipeline;
 using Utils.FSM;
 using Utils.Pooling;
 
-public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoBehaviour, IChunkManager, ITestableChunkManager 
-    where ChunkDataType : IChunkData<VoxelDataType>
+public abstract class AbstractChunkManager<VoxelDataType> : MonoBehaviour, IChunkManager, ITestableChunkManager    
     where VoxelDataType : IVoxelData
 {
     #region Shown in inspector
@@ -59,16 +58,16 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
     #endregion
 
 
-    protected AbstractProviderComponent<ChunkDataType, VoxelDataType> chunkProvider { get; set; }
-    protected AbstractMesherComponent<ChunkDataType, VoxelDataType> chunkMesher { get; set; }
+    protected AbstractProviderComponent<VoxelDataType> chunkProvider { get; set; }
+    protected AbstractMesherComponent<VoxelDataType> chunkMesher { get; set; }
 
-    protected Dictionary<Vector3Int, AbstractChunkComponent<ChunkDataType, VoxelDataType>> loadedChunks;
+    protected Dictionary<Vector3Int, AbstractChunkComponent<VoxelDataType>> loadedChunks;
 
     //Current chunkID occupied by the Player
     protected Vector3Int playerChunkID;
     protected Vector3Int prevPlayerChunkID;
 
-    private ChunkPipelineManager<ChunkDataType, VoxelDataType> pipeline;
+    private ChunkPipelineManager<VoxelDataType> pipeline;
 
     public virtual void Initialise() 
     {
@@ -82,7 +81,7 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
         transform.position = Vector3.zero;
         transform.rotation = Quaternion.Euler(0, 0, 0);
 
-        loadedChunks = new Dictionary<Vector3Int, AbstractChunkComponent<ChunkDataType, VoxelDataType>>();
+        loadedChunks = new Dictionary<Vector3Int, AbstractChunkComponent<VoxelDataType>>();
 
         chunkPool = new PrefabPool() { prefab = chunkPrefab};
 
@@ -93,15 +92,15 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
         var worldInterface = FindObjectOfType<VoxelWorldInterface>();
         worldInterface.Intialise(this, VoxelTypeManager);
 
-        chunkProvider = GetComponent<AbstractProviderComponent<ChunkDataType, VoxelDataType>>();
-        chunkMesher = GetComponent<AbstractMesherComponent<ChunkDataType, VoxelDataType>>();
+        chunkProvider = GetComponent<AbstractProviderComponent<VoxelDataType>>();
+        chunkMesher = GetComponent<AbstractMesherComponent<VoxelDataType>>();
         Assert.IsNotNull(chunkProvider, "Chunk Manager must have a chunk provider component");
         Assert.IsNotNull(chunkMesher, "Chunk Manager must have a chunk mesher component");
 
         chunkProvider.Initialise(VoxelTypeManager, this);
         chunkMesher.Initialise(VoxelTypeManager, this);
 
-        pipeline = new ChunkPipelineManager<ChunkDataType, VoxelDataType>(
+        pipeline = new ChunkPipelineManager<VoxelDataType>(
             chunkProvider,
             chunkMesher,
             GetChunkComponent,
@@ -187,7 +186,7 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
         }
     }
 
-    private AbstractChunkComponent<ChunkDataType,VoxelDataType> GetChunkComponent(Vector3Int chunkID) 
+    private AbstractChunkComponent<VoxelDataType> GetChunkComponent(Vector3Int chunkID) 
     {
         if (loadedChunks.TryGetValue(chunkID, out var chunkComponent))
         {
@@ -247,7 +246,7 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
         {
             //Get a new Chunk GameObject to house the generated Chunk data.
             var ChunkObject = chunkPool.Next(transform);
-            ChunkComponent = ChunkObject.GetComponent<AbstractChunkComponent<ChunkDataType, VoxelDataType>>();
+            ChunkComponent = ChunkObject.GetComponent<AbstractChunkComponent<VoxelDataType>>();
             ChunkComponent.Initialise(chunkID, ChunkToWorldPosition(chunkID));
             //Add to set of loaded chunks
             loadedChunks[chunkID] = ChunkComponent;
@@ -308,7 +307,7 @@ public abstract class AbstractChunkManager<ChunkDataType, VoxelDataType> : MonoB
     /// <param name="newTypeID"></param>
     /// <param name="chunkComponent"></param>
     /// <param name="localVoxelIndex"></param>
-    protected void OnVoxelSet(ushort previousTypeID,ushort newTypeID, AbstractChunkComponent<ChunkDataType, VoxelDataType> chunkComponent, Vector3Int localVoxelIndex) 
+    protected void OnVoxelSet(ushort previousTypeID,ushort newTypeID, AbstractChunkComponent<VoxelDataType> chunkComponent, Vector3Int localVoxelIndex) 
     {
         if (previousTypeID == newTypeID)
         {

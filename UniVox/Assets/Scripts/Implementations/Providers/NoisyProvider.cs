@@ -8,7 +8,7 @@ using System;
 
 namespace UniVox.Implementations.Providers
 {
-    public class NoisyProvider : AbstractProviderComponent<AbstractChunkData, VoxelData>
+    public class NoisyProvider : AbstractProviderComponent<VoxelData>
     {
         public int Seed = 1337;
         public int SeaLevel = 0;
@@ -50,7 +50,7 @@ namespace UniVox.Implementations.Providers
 
         }
 
-        public override AbstractChunkData GenerateChunkData(Vector3Int chunkID, Vector3Int chunkDimensions)
+        public override IChunkData<VoxelData> GenerateChunkData(Vector3Int chunkID, Vector3Int chunkDimensions)
         {
             if (chunkID.y < chunkManager.MinChunkY || chunkID.y > chunkManager.MaxChunkY)
             {

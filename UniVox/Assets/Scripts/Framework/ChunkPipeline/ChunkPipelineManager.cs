@@ -7,17 +7,16 @@ using UnityEngine.Assertions;
 
 namespace UniVox.Framework.ChunkPipeline
 {
-    public class ChunkPipelineManager<ChunkDataType, VoxelDataType> 
-        where ChunkDataType : IChunkData<VoxelDataType>
-        where VoxelDataType : IVoxelData
+    public class ChunkPipelineManager<V>        
+        where V : IVoxelData
     {
         private List<PipelineStage> stages = new List<PipelineStage>();
-        private IChunkProvider<ChunkDataType, VoxelDataType> chunkProvider;
-        private IChunkMesher<ChunkDataType, VoxelDataType> chunkMesher;
+        private IChunkProvider<V> chunkProvider;
+        private IChunkMesher<V> chunkMesher;
 
         private Dictionary<Vector3Int, ChunkStageData> chunkStageMap = new Dictionary<Vector3Int, ChunkStageData>();
 
-        private Func<Vector3Int, IChunkComponent<ChunkDataType, VoxelDataType>> getChunkComponent;
+        private Func<Vector3Int, IChunkComponent<V>> getChunkComponent;
 
         private Action<Vector3Int, int> createNewChunkWithTarget;
 
@@ -26,9 +25,9 @@ namespace UniVox.Framework.ChunkPipeline
         public int RenderedStage { get; private set; }
         public int CompleteStage { get; private set; }
 
-        public ChunkPipelineManager(IChunkProvider<ChunkDataType, VoxelDataType> chunkProvider,
-            IChunkMesher<ChunkDataType, VoxelDataType> chunkMesher,
-            Func<Vector3Int,IChunkComponent<ChunkDataType,VoxelDataType>> getChunkComponent,
+        public ChunkPipelineManager(IChunkProvider<V> chunkProvider,
+            IChunkMesher<V> chunkMesher,
+            Func<Vector3Int,IChunkComponent<V>> getChunkComponent,
             Action<Vector3Int, int> createNewChunkWithTarget,
             Func<Vector3Int,float> getPriorityOfChunk,
             int maxDataPerUpdate,int maxMeshPerUpdate,int maxCollisionPerUpdate) 
@@ -41,7 +40,7 @@ namespace UniVox.Framework.ChunkPipeline
             int i = 0;
 
             stages.Add(new PrioritizedStage("ScheduledForData",i++,maxDataPerUpdate,TargetStageGreaterThanCurrent,NextStageFreeForChunk, getPriorityOfChunk));
-            stages.Add(new WaitForJobStage<ChunkDataType>("GeneratingData", i++, TargetStageGreaterThanCurrent, makeDataGenJob,
+            stages.Add(new WaitForJobStage<IChunkData<V>>("GeneratingData", i++, TargetStageGreaterThanCurrent, chunkProvider.ProvideChunkDataJob,
                 (cId, dat) => getChunkComponent(cId).Data = dat)) ;
             DataStage = i;
             stages.Add(new PipelineStage("GotData",i++));
@@ -57,7 +56,7 @@ namespace UniVox.Framework.ChunkPipeline
             }
 
             stages.Add(new PrioritizedStage("ScheduledForMesh",i++,maxMeshPerUpdate, TargetStageGreaterThanCurrent, NextStageFreeForChunk, getPriorityOfChunk));
-            stages.Add(new WaitForJobStage<Mesh>("GeneratingMesh",i++, TargetStageGreaterThanCurrent, makeMeshingJob,
+            stages.Add(new WaitForJobStage<Mesh>("GeneratingMesh",i++, TargetStageGreaterThanCurrent, chunkMesher.CreateMeshJob,
                 (cId,mesh)=>getChunkComponent(cId).SetRenderMesh(mesh)));
             RenderedStage = i;
             stages.Add(new PipelineStage("GotMesh",i++, ShouldScheduleForNext));
@@ -262,21 +261,11 @@ namespace UniVox.Framework.ChunkPipeline
         private bool ChunkDataReadable(ChunkStageData stageData) 
         {
             return stageData.minStage >= DataStage;
-        }
-
-        private AbstractPipelineJob<ChunkDataType> makeDataGenJob(Vector3Int chunkID) 
-        {
-            return new BasicDataGenerationJob<ChunkDataType, VoxelDataType>(chunkProvider, chunkID);
-        }
-
-        private AbstractPipelineJob<Mesh> makeMeshingJob(Vector3Int chunkID) 
-        {
-            return new BasicMeshGenerationJob<ChunkDataType, VoxelDataType>(chunkMesher, getChunkComponent(chunkID).Data);
-        }
+        }        
 
         private AbstractPipelineJob<Mesh> makeCollisionMeshingJob(Vector3Int chunkID) 
         {
-            return new BasicCollisionMeshingJob<ChunkDataType, VoxelDataType>(getChunkComponent(chunkID));
+            return new BasicFunctionJob<Mesh>(() => getChunkComponent(chunkID).GetRenderMesh());
         }
 
         /// <summary>

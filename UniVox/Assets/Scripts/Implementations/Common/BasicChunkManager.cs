@@ -4,7 +4,7 @@ using UniVox.Implementations.ChunkData;
 
 namespace UniVox.Implementations.Common
 {
-    public class BasicChunkManager : AbstractChunkManager<AbstractChunkData, VoxelData>
+    public class BasicChunkManager : AbstractChunkManager<VoxelData>
     {
         public override void Initialise()
         {
