@@ -50,5 +50,10 @@ namespace UniVox.Framework
             }
             return false;
         }
+
+        public Vector3Int WorldToChunkPosition(Vector3 pos) 
+        {
+            return chunkManager.WorldToChunkPosition(pos);
+        }
     }
 }
