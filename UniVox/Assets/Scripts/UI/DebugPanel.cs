@@ -45,7 +45,8 @@ namespace UniVox.UI
 
             List<DebugItem> items = new List<DebugItem>() {
                 new DebugItem("Coords"),
-                new DebugItem("ChunkID")
+                new DebugItem("ChunkID"),
+                new DebugItem("Pipeline Status")
             };
 
             foreach (var item in items)
@@ -72,6 +73,7 @@ namespace UniVox.UI
             {
                 debugItems["Coords"].Update(player.position.ToString());
                 debugItems["ChunkID"].Update(world.WorldToChunkPosition(player.position).ToString());
+                debugItems["Pipeline Status"].Update(world.GetPipelineStatus());
             }
 
         }
@@ -84,5 +86,10 @@ namespace UniVox.UI
                 item.display.gameObject.SetActive(show);
             }
         }
+    }
+
+    public interface IDebugWorld 
+    {
+        string GetPipelineStatus();
     }
 }

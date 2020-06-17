@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UniVox.Implementations.ChunkData;
 using UniVox.Framework.ChunkPipeline.VirtualJobs;
+using System;
 
 namespace UniVox.Framework
 {
@@ -48,6 +49,11 @@ namespace UniVox.Framework
         public virtual AbstractPipelineJob<IChunkData<V>> ProvideChunkDataJob(Vector3Int chunkID) 
         {
             return new BasicFunctionJob<IChunkData<V>>(()=>ProvideChunkData(chunkID));
+        }
+
+        public virtual AbstractPipelineJob<IChunkData<V>> GenerateChunkDataJob(Vector3Int chunkID, Vector3Int chunkDimensions) 
+        {
+            throw new NotImplementedException();
         }
     }
 }

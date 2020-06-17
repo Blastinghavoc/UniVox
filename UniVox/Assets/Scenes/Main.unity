@@ -236,6 +236,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   textPrefab: {fileID: 2632865896696172478, guid: d89c09d703981604cadd12680cc0f0db,
     type: 3}
+  fontSize: 25
 --- !u!224 &695009565 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 398304577012212022, guid: 579d24a84d9385447b0eb6819a968722,
@@ -265,6 +266,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: 3b5947e841c3a4845b8c9cbf0efbbebc,
         type: 2}
+    - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
+      propertyPath: HeightmapScale
+      value: 0.01
+      objectReference: {fileID: 0}
     - target: {fileID: 398304577423018871, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
       propertyPath: VoxelTypes.Array.size

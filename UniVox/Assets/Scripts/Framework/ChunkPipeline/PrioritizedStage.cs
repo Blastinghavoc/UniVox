@@ -11,6 +11,8 @@ namespace UniVox.Framework.ChunkPipeline
 
         protected Func<Vector3Int, float> getPriority = (_) => 0;
 
+        public Func<int> UpdateMax = null;
+
         public PrioritizedStage(string name, int order, int maxPerUpdate, 
             Func<Vector3Int, int, bool> nextStageCondition, 
             Func<Vector3Int, int, bool> waitEndedCondition,
@@ -22,13 +24,19 @@ namespace UniVox.Framework.ChunkPipeline
 
         public override void Update(out List<Vector3Int> movingOn, out List<Vector3Int> terminating)
         {
+            if (UpdateMax != null)
+            {
+                //Potentially update the maximum every update.
+                MaxPerUpdate = UpdateMax();
+            }
+
             movingOn = new List<Vector3Int>();
             terminating = new List<Vector3Int>();
 
             int movedOn = 0;
 
             List<Vector3Int> waiting = new List<Vector3Int>();
-            while (movedOn < maxPerUpdate && queue.Count > 0)
+            while (movedOn < MaxPerUpdate && queue.Count > 0)
             {
                 var item = queue.Dequeue();
 
@@ -57,7 +65,7 @@ namespace UniVox.Framework.ChunkPipeline
 
             }
 
-            //Put all waiting items back in the queue
+            //Put all waiting items back in the queue (side effect of updating their priority)
             foreach (var item in waiting)
             {
                 queue.Enqueue(item, getPriority(item));
@@ -66,8 +74,13 @@ namespace UniVox.Framework.ChunkPipeline
             //Must still remove any chunks that should terminate
             List<Vector3Int> tmpTerminating = new List<Vector3Int>();
             chunkIdsInStage.RemoveWhere((id) => {
-                tmpTerminating.Add(id);
-                return !NextStageCondition(id, Order);
+                if (!NextStageCondition(id, Order))
+                {
+                    tmpTerminating.Add(id);
+                    return true;
+
+                }
+                return false;
             });
 
             terminating.AddRange(tmpTerminating);

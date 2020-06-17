@@ -149,6 +149,14 @@ public abstract class AbstractChunkManager<VoxelDataType> : MonoBehaviour, IChun
     }
 
     /// <summary>
+    /// Dispose of anything that needs to be disposed of
+    /// </summary>
+    private void OnDestroy()
+    {
+        pipeline.Dispose();
+    }
+
+    /// <summary>
     /// Load chunks around the player, unload those that are too far.
     /// </summary>
     protected void UpdatePlayerArea()
@@ -516,7 +524,7 @@ public abstract class AbstractChunkManager<VoxelDataType> : MonoBehaviour, IChun
     }
     #endregion
 
-    #region Test facilitating methods
+    #region Test and debug facilitating methods
 
 
     public bool AllChunksInTargetState()
@@ -544,6 +552,11 @@ public abstract class AbstractChunkManager<VoxelDataType> : MonoBehaviour, IChun
     public Rigidbody GetPlayer() 
     {
         return Player;
+    }
+
+    public string GetPipelineStatus() 
+    {
+        return pipeline.GetPipelineStatus();
     }
 
     #endregion

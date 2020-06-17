@@ -8,6 +8,8 @@ using System;
 using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Collections;
+using UniVox.Framework.ChunkPipeline.VirtualJobs;
+using Unity.Burst;
 
 namespace UniVox.Implementations.Providers
 {
@@ -31,7 +33,7 @@ namespace UniVox.Implementations.Providers
         public SOVoxelTypeDefinition bedrockType;
         private ushort bedrockID;
 
-        private FastNoise noise;
+        private FastNoise fastNoise;
 
         private int minY = int.MinValue;
 
@@ -43,14 +45,79 @@ namespace UniVox.Implementations.Providers
             stoneID = voxelTypeManager.GetId(stoneType);
             bedrockID = voxelTypeManager.GetId(bedrockType);
 
-            noise = new FastNoise(Seed);
-            noiseSettings.ApplyTo(noise);
+            fastNoise = new FastNoise(Seed);
+            noiseSettings.ApplyTo(fastNoise);
 
             if (chunkManager.IsWorldHeightLimited)
             {
                 minY = chunkManager.MinChunkY * chunkManager.ChunkDimensions.y;
             }
 
+        }
+
+        public override AbstractPipelineJob<IChunkData<VoxelData>> ProvideChunkDataJob(Vector3Int chunkID)
+        {
+            if (ModifiedChunkData.TryGetValue(chunkID, out var data))
+            {
+                return new BasicFunctionJob<IChunkData<VoxelData>>(() => data);
+            }
+
+            var chunkDimensions = chunkManager.ChunkDimensions;
+
+            DataGenerationJob job = new DataGenerationJob();
+            job.chunkPosition = chunkManager.ChunkToWorldPosition(chunkID);
+            job.ids = new BlockIDs()
+            {
+                dirt = dirtID,
+                grass = grassID,
+                stone = stoneID,
+                bedrock = bedrockID
+            };
+            job.noiseSettings = new JobNoiseSettings()
+            {
+                Lacunarity = noiseSettings.Lacunarity,
+                Persistence = noiseSettings.Persistence,
+                Octaves = noiseSettings.Octaves
+            };
+            job.worldSettings = new WorldSettings()
+            {
+                CaveDensity = Density,
+                SeaLevel = SeaLevel,
+                HeightmapScale = HeightmapScale,
+                ChunkDimensions = new int3(chunkDimensions.x, chunkDimensions.y, chunkDimensions.z),
+                MaxHeightmapHeight = MaxHeight,
+                MinY = minY
+            };
+
+            var arrayLength = chunkDimensions.x * chunkDimensions.y * chunkDimensions.z;
+
+            NativeArray<VoxelData> voxelData = new NativeArray<VoxelData>(arrayLength, Allocator.Persistent);
+            job.chunkData = voxelData;
+
+            Func<IChunkData<VoxelData>> cleanup = () =>
+            {
+                var ChunkData = new ArrayChunkData(chunkID, chunkDimensions);
+
+                int i = 0;
+                for (int z = 0; z < chunkDimensions.z; z++)
+                {
+                    for (int y = 0; y < chunkDimensions.y; y++)
+                    {
+                        for (int x = 0; x < chunkDimensions.x; x++)
+                        {
+                            ChunkData[x, y, z] = voxelData[i];
+                            i++;
+                        }
+                    }
+                }
+
+                ChunkData.FullyGenerated = true;
+                //Dispose of native array
+                voxelData.Dispose();
+                return ChunkData;
+            };
+
+            return new PipelineUnityJob<IChunkData<VoxelData>, DataGenerationJob>(job, cleanup);
         }
 
         public override IChunkData<VoxelData> GenerateChunkData(Vector3Int chunkID, Vector3Int chunkDimensions)
@@ -66,13 +133,13 @@ namespace UniVox.Implementations.Providers
 
             float[,] heightMap = new float[chunkDimensions.x, chunkDimensions.z];
 
-            for (int x = 0; x < chunkDimensions.x; x++)
+            for (int z = 0; z < chunkDimensions.z; z++)
             {
-                for (int z = 0; z < chunkDimensions.z; z++)
+                for (int x = 0; x < chunkDimensions.x; x++)
                 {
                     heightMap[x, z] = CalculateHeightMapAt(x+chunkPosition.x, z+chunkPosition.z);
                 }
-            }
+            }            
 
             for (int z = 0; z < chunkDimensions.z; z++)
             {                
@@ -108,7 +175,7 @@ namespace UniVox.Implementations.Providers
 
         private float CalculateHeightMapAt(int x, int z) 
         {
-            float rawHeightmap = noise.GetSimplexFractal(x * HeightmapScale, z * HeightmapScale) * MaxHeight;
+            float rawHeightmap = fastNoise.GetSimplexFractal(x * HeightmapScale, z * HeightmapScale) * MaxHeight;
 
             //add the raw heightmap to the base ground height
             return SeaLevel + rawHeightmap;
@@ -136,7 +203,7 @@ namespace UniVox.Implementations.Providers
             }
 
             //3D noise for caves
-            float caveNoise = noise.GetPerlinFractal(x * 5f, y * 10f, z * 5f);
+            float caveNoise = fastNoise.GetPerlinFractal(x * 5f, y * 10f, z * 5f);
 
             if (caveNoise > Density)
             {
@@ -193,6 +260,7 @@ namespace UniVox.Implementations.Providers
         public int3 ChunkDimensions;
     }
 
+    [BurstCompile]
     public struct DataGenerationJob : IJob
     {
         public WorldSettings worldSettings;
@@ -200,36 +268,51 @@ namespace UniVox.Implementations.Providers
         public BlockIDs ids;
         public float3 chunkPosition;
 
-        public NativeArray<ushort> voxelIds;
+        public NativeArray<VoxelData> chunkData;
+
+        //Used for noise normalization
+        private float MaxNoiseAmplitude;
 
         public void Execute()
         {
+            PrecalculateMaxNoiseAmplitude();
+
 
             int3 dimensions = worldSettings.ChunkDimensions;
 
-            float[,] heightMap = new float[dimensions.x, dimensions.z];
+            //float[,] heightMap = new float[dimensions.x, dimensions.z];
+            NativeArray<float> heightMap = new NativeArray<float>(dimensions.x*dimensions.y,Allocator.Temp);
 
-            for (int x = 0; x < dimensions.x; x++)
+            int i = 0;
+            for (int z = 0; z < dimensions.z; z++)
             {
-                for (int z = 0; z < dimensions.z; z++)
+                for (int x = 0; x < dimensions.x; x++)
                 {
-                    heightMap[x, z] = CalculateHeightMapAt(new float2(x + chunkPosition.x, z + chunkPosition.z));
+                    heightMap[i] = CalculateHeightMapAt(new float2(x + chunkPosition.x, z + chunkPosition.z));
+                    i++;
                 }
             }
+            var heightMapDimensions = new int2(dimensions.x, dimensions.z);
 
+            i = 0;
             for (int z = 0; z < dimensions.z; z++)
             {
                 for (int y = 0; y < dimensions.y; y++)
                 {
                     for (int x = 0; x < dimensions.x; x++)
                     {
-                        voxelIds[Utils.Helper.MultiIndexToFlat(x, y, z, dimensions)] = CalculateVoxelIDAt(new float3(x, y, z) + chunkPosition, heightMap[x, z]);
+                        var pos = chunkPosition + new float3(x, y, z);
+
+                        var id = CalculateVoxelIDAt(pos, heightMap[Utils.Helper.MultiIndexToFlat(x,z, heightMapDimensions)]);
+
+                        chunkData[i] = new VoxelData(id);
+                        i++;
                     }
                 }
             }
         }
 
-        private float CalculateHeightMapAt(float2 pos)
+        public float CalculateHeightMapAt(float2 pos)
         {            
             
             float rawHeightmap = FractalNoise(pos * worldSettings.HeightmapScale) * worldSettings.MaxHeightmapHeight;
@@ -238,7 +321,7 @@ namespace UniVox.Implementations.Providers
             return worldSettings.SeaLevel + rawHeightmap;
         }
 
-        private ushort CalculateVoxelIDAt(float3 pos, float height)
+        public ushort CalculateVoxelIDAt(float3 pos, float height)
         {            
             ushort id = VoxelTypeManager.AIR_ID;
 
@@ -254,7 +337,7 @@ namespace UniVox.Implementations.Providers
             }
 
             //3D noise for caves
-            float caveNoise = FractalNoise(pos*5);
+            float caveNoise = FractalNoise(pos * 5);
 
             if (caveNoise > worldSettings.CaveDensity)
             {
@@ -281,21 +364,31 @@ namespace UniVox.Implementations.Providers
             return id;
         }
 
+        private void PrecalculateMaxNoiseAmplitude() 
+        {
+            //Precalcuate max noise amplitude, to avoid having to do so for each noise calculation
+            float amplitude = 1;
+            MaxNoiseAmplitude = 0;
+            for (int n = 0; n < noiseSettings.Octaves; n++)
+            {
+                MaxNoiseAmplitude += amplitude;
+                amplitude *= noiseSettings.Persistence;
+            }
+        }
+
         private float FractalNoise(float3 pos) 
         {
             float total = 0;
             float frequency = 1;
             float amplitude = 1;
-            float totalAmplitude = 0;  // Used for normalization
             for (int i = 0; i < noiseSettings.Octaves; i++)
             {
                 total += noise.snoise(pos*frequency) * amplitude;
-                totalAmplitude += amplitude;
                 amplitude *= noiseSettings.Persistence;
                 frequency *= noiseSettings.Lacunarity;
             }
             //Return normalised
-            return total / totalAmplitude;
+            return total / MaxNoiseAmplitude;
         }
 
         private float FractalNoise(float2 pos)
@@ -303,16 +396,14 @@ namespace UniVox.Implementations.Providers
             float total = 0;
             float frequency = 1;
             float amplitude = 1;
-            float totalAmplitude = 0;  // Used for normalization
             for (int i = 0; i < noiseSettings.Octaves; i++)
             {
                 total += noise.snoise(pos * frequency) * amplitude;
-                totalAmplitude += amplitude;
                 amplitude *= noiseSettings.Persistence;
                 frequency *= noiseSettings.Lacunarity;
             }
             //Return normalised
-            return total / totalAmplitude;
+            return total / MaxNoiseAmplitude;
         }
     }
 }

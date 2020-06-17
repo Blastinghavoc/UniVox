@@ -9,5 +9,7 @@ namespace PerformanceTesting
         bool AllChunksInTargetState();
 
         Rigidbody GetPlayer();
+
+        string GetPipelineStatus();
     }
 }

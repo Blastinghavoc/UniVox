@@ -2,6 +2,8 @@
 using System.Collections;
 using System;
 using UnityEngine.UIElements;
+using PerformanceTesting;
+using UniVox.UI;
 
 namespace UniVox.Framework
 {
@@ -9,12 +11,12 @@ namespace UniVox.Framework
     /// <summary>
     /// Global interface to the voxel world to be accessed by gameplay scripts
     /// </summary>
-    public class VoxelWorldInterface : MonoBehaviour
+    public class VoxelWorldInterface : MonoBehaviour,IDebugWorld
     {
-        protected IChunkManager chunkManager;
+        protected ITestableChunkManager chunkManager;
         protected VoxelTypeManager voxelTypeManager;
 
-        public void Intialise(IChunkManager manager, VoxelTypeManager voxelTypeManager)
+        public void Intialise(ITestableChunkManager manager, VoxelTypeManager voxelTypeManager)
         {
             chunkManager = manager;
             this.voxelTypeManager = voxelTypeManager;
@@ -54,6 +56,11 @@ namespace UniVox.Framework
         public Vector3Int WorldToChunkPosition(Vector3 pos) 
         {
             return chunkManager.WorldToChunkPosition(pos);
+        }
+
+        public string GetPipelineStatus()
+        {
+            return chunkManager.GetPipelineStatus();
         }
     }
 }

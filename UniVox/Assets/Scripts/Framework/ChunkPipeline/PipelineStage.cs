@@ -10,6 +10,8 @@ namespace UniVox.Framework.ChunkPipeline
         public string Name { get; private set; }
         public int Order { get; private set; }
 
+        public int Count { get => chunkIdsInStage.Count; }
+
         /// <summary>
         /// The condition to be evalutated to decide whether to move the chunk to the next stage,
         /// or terminate it here. true -> continue, false -> terminate

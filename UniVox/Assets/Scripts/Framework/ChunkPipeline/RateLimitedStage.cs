@@ -11,18 +11,18 @@ namespace UniVox.Framework.ChunkPipeline
     /// </summary>
     public class RateLimitedStage : WaitingStage
     {
-        protected int maxPerUpdate = 1;
+        public int MaxPerUpdate { get; set; } = 1;
 
         public RateLimitedStage(string name, int order,int maxPerUpdate) : base(name, order)
         {
             Assert.IsTrue(maxPerUpdate > 0);
-            this.maxPerUpdate = maxPerUpdate;
+            this.MaxPerUpdate = maxPerUpdate;
         }
 
         public RateLimitedStage(string name, int order, int maxPerUpdate, Func<Vector3Int, int, bool> nextStageCondition, Func<Vector3Int, int, bool> waitEndedCondition) : base(name, order,nextStageCondition,waitEndedCondition)
         {
             Assert.IsTrue(maxPerUpdate > 0);
-            this.maxPerUpdate = maxPerUpdate;
+            this.MaxPerUpdate = maxPerUpdate;
         }
 
         public override void Update(out List<Vector3Int> movingOn, out List<Vector3Int> terminating)
@@ -40,7 +40,7 @@ namespace UniVox.Framework.ChunkPipeline
                 if (NextStageCondition(item, Order))
                 {
                     //The chunk would ordinarily be able to move on, but we need to check the wait condition first
-                    if (movedOn < maxPerUpdate &&  WaitEndedCondition(item, Order))
+                    if (movedOn < MaxPerUpdate &&  WaitEndedCondition(item, Order))
                     {                        
                         movingOn.Add(item);
                         movedOn++;

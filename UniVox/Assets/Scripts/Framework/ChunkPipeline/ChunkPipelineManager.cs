@@ -4,15 +4,14 @@ using System.Collections.Generic;
 using System;
 using UniVox.Framework.ChunkPipeline.VirtualJobs;
 using UnityEngine.Assertions;
+using System.Text;
 
 namespace UniVox.Framework.ChunkPipeline
 {
-    public class ChunkPipelineManager<V>        
+    public class ChunkPipelineManager<V>: IDisposable
         where V : IVoxelData
     {
         private List<PipelineStage> stages = new List<PipelineStage>();
-        private IChunkProvider<V> chunkProvider;
-        private IChunkMesher<V> chunkMesher;
 
         private Dictionary<Vector3Int, ChunkStageData> chunkStageMap = new Dictionary<Vector3Int, ChunkStageData>();
 
@@ -32,17 +31,20 @@ namespace UniVox.Framework.ChunkPipeline
             Func<Vector3Int,float> getPriorityOfChunk,
             int maxDataPerUpdate,int maxMeshPerUpdate,int maxCollisionPerUpdate) 
         {
-            this.chunkProvider = chunkProvider;
-            this.chunkMesher = chunkMesher;
             this.getChunkComponent = getChunkComponent;
             this.createNewChunkWithTarget = createNewChunkWithTarget;
 
             int i = 0;
 
-            stages.Add(new PrioritizedStage("ScheduledForData",i++,maxDataPerUpdate,TargetStageGreaterThanCurrent,NextStageFreeForChunk, getPriorityOfChunk));
-            stages.Add(new WaitForJobStage<IChunkData<V>>("GeneratingData", i++, TargetStageGreaterThanCurrent, chunkProvider.ProvideChunkDataJob,
-                (cId, dat) => getChunkComponent(cId).Data = dat)) ;
+            var ScheduledForData = new PrioritizedStage("ScheduledForData", i++, maxDataPerUpdate, TargetStageGreaterThanCurrent, NextStageFreeForChunk, getPriorityOfChunk);
+            stages.Add(ScheduledForData);
+
+            var GeneratingData = new WaitForJobStage<IChunkData<V>>("GeneratingData", i++, TargetStageGreaterThanCurrent, chunkProvider.ProvideChunkDataJob,
+                (cId, dat) => getChunkComponent(cId).Data = dat, maxDataPerUpdate);
+            stages.Add(GeneratingData);
             DataStage = i;
+            ScheduledForData.UpdateMax = GeneratingData.MaxToEnter;
+
             stages.Add(new PipelineStage("GotData",i++));
 
             if (chunkMesher.IsMeshDependentOnNeighbourChunks)
@@ -55,16 +57,27 @@ namespace UniVox.Framework.ChunkPipeline
                 stages[DataStage].NextStageCondition = ShouldScheduleForNext;
             }
 
-            stages.Add(new PrioritizedStage("ScheduledForMesh",i++,maxMeshPerUpdate, TargetStageGreaterThanCurrent, NextStageFreeForChunk, getPriorityOfChunk));
-            stages.Add(new WaitForJobStage<Mesh>("GeneratingMesh",i++, TargetStageGreaterThanCurrent, chunkMesher.CreateMeshJob,
-                (cId,mesh)=>getChunkComponent(cId).SetRenderMesh(mesh)));
+            var ScheduledForMesh = new PrioritizedStage("ScheduledForMesh", i++, maxMeshPerUpdate, TargetStageGreaterThanCurrent, NextStageFreeForChunk, getPriorityOfChunk);
+            stages.Add(ScheduledForMesh);
+
+            var GeneratingMesh = new WaitForJobStage<Mesh>("GeneratingMesh", i++, TargetStageGreaterThanCurrent, chunkMesher.CreateMeshJob,
+                (cId, mesh) => getChunkComponent(cId).SetRenderMesh(mesh),maxMeshPerUpdate);
+            stages.Add(GeneratingMesh);
             RenderedStage = i;
+            ScheduledForMesh.UpdateMax = GeneratingMesh.MaxToEnter;
+
             stages.Add(new PipelineStage("GotMesh",i++, ShouldScheduleForNext));
 
-            stages.Add(new PrioritizedStage("ScheduledForCollisionMesh",i++,maxCollisionPerUpdate, TargetStageGreaterThanCurrent, NextStageFreeForChunk, getPriorityOfChunk));
-            stages.Add(new WaitForJobStage<Mesh>("ApplyingCollisionMesh",i++, TargetStageGreaterThanCurrent, makeCollisionMeshingJob,
-                (cId,mesh)=>getChunkComponent(cId).SetCollisionMesh(mesh)));
+            var ScheduledForCollisionMesh = new PrioritizedStage("ScheduledForCollisionMesh", i++, maxCollisionPerUpdate, TargetStageGreaterThanCurrent, NextStageFreeForChunk, getPriorityOfChunk);
+            stages.Add(ScheduledForCollisionMesh);
+
+            var ApplyingCollisionMesh = new WaitForJobStage<Mesh>("ApplyingCollisionMesh", i++, TargetStageGreaterThanCurrent, makeCollisionMeshingJob,
+                (cId, mesh) => getChunkComponent(cId).SetCollisionMesh(mesh),maxCollisionPerUpdate);
+            stages.Add(ApplyingCollisionMesh);
             CompleteStage = i;
+            ScheduledForCollisionMesh.UpdateMax = ApplyingCollisionMesh.MaxToEnter;
+
+
             //Final stage "nextStageCondition" is always false
             stages.Add(new PipelineStage("Complete",i++, (a,b)=>false));
         
@@ -103,7 +116,7 @@ namespace UniVox.Framework.ChunkPipeline
                 }
             }
 
-        }
+        }        
 
         public void AddChunk(Vector3Int chunkId, int targetStage) 
         {
@@ -337,6 +350,28 @@ namespace UniVox.Framework.ChunkPipeline
                 return stageData.targetStage > currentStage;
             }
             return false;
+        }
+
+        public void Dispose()
+        {
+            Debug.Log(GetPipelineStatus());
+            foreach (var stage in stages)
+            {
+                if (stage is IDisposable disposable)
+                {
+                    disposable.Dispose();
+                }
+            }
+        }
+
+        public string GetPipelineStatus() 
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (var stage in stages)
+            {
+                sb.AppendLine($"{stage.Name}:{stage.Count}");
+            }
+            return sb.ToString();
         }
 
         private class ChunkStageData 
