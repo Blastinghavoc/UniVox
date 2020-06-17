@@ -1,11 +1,11 @@
 ﻿using UnityEngine;
-using System.Collections;
-using UniVox.Framework;
 
-namespace UniVox.Framework { 
+namespace UniVox.Framework
+{
 
+    //DEPRECATED see SOMeshDefinition and BurstableMeshDefinition
     [System.Serializable]
-    public class VoxelMeshDefinition
+    public struct MeshDefinition
     {
         //All positional vertices in the mesh
         public Vector3[] AllVertices;
@@ -14,15 +14,15 @@ namespace UniVox.Framework {
         //All Normals in the mesh
         public Vector3[] AllNormals;
         //Definitions for each face
-        public VoxelFaceDefinition[] Faces = new VoxelFaceDefinition[Directions.NumDirections];
+        public VoxelFaceDefinition[] Faces;
 
     }
 
     [System.Serializable]
-    public class VoxelFaceDefinition 
+    public struct VoxelFaceDefinition
     {
         //Whether or not the face should be considered solid for the purposes of culling
-        public bool isSolid = true;
+        public bool isSolid;
         /// <summary>
         /// These arrays are indices into the corresponding AllX arrays of the 
         /// owning VoxelMeshDefinition

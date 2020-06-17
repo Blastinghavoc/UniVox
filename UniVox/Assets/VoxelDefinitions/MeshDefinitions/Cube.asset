@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fd133c72dc0310147badab47c4d5b536, type: 3}
+  m_Script: {fileID: 11500000, guid: 543660d8e491e744fb3cf6989de4f0a4, type: 3}
   m_Name: Cube
   m_EditorClassIdentifier: 
   AllVertices:

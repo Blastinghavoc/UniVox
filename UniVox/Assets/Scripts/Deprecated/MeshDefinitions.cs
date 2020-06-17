@@ -6,7 +6,7 @@ namespace UniVox.Deprecated
 {
     public static class MeshDefinitions
     {
-        public static VoxelMeshDefinition Cube = new VoxelMeshDefinition()
+        public static MeshDefinition Cube = new MeshDefinition()
         {
             AllVertices = new Vector3[8] {
             new Vector3(0, 0, 0),//0

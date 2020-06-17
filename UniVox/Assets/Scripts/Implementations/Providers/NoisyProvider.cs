@@ -330,7 +330,7 @@ namespace UniVox.Implementations.Providers
             }
 
             //3D noise for caves
-            float caveNoise = FractalNoise(pos * 5);
+            float caveNoise = FractalNoise(pos * 0.01f);
 
             if (caveNoise > worldSettings.CaveDensity)
             {
