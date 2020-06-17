@@ -46,14 +46,19 @@ namespace UniVox.Framework
 
         public abstract IChunkData<V> GenerateChunkData(Vector3Int chunkID, Vector3Int chunkDimensions);
 
-        public virtual AbstractPipelineJob<IChunkData<V>> ProvideChunkDataJob(Vector3Int chunkID) 
+        public AbstractPipelineJob<IChunkData<V>> ProvideChunkDataJob(Vector3Int chunkID) 
         {
-            return new BasicFunctionJob<IChunkData<V>>(()=>ProvideChunkData(chunkID));
+            if (ModifiedChunkData.TryGetValue(chunkID, out var data))
+            {
+                return new BasicFunctionJob<IChunkData<V>>(() => data);
+            }
+
+            return GenerateChunkDataJob(chunkID, chunkManager.ChunkDimensions);
         }
 
         public virtual AbstractPipelineJob<IChunkData<V>> GenerateChunkDataJob(Vector3Int chunkID, Vector3Int chunkDimensions) 
         {
-            throw new NotImplementedException();
+            return new BasicFunctionJob<IChunkData<V>>(()=>GenerateChunkData(chunkID,chunkDimensions));
         }
     }
 }

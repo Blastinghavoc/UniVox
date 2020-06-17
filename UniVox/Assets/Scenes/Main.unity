@@ -341,6 +341,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: GameSceneObjects
       objectReference: {fileID: 0}
+    - target: {fileID: 398304577765385446, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 398304578991225289, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
       propertyPath: m_TagString
@@ -365,6 +370,11 @@ PrefabInstance:
         type: 3}
       propertyPath: MaxGeneratedPerUpdate
       value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 5880167504519198131, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6215028733184748506, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}

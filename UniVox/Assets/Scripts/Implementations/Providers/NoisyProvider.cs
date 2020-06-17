@@ -55,15 +55,8 @@ namespace UniVox.Implementations.Providers
 
         }
 
-        public override AbstractPipelineJob<IChunkData<VoxelData>> ProvideChunkDataJob(Vector3Int chunkID)
+        public override AbstractPipelineJob<IChunkData<VoxelData>> GenerateChunkDataJob(Vector3Int chunkID,Vector3Int chunkDimensions)
         {
-            if (ModifiedChunkData.TryGetValue(chunkID, out var data))
-            {
-                return new BasicFunctionJob<IChunkData<VoxelData>>(() => data);
-            }
-
-            var chunkDimensions = chunkManager.ChunkDimensions;
-
             DataGenerationJob job = new DataGenerationJob();
             job.chunkPosition = chunkManager.ChunkToWorldPosition(chunkID);
             job.ids = new BlockIDs()
