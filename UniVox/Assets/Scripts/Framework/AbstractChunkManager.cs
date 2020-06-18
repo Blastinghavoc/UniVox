@@ -11,7 +11,7 @@ using Utils.FSM;
 using Utils.Pooling;
 
 public abstract class AbstractChunkManager<VoxelDataType> : MonoBehaviour, IChunkManager, ITestableChunkManager    
-    where VoxelDataType : IVoxelData
+    where VoxelDataType :struct, IVoxelData
 {
     #region Shown in inspector
 

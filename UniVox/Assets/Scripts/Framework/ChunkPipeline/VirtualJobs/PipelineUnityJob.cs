@@ -1,15 +1,16 @@
 ﻿using System;
 using Unity.Jobs;
+using UniVox.Framework.Jobified;
 
 namespace UniVox.Framework.ChunkPipeline.VirtualJobs
 {
     /// <summary>
     /// Wrapper around a Unity IJob
     /// </summary>
-    public class PipelineUnityJob<T,jobType> : AbstractPipelineJob<T>
-        where jobType: struct,IJob
+    public class PipelineUnityJob<T, JobType> : AbstractPipelineJob<T>
+        where JobType: struct, IJob
     {
-        private jobType job;
+        private JobWrapper<JobType> jobWrapper;
         private JobHandle handle;
         private Func<T> cleanup ;
 
@@ -23,15 +24,15 @@ namespace UniVox.Framework.ChunkPipeline.VirtualJobs
             } 
         }
 
-        public PipelineUnityJob(jobType job, Func<T> cleanup)
+        public PipelineUnityJob(JobWrapper<JobType> jobWrapper, Func<T> cleanup)
         {
-            this.job = job;
+            this.jobWrapper = jobWrapper;
             this.cleanup = cleanup;
         }
 
         public override void Start()
         {
-            handle = job.Schedule();
+            handle = jobWrapper.job.Schedule();
         }
 
         public override void Terminate()

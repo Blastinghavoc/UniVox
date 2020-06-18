@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System;
+using Unity.Mathematics;
 
 public static class VectorExtensions
 {
@@ -131,4 +132,28 @@ public static class VectorExtensions
     }
     #endregion
 
+
+    #region Jobified
+
+    public static int3 ToSIMD(this Vector3Int v) 
+    {
+        return new int3(v.x, v.y, v.z);
+    }
+
+    public static Vector3Int ToBasic(this int3 v) 
+    {
+        return new Vector3Int(v.x, v.y, v.z);
+    }
+
+    public static float3 ToSIMD(this Vector3 v)
+    {
+        return new float3(v.x, v.y, v.z);
+    }
+
+    public static Vector3 ToBasic(this float3 v)
+    {
+        return new Vector3(v.x, v.y, v.z);
+    }
+
+    #endregion
 }

@@ -5,6 +5,7 @@ using System;
 using UniVox.Framework.ChunkPipeline.VirtualJobs;
 using UnityEngine.Assertions;
 using System.Text;
+using UnityEngine.Profiling;
 
 namespace UniVox.Framework.ChunkPipeline
 {
@@ -89,6 +90,7 @@ namespace UniVox.Framework.ChunkPipeline
         /// </summary>
         public void Update() 
         {
+            Profiler.BeginSample("PipelineUpdate");
             for (int stageIndex = 0; stageIndex < stages.Count; stageIndex++)
             {
                 var stage = stages[stageIndex];
@@ -115,6 +117,7 @@ namespace UniVox.Framework.ChunkPipeline
                     }
                 }
             }
+            Profiler.EndSample();
 
         }        
 

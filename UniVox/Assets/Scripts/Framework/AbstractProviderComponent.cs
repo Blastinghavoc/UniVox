@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UniVox.Implementations.ChunkData;
 using UniVox.Framework.ChunkPipeline.VirtualJobs;
 using System;
+using UnityEngine.Profiling;
 
 namespace UniVox.Framework
 {
@@ -53,7 +54,11 @@ namespace UniVox.Framework
                 return new BasicFunctionJob<IChunkData<V>>(() => data);
             }
 
-            return GenerateChunkDataJob(chunkID, chunkManager.ChunkDimensions);
+            Profiler.BeginSample("CreateGenerationJob");
+            var tmp = GenerateChunkDataJob(chunkID, chunkManager.ChunkDimensions);
+            Profiler.EndSample();
+
+            return tmp;
         }
 
         public virtual AbstractPipelineJob<IChunkData<V>> GenerateChunkDataJob(Vector3Int chunkID, Vector3Int chunkDimensions) 

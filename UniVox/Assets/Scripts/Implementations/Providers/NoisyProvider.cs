@@ -10,6 +10,7 @@ using Unity.Mathematics;
 using Unity.Collections;
 using UniVox.Framework.ChunkPipeline.VirtualJobs;
 using Unity.Burst;
+using UniVox.Framework.Jobified;
 
 namespace UniVox.Implementations.Providers
 {
@@ -57,22 +58,23 @@ namespace UniVox.Implementations.Providers
 
         public override AbstractPipelineJob<IChunkData<VoxelData>> GenerateChunkDataJob(Vector3Int chunkID,Vector3Int chunkDimensions)
         {
-            DataGenerationJob job = new DataGenerationJob();
-            job.chunkPosition = chunkManager.ChunkToWorldPosition(chunkID);
-            job.ids = new BlockIDs()
+            var jobWrapper = new JobWrapper<DataGenerationJob>();
+            jobWrapper.job = new DataGenerationJob();
+            jobWrapper.job.chunkPosition = chunkManager.ChunkToWorldPosition(chunkID);
+            jobWrapper.job.ids = new BlockIDs()
             {
                 dirt = dirtID,
                 grass = grassID,
                 stone = stoneID,
                 bedrock = bedrockID
             };
-            job.noiseSettings = new JobNoiseSettings()
+            jobWrapper.job.noiseSettings = new JobNoiseSettings()
             {
                 Lacunarity = noiseSettings.Lacunarity,
                 Persistence = noiseSettings.Persistence,
                 Octaves = noiseSettings.Octaves
             };
-            job.worldSettings = new WorldSettings()
+            jobWrapper.job.worldSettings = new WorldSettings()
             {
                 CaveDensity = Density,
                 SeaLevel = SeaLevel,
@@ -85,7 +87,7 @@ namespace UniVox.Implementations.Providers
             var arrayLength = chunkDimensions.x * chunkDimensions.y * chunkDimensions.z;
 
             NativeArray<VoxelData> voxelData = new NativeArray<VoxelData>(arrayLength, Allocator.Persistent);
-            job.chunkData = voxelData;
+            jobWrapper.job.chunkData = voxelData;
 
             Func<IChunkData<VoxelData>> cleanup = () =>
             {
@@ -110,7 +112,7 @@ namespace UniVox.Implementations.Providers
                 return ChunkData;
             };
 
-            return new PipelineUnityJob<IChunkData<VoxelData>, DataGenerationJob>(job, cleanup);
+            return new PipelineUnityJob<IChunkData<VoxelData>, DataGenerationJob>(jobWrapper, cleanup);
         }
 
         public override IChunkData<VoxelData> GenerateChunkData(Vector3Int chunkID, Vector3Int chunkDimensions)

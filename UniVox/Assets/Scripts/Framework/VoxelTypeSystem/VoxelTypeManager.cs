@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.Assertions;
 using System;
+using Unity.Collections;
+using UniVox.Framework.Jobified;
 
 namespace UniVox.Framework
 {
@@ -21,6 +23,11 @@ namespace UniVox.Framework
         private Dictionary<SOVoxelTypeDefinition, ushort> DefinitionToIDMap;
 
         private List<VoxelTypeData> typeData;
+
+        #region Job Compatibility
+        //public NativeHashMap<ushort, BurstableMeshDefinition> meshForVoxelType { get; private set; }
+        //public NativeHashMap<ushort, NativeArray<float>> zIndicesPerFaceForVoxelType { get; private set; }
+        #endregion
 
         //Ensure that default initialisation of a VoxelData instance is Air
         public const ushort AIR_ID = 0;
@@ -48,7 +55,6 @@ namespace UniVox.Framework
             int currentZ = 0;
 
             RectInt commonTexSize = new RectInt(0, 0, VoxelTypes[0].FaceTextures[0].width, VoxelTypes[0].FaceTextures[0].height);
-
 
             foreach (var item in VoxelTypes)
             {
@@ -82,6 +88,36 @@ namespace UniVox.Framework
             }
 
             CreateTextureArray(uniqueTextures, commonTexSize);
+
+            InitialiseJobified();
+        }
+
+        private void InitialiseJobified() 
+        {
+            //meshForVoxelType = new NativeHashMap<ushort, BurstableMeshDefinition>(typeData.Count, Allocator.Persistent);
+            //zIndicesPerFaceForVoxelType = new NativeHashMap<ushort, NativeArray<float>>(typeData.Count, Allocator.Persistent);
+
+            //Dictionary<SOMeshDefinition, BurstableMeshDefinition> uniqueMeshDefinitions = new Dictionary<SOMeshDefinition, BurstableMeshDefinition>();
+
+            //for (ushort id = 0; id < typeData.Count; id++)
+            //{
+            //    var item = typeData[id];
+            //    zIndicesPerFaceForVoxelType.Add(id, new NativeArray<float>(item.zIndicesPerFace,Allocator.Persistent));
+
+            //    var SODef = item.definition.meshDefinition;
+            //    if (!uniqueMeshDefinitions.TryGetValue(SODef,out var burstable))
+            //    {
+            //        burstable = SODef.ToBurst();
+            //        uniqueMeshDefinitions.Add(SODef, burstable);
+            //    }
+            //    meshForVoxelType.Add(id,burstable);
+            //}
+        }
+
+        private void OnDestroy()
+        {
+            //meshForVoxelType.Dispose();
+            //zIndicesPerFaceForVoxelType.Dispose();
         }
 
         public VoxelTypeData GetData(ushort voxelTypeID)
