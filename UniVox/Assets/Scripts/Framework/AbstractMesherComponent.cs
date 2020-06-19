@@ -18,6 +18,9 @@ namespace UniVox.Framework
 
         public bool IsMeshDependentOnNeighbourChunks { get; protected set; } = false;
 
+        //TODO remove, testing only
+        public bool Burst = true;
+
         protected VoxelTypeManager voxelTypeManager;
         protected AbstractChunkManager<V> chunkManager;
 
@@ -164,6 +167,11 @@ namespace UniVox.Framework
 
         public AbstractPipelineJob<Mesh> CreateMeshJob(Vector3Int chunkID)
         {
+            if (!Burst)
+            {
+                return new BasicFunctionJob<Mesh>(() => CreateMesh(chunkManager.GetReadOnlyChunkData(chunkID)));
+            }
+
             Profiler.BeginSample("CreateMeshJob");
 
             var jobWrapper = new JobWrapper<MeshingJob<V>>();
@@ -205,6 +213,7 @@ namespace UniVox.Framework
 
             Func<Mesh> cleanup = () =>
             {
+                Profiler.BeginSample("MeshJobCleanup");
                 Mesh mesh = new Mesh();
 
                 if (jobWrapper.job.vertices.Length >= ushort.MaxValue)
@@ -226,18 +235,20 @@ namespace UniVox.Framework
                 jobWrapper.job.voxels.Dispose();
                 jobWrapper.job.neighbourData.Dispose();
 
+                Profiler.EndSample();
+
                 return mesh;
             };
 
             Profiler.EndSample();
 
-            //DEBUG
-            //return new BasicFunctionJob<Mesh>(() =>
-            //{
-            //    //jobWrapper.job.Run();
-            //    jobWrapper.job.Execute();
+
+            //Single threaded version
+            //return new BasicFunctionJob<Mesh>(() => {
+            //    jobWrapper.job.Run();
             //    return cleanup();
             //});
+
             return new PipelineUnityJob<Mesh, MeshingJob<V>>(jobWrapper, cleanup);
 
         }

@@ -11,6 +11,7 @@ using Unity.Collections;
 using UniVox.Framework.ChunkPipeline.VirtualJobs;
 using Unity.Burst;
 using UniVox.Framework.Jobified;
+using UnityEngine.Profiling;
 
 namespace UniVox.Implementations.Providers
 {
@@ -58,6 +59,11 @@ namespace UniVox.Implementations.Providers
 
         public override AbstractPipelineJob<IChunkData<VoxelData>> GenerateChunkDataJob(Vector3Int chunkID,Vector3Int chunkDimensions)
         {
+            if (!Burst)
+            {
+                return base.GenerateChunkDataJob(chunkID, chunkDimensions);
+            }
+
             var jobWrapper = new JobWrapper<DataGenerationJob>();
             jobWrapper.job = new DataGenerationJob();
             jobWrapper.job.chunkPosition = chunkManager.ChunkToWorldPosition(chunkID);
@@ -91,23 +97,29 @@ namespace UniVox.Implementations.Providers
 
             Func<IChunkData<VoxelData>> cleanup = () =>
             {
-                var ChunkData = new ArrayChunkData(chunkID, chunkDimensions);
+                Profiler.BeginSample("DataJobCleanup");
 
-                int i = 0;
-                for (int z = 0; z < chunkDimensions.z; z++)
-                {
-                    for (int y = 0; y < chunkDimensions.y; y++)
-                    {
-                        for (int x = 0; x < chunkDimensions.x; x++)
-                        {
-                            ChunkData[x, y, z] = voxelData[i];
-                            i++;
-                        }
-                    }
-                }
+                //Pass native array directly to chunk data object. It will be disposed of much later.
+                var ChunkData = new NativeArrayChunkData(chunkID, chunkDimensions, voxelData);
 
-                //Dispose of native array
-                voxelData.Dispose();
+                //var ChunkData = new ArrayChunkData(chunkID, chunkDimensions);
+
+                //int i = 0;
+                //for (int z = 0; z < chunkDimensions.z; z++)
+                //{
+                //    for (int y = 0; y < chunkDimensions.y; y++)
+                //    {
+                //        for (int x = 0; x < chunkDimensions.x; x++)
+                //        {
+                //            ChunkData[x, y, z] = voxelData[i];
+                //            i++;
+                //        }
+                //    }
+                //}
+                ////Dispose of native array
+                //voxelData.Dispose();
+
+                Profiler.EndSample();
                 return ChunkData;
             };
 

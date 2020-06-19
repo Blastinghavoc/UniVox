@@ -5,6 +5,8 @@ using UnityEngine.Assertions;
 
 namespace UniVox.Framework.ChunkPipeline
 {
+    //NOTE: Unused, Prioritized stage is used instead.
+
     /// <summary>
     /// A stage that limits how many can go onto the next stage per update.
     /// Optionally also allows chunks to wait for a particular condition as well.

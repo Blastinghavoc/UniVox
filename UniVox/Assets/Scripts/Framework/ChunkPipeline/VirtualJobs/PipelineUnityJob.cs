@@ -17,7 +17,7 @@ namespace UniVox.Framework.ChunkPipeline.VirtualJobs
         public override bool Done { get {
                 if (handle.IsCompleted)
                 {
-                    Terminate();
+                    Finish();
                     return true;
                 }
                 return false; 
@@ -35,10 +35,23 @@ namespace UniVox.Framework.ChunkPipeline.VirtualJobs
             handle = jobWrapper.job.Schedule();
         }
 
-        public override void Terminate()
+        private void Finish()
         {
             handle.Complete();
             Result = cleanup();
+        }
+
+        /// <summary>
+        /// To be called if the job need to be prematurely ended.
+        /// Otherwise disposal will be handled by whatever receives the result.
+        /// </summary>
+        public override void Dispose()
+        {
+            Finish();
+            if (Result is IDisposable disposable)
+            {
+                disposable.Dispose();
+            }
         }
     }
 }

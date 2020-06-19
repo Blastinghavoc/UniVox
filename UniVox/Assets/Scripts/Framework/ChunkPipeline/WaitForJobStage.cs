@@ -114,7 +114,7 @@ namespace UniVox.Framework.ChunkPipeline
             Debug.Log($"Disposing of {chunkIdsInStage.Count} unfinished jobs in stage {Name}");
             chunkIdsInStage.RemoveWhere((id)=> 
             {
-                jobs[id].Terminate();
+                jobs[id].Dispose();
                 jobs.Remove(id);
                 return true;
             });

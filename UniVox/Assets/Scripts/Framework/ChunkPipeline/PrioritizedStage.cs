@@ -2,6 +2,7 @@
 using UnityEngine;
 using Priority_Queue;
 using System.Collections.Generic;
+using UnityEngine.Profiling;
 
 namespace UniVox.Framework.ChunkPipeline
 {
@@ -24,6 +25,7 @@ namespace UniVox.Framework.ChunkPipeline
 
         public override void Update(out List<Vector3Int> movingOn, out List<Vector3Int> terminating)
         {
+            Profiler.BeginSample("PrioritizedStageUpdate");
             if (UpdateMax != null)
             {
                 //Potentially update the maximum every update.
@@ -35,10 +37,15 @@ namespace UniVox.Framework.ChunkPipeline
 
             int movedOn = 0;
 
-            List<Vector3Int> waiting = new List<Vector3Int>();
-            while (movedOn < MaxPerUpdate && queue.Count > 0)
+            //List<Vector3Int> waiting = new List<Vector3Int>();
+
+            //Iterate over queue in order, until at most MaxPerUpdate items have been moved on
+            foreach (var item in queue)
             {
-                var item = queue.Dequeue();
+                if (movedOn >= MaxPerUpdate)
+                {
+                    break;
+                }
 
                 if (NextStageCondition(item, Order))
                 {
@@ -52,7 +59,6 @@ namespace UniVox.Framework.ChunkPipeline
                     else
                     {
                         //Otherwise, the chunk neither moves on nor terminates, it waits
-                        waiting.Add(item);
                         continue;
                     }
 
@@ -62,28 +68,70 @@ namespace UniVox.Framework.ChunkPipeline
                     terminating.Add(item);
                     chunkIdsInStage.Remove(item);
                 }
-
             }
+
+            //Remove items from the queue when they move on
+            foreach (var item in movingOn)
+            {
+                queue.Remove(item);
+            }
+
+            //Remove items from the queue when they terminate
+            foreach (var item in terminating)
+            {
+                queue.Remove(item);
+            }
+
+            //while (movedOn < MaxPerUpdate && queue.Count > 0)
+            //{
+            //    var item = queue.Dequeue();
+
+            //    if (NextStageCondition(item, Order))
+            //    {
+            //        //The chunk would ordinarily be able to move on, but we need to check the wait condition first
+            //        if (WaitEndedCondition(item, Order))
+            //        {
+            //            movingOn.Add(item);
+            //            chunkIdsInStage.Remove(item);
+            //            movedOn++;
+            //        }
+            //        else
+            //        {
+            //            //Otherwise, the chunk neither moves on nor terminates, it waits
+            //            waiting.Add(item);
+            //            continue;
+            //        }
+
+            //    }
+            //    else
+            //    {
+            //        terminating.Add(item);
+            //        chunkIdsInStage.Remove(item);
+            //    }
+
+            //}
 
             //Put all waiting items back in the queue (side effect of updating their priority)
-            foreach (var item in waiting)
-            {
-                queue.Enqueue(item, getPriority(item));
-            }
+            //foreach (var item in waiting)
+            //{
+            //    queue.Enqueue(item, getPriority(item));
+            //}
 
             //Must still remove any chunks that should terminate
-            List<Vector3Int> tmpTerminating = new List<Vector3Int>();
-            chunkIdsInStage.RemoveWhere((id) => {
-                if (!NextStageCondition(id, Order))
-                {
-                    tmpTerminating.Add(id);
-                    return true;
+            //List<Vector3Int> tmpTerminating = new List<Vector3Int>();
+            //chunkIdsInStage.RemoveWhere((id) => {
+            //    if (!NextStageCondition(id, Order))
+            //    {
+            //        tmpTerminating.Add(id);
+            //        return true;
 
-                }
-                return false;
-            });
+            //    }
+            //    return false;
+            //});
 
-            terminating.AddRange(tmpTerminating);
+            //terminating.AddRange(tmpTerminating);
+
+            Profiler.EndSample();
         }
 
         public override void Add(Vector3Int incoming)

@@ -166,7 +166,7 @@ public abstract class AbstractChunkManager<VoxelDataType> : MonoBehaviour, IChun
             .Where((id) => !InsideChunkRadius(id, dataChunksRadii))
             .ToList();
         
-        deactivate.ForEach(Deactivate);
+        deactivate.ForEach(DeactivateChunk);
 
         for (int x = -dataChunksRadii.x; x <= dataChunksRadii.x; x++)
         {
@@ -203,16 +203,26 @@ public abstract class AbstractChunkManager<VoxelDataType> : MonoBehaviour, IChun
         throw new Exception($"Tried to get a chunk component that for chunk ID {chunkID} that is not loaded");
     }
 
-    protected void Deactivate(Vector3Int chunkID)
+    protected void DeactivateChunk(Vector3Int chunkID)
     {
         if (loadedChunks.TryGetValue(chunkID, out var chunkComponent))
         {
             pipeline.RemoveChunk(chunkID);
 
-            //Return modified data to the provider
-            if (chunkComponent.Data != null && chunkComponent.Data.ModifiedSinceGeneration)
+            //Deal with the component's data
+            if (chunkComponent.Data != null)
             {
-                chunkProvider.AddModifiedChunkData(chunkComponent.ChunkID, chunkComponent.Data);
+                if (chunkComponent.Data.ModifiedSinceGeneration)
+                {
+                    //If it was modified, don't dispose of it yet, give it back to the provider
+                    chunkProvider.AddModifiedChunkData(chunkComponent.ChunkID, chunkComponent.Data);
+                }
+                else
+                {
+                    //If the data isn't being kept, dispose of it
+                    chunkComponent.Data.Dispose();
+                }
+
             }
 
             loadedChunks.Remove(chunkID);

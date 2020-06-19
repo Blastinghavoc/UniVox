@@ -2,7 +2,7 @@
 
 namespace UniVox.Framework.ChunkPipeline.VirtualJobs
 {
-    public abstract class AbstractPipelineJob<T>
+    public abstract class AbstractPipelineJob<T>:IDisposable
     {
         public virtual bool Done { get; protected set; } = false;
 
@@ -11,7 +11,7 @@ namespace UniVox.Framework.ChunkPipeline.VirtualJobs
         //Start the job running
         public abstract void Start();
 
-        public virtual void Terminate() 
+        public virtual void Dispose() 
         { 
         
         }

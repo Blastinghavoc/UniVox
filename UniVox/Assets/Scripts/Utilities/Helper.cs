@@ -9,7 +9,7 @@ namespace Utils
         #region 3D index flattening
         public static int MultiIndexToFlat(int x, int y, int z,Vector3Int dimensions)
         {
-            return MultiIndexToFlat(x, y, z, new int3(dimensions.x, dimensions.y, dimensions.z));
+            return MultiIndexToFlat(x, y, z, dimensions.x,dimensions.x*dimensions.y);
         }
 
         public static void FlatIndexToMulti(int flat,Vector3Int dimensions,out int x,out int y, out int z) 
@@ -19,7 +19,21 @@ namespace Utils
 
         public static int MultiIndexToFlat(int x, int y, int z, int3 dimensions)
         {
-            return x + dimensions.x * (y + dimensions.y * z);
+            return MultiIndexToFlat(x, y, z, dimensions.x, dimensions.x * dimensions.y);
+        }
+
+        /// <summary>
+        /// Optimized version of multiIndexToFlat assuming the dimensions have been precalculated
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="z"></param>
+        /// <param name="dx"></param>
+        /// <param name="dxdy"></param>
+        /// <returns></returns>
+        public static int MultiIndexToFlat(int x, int y, int z, int dx, int dxdy) 
+        {
+            return x + dx*y + dxdy * z;
         }
 
         public static void FlatIndexToMulti(int flat, int3 dimensions, out int x, out int y, out int z)

@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
 namespace UniVox.Framework
 {
@@ -7,7 +8,8 @@ namespace UniVox.Framework
     /// <summary>
     /// The data representation of a Chunk
     /// </summary>
-    public interface IChunkData<V> where V : IVoxelData
+    public interface IChunkData<V>: IDisposable 
+        where V : IVoxelData
     {
         Vector3Int ChunkID { get; set; }
 

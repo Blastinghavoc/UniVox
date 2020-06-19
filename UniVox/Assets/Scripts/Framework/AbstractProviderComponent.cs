@@ -14,6 +14,9 @@ namespace UniVox.Framework
         protected VoxelTypeManager voxelTypeManager;
         protected IChunkManager chunkManager;
 
+        //TODO remove, testing only
+        public bool Burst = true;
+
         /// <summary>
         /// Chunk Data for chunks that are not active, but have been modified.
         /// If a request is made to provide any of these chunks, the modified
@@ -31,6 +34,14 @@ namespace UniVox.Framework
         public void AddModifiedChunkData(Vector3Int chunkID, IChunkData<V> data) 
         {
             ModifiedChunkData[chunkID] = data;
+        }
+
+        private void OnDestroy()
+        {
+            foreach (var item in ModifiedChunkData.Values)
+            {
+                item.Dispose();
+            }
         }
 
         public IChunkData<V> ProvideChunkData(Vector3Int chunkID) 
