@@ -106,7 +106,6 @@ namespace UniVox.Implementations.Providers
                     }
                 }
 
-                ChunkData.FullyGenerated = true;
                 //Dispose of native array
                 voxelData.Dispose();
                 return ChunkData;

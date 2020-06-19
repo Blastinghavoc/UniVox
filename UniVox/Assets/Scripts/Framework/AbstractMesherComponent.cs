@@ -22,6 +22,7 @@ namespace UniVox.Framework
         protected AbstractChunkManager<V> chunkManager;
 
         protected NativeArray<int3> directionVectors;
+        protected NativeArray<byte> directionOpposites;
 
         public virtual void Initialise(VoxelTypeManager voxelTypeManager, AbstractChunkManager<V> chunkManager)
         {
@@ -34,14 +35,14 @@ namespace UniVox.Framework
                 var vec = Directions.IntVectors[i];
                 directionVectors[i] = vec.ToSIMD();
             }
+
+            directionOpposites = new NativeArray<byte>(Directions.Oposite, Allocator.Persistent);
         }
 
         private void OnDestroy()
         {
-            if (directionVectors.IsCreated)
-            {
-                directionVectors.Dispose();
-            }
+            directionVectors.SmartDispose();
+            directionOpposites.SmartDispose();
         }
 
         public Mesh CreateMesh(IChunkData<V> chunk)
@@ -156,68 +157,90 @@ namespace UniVox.Framework
             currentIndex += face.UsedVertices.Length;
         }
 
+        //public AbstractPipelineJob<Mesh> CreateMeshJob(Vector3Int chunkID)
+        //{
+        //    return new BasicFunctionJob<Mesh>(() => CreateMesh(chunkManager.GetReadOnlyChunkData(chunkID)));
+        //}
+
         public AbstractPipelineJob<Mesh> CreateMeshJob(Vector3Int chunkID)
         {
-            return new BasicFunctionJob<Mesh>(() => CreateMesh(chunkManager.GetReadOnlyChunkData(chunkID)));
+            Profiler.BeginSample("CreateMeshJob");
+
+            var jobWrapper = new JobWrapper<MeshingJob<V>>();
+            jobWrapper.job = new MeshingJob<V>();
+            jobWrapper.job.cullfaces = IsMeshDependentOnNeighbourChunks;
+            var chunkDimensions = chunkManager.ChunkDimensions;
+            jobWrapper.job.dimensions = new int3(chunkDimensions.x, chunkDimensions.y, chunkDimensions.z);
+
+            var chunkData = chunkManager.GetReadOnlyChunkData(chunkID);
+
+            //Copy chunk data to native array
+            NativeArray<V> voxels = chunkData.ToNative();
+
+            jobWrapper.job.voxels = voxels;
+
+            NeighbourData<V> neighbourData = new NeighbourData<V>();
+            //Cache neighbour data if necessary
+            if (IsMeshDependentOnNeighbourChunks)
+            {
+                for (int i = 0; i < Directions.NumDirections; i++)
+                {
+                    var neighbourID = chunkData.ChunkID + Directions.IntVectors[i];
+                    neighbourData.Add(i, chunkManager.GetReadOnlyChunkData(neighbourID).BorderToNative(Directions.Oposite[i]));
+                }
+            }
+            //TODO initialise neighbourdata empty if not dependent
+
+            jobWrapper.job.neighbourData = neighbourData;
+
+            jobWrapper.job.meshDatabase = voxelTypeManager.nativeMeshDatabase;
+            jobWrapper.job.voxelTypeDatabase = voxelTypeManager.nativeVoxelTypeDatabase;
+            jobWrapper.job.DirectionVectors = directionVectors;
+            jobWrapper.job.DirectionOpposites = directionOpposites;
+
+            jobWrapper.job.vertices = new NativeList<float3>(Allocator.Persistent);
+            jobWrapper.job.uvs = new NativeList<float3>(Allocator.Persistent);
+            jobWrapper.job.normals = new NativeList<float3>(Allocator.Persistent);
+            jobWrapper.job.triangleIndices = new NativeList<int>(Allocator.Persistent);
+
+            Func<Mesh> cleanup = () =>
+            {
+                Mesh mesh = new Mesh();
+
+                if (jobWrapper.job.vertices.Length >= ushort.MaxValue)
+                {
+                    //Cope with bigger meshes
+                    mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+                }
+
+                mesh.vertices = jobWrapper.job.vertices.ToArray().ToBasic();
+                mesh.SetUVs(0, jobWrapper.job.uvs.ToArray().ToBasic());
+                mesh.normals = jobWrapper.job.normals.ToArray().ToBasic();
+                mesh.triangles = jobWrapper.job.triangleIndices.ToArray();
+
+                jobWrapper.job.vertices.Dispose();
+                jobWrapper.job.uvs.Dispose();
+                jobWrapper.job.normals.Dispose();
+                jobWrapper.job.triangleIndices.Dispose();
+
+                jobWrapper.job.voxels.Dispose();
+                jobWrapper.job.neighbourData.Dispose();
+
+                return mesh;
+            };
+
+            Profiler.EndSample();
+
+            //DEBUG
+            //return new BasicFunctionJob<Mesh>(() =>
+            //{
+            //    //jobWrapper.job.Run();
+            //    jobWrapper.job.Execute();
+            //    return cleanup();
+            //});
+            return new PipelineUnityJob<Mesh, MeshingJob<V>>(jobWrapper, cleanup);
+
         }
-
-        //public AbstractPipelineJob<Mesh> CreateMeshJob(Vector3Int chunkID) 
-        //{
-        //    var jobWrapper = new JobWrapper<MeshingJob<V>>();
-        //    jobWrapper.job = new MeshingJob<V>();
-        //    jobWrapper.job.cullfaces = IsMeshDependentOnNeighbourChunks;
-        //    var chunkDimensions = chunkManager.ChunkDimensions;
-        //    jobWrapper.job.dimensions = new int3(chunkDimensions.x, chunkDimensions.y, chunkDimensions.z);
-
-        //    var chunkData = chunkManager.GetReadOnlyChunkData(chunkID);
-
-        //    //Copy chunk data to native array
-        //    NativeArray<V> voxels = chunkData.ToNative();
-
-        //    jobWrapper.job.voxels = voxels;
-
-        //    NativeHashMap<int, NativeArray<V>> neighbourData = new NativeHashMap<int, NativeArray<V>>(Directions.NumDirections, Allocator.Persistent);
-        //    //Cache neighbour data if necessary
-        //    if (IsMeshDependentOnNeighbourChunks)
-        //    {
-        //        for (int i = 0; i < Directions.NumDirections; i++)
-        //        {
-        //            var neighbourID = chunkData.ChunkID + Directions.IntVectors[i];
-        //            neighbourData.Add(i,chunkManager.GetReadOnlyChunkData(neighbourID).BorderToNative(Directions.Oposite[i]));
-        //        }
-        //    }
-        //    jobWrapper.job.neighbourData = neighbourData;
-
-        //    jobWrapper.job.meshForVoxelType = voxelTypeManager.meshForVoxelType;
-        //    jobWrapper.job.zIndicesPerFaceForVoxelType = voxelTypeManager.zIndicesPerFaceForVoxelType;
-        //    jobWrapper.job.DirectionVectors = directionVectors;
-
-        //    Func<Mesh> cleanup = ()=>
-        //    {
-        //        Mesh mesh = new Mesh();
-
-        //        if (jobWrapper.job.vertices.Length >= ushort.MaxValue)
-        //        {
-        //            //Cope with bigger meshes
-        //            mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
-        //        }
-
-        //        mesh.vertices = jobWrapper.job.vertices.ToArray().ToBasic();
-        //        mesh.SetUVs(0, jobWrapper.job.uvs.ToArray().ToBasic());
-        //        mesh.normals = jobWrapper.job.normals.ToArray().ToBasic();
-        //        mesh.triangles = jobWrapper.job.triangleIndices.ToArray();
-
-        //        jobWrapper.job.vertices.Dispose();
-        //        jobWrapper.job.uvs.Dispose();
-        //        jobWrapper.job.normals.Dispose();
-        //        jobWrapper.job.triangleIndices.Dispose();
-
-        //        return mesh;
-        //    };
-
-        //    return new PipelineUnityJob<Mesh, MeshingJob<V>>(jobWrapper, cleanup);
-
-        //}
 
     }
 
@@ -225,19 +248,20 @@ namespace UniVox.Framework
     public struct MeshingJob<V> : IJob
         where V:struct, IVoxelData
     {
-        public bool cullfaces;
-        public int3 dimensions;
-        private const int numDirections = Directions.NumDirections;
+        [ReadOnly] public bool cullfaces;
+        [ReadOnly] public int3 dimensions;
+        [ReadOnly] private const int numDirections = Directions.NumDirections;
 
         [ReadOnly] public NativeArray<V> voxels;
-        //Map direction -> neighbour data
-        [ReadOnly] public NativeHashMap<int, NativeArray<V>> neighbourData;
 
-        [ReadOnly] public NativeHashMap<ushort, BurstableMeshDefinition> meshForVoxelType;
+        [ReadOnly] public NeighbourData<V> neighbourData;
 
-        [ReadOnly] public NativeHashMap<ushort, NativeArray<float>> zIndicesPerFaceForVoxelType;
+        [ReadOnly] public NativeMeshDatabase meshDatabase;
+
+        [ReadOnly] public NativeVoxelTypeDatabase voxelTypeDatabase;
 
         [ReadOnly] public NativeArray<int3> DirectionVectors;
+        [ReadOnly] public NativeArray<byte> DirectionOpposites;
 
         public NativeList<float3> vertices;
         public NativeList<float3> uvs;
@@ -270,27 +294,29 @@ namespace UniVox.Framework
 
         private void AddMeshDataForVoxel(ushort id, int3 position, ref int currentIndex)
         {
-            var meshDefinition = meshForVoxelType[id];
-            var faceZs = zIndicesPerFaceForVoxelType[id];
+            var meshID = meshDatabase.voxelTypeToMeshTypeMap[id];
+            var faceZRange = voxelTypeDatabase.voxelTypeToZIndicesRangeMap[id];
 
             //Add single voxel's data
             for (int i = 0; i < numDirections; i++)
             {
                 if (IncludeFace(position, i))
                 {
-                    AddFace(ref meshDefinition, faceZs[i], i, position,ref currentIndex);
+                    AddFace(meshID, voxelTypeDatabase.zIndicesPerFace[faceZRange.start+i], i, position,ref currentIndex);
                 }
             }
         }
 
-        private void AddFace(ref BurstableMeshDefinition meshDefinition, float uvZ, int direction,int3 position,ref int currentIndex)
+        private void AddFace(int meshID, float uvZ, int direction,int3 position,ref int currentIndex)
         {
-            var usedNodesSlice = meshDefinition.nodesUsedByFace[direction];
+            var meshRange = meshDatabase.meshTypeRanges[meshID];
+
+            var usedNodesSlice = meshDatabase.nodesUsedByFaces[meshRange.start+direction];
 
             //Add all the nodes used by this face
             for (int i = usedNodesSlice.start; i < usedNodesSlice.end; i++)
             {
-                var node = meshDefinition.nodes[i];
+                var node = meshDatabase.allMeshNodes[i];
                 vertices.Add(node.vertex + position);
                 uvs.Add(new float3(node.uv, uvZ));
                 normals.Add(node.normal);
@@ -298,11 +324,11 @@ namespace UniVox.Framework
 
             //Add the triangleIndices used by this face
 
-            var relativeTrianglesSlice = meshDefinition.relativeTrianglesByFace[direction];
+            var relativeTrianglesSlice = meshDatabase.relativeTrianglesByFaces[meshRange.start + direction];
 
             for (int i = relativeTrianglesSlice.start; i < relativeTrianglesSlice.end; i++)
             {
-                triangleIndices.Add(meshDefinition.allRelativeTriangles[i] + currentIndex);
+                triangleIndices.Add(meshDatabase.allRelativeTriangles[i] + currentIndex);
             }
 
             //Update indexing
@@ -346,10 +372,12 @@ namespace UniVox.Framework
                 //Include the face if the adjacent voxel is air
                 return true;
             }
-            var adjacentMesh = meshForVoxelType[voxelTypeID];
+            var meshID = meshDatabase.voxelTypeToMeshTypeMap[voxelTypeID];
+            var meshRange = meshDatabase.meshTypeRanges[meshID];
+            var faceIsSolid = meshDatabase.isFaceSolid[meshRange.start + DirectionOpposites[direction]];
 
             //Exclude this face if adjacent face is solid
-            return !adjacentMesh.isFaceSolid[Directions.Oposite[direction]];
+            return !faceIsSolid;
         }
 
         private bool TryGetVoxelAt(int3 pos, out ushort voxelId) 

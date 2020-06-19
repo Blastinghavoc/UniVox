@@ -1,16 +1,13 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System;
 using Unity.Collections;
-using UniVox.Implementations.ChunkData;
-using UniVox.Framework;
-using System.Collections.Generic;
 using Unity.Mathematics;
+using UnityEngine;
 
 namespace UniVox.Framework.Jobified
 {
     public static class NativeExtensions
     {
-        public static NativeArray<V> ToNative<V>(this IChunkData<V> chunkData) 
+        public static NativeArray<V> ToNative<V>(this IChunkData<V> chunkData)
             where V : struct, IVoxelData
         {
             //Copy chunk data to native array
@@ -42,45 +39,45 @@ namespace UniVox.Framework.Jobified
         /// <param name="chunkData"></param>
         /// <param name="Direction"></param>
         /// <returns></returns>
-        public static NativeArray<V> BorderToNative<V>(this IChunkData<V> chunkData,int Direction)
+        public static NativeArray<V> BorderToNative<V>(this IChunkData<V> chunkData, int Direction)
             where V : struct, IVoxelData
         {
-            StartEnd xRange = new StartEnd() { start = 0, end = chunkData.Dimensions.x};
+            StartEnd xRange = new StartEnd() { start = 0, end = chunkData.Dimensions.x };
             StartEnd yRange = new StartEnd() { start = 0, end = chunkData.Dimensions.y };
             StartEnd zRange = new StartEnd() { start = 0, end = chunkData.Dimensions.z };
 
             switch (Direction)
             {
                 case Directions.UP:
-                    yRange.start = yRange.end-1;
+                    yRange.start = yRange.end - 1;
                     break;
                 case Directions.DOWN:
-                    yRange.end = yRange.end + 1;
+                    yRange.end = yRange.start +1;
                     break;
                 case Directions.NORTH:
                     zRange.start = zRange.end - 1;
                     break;
                 case Directions.SOUTH:
-                    zRange.end = zRange.start + 1;
+                    zRange.end = zRange.start +1;
                     break;
                 case Directions.EAST:
                     xRange.start = xRange.end - 1;
                     break;
                 case Directions.WEST:
-                    xRange.end = xRange.start + 1;
+                    xRange.end = xRange.start+1;
                     break;
                 default:
-                    break;
+                    throw new ArgumentException($"direction {Direction} was not recognised");
             }
 
-            NativeArray<V> voxelData = new NativeArray<V>(xRange.Length * yRange.Length * zRange.Length,Allocator.Persistent);
+            NativeArray<V> voxelData = new NativeArray<V>(xRange.Length * yRange.Length * zRange.Length, Allocator.Persistent);
 
             int i = 0;
-            for (int z = 0; z < chunkData.Dimensions.z; z++)
+            for (int z = zRange.start; z < zRange.end; z++)
             {
-                for (int y = 0; y < chunkData.Dimensions.y; y++)
+                for (int y = yRange.start; y < yRange.end; y++)
                 {
-                    for (int x = 0; x < chunkData.Dimensions.x; x++)
+                    for (int x = xRange.start; x < xRange.end; x++)
                     {
                         voxelData[i] = chunkData[x, y, z];
 
@@ -93,7 +90,7 @@ namespace UniVox.Framework.Jobified
 
         }
 
-        public static Vector3[] ToBasic(this float3[] arr) 
+        public static Vector3[] ToBasic(this float3[] arr)
         {
             Vector3[] result = new Vector3[arr.Length];
             for (int i = 0; i < arr.Length; i++)
@@ -101,6 +98,20 @@ namespace UniVox.Framework.Jobified
                 result[i] = arr[i].ToBasic();
             }
             return result;
+        }
+
+        /// <summary>
+        /// Dispose of array if it was created
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="arr"></param>
+        public static void SmartDispose<T>(this NativeArray<T> arr)
+            where T : struct
+        {
+            if (arr.IsCreated)
+            {
+                arr.Dispose();
+            }
         }
     }
 }

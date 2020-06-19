@@ -41,7 +41,11 @@ namespace UniVox.Framework.ChunkPipeline
             stages.Add(ScheduledForData);
 
             var GeneratingData = new WaitForJobStage<IChunkData<V>>("GeneratingData", i++, TargetStageGreaterThanCurrent, chunkProvider.ProvideChunkDataJob,
-                (cId, dat) => getChunkComponent(cId).Data = dat, maxDataPerUpdate);
+                (cId, dat) => { 
+                    dat.FullyGenerated = true;
+                    getChunkComponent(cId).Data = dat;
+                }
+                , maxDataPerUpdate);
             stages.Add(GeneratingData);
             DataStage = i;
             ScheduledForData.UpdateMax = GeneratingData.MaxToEnter;

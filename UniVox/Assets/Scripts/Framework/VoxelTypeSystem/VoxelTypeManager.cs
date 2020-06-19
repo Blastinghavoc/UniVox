@@ -25,8 +25,8 @@ namespace UniVox.Framework
         private List<VoxelTypeData> typeData;
 
         #region Job Compatibility
-        //public NativeHashMap<ushort, BurstableMeshDefinition> meshForVoxelType { get; private set; }
-        //public NativeHashMap<ushort, NativeArray<float>> zIndicesPerFaceForVoxelType { get; private set; }
+        public NativeMeshDatabase nativeMeshDatabase;
+        public NativeVoxelTypeDatabase nativeVoxelTypeDatabase;
         #endregion
 
         //Ensure that default initialisation of a VoxelData instance is Air
@@ -94,30 +94,14 @@ namespace UniVox.Framework
 
         private void InitialiseJobified() 
         {
-            //meshForVoxelType = new NativeHashMap<ushort, BurstableMeshDefinition>(typeData.Count, Allocator.Persistent);
-            //zIndicesPerFaceForVoxelType = new NativeHashMap<ushort, NativeArray<float>>(typeData.Count, Allocator.Persistent);
-
-            //Dictionary<SOMeshDefinition, BurstableMeshDefinition> uniqueMeshDefinitions = new Dictionary<SOMeshDefinition, BurstableMeshDefinition>();
-
-            //for (ushort id = 0; id < typeData.Count; id++)
-            //{
-            //    var item = typeData[id];
-            //    zIndicesPerFaceForVoxelType.Add(id, new NativeArray<float>(item.zIndicesPerFace,Allocator.Persistent));
-
-            //    var SODef = item.definition.meshDefinition;
-            //    if (!uniqueMeshDefinitions.TryGetValue(SODef,out var burstable))
-            //    {
-            //        burstable = SODef.ToBurst();
-            //        uniqueMeshDefinitions.Add(SODef, burstable);
-            //    }
-            //    meshForVoxelType.Add(id,burstable);
-            //}
+            nativeMeshDatabase = NativeMeshDatabaseExtensions.FromTypeData(typeData);
+            nativeVoxelTypeDatabase = NativeVoxelTypeDatabaseExtensions.FromTypeData(typeData);
         }
 
         private void OnDestroy()
         {
-            //meshForVoxelType.Dispose();
-            //zIndicesPerFaceForVoxelType.Dispose();
+            nativeMeshDatabase.Dispose();
+            nativeVoxelTypeDatabase.Dispose();
         }
 
         public VoxelTypeData GetData(ushort voxelTypeID)
