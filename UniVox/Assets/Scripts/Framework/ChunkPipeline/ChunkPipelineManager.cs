@@ -90,7 +90,10 @@ namespace UniVox.Framework.ChunkPipeline
                 (cId, mesh) => getChunkComponent(cId).SetRenderMesh(mesh),maxMeshPerUpdate);
             stages.Add(GeneratingMesh);
             //TODO remove DEBUG
-            GeneratingMesh.PreconditionCheck = (cId) => NeighboursHaveData(cId);
+            if (chunkMesher.IsMeshDependentOnNeighbourChunks)
+            {
+                GeneratingMesh.PreconditionCheck = (cId) => NeighboursHaveData(cId);
+            }
 
             RenderedStage = i;
             ScheduledForMesh.UpdateMax = GeneratingMesh.MaxToEnter;
@@ -159,9 +162,33 @@ namespace UniVox.Framework.ChunkPipeline
                 foreach (var item in goingBackwards)
                 {
                     //Send the item back one stage, as long as it's valid to do so
-                    if (chunkStageMap.TryGetValue(item,out var stageData) && stageData.maxStage >= prevStageIndex)
+                    if (chunkStageMap.TryGetValue(item,out var stageData))
                     {
-                        ReenterAtStage(item, prevStageIndex,stageData);
+                        if (stageData.maxStage >= prevStageIndex)
+                        {
+                            ReenterAtStage(item, prevStageIndex,stageData);
+                            if (stageData.maxStage == stageIndex)
+                            {
+                                ///This was the max stage, it has now been demoted
+                                stageData.maxStage = prevStageIndex;
+                            }
+                        }
+                        else
+                        {
+                            ///Discard the item, its state is not currently valid.
+                            ///This can only be because the chunk id was removed from the pipeline
+                            ///and re-added while this item was stuck in this stage, and it has 
+                            ///only just been released. Being here implies that the id was re-added
+                            ///with a lower priority.
+                        }
+                    }
+                    else
+                    {
+                        ///Otherwise, the item has been removed from the pipeline and should be discarded, but
+                        ///that should have happened earlier than this (it should have been added to the Terminating
+                        ///list, not the GoingBackwards list)
+                        throw new Exception($"{item} terminated in an unexpected way, it was part of the GoingBackwards list " +
+                            $"when it should have been part of the terminating list");
                     }
                 }
             }

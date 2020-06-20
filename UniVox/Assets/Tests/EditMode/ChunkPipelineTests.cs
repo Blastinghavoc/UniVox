@@ -108,6 +108,12 @@ namespace Tests
             mockComponentStorage.Add(id,new MockChunkComponent() { ChunkID = id});
         }
 
+        void mockRemoveChunk(Vector3Int id) 
+        {
+            pipeline.RemoveChunk(id);
+            mockComponentStorage.Remove(id);
+        }
+
         float MockGetPriorityOfChunk(Vector3Int chunkID)
         {
             var absDisplacement = (mockPlayChunkID - chunkID).ElementWise(Mathf.Abs);
@@ -402,21 +408,238 @@ namespace Tests
             AssertChunkStages(third, pipeline.CompleteStage, pipeline.CompleteStage, pipeline.CompleteStage);
         }
 
-        // A Test behaves as an ordinary method
-        [Test]
-        public void ChunkPipelineTestsSimplePasses()
+       [Test]
+        public void ChunkRemovedWhileScheduledForData() 
         {
-            // Use the Assert class to test conditions
+            pipeline = new ChunkPipelineManager<VoxelData>(
+              mockProvider,
+              mockMesher,
+              mockGetComponent,
+              mockCreateNewChunkWithTarget,
+              MockGetPriorityOfChunk,
+              1,
+              1,
+              1
+              );
+
+            var testId = new Vector3Int(10, 0, 0);
+            mockCreateNewChunkWithTarget(new Vector3Int(0, 0, 0), pipeline.CompleteStage);
+            mockCreateNewChunkWithTarget(testId, pipeline.CompleteStage);
+
+            pipeline.Update();
+
+            //the testId should not have progressed due to the max per update limit
+            AssertChunkStages(testId, 0, 0, pipeline.CompleteStage);
+
+            //Remove the chunk
+            mockRemoveChunk(testId);
+
+            //Exception should be thrown on trying to get the chunk id now
+            Assert.That(() => pipeline.GetMaxStage(testId),
+                  Throws.TypeOf<ArgumentOutOfRangeException>(),
+                  "Should throw exception when trying to get max stage of a chunk that was removed from the pipeline");
+
+            //Add the chunk back
+            mockCreateNewChunkWithTarget(testId, pipeline.CompleteStage);
+
+            pipeline.Update();
+
+            //The chunk should have passed through the pipeline
+
+            AssertChunkStages(testId, pipeline.CompleteStage, pipeline.CompleteStage, pipeline.CompleteStage);
+
         }
 
-        // A UnityTest behaves like a coroutine in Play Mode. In Edit Mode you can use
-        // `yield return null;` to skip a frame.
-        [UnityTest]
-        public IEnumerator ChunkPipelineTestsWithEnumeratorPasses()
+        [Test]
+        public void ChunkRemovedWhileScheduledForMeshWithDependencies()
         {
-            // Use the Assert class to test conditions.
-            // Use yield to skip a frame.
-            yield return null;
+            mockMesher.IsMeshDependentOnNeighbourChunks = true;
+            pipeline = new ChunkPipelineManager<VoxelData>(
+              mockProvider,
+              mockMesher,
+              mockGetComponent,
+              mockCreateNewChunkWithTarget,
+              MockGetPriorityOfChunk,
+              100,
+              1,
+              1
+              );
+
+            var zeroId = new Vector3Int(0, 0, 0);
+            var testId = new Vector3Int(1, 0, 0);
+            mockCreateNewChunkWithTarget(zeroId, pipeline.CompleteStage);
+
+            pipeline.Update();
+
+            //cid 0 should get to waiting for neighbours
+            AssertChunkStages(zeroId, pipeline.DataStage, pipeline.DataStage, pipeline.CompleteStage);
+
+            //The test id should have been added to the start stage as it is a neighbour of cid 0
+            AssertChunkStages(testId, 0, 0, pipeline.DataStage);
+
+            //Update the target of some of the other neighbours
+            pipeline.SetTarget(new Vector3Int(0, 1, 0), pipeline.CompleteStage);
+            pipeline.SetTarget(new Vector3Int(0, 0, 1), pipeline.CompleteStage);
+            pipeline.SetTarget(new Vector3Int(0, 0, -1), pipeline.CompleteStage);
+            pipeline.SetTarget(new Vector3Int(0, -1, 0), pipeline.CompleteStage);
+
+            pipeline.Update();
+
+            //zeroID should be complete
+            AssertChunkStages(zeroId, pipeline.CompleteStage, pipeline.CompleteStage, pipeline.CompleteStage);
+
+            //Update the target of the test id
+            pipeline.SetTarget(testId, pipeline.CompleteStage);
+
+            pipeline.Update();
+            pipeline.Update();
+
+            //the test id should be scheduled for mesh
+            AssertChunkStages(testId, pipeline.DataStage + 1, pipeline.DataStage + 1, pipeline.CompleteStage);
+
+            //Remove the test id
+            mockRemoveChunk(testId);
+
+            //Exception should be thrown on trying to get the chunk id now
+            Assert.That(() => pipeline.GetMaxStage(testId),
+                  Throws.TypeOf<ArgumentOutOfRangeException>(),
+                  "Should throw exception when trying to get max stage of a chunk that was removed from the pipeline");
+
+            //Add it back with a lower priority
+            mockCreateNewChunkWithTarget(testId, pipeline.DataStage);
+
+            pipeline.Update();
+
+            //test id should be back in the data stage
+            AssertChunkStages(testId, pipeline.DataStage, pipeline.DataStage, pipeline.DataStage);
+
+        }
+
+        [Test]
+        public void OneOfNeighboursRemovedWhileScheduledForMesh()
+        {
+            mockMesher.IsMeshDependentOnNeighbourChunks = true;
+            pipeline = new ChunkPipelineManager<VoxelData>(
+              mockProvider,
+              mockMesher,
+              mockGetComponent,
+              mockCreateNewChunkWithTarget,
+              MockGetPriorityOfChunk,
+              100,
+              1,
+              1
+              );
+
+            var zeroId = new Vector3Int(0, 0, 0);
+            var testId = new Vector3Int(1, 0, 0);
+            mockCreateNewChunkWithTarget(zeroId, pipeline.CompleteStage);
+
+            pipeline.Update();
+
+            //cid 0 should get to waiting for neighbours
+            AssertChunkStages(zeroId, pipeline.DataStage, pipeline.DataStage, pipeline.CompleteStage);
+
+            //The test id should have been added to the start stage as it is a neighbour of cid 0
+            AssertChunkStages(testId, 0, 0, pipeline.DataStage);
+
+            //Update the target of some of the other neighbours
+            pipeline.SetTarget(new Vector3Int(0, 1, 0), pipeline.CompleteStage);
+            pipeline.SetTarget(new Vector3Int(0, 0, 1), pipeline.CompleteStage);
+
+
+            pipeline.Update();
+
+            //zeroID should be complete
+            AssertChunkStages(zeroId, pipeline.CompleteStage, pipeline.CompleteStage, pipeline.CompleteStage);
+
+            //Update the target of the test id
+            pipeline.SetTarget(testId, pipeline.CompleteStage);
+
+            pipeline.Update();
+            pipeline.Update();
+
+            //the test id should be scheduled for mesh
+            AssertChunkStages(testId, pipeline.DataStage +1, pipeline.DataStage + 1, pipeline.CompleteStage);
+
+            //Remove one of the test id's neighbours
+            mockRemoveChunk(zeroId);
+
+            pipeline.Update();
+
+            //test id should be back in the waiting for neighbour data stage
+            AssertChunkStages(testId, pipeline.DataStage, pipeline.DataStage, pipeline.CompleteStage);
+
+        }
+
+        [Test]
+        public void NeighbourAndSelfRemovedWhileScheduledForMesh()
+        {
+            mockMesher.IsMeshDependentOnNeighbourChunks = true;
+            int maxData = 100;
+            pipeline = new ChunkPipelineManager<VoxelData>(
+              mockProvider,
+              mockMesher,
+              mockGetComponent,
+              mockCreateNewChunkWithTarget,
+              MockGetPriorityOfChunk,
+              maxData,
+              1,
+              1
+              );
+
+            var zeroId = new Vector3Int(0, 1000, 0);
+            var testId = new Vector3Int(1, 1000, 0);
+            mockCreateNewChunkWithTarget(zeroId, pipeline.CompleteStage);
+
+            pipeline.Update();
+
+            //zeroId should get to waiting for neighbours
+            AssertChunkStages(zeroId, pipeline.DataStage, pipeline.DataStage, pipeline.CompleteStage);
+
+            //The test id should have been added to the start stage as it is a neighbour of cid 0
+            AssertChunkStages(testId, 0, 0, pipeline.DataStage);
+
+            //Update the target of some of the other neighbours
+            pipeline.SetTarget(new Vector3Int(0, 1001, 0), pipeline.CompleteStage);
+            pipeline.SetTarget(new Vector3Int(0, 1000, 1), pipeline.CompleteStage);
+
+
+            pipeline.Update();
+
+            //zeroID should be complete
+            AssertChunkStages(zeroId, pipeline.CompleteStage, pipeline.CompleteStage, pipeline.CompleteStage);
+
+            //Update the target of the test id
+            pipeline.SetTarget(testId, pipeline.CompleteStage);
+
+            pipeline.Update();
+            pipeline.Update();
+
+            //the test id should be scheduled for mesh
+            AssertChunkStages(testId, pipeline.DataStage + 1, pipeline.DataStage + 1, pipeline.CompleteStage);
+
+            //Remove one of the test id's neighbours
+            mockRemoveChunk(zeroId);
+            //Remove the test id itself
+            mockRemoveChunk(testId);
+
+            //Add loads of other chunks (with higher priority) to prevent the target getting back to the data stage
+            for (int i = 0; i <= maxData; i++)
+            {
+                mockCreateNewChunkWithTarget(new Vector3Int(0, 0, i), pipeline.DataStage);
+            }
+
+            //Add the test id back
+            mockCreateNewChunkWithTarget(testId,pipeline.CompleteStage);
+
+            //Min and max should now be 0 as the id has been removed and re-added
+            AssertChunkStages(testId, 0, 0, pipeline.CompleteStage);
+
+            pipeline.Update();
+
+            //test id should be in the start stage, with its min and max correct
+            AssertChunkStages(testId, 0, 0, pipeline.CompleteStage);
+
         }
 
         /// <summary>
