@@ -3,6 +3,7 @@ using UnityEngine;
 using Priority_Queue;
 using System.Collections.Generic;
 using UnityEngine.Profiling;
+using UnityEngine.Assertions;
 
 namespace UniVox.Framework.ChunkPipeline
 {
@@ -14,6 +15,12 @@ namespace UniVox.Framework.ChunkPipeline
 
         public Func<int> UpdateMax = null;
 
+        /// <summary>
+        /// A condition that is assumed to hold for any item in this stage.
+        /// If it is checked and found to be false, the item must go back to the previous stage.
+        /// </summary>
+        public Func<Vector3Int, bool> Precondition = (_) => true;
+
         public PrioritizedStage(string name, int order, int maxPerUpdate, 
             Func<Vector3Int, int, bool> nextStageCondition, 
             Func<Vector3Int, int, bool> waitEndedCondition,
@@ -23,17 +30,15 @@ namespace UniVox.Framework.ChunkPipeline
             getPriority = priorityFunc;
         }
 
-        public override void Update(out List<Vector3Int> movingOn, out List<Vector3Int> terminating)
+        protected override void SelfUpdate()
         {
             Profiler.BeginSample("PrioritizedStageUpdate");
+
             if (UpdateMax != null)
             {
                 //Potentially update the maximum every update.
                 MaxPerUpdate = UpdateMax();
             }
-
-            movingOn = new List<Vector3Int>();
-            terminating = new List<Vector3Int>();
 
             int movedOn = 0;
 
@@ -45,16 +50,25 @@ namespace UniVox.Framework.ChunkPipeline
                 if (movedOn >= MaxPerUpdate)
                 {
                     break;
-                }
+                }                
 
                 if (NextStageCondition(item, Order))
                 {
                     //The chunk would ordinarily be able to move on, but we need to check the wait condition first
                     if (WaitEndedCondition(item, Order))
                     {
-                        movingOn.Add(item);
-                        chunkIdsInStage.Remove(item);
-                        movedOn++;
+                        //Just before the chunk would move on, re-check that the precondition still holds
+                        if (Precondition(item))
+                        {
+                            MovingOnThisUpdate.Add(item);
+                            chunkIdsInStage.Remove(item);
+                            movedOn++;
+                        }
+                        else
+                        {
+                            GoingBackwardsThisUpdate.Add(item);
+                            chunkIdsInStage.Remove(item);
+                        }
                     }
                     else
                     {
@@ -65,19 +79,25 @@ namespace UniVox.Framework.ChunkPipeline
                 }
                 else
                 {
-                    terminating.Add(item);
+                    TerminatingThisUpdate.Add(item);
                     chunkIdsInStage.Remove(item);
                 }
             }
 
             //Remove items from the queue when they move on
-            foreach (var item in movingOn)
+            foreach (var item in MovingOnThisUpdate)
             {
                 queue.Remove(item);
             }
 
             //Remove items from the queue when they terminate
-            foreach (var item in terminating)
+            foreach (var item in TerminatingThisUpdate)
+            {
+                queue.Remove(item);
+            }
+
+            //Remove items from the queue when the go backwards
+            foreach (var item in GoingBackwardsThisUpdate)
             {
                 queue.Remove(item);
             }
@@ -137,6 +157,7 @@ namespace UniVox.Framework.ChunkPipeline
         public override void Add(Vector3Int incoming)
         {
             base.Add(incoming);
+            Assert.IsTrue(!queue.Contains(incoming), $"Queue already contained {incoming} in stage {Name}");
             queue.Enqueue(incoming, getPriority(incoming));
         }
 
@@ -145,6 +166,7 @@ namespace UniVox.Framework.ChunkPipeline
             base.AddAll(incoming);
             foreach (var item in incoming)
             {
+                Assert.IsTrue(!queue.Contains(item), $"Queue already contained {item} in stage {Name}");
                 queue.Enqueue(item, getPriority(item));
             }
         }

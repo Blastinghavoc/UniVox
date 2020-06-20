@@ -8,7 +8,7 @@ using UniVox.Framework.Jobified;
 
 namespace UniVox.Framework
 {
-    public class VoxelTypeManager : MonoBehaviour
+    public class VoxelTypeManager : MonoBehaviour, IDisposable
     {
         public class VoxelTypeData
         {
@@ -31,6 +31,8 @@ namespace UniVox.Framework
 
         //Ensure that default initialisation of a VoxelData instance is Air
         public const ushort AIR_ID = 0;
+
+        private bool disposed = false;
 
         public void Initialise()
         {
@@ -98,10 +100,19 @@ namespace UniVox.Framework
             nativeVoxelTypeDatabase = NativeVoxelTypeDatabaseExtensions.FromTypeData(typeData);
         }
 
+        public void Dispose() 
+        {
+            if (!disposed)
+            {
+                nativeMeshDatabase.Dispose();
+                nativeVoxelTypeDatabase.Dispose();
+                disposed = true;
+            }
+        }
+
         private void OnDestroy()
         {
-            nativeMeshDatabase.Dispose();
-            nativeVoxelTypeDatabase.Dispose();
+            Dispose();
         }
 
         public VoxelTypeData GetData(ushort voxelTypeID)

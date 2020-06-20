@@ -14,10 +14,14 @@ namespace UniVox.Framework.ChunkPipeline.VirtualJobs
         private JobHandle handle;
         private Func<T> cleanup ;
 
+        private bool cleanedUp = false;
         public override bool Done { get {
                 if (handle.IsCompleted)
                 {
-                    Finish();
+                    if (!cleanedUp)
+                    {
+                        DoCleanup();
+                    }
                     return true;
                 }
                 return false; 
@@ -35,22 +39,22 @@ namespace UniVox.Framework.ChunkPipeline.VirtualJobs
             handle = jobWrapper.job.Schedule();
         }
 
-        private void Finish()
+        private void DoCleanup()
         {
             handle.Complete();
             Result = cleanup();
+            cleanedUp = true;
         }
 
         /// <summary>
-        /// To be called if the job need to be prematurely ended.
-        /// Otherwise disposal will be handled by whatever receives the result.
+        /// To be called only if the job needs to be prematurely ended.
+        /// Otherwise the cleanup will be done when the job completes.
         /// </summary>
         public override void Dispose()
         {
-            Finish();
-            if (Result is IDisposable disposable)
+            if (!Done)
             {
-                disposable.Dispose();
+                DoCleanup();
             }
         }
     }

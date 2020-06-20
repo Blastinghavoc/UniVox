@@ -12,7 +12,7 @@ using TypeData = UniVox.Framework.VoxelTypeManager.VoxelTypeData;
 
 namespace UniVox.Framework
 {
-    public abstract class AbstractMesherComponent<V> : MonoBehaviour, IChunkMesher<V>
+    public abstract class AbstractMesherComponent<V> : MonoBehaviour, IChunkMesher<V>, IDisposable
         where V : struct, IVoxelData
     {
 
@@ -24,8 +24,12 @@ namespace UniVox.Framework
         protected VoxelTypeManager voxelTypeManager;
         protected AbstractChunkManager<V> chunkManager;
 
+        /// <summary>
+        /// Data to support mesh jobs
+        /// </summary>
         protected NativeArray<int3> directionVectors;
         protected NativeArray<byte> directionOpposites;
+        private bool disposed = false;
 
         public virtual void Initialise(VoxelTypeManager voxelTypeManager, AbstractChunkManager<V> chunkManager)
         {
@@ -42,10 +46,19 @@ namespace UniVox.Framework
             directionOpposites = new NativeArray<byte>(Directions.Oposite, Allocator.Persistent);
         }
 
+        public void Dispose() 
+        {
+            if (!disposed)
+            {
+                directionVectors.SmartDispose();
+                directionOpposites.SmartDispose();
+                disposed = true;
+            }
+        }
+
         private void OnDestroy()
         {
-            directionVectors.SmartDispose();
-            directionOpposites.SmartDispose();
+            Dispose();
         }
 
         public Mesh CreateMesh(IChunkData<V> chunk)
@@ -189,6 +202,7 @@ namespace UniVox.Framework
 
             NeighbourData<V> neighbourData = new NeighbourData<V>();
             //Cache neighbour data if necessary
+            
             if (IsMeshDependentOnNeighbourChunks)
             {
                 for (int i = 0; i < Directions.NumDirections; i++)

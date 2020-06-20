@@ -12,6 +12,16 @@ namespace UniVox.Framework.ChunkPipeline
 
         public int Count { get => chunkIdsInStage.Count; }
 
+        #region Lists populated after each update that may be of interest to external code
+        /// <summary>
+        /// Note that these are only valid after Update has been called each frame.
+        /// </summary>
+        public List<Vector3Int> MovingOnThisUpdate { get; protected set; }
+        public List<Vector3Int> TerminatingThisUpdate { get; protected set; }
+        //Items who must return to the previous stage
+        public List<Vector3Int> GoingBackwardsThisUpdate { get; protected set; }
+        #endregion
+
         /// <summary>
         /// The condition to be evalutated to decide whether to move the chunk to the next stage,
         /// or terminate it here. true -> continue, false -> terminate
@@ -24,6 +34,9 @@ namespace UniVox.Framework.ChunkPipeline
         {
             Name = name;
             Order = order;
+            MovingOnThisUpdate = new List<Vector3Int>();
+            TerminatingThisUpdate = new List<Vector3Int>();
+            GoingBackwardsThisUpdate = new List<Vector3Int>();
         }
 
         public PipelineStage(string name, int order, Func<Vector3Int, int, bool> nextStageCondition) : this(name, order)
@@ -31,27 +44,38 @@ namespace UniVox.Framework.ChunkPipeline
             NextStageCondition = nextStageCondition;
         }
 
-        public virtual void Update(out List<Vector3Int> movingOn, out List<Vector3Int> terminating)
+        /// <summary>
+        /// Clear the output lists in preparation for update
+        /// </summary>
+        private void ClearLists() 
         {
-            var movingOnTmp = new List<Vector3Int>();
-            var terminatingTmp = new List<Vector3Int>();
+            MovingOnThisUpdate.Clear();
+            TerminatingThisUpdate.Clear();
+            GoingBackwardsThisUpdate.Clear();
+        }
 
-            chunkIdsInStage.RemoveWhere((item)=> {
+        public void Update()
+        {
+            ClearLists();
+
+            SelfUpdate();
+        }
+
+        protected virtual void SelfUpdate() 
+        {
+            chunkIdsInStage.RemoveWhere((item) => {
                 if (NextStageCondition(item, Order))
                 {
-                    movingOnTmp.Add(item);
+                    MovingOnThisUpdate.Add(item);
                 }
                 else
                 {
-                    terminatingTmp.Add(item);
+                    TerminatingThisUpdate.Add(item);
                 }
                 //Always remove
                 return true;
 
             });
-
-            movingOn = movingOnTmp;
-            terminating = terminatingTmp;
 
             //All chunks in the stage have either moved on or terminated here
             Assert.AreEqual(0, chunkIdsInStage.Count);

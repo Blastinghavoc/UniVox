@@ -154,6 +154,8 @@ public abstract class AbstractChunkManager<VoxelDataType> : MonoBehaviour, IChun
     private void OnDestroy()
     {
         pipeline.Dispose();
+        VoxelTypeManager.Dispose();
+        chunkMesher.Dispose();
     }
 
     /// <summary>
@@ -217,12 +219,6 @@ public abstract class AbstractChunkManager<VoxelDataType> : MonoBehaviour, IChun
                     //If it was modified, don't dispose of it yet, give it back to the provider
                     chunkProvider.AddModifiedChunkData(chunkComponent.ChunkID, chunkComponent.Data);
                 }
-                else
-                {
-                    //If the data isn't being kept, dispose of it
-                    chunkComponent.Data.Dispose();
-                }
-
             }
 
             loadedChunks.Remove(chunkID);
@@ -396,6 +392,10 @@ public abstract class AbstractChunkManager<VoxelDataType> : MonoBehaviour, IChun
     {
         if (loadedChunks.TryGetValue(chunkID,out var chunkComponent))
         {
+            if (chunkComponent.Data == null)
+            {
+                throw new ArgumentException($"It is not valid to get read-only data for chunk ID {chunkID}, as its data is null");
+            }
             return new ReadOnlyChunkData<VoxelDataType>(chunkComponent.Data);
         }
         return null;    

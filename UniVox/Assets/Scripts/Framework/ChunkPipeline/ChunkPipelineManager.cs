@@ -6,6 +6,7 @@ using UniVox.Framework.ChunkPipeline.VirtualJobs;
 using UnityEngine.Assertions;
 using System.Text;
 using UnityEngine.Profiling;
+using System.Linq;
 
 namespace UniVox.Framework.ChunkPipeline
 {
@@ -37,37 +38,60 @@ namespace UniVox.Framework.ChunkPipeline
 
             int i = 0;
 
-            var ScheduledForData = new PrioritizedStage("ScheduledForData", i++, maxDataPerUpdate, TargetStageGreaterThanCurrent, NextStageFreeForChunk, getPriorityOfChunk);
+            var ScheduledForData = new PrioritizedStage("ScheduledForData", i++, 
+                maxDataPerUpdate, 
+                TargetStageGreaterThanCurrent, 
+                NextStageFreeForChunk, 
+                getPriorityOfChunk);
             stages.Add(ScheduledForData);
 
-            var GeneratingData = new WaitForJobStage<IChunkData<V>>("GeneratingData", i++, TargetStageGreaterThanCurrent, chunkProvider.ProvideChunkDataJob,
-                (cId, dat) => { 
-                    dat.FullyGenerated = true;
-                    getChunkComponent(cId).Data = dat;
-                }
-                , maxDataPerUpdate);
+            var GeneratingData = new WaitForJobStage<IChunkData<V>>("GeneratingData", i++, 
+                TargetStageGreaterThanCurrent, 
+                chunkProvider.ProvideChunkDataJob,
+                OnDataGenJobDone, 
+                maxDataPerUpdate);
             stages.Add(GeneratingData);
             DataStage = i;
+            //Ensure that ScheduledForData never sends too many items per update
             ScheduledForData.UpdateMax = GeneratingData.MaxToEnter;
 
             stages.Add(new PipelineStage("GotData",i++));
 
             if (chunkMesher.IsMeshDependentOnNeighbourChunks)
             {
+                /// If mesh is dependent on neighbour chunks, add a waiting stage
+                /// to wait until the neighvours of a chunk have their data before
+                /// moving that chunk onwards through the pipeline
                 DataStage = i;
-                stages.Add(new WaitingStage("WaitingForNeighbourData",i++, ShouldScheduleForNext,(cId,_)=>NeighboursHaveData(cId)));
+                stages.Add(new WaitingStage("WaitingForNeighbourData", i++, 
+                    ShouldScheduleForNext, 
+                    (cId, _) => NeighboursHaveData(cId,true)));
             }
             else
             {
                 stages[DataStage].NextStageCondition = ShouldScheduleForNext;
             }
 
-            var ScheduledForMesh = new PrioritizedStage("ScheduledForMesh", i++, maxMeshPerUpdate, TargetStageGreaterThanCurrent, NextStageFreeForChunk, getPriorityOfChunk);
+
+            var ScheduledForMesh = new PrioritizedStage("ScheduledForMesh", i++, 
+                maxMeshPerUpdate, 
+                TargetStageGreaterThanCurrent,
+                (cId, stageNo) => NextStageFreeForChunk(cId, stageNo), 
+                getPriorityOfChunk);
+            if (chunkMesher.IsMeshDependentOnNeighbourChunks)
+            {
+                ///If mesh is dependent on neighbours, check the precondition has not changed
+                ///before a chunk is allowed to go from the ScheduledForMesh stage to GeneratingMesh
+                ScheduledForMesh.Precondition = (cId)=>NeighboursHaveData(cId);
+            }
             stages.Add(ScheduledForMesh);
 
             var GeneratingMesh = new WaitForJobStage<Mesh>("GeneratingMesh", i++, TargetStageGreaterThanCurrent, chunkMesher.CreateMeshJob,
                 (cId, mesh) => getChunkComponent(cId).SetRenderMesh(mesh),maxMeshPerUpdate);
             stages.Add(GeneratingMesh);
+            //TODO remove DEBUG
+            GeneratingMesh.PreconditionCheck = (cId) => NeighboursHaveData(cId);
+
             RenderedStage = i;
             ScheduledForMesh.UpdateMax = GeneratingMesh.MaxToEnter;
 
@@ -98,12 +122,21 @@ namespace UniVox.Framework.ChunkPipeline
             for (int stageIndex = 0; stageIndex < stages.Count; stageIndex++)
             {
                 var stage = stages[stageIndex];
-                stage.Update(out var movingOn, out var terminatingHere);
+                stage.Update();
+                var movingOn = stage.MovingOnThisUpdate;
 
                 if (movingOn.Count > 0)
                 {
                     var nextStageIndex = stageIndex + 1;
                     var nextStage = stages[nextStageIndex];
+
+                    //TODO remove DEBUG
+                    //foreach (var item in movingOn)
+                    //{
+                    //    Assert.IsTrue(!nextStage.Contains(item),$"Chunk ID {item} tried to move from stage {stage.Name} to stage {nextStage.Name} when the receiving stage already contained it!" +
+                    //        $"The moving on list contained {movingOn.Count((_)=> _==item)} instances of {item}");
+                    //}
+
                     nextStage.AddAll(movingOn);
                     foreach (var item in movingOn)
                     {
@@ -120,6 +153,17 @@ namespace UniVox.Framework.ChunkPipeline
                         }
                     }
                 }
+
+                var goingBackwards = stage.GoingBackwardsThisUpdate;
+                int prevStageIndex = stageIndex - 1;
+                foreach (var item in goingBackwards)
+                {
+                    //Send the item back one stage, as long as it's valid to do so
+                    if (chunkStageMap.TryGetValue(item,out var stageData) && stageData.maxStage >= prevStageIndex)
+                    {
+                        ReenterAtStage(item, prevStageIndex,stageData);
+                    }
+                }
             }
             Profiler.EndSample();
 
@@ -130,7 +174,13 @@ namespace UniVox.Framework.ChunkPipeline
             Assert.IsFalse(chunkStageMap.ContainsKey(chunkId));
             chunkStageMap.Add(chunkId, new ChunkStageData() { targetStage = targetStage});
             //Add to first stage
-            stages[0].Add(chunkId);
+            if (!stages[0].Contains(chunkId))
+            {
+                ///Note that there is a possibility that the first stage could already
+                ///contain the "new" chunk; if it had been added before, and then went out
+                ///of range the first stage may not have gotten around to removing it yet.
+                stages[0].Add(chunkId);
+            }
         }
 
         public void SetTarget(Vector3Int chunkId, int targetStage) 
@@ -217,7 +267,7 @@ namespace UniVox.Framework.ChunkPipeline
         {
             if (stage > stageData.maxStage)
             {
-                throw new ArgumentOutOfRangeException($"Cannot reenter chunk id {chunkID} at stage {stage} because it has" +
+                throw new ArgumentOutOfRangeException($"Cannot reenter chunk id {chunkID} at stage {stage} because it has " +
                     $"never previously reached that stage. The current max stage is {stageData.maxStage}");
             }
 
@@ -260,6 +310,12 @@ namespace UniVox.Framework.ChunkPipeline
             return ChunkDataReadable(stageData);
         }
 
+        private void OnDataGenJobDone(Vector3Int cId,IChunkData<V> dat) 
+        {
+            dat.FullyGenerated = true;
+            getChunkComponent(cId).Data = dat;
+        }
+
         /// <summary>
         /// Get the stage data for a chunk, under the assumption that it exists.
         /// An exception is thrown if it does not exist.
@@ -290,11 +346,12 @@ namespace UniVox.Framework.ChunkPipeline
 
         /// <summary>
         /// Checks whether all neighbours of the given chunk ID have data,
-        /// and requests generation of the data for any that do not.
+        /// and optionally requests generation of the data for any that do not.
         /// </summary>
         /// <param name="chunkID"></param>
+        /// <param name="generateMissing"></param>
         /// <returns></returns>
-        private bool NeighboursHaveData(Vector3Int chunkID) 
+        private bool NeighboursHaveData(Vector3Int chunkID,bool generateMissing = false) 
         {
             bool allHaveData = true;
             foreach (var dir in Directions.IntVectors)
@@ -303,8 +360,11 @@ namespace UniVox.Framework.ChunkPipeline
 
                 if (!chunkStageMap.TryGetValue(neighbourID, out var neighbourStageData))
                 {
-                    //The chunk does not exist at all, generate it to the data stage
-                    createNewChunkWithTarget(neighbourID, DataStage);
+                    if (generateMissing)
+                    {
+                        //The chunk does not exist at all, generate it to the data stage
+                        createNewChunkWithTarget(neighbourID, DataStage);
+                    }
                     allHaveData = false;
                 }
                 else if (!ChunkDataReadable(neighbourStageData))

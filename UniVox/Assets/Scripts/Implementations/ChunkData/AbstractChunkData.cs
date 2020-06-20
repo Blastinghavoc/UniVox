@@ -69,10 +69,6 @@ namespace UniVox.Implementations.ChunkData
             return false;
         }
 
-        public virtual void Dispose()
-        {
-            //Nothing to dispose, but subclasses may need this
-        }
         #endregion
     }
 }

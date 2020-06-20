@@ -32,11 +32,6 @@ namespace UniVox.Framework
             SetCollisionMesh(null);
         }
 
-        private void OnDestroy()
-        {
-            Data?.Dispose();
-        }
-
         public Mesh GetRenderMesh() 
         {
             return meshFilter.mesh;

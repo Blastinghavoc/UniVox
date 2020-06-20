@@ -7,17 +7,21 @@ using UniVox.Implementations.Common;
 
 namespace UniVox.Implementations.ChunkData
 {
-    public class NativeArrayChunkData : AbstractChunkData 
+    /// <summary>
+    /// Similar to arrayChunkData, but implented with a flat array.
+    /// This allows it to be easily constructed from the result of a job.
+    /// </summary>
+    public class FlatArrayChunkData : AbstractChunkData 
     {
         /// <summary>
         /// XYZ Voxel Data
         /// </summary>
-        protected NativeArray<VoxelData> voxels;
+        protected VoxelData[] voxels;
 
         //Dimensions.x*Dimensions.y cache
         private int dxdy;
 
-        public NativeArrayChunkData(Vector3Int ID, Vector3Int chunkDimensions,NativeArray<VoxelData> data) : base(ID, chunkDimensions)
+        public FlatArrayChunkData(Vector3Int ID, Vector3Int chunkDimensions, VoxelData[] data) : base(ID, chunkDimensions)
         {
             if (chunkDimensions.x*chunkDimensions.y*chunkDimensions.z != data.Length)
             {
@@ -35,11 +39,6 @@ namespace UniVox.Implementations.ChunkData
         protected override void SetVoxelAtLocalCoordinates(int x, int y, int z, VoxelData voxel)
         {
             voxels[Utils.Helper.MultiIndexToFlat(x, y, z, Dimensions.x, dxdy)] = voxel;
-        }
-
-        public override void Dispose()
-        {
-            voxels.SmartDispose();
         }
     }
 }

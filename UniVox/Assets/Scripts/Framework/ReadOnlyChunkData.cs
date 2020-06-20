@@ -21,11 +21,6 @@ namespace UniVox.Framework
         public bool ModifiedSinceGeneration { get => realData.ModifiedSinceGeneration; set => throw new System.NotImplementedException(); }
         public bool FullyGenerated { get => realData.FullyGenerated; set => throw new System.NotImplementedException(); }
 
-        public void Dispose()
-        {
-            //Do nothing. We don't know if the real data is used elsewhere
-        }
-
         public bool TryGetVoxelAtLocalCoordinates(Vector3Int coords, out V vox)
         {
             return realData.TryGetVoxelAtLocalCoordinates(coords, out vox);

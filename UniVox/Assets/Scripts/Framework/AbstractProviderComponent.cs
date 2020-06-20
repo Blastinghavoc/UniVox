@@ -36,14 +36,6 @@ namespace UniVox.Framework
             ModifiedChunkData[chunkID] = data;
         }
 
-        private void OnDestroy()
-        {
-            foreach (var item in ModifiedChunkData.Values)
-            {
-                item.Dispose();
-            }
-        }
-
         public IChunkData<V> ProvideChunkData(Vector3Int chunkID) 
         {
             if (ModifiedChunkData.TryGetValue(chunkID,out var data))

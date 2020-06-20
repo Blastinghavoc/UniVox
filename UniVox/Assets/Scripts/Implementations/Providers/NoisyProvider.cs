@@ -99,8 +99,10 @@ namespace UniVox.Implementations.Providers
             {
                 Profiler.BeginSample("DataJobCleanup");
 
-                //Pass native array directly to chunk data object. It will be disposed of much later.
-                var ChunkData = new NativeArrayChunkData(chunkID, chunkDimensions, voxelData);
+                //Pass flat array to chunk data.
+                var ChunkData = new FlatArrayChunkData(chunkID, chunkDimensions, voxelData.ToArray());
+                //Dispose of native array
+                voxelData.Dispose();
 
                 //var ChunkData = new ArrayChunkData(chunkID, chunkDimensions);
 

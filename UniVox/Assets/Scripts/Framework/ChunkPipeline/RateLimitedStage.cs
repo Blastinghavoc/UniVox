@@ -27,11 +27,8 @@ namespace UniVox.Framework.ChunkPipeline
             this.MaxPerUpdate = maxPerUpdate;
         }
 
-        public override void Update(out List<Vector3Int> movingOn, out List<Vector3Int> terminating)
+        protected override void SelfUpdate()
         {
-            movingOn = new List<Vector3Int>();
-            terminating = new List<Vector3Int>();
-
             int movedOn = 0;
 
             /* Go through all the chunk ids in the stage, ensuring that any that should terminate do so,
@@ -44,7 +41,7 @@ namespace UniVox.Framework.ChunkPipeline
                     //The chunk would ordinarily be able to move on, but we need to check the wait condition first
                     if (movedOn < MaxPerUpdate &&  WaitEndedCondition(item, Order))
                     {                        
-                        movingOn.Add(item);
+                        MovingOnThisUpdate.Add(item);
                         movedOn++;
                     }
                     else
@@ -56,19 +53,19 @@ namespace UniVox.Framework.ChunkPipeline
                 }
                 else
                 {
-                    terminating.Add(item);
+                    TerminatingThisUpdate.Add(item);
                 }
             }
 
 
             //Remove the processed chunks
 
-            foreach (var item in movingOn)
+            foreach (var item in MovingOnThisUpdate)
             {
                 chunkIdsInStage.Remove(item);
             }
 
-            foreach (var item in terminating)
+            foreach (var item in TerminatingThisUpdate)
             {
                 chunkIdsInStage.Remove(item);
             }
