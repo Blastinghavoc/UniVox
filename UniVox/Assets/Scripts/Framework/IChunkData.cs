@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System;
+using Unity.Collections;
 
 namespace UniVox.Framework
 {
@@ -9,7 +10,7 @@ namespace UniVox.Framework
     /// The data representation of a Chunk
     /// </summary>
     public interface IChunkData<V>
-        where V : IVoxelData
+        where V : struct, IVoxelData
     {
         Vector3Int ChunkID { get; set; }
 
@@ -25,5 +26,6 @@ namespace UniVox.Framework
         bool TryGetVoxelAtLocalCoordinates(Vector3Int coords, out V vox);
         bool TryGetVoxelAtLocalCoordinates(int x, int y, int z, out V vox);
 
+        NativeArray<V> ToNative(Allocator allocator = Allocator.Persistent);
     }
 }

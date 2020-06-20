@@ -203,6 +203,11 @@ PrefabInstance:
       propertyPath: m_IsKinematic
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3231851409899628765, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4363647225878257416, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
       propertyPath: Burst
@@ -211,12 +216,22 @@ PrefabInstance:
     - target: {fileID: 5880167504519198129, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
       propertyPath: MaxMeshedPerUpdate
-      value: 12
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 5880167504519198129, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
       propertyPath: MaxGeneratedPerUpdate
-      value: 24
+      value: 12
+      objectReference: {fileID: 0}
+    - target: {fileID: 5880167504519198129, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: renderedChunksRadii.x
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5880167504519198129, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: renderedChunksRadii.z
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 5880167504519198131, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}

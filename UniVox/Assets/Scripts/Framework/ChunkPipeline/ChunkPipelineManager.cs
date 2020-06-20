@@ -11,7 +11,7 @@ using System.Linq;
 namespace UniVox.Framework.ChunkPipeline
 {
     public class ChunkPipelineManager<V>: IDisposable
-        where V : IVoxelData
+        where V :struct, IVoxelData
     {
         private List<PipelineStage> stages = new List<PipelineStage>();
 
@@ -89,6 +89,7 @@ namespace UniVox.Framework.ChunkPipeline
             var GeneratingMesh = new WaitForJobStage<Mesh>("GeneratingMesh", i++, TargetStageGreaterThanCurrent, chunkMesher.CreateMeshJob,
                 (cId, mesh) => getChunkComponent(cId).SetRenderMesh(mesh),maxMeshPerUpdate);
             stages.Add(GeneratingMesh);
+
             //TODO remove DEBUG
             if (chunkMesher.IsMeshDependentOnNeighbourChunks)
             {
@@ -125,20 +126,15 @@ namespace UniVox.Framework.ChunkPipeline
             for (int stageIndex = 0; stageIndex < stages.Count; stageIndex++)
             {
                 var stage = stages[stageIndex];
+                Profiler.BeginSample(stage.Name);
                 stage.Update();
+                Profiler.EndSample();
                 var movingOn = stage.MovingOnThisUpdate;
 
                 if (movingOn.Count > 0)
                 {
                     var nextStageIndex = stageIndex + 1;
                     var nextStage = stages[nextStageIndex];
-
-                    //TODO remove DEBUG
-                    //foreach (var item in movingOn)
-                    //{
-                    //    Assert.IsTrue(!nextStage.Contains(item),$"Chunk ID {item} tried to move from stage {stage.Name} to stage {nextStage.Name} when the receiving stage already contained it!" +
-                    //        $"The moving on list contained {movingOn.Count((_)=> _==item)} instances of {item}");
-                    //}
 
                     nextStage.AddAll(movingOn);
                     foreach (var item in movingOn)

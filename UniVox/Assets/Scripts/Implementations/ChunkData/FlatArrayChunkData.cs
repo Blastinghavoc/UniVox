@@ -40,5 +40,10 @@ namespace UniVox.Implementations.ChunkData
         {
             voxels[Utils.Helper.MultiIndexToFlat(x, y, z, Dimensions.x, dxdy)] = voxel;
         }
+
+        public override NativeArray<VoxelData> ToNative(Allocator allocator = Allocator.Persistent)
+        {
+            return new NativeArray<VoxelData>(voxels, allocator);
+        }
     }
 }

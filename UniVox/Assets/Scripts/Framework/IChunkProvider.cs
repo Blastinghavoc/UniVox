@@ -4,7 +4,7 @@ using UniVox.Framework.ChunkPipeline.VirtualJobs;
 
 namespace UniVox.Framework
 {
-    public interface IChunkProvider<V> where V : IVoxelData
+    public interface IChunkProvider<V> where V :struct, IVoxelData
     {
         /// <summary>
         /// Provides data for the chunk with given ID

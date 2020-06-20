@@ -1,10 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
+using Unity.Collections;
 
 namespace UniVox.Framework
 {
     public class ReadOnlyChunkData<V> : IChunkData<V>
-        where V : IVoxelData
+        where V :struct, IVoxelData
     {
         private IChunkData<V> realData;
 
@@ -20,6 +21,11 @@ namespace UniVox.Framework
         public Vector3Int Dimensions { get => realData.Dimensions; set => throw new System.NotImplementedException(); }
         public bool ModifiedSinceGeneration { get => realData.ModifiedSinceGeneration; set => throw new System.NotImplementedException(); }
         public bool FullyGenerated { get => realData.FullyGenerated; set => throw new System.NotImplementedException(); }
+
+        public NativeArray<V> ToNative(Allocator allocator = Allocator.Persistent)
+        {
+            return realData.ToNative(allocator);
+        }
 
         public bool TryGetVoxelAtLocalCoordinates(Vector3Int coords, out V vox)
         {

@@ -3,7 +3,7 @@
 namespace UniVox.Framework
 {
     public interface IChunkComponent<VoxelDataType>      
-        where VoxelDataType : IVoxelData
+        where VoxelDataType : struct,IVoxelData
     {
         Vector3Int ChunkID { get; }
         IChunkData<VoxelDataType> Data { get; set; }

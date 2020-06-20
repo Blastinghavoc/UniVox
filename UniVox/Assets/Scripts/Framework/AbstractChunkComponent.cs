@@ -11,7 +11,7 @@ namespace UniVox.Framework
     [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider))]
     public abstract class AbstractChunkComponent<V> : MonoBehaviour, 
         IChunkComponent<V> 
-        where V : IVoxelData
+        where V :struct, IVoxelData
     {
         public IChunkData<V> Data { get; set; }
         public Vector3Int ChunkID { get; private set; }

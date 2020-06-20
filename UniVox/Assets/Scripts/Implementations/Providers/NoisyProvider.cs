@@ -104,23 +104,6 @@ namespace UniVox.Implementations.Providers
                 //Dispose of native array
                 voxelData.Dispose();
 
-                //var ChunkData = new ArrayChunkData(chunkID, chunkDimensions);
-
-                //int i = 0;
-                //for (int z = 0; z < chunkDimensions.z; z++)
-                //{
-                //    for (int y = 0; y < chunkDimensions.y; y++)
-                //    {
-                //        for (int x = 0; x < chunkDimensions.x; x++)
-                //        {
-                //            ChunkData[x, y, z] = voxelData[i];
-                //            i++;
-                //        }
-                //    }
-                //}
-                ////Dispose of native array
-                //voxelData.Dispose();
-
                 Profiler.EndSample();
                 return ChunkData;
             };

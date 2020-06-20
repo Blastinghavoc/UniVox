@@ -1,5 +1,7 @@
-﻿using UnityEngine;
+﻿using Unity.Collections;
+using UnityEngine;
 using UniVox.Framework;
+using UniVox.Framework.Jobified;
 using UniVox.Implementations.Common;
 
 namespace UniVox.Implementations.ChunkData
@@ -67,6 +69,11 @@ namespace UniVox.Implementations.ChunkData
             }
             vox = default;
             return false;
+        }
+
+        public virtual NativeArray<VoxelData> ToNative(Allocator allocator = Allocator.Persistent)
+        {
+            return this.ToNativeBruteForce(allocator);
         }
 
         #endregion

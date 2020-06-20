@@ -9,7 +9,7 @@ using UnityEngine.Profiling;
 namespace UniVox.Framework
 {
     public abstract class AbstractProviderComponent<V> : MonoBehaviour, IChunkProvider<V>
-        where V : IVoxelData
+        where V : struct,IVoxelData
     {
         protected VoxelTypeManager voxelTypeManager;
         protected IChunkManager chunkManager;

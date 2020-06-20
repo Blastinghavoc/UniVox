@@ -173,11 +173,6 @@ namespace UniVox.Framework
             currentIndex += face.UsedVertices.Length;
         }
 
-        //public AbstractPipelineJob<Mesh> CreateMeshJob(Vector3Int chunkID)
-        //{
-        //    return new BasicFunctionJob<Mesh>(() => CreateMesh(chunkManager.GetReadOnlyChunkData(chunkID)));
-        //}
-
         public AbstractPipelineJob<Mesh> CreateMeshJob(Vector3Int chunkID)
         {
             if (!Burst)
@@ -196,13 +191,16 @@ namespace UniVox.Framework
             var chunkData = chunkManager.GetReadOnlyChunkData(chunkID);
 
             //Copy chunk data to native array
+            Profiler.BeginSample("VoxelsToNative");
             NativeArray<V> voxels = chunkData.ToNative();
+            Profiler.EndSample();
 
             jobWrapper.job.voxels = voxels;
 
             NeighbourData<V> neighbourData = new NeighbourData<V>();
             //Cache neighbour data if necessary
-            
+
+            Profiler.BeginSample("CacheNeighbourData");
             if (IsMeshDependentOnNeighbourChunks)
             {
                 for (int i = 0; i < Directions.NumDirections; i++)
@@ -211,7 +209,15 @@ namespace UniVox.Framework
                     neighbourData.Add(i, chunkManager.GetReadOnlyChunkData(neighbourID).BorderToNative(Directions.Oposite[i]));
                 }
             }
-            //TODO initialise neighbourdata empty if not dependent
+            else
+            {
+                //Initialise neighbour data with small blank arrays if not needed
+                for (int i = 0; i < Directions.NumDirections; i++)
+                {
+                    neighbourData.Add(i, new NativeArray<V>(1,Allocator.Persistent));
+                }
+            }
+            Profiler.EndSample();
 
             jobWrapper.job.neighbourData = neighbourData;
 

@@ -7,11 +7,11 @@ namespace UniVox.Framework.Jobified
 {
     public static class NativeExtensions
     {
-        public static NativeArray<V> ToNative<V>(this IChunkData<V> chunkData)
+        public static NativeArray<V> ToNativeBruteForce<V>(this IChunkData<V> chunkData,Allocator allocator = Allocator.Persistent)
             where V : struct, IVoxelData
         {
             //Copy chunk data to native array
-            NativeArray<V> voxels = new NativeArray<V>(chunkData.Dimensions.x * chunkData.Dimensions.y * chunkData.Dimensions.z, Allocator.Persistent);
+            NativeArray<V> voxels = new NativeArray<V>(chunkData.Dimensions.x * chunkData.Dimensions.y * chunkData.Dimensions.z, allocator);
 
             int i = 0;
             for (int z = 0; z < chunkData.Dimensions.z; z++)

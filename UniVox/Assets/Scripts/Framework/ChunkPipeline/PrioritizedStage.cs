@@ -32,8 +32,6 @@ namespace UniVox.Framework.ChunkPipeline
 
         protected override void SelfUpdate()
         {
-            Profiler.BeginSample("PrioritizedStageUpdate");
-
             if (UpdateMax != null)
             {
                 //Potentially update the maximum every update.
@@ -41,8 +39,6 @@ namespace UniVox.Framework.ChunkPipeline
             }
 
             int movedOn = 0;
-
-            //List<Vector3Int> waiting = new List<Vector3Int>();
 
             //Iterate over queue in order, until at most MaxPerUpdate items have been moved on
             foreach (var item in queue)
@@ -102,56 +98,6 @@ namespace UniVox.Framework.ChunkPipeline
                 queue.Remove(item);
             }
 
-            //while (movedOn < MaxPerUpdate && queue.Count > 0)
-            //{
-            //    var item = queue.Dequeue();
-
-            //    if (NextStageCondition(item, Order))
-            //    {
-            //        //The chunk would ordinarily be able to move on, but we need to check the wait condition first
-            //        if (WaitEndedCondition(item, Order))
-            //        {
-            //            movingOn.Add(item);
-            //            chunkIdsInStage.Remove(item);
-            //            movedOn++;
-            //        }
-            //        else
-            //        {
-            //            //Otherwise, the chunk neither moves on nor terminates, it waits
-            //            waiting.Add(item);
-            //            continue;
-            //        }
-
-            //    }
-            //    else
-            //    {
-            //        terminating.Add(item);
-            //        chunkIdsInStage.Remove(item);
-            //    }
-
-            //}
-
-            //Put all waiting items back in the queue (side effect of updating their priority)
-            //foreach (var item in waiting)
-            //{
-            //    queue.Enqueue(item, getPriority(item));
-            //}
-
-            //Must still remove any chunks that should terminate
-            //List<Vector3Int> tmpTerminating = new List<Vector3Int>();
-            //chunkIdsInStage.RemoveWhere((id) => {
-            //    if (!NextStageCondition(id, Order))
-            //    {
-            //        tmpTerminating.Add(id);
-            //        return true;
-
-            //    }
-            //    return false;
-            //});
-
-            //terminating.AddRange(tmpTerminating);
-
-            Profiler.EndSample();
         }
 
         public override void Add(Vector3Int incoming)
