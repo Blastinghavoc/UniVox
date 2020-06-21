@@ -12,6 +12,13 @@ namespace UniVox.UI
         [SerializeField] private GameObject textPrefab = null;
         [SerializeField] private int fontSize = 25;
 
+        /// <summary>
+        /// FPS stuff
+        /// </summary>
+        private int numFramesSinceLast = 0;
+        private float fpsAveragingTime = 0.5f;
+        private float nextTimeToMeasureFPS = 0;
+
         private class DebugItem
         {
             public string name = "";
@@ -44,6 +51,7 @@ namespace UniVox.UI
             player = GameObject.FindGameObjectsWithTag("Player")[0].transform;
 
             List<DebugItem> items = new List<DebugItem>() {
+                new DebugItem("FPS"),
                 new DebugItem("Coords"),
                 new DebugItem("ChunkID"),
                 new DebugItem("Pipeline Status")
@@ -70,10 +78,19 @@ namespace UniVox.UI
             }
 
             if (show)
-            {
+            {                
                 debugItems["Coords"].Update(player.position.ToString());
                 debugItems["ChunkID"].Update(world.WorldToChunkPosition(player.position).ToString());
                 debugItems["Pipeline Status"].Update(world.GetPipelineStatus());
+
+                numFramesSinceLast++;
+                if (Time.time > nextTimeToMeasureFPS)
+                {
+                    nextTimeToMeasureFPS = Time.time + fpsAveragingTime;
+                    var avgFPS = numFramesSinceLast / fpsAveragingTime;
+                    numFramesSinceLast = 0;
+                    debugItems["FPS"].Update(avgFPS.ToString());
+                }
             }
 
         }
