@@ -230,9 +230,9 @@ namespace UniVox.Framework
             jobWrapper.job.DirectionVectors = directionVectors;
             jobWrapper.job.DirectionOpposites = directionOpposites;
 
-            jobWrapper.job.vertices = new NativeList<float3>(Allocator.Persistent);
-            jobWrapper.job.uvs = new NativeList<float3>(Allocator.Persistent);
-            jobWrapper.job.normals = new NativeList<float3>(Allocator.Persistent);
+            jobWrapper.job.vertices = new NativeList<Vector3>(Allocator.Persistent);
+            jobWrapper.job.uvs = new NativeList<Vector3>(Allocator.Persistent);
+            jobWrapper.job.normals = new NativeList<Vector3>(Allocator.Persistent);
             jobWrapper.job.triangleIndices = new NativeList<int>(Allocator.Persistent);
 
             Func<Mesh> cleanup = () =>
@@ -246,9 +246,9 @@ namespace UniVox.Framework
                     mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
                 }
 
-                mesh.vertices = jobWrapper.job.vertices.ToArray().ToBasic();
-                mesh.SetUVs(0, jobWrapper.job.uvs.ToArray().ToBasic());
-                mesh.normals = jobWrapper.job.normals.ToArray().ToBasic();
+                mesh.vertices = jobWrapper.job.vertices.ToArray();
+                mesh.SetUVs(0, jobWrapper.job.uvs.ToArray());
+                mesh.normals = jobWrapper.job.normals.ToArray();
                 mesh.triangles = jobWrapper.job.triangleIndices.ToArray();
 
                 jobWrapper.job.vertices.Dispose();
@@ -298,9 +298,9 @@ namespace UniVox.Framework
         [ReadOnly] public NativeArray<int3> DirectionVectors;
         [ReadOnly] public NativeArray<byte> DirectionOpposites;
 
-        public NativeList<float3> vertices;
-        public NativeList<float3> uvs;
-        public NativeList<float3> normals;
+        public NativeList<Vector3> vertices;
+        public NativeList<Vector3> uvs;
+        public NativeList<Vector3> normals;
         public NativeList<int> triangleIndices;
 
         public void Execute()
