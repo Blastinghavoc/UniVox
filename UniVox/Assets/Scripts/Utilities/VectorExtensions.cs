@@ -135,7 +135,7 @@ public static class VectorExtensions
 
     #region Jobified
 
-    public static int3 ToSIMD(this Vector3Int v) 
+    public static int3 ToBurstable(this Vector3Int v) 
     {
         return new int3(v.x, v.y, v.z);
     }
@@ -145,7 +145,7 @@ public static class VectorExtensions
         return new Vector3Int(v.x, v.y, v.z);
     }
 
-    public static float3 ToSIMD(this Vector3 v)
+    public static float3 ToBurstable(this Vector3 v)
     {
         return new float3(v.x, v.y, v.z);
     }

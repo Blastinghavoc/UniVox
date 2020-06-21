@@ -40,7 +40,7 @@ namespace UniVox.Framework
             for (int i = 0; i < Directions.NumDirections; i++)
             {
                 var vec = Directions.IntVectors[i];
-                directionVectors[i] = vec.ToSIMD();
+                directionVectors[i] = vec.ToBurstable();
             }
 
             directionOpposites = new NativeArray<byte>(Directions.Oposite, Allocator.Persistent);
@@ -60,6 +60,8 @@ namespace UniVox.Framework
         {
             Dispose();
         }
+
+        #region Deprecated
 
         public Mesh CreateMesh(IChunkData<V> chunk)
         {
@@ -124,7 +126,7 @@ namespace UniVox.Framework
 
         }
 
-        protected virtual void AddMeshDataForVoxel(IChunkData<V> chunk, TypeData voxelTypeData, Vector3Int position, List<Vector3> vertices, List<Vector3> uvs, List<Vector3> normals, List<int> indices, ref int currentIndex, List<ReadOnlyChunkData<V>> neighbourData)
+        protected void AddMeshDataForVoxel(IChunkData<V> chunk, TypeData voxelTypeData, Vector3Int position, List<Vector3> vertices, List<Vector3> uvs, List<Vector3> normals, List<int> indices, ref int currentIndex, List<ReadOnlyChunkData<V>> neighbourData)
         {
             var meshDefinition = voxelTypeData.definition.meshDefinition;
             ref var faceZs = ref voxelTypeData.zIndicesPerFace;
@@ -172,6 +174,8 @@ namespace UniVox.Framework
             //Update indexing
             currentIndex += face.UsedVertices.Length;
         }
+
+        #endregion
 
         public AbstractPipelineJob<Mesh> CreateMeshJob(Vector3Int chunkID)
         {

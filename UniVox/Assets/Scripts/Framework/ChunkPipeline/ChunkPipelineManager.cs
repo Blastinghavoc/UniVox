@@ -126,7 +126,7 @@ namespace UniVox.Framework.ChunkPipeline
             for (int stageIndex = 0; stageIndex < stages.Count; stageIndex++)
             {
                 var stage = stages[stageIndex];
-                Profiler.BeginSample(stage.Name);
+                Profiler.BeginSample(stage.Name+"Stage");
                 stage.Update();
                 Profiler.EndSample();
                 var movingOn = stage.MovingOnThisUpdate;

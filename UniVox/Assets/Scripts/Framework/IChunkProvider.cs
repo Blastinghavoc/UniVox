@@ -6,11 +6,7 @@ namespace UniVox.Framework
 {
     public interface IChunkProvider<V> where V :struct, IVoxelData
     {
-        /// <summary>
-        /// Provides data for the chunk with given ID
-        /// </summary>
-        /// <param name="chunkID"></param>
-        IChunkData<V> ProvideChunkData(Vector3Int chunkID);
+        ///Returns a pipeline job that provides chunk data.
         AbstractPipelineJob<IChunkData<V>> ProvideChunkDataJob(Vector3Int chunkID);
     }
 }

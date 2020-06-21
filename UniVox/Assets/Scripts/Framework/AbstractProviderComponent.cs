@@ -36,20 +36,6 @@ namespace UniVox.Framework
             ModifiedChunkData[chunkID] = data;
         }
 
-        public IChunkData<V> ProvideChunkData(Vector3Int chunkID) 
-        {
-            if (ModifiedChunkData.TryGetValue(chunkID,out var data))
-            {
-                return data;
-            }           
-
-            data = GenerateChunkData(chunkID, chunkManager.ChunkDimensions);
-            data.FullyGenerated = true;
-            return data;
-        }
-
-        public abstract IChunkData<V> GenerateChunkData(Vector3Int chunkID, Vector3Int chunkDimensions);
-
         public AbstractPipelineJob<IChunkData<V>> ProvideChunkDataJob(Vector3Int chunkID) 
         {
             if (ModifiedChunkData.TryGetValue(chunkID, out var data))
@@ -64,9 +50,12 @@ namespace UniVox.Framework
             return tmp;
         }
 
-        public virtual AbstractPipelineJob<IChunkData<V>> GenerateChunkDataJob(Vector3Int chunkID, Vector3Int chunkDimensions) 
-        {
-            return new BasicFunctionJob<IChunkData<V>>(()=>GenerateChunkData(chunkID,chunkDimensions));
-        }
+        /// <summary>
+        /// To be implemented by derived classes, returning a pipeline job to generatie the chunk data.
+        /// </summary>
+        /// <param name="chunkID"></param>
+        /// <param name="chunkDimensions"></param>
+        /// <returns></returns>
+        public abstract AbstractPipelineJob<IChunkData<V>> GenerateChunkDataJob(Vector3Int chunkID, Vector3Int chunkDimensions);
     }
 }

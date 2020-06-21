@@ -3,6 +3,7 @@ using System.Collections;
 using UniVox.Framework;
 using UniVox.Implementations.ChunkData;
 using UniVox.Implementations.Common;
+using UniVox.Framework.ChunkPipeline.VirtualJobs;
 
 namespace UniVox.Implementations.Providers
 {
@@ -20,10 +21,9 @@ namespace UniVox.Implementations.Providers
             grassID = voxelTypeManager.GetId(grassType);
         }
 
-        public override IChunkData<VoxelData> GenerateChunkData(Vector3Int chunkID, Vector3Int chunkDimensions)
+        public override AbstractPipelineJob<IChunkData<VoxelData>> GenerateChunkDataJob(Vector3Int chunkID, Vector3Int chunkDimensions)
         {
-            return FlatWorld(chunkID,chunkDimensions);
-            //return HalfHeight(chunkID, chunkDimensions);
+            return new BasicFunctionJob<IChunkData<VoxelData>>(() => FlatWorld(chunkID, chunkDimensions));
         }
 
         private AbstractChunkData FlatWorld(Vector3Int chunkID, Vector3Int chunkDimensions) 
@@ -107,6 +107,6 @@ namespace UniVox.Implementations.Providers
                 }
             }
             return ChunkData;
-        }
+        }        
     }
 }

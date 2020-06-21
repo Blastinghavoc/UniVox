@@ -48,7 +48,9 @@ namespace UniVox.Implementations.Providers
             bedrockID = voxelTypeManager.GetId(bedrockType);
 
             fastNoise = new FastNoise(Seed);
-            noiseSettings.ApplyTo(fastNoise);
+            fastNoise.SetFractalLacunarity(noiseSettings.Lacunarity);
+            fastNoise.SetFractalGain(noiseSettings.Persistence);
+            fastNoise.SetFractalOctaves(noiseSettings.Octaves);
 
             if (chunkManager.IsWorldHeightLimited)
             {
@@ -61,7 +63,7 @@ namespace UniVox.Implementations.Providers
         {
             if (!Burst)
             {
-                return base.GenerateChunkDataJob(chunkID, chunkDimensions);
+                return new BasicFunctionJob<IChunkData<VoxelData>>(()=>GenerateChunkData(chunkID,chunkDimensions));
             }
 
             var jobWrapper = new JobWrapper<DataGenerationJob>();
@@ -74,12 +76,7 @@ namespace UniVox.Implementations.Providers
                 stone = stoneID,
                 bedrock = bedrockID
             };
-            jobWrapper.job.noiseSettings = new JobNoiseSettings()
-            {
-                Lacunarity = noiseSettings.Lacunarity,
-                Persistence = noiseSettings.Persistence,
-                Octaves = noiseSettings.Octaves
-            };
+            jobWrapper.job.noiseSettings = noiseSettings;
             jobWrapper.job.worldSettings = new WorldSettings()
             {
                 CaveDensity = Density,
@@ -111,7 +108,15 @@ namespace UniVox.Implementations.Providers
             return new PipelineUnityJob<IChunkData<VoxelData>, DataGenerationJob>(jobWrapper, cleanup);
         }
 
-        public override IChunkData<VoxelData> GenerateChunkData(Vector3Int chunkID, Vector3Int chunkDimensions)
+
+        #region Deprecated
+        /// <summary>
+        /// Main-thread chunk generation
+        /// </summary>
+        /// <param name="chunkID"></param>
+        /// <param name="chunkDimensions"></param>
+        /// <returns></returns>
+        private IChunkData<VoxelData> GenerateChunkData(Vector3Int chunkID, Vector3Int chunkDimensions)
         {
             if (chunkID.y < chunkManager.MinChunkY || chunkID.y > chunkManager.MaxChunkY)
             {
@@ -221,11 +226,12 @@ namespace UniVox.Implementations.Providers
 
             return id;
         }
-        
+        #endregion
+
     }
 
     [System.Serializable]
-    public struct JobNoiseSettings
+    public struct NoiseSettings
     {
         public int Octaves;
         public float Persistence;//Aka gain
@@ -255,7 +261,7 @@ namespace UniVox.Implementations.Providers
     public struct DataGenerationJob : IJob
     {
         public WorldSettings worldSettings;
-        public JobNoiseSettings noiseSettings;
+        public NoiseSettings noiseSettings;
         public BlockIDs ids;
         public float3 chunkPosition;
 
