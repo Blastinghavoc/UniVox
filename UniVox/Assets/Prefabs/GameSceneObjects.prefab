@@ -261,10 +261,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   VoxelMaterial: {fileID: 2100000, guid: e2ba7f0aeb4429d458c55c71042259b6, type: 2}
   VoxelTypes:
-  - {fileID: 11400000, guid: a03c76065d9f24749ae1e10da8247535, type: 2}
   - {fileID: 11400000, guid: 3b5947e841c3a4845b8c9cbf0efbbebc, type: 2}
+  - {fileID: 11400000, guid: a03c76065d9f24749ae1e10da8247535, type: 2}
   - {fileID: 11400000, guid: da8f3cdeb3374df40a2e8e80b40a9e01, type: 2}
+  - {fileID: 11400000, guid: 41f8baae3c348e340a11f923c17c715e, type: 2}
+  - {fileID: 11400000, guid: 0e2fe9399ec31f9429b1ef2145e8f4db, type: 2}
+  - {fileID: 11400000, guid: 4312d675a9aae974ca00ae7930641832, type: 2}
   - {fileID: 11400000, guid: a8aff50ee8c68ea4192732a3ece092b4, type: 2}
+  - {fileID: 11400000, guid: 29a81a7c3885cee43ad6f88a9ba44766, type: 2}
 --- !u!1 &398304577439083001
 GameObject:
   m_ObjectHideFlags: 0
@@ -605,11 +609,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9417ea322804d09478ea1f7e0bf533a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Burst: 1
   Seed: 1337
-  SeaLevel: 0
-  Density: 0.2
-  MaxHeight: 32
-  HeightmapScale: 0.01
+  worldSettings:
+    HeightmapScale: 0.01
+    MaxHeightmapHeight: 64
+    HeightmapExponent: 5
+    SeaLevel: 0
+    CaveThreshold: 1
+    CaveScale: 0
   noiseSettings:
     Octaves: 3
     Persistence: 0.5
@@ -638,12 +646,12 @@ PrefabInstance:
     - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: MaxGeneratedPerUpdate
-      value: 6
+      value: 24
       objectReference: {fileID: 0}
     - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: renderedChunksRadii.y
-      value: 16
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
@@ -679,6 +687,11 @@ PrefabInstance:
         type: 3}
       propertyPath: verticalChunkLimit
       value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: MaxMeshedPerUpdate
+      value: 12
       objectReference: {fileID: 0}
     - target: {fileID: 6061144537135917621, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
@@ -875,7 +888,7 @@ PrefabInstance:
     - target: {fileID: 2491222762481690383, guid: e4924b752413e2444932f1f7c0e99bbc,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 17
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2491222762481690383, guid: e4924b752413e2444932f1f7c0e99bbc,
         type: 3}
@@ -921,6 +934,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2491222762484586573, guid: e4924b752413e2444932f1f7c0e99bbc,
+        type: 3}
+      propertyPath: m_IsKinematic
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e4924b752413e2444932f1f7c0e99bbc, type: 3}

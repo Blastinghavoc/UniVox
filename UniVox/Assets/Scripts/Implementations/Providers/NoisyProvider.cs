@@ -244,6 +244,7 @@ namespace UniVox.Implementations.Providers
     {
         public float HeightmapScale;
         public float MaxHeightmapHeight;
+        public float HeightmapExponent;
         public float SeaLevel;
         [NonSerialized] public float MinY;
         public float CaveThreshold;
@@ -306,7 +307,7 @@ namespace UniVox.Implementations.Providers
         public float CalculateHeightMapAt(float2 pos)
         {            
             
-            float rawHeightmap = FractalNoise(pos * worldSettings.HeightmapScale) * worldSettings.MaxHeightmapHeight;
+            float rawHeightmap = math.pow(ZeroToOne(FractalNoise(pos * worldSettings.HeightmapScale)),worldSettings.HeightmapExponent) * worldSettings.MaxHeightmapHeight;
 
             //add the raw heightmap to the base ground height
             return worldSettings.SeaLevel + rawHeightmap;
@@ -365,6 +366,17 @@ namespace UniVox.Implementations.Providers
                 MaxNoiseAmplitude += amplitude;
                 amplitude *= noiseSettings.Persistence;
             }
+        }
+
+        /// <summary>
+        /// Transform a noise value from the -1->1 range that the noise functions
+        /// output to the 0->1 range
+        /// </summary>
+        /// <param name="rawNoise"></param>
+        /// <returns></returns>
+        private float ZeroToOne(float rawNoise) 
+        {
+            return math.unlerp(-1, 1, rawNoise);
         }
 
         private float FractalNoise(float3 pos) 

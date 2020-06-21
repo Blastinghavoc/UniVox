@@ -121,6 +121,56 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &18352213
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 18352214}
+  - component: {fileID: 18352215}
+  m_Layer: 0
+  m_Name: BiomeDatabase
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &18352214
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 18352213}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 254905653}
+  m_RootOrder: 6
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &18352215
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 18352213}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f568bfa1bc8a12488d51c12fe1ef120, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  config: {fileID: 11400000, guid: 69c27e57ecc1a744c9f5c0aa59170259, type: 2}
+--- !u!4 &254905653 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 398304577439083000, guid: 579d24a84d9385447b0eb6819a968722,
+    type: 3}
+  m_PrefabInstance: {fileID: 398304578466534659}
+  m_PrefabAsset: {fileID: 0}
 --- !u!108 &705507994 stripped
 Light:
   m_CorrespondingSourceObject: {fileID: 398304578835441561, guid: 579d24a84d9385447b0eb6819a968722,
@@ -134,30 +184,30 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
-      propertyPath: Burst
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
-      propertyPath: worldSettings.HeightmapScale
-      value: 0.01
-      objectReference: {fileID: 0}
-    - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
-      propertyPath: worldSettings.MaxHeightmapHeight
-      value: 32
-      objectReference: {fileID: 0}
-    - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
-      propertyPath: worldSettings.CaveDensity
-      value: 0.2
-      objectReference: {fileID: 0}
-    - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
-      propertyPath: worldSettings.CaveScale
-      value: 0.01
-      objectReference: {fileID: 0}
-    - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
-      propertyPath: worldSettings.CaveThreshold
-      value: 0.2
-      objectReference: {fileID: 0}
+    - target: {fileID: 398304577423018871, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: VoxelTypes.Array.data[8]
+      value: 
+      objectReference: {fileID: 11400000, guid: 0e2fe9399ec31f9429b1ef2145e8f4db,
+        type: 2}
+    - target: {fileID: 398304577423018871, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: VoxelTypes.Array.data[9]
+      value: 
+      objectReference: {fileID: 11400000, guid: 4312d675a9aae974ca00ae7930641832,
+        type: 2}
+    - target: {fileID: 398304577423018871, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: VoxelTypes.Array.data[10]
+      value: 
+      objectReference: {fileID: 11400000, guid: a8aff50ee8c68ea4192732a3ece092b4,
+        type: 2}
+    - target: {fileID: 398304577423018871, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: VoxelTypes.Array.data[11]
+      value: 
+      objectReference: {fileID: 11400000, guid: 29a81a7c3885cee43ad6f88a9ba44766,
+        type: 2}
     - target: {fileID: 398304577439083000, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -217,51 +267,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: GameSceneObjects
-      objectReference: {fileID: 0}
-    - target: {fileID: 398304577765385446, guid: 579d24a84d9385447b0eb6819a968722,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 398304578996345519, guid: 579d24a84d9385447b0eb6819a968722,
-        type: 3}
-      propertyPath: m_IsKinematic
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3231851409899628765, guid: 579d24a84d9385447b0eb6819a968722,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4363647225878257416, guid: 579d24a84d9385447b0eb6819a968722,
-        type: 3}
-      propertyPath: Burst
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5880167504519198129, guid: 579d24a84d9385447b0eb6819a968722,
-        type: 3}
-      propertyPath: MaxMeshedPerUpdate
-      value: 6
-      objectReference: {fileID: 0}
-    - target: {fileID: 5880167504519198129, guid: 579d24a84d9385447b0eb6819a968722,
-        type: 3}
-      propertyPath: MaxGeneratedPerUpdate
-      value: 12
-      objectReference: {fileID: 0}
-    - target: {fileID: 5880167504519198129, guid: 579d24a84d9385447b0eb6819a968722,
-        type: 3}
-      propertyPath: renderedChunksRadii.x
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 5880167504519198129, guid: 579d24a84d9385447b0eb6819a968722,
-        type: 3}
-      propertyPath: renderedChunksRadii.z
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 5880167504519198131, guid: 579d24a84d9385447b0eb6819a968722,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 579d24a84d9385447b0eb6819a968722, type: 3}

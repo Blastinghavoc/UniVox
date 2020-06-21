@@ -21,6 +21,17 @@ namespace UniVox.Implementations.ChunkData
         //Dimensions.x*Dimensions.y cache
         private int dxdy;
 
+        public FlatArrayChunkData() { }
+
+        public FlatArrayChunkData(Vector3Int ID, Vector3Int chunkDimensions) : base(ID, chunkDimensions) 
+        {
+        }
+
+        public override void Initialise(Vector3Int ID, Vector3Int chunkDimensions)
+        {
+            base.Initialise(ID, chunkDimensions);
+        }
+
         public FlatArrayChunkData(Vector3Int ID, Vector3Int chunkDimensions, VoxelData[] data) : base(ID, chunkDimensions)
         {
             if (chunkDimensions.x*chunkDimensions.y*chunkDimensions.z != data.Length)

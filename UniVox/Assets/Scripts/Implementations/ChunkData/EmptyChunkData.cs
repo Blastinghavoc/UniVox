@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UniVox.Implementations.Common;
 using UniVox.Framework;
+using Unity.Collections;
 
 namespace UniVox.Implementations.ChunkData
 {
@@ -12,6 +13,11 @@ namespace UniVox.Implementations.ChunkData
     {
         public EmptyChunkData(Vector3Int ID, Vector3Int chunkDimensions) : base(ID, chunkDimensions)
         {
+        }
+
+        public override void FromNative(NativeArray<VoxelData> native)
+        {
+            throw new System.NotImplementedException($"This is an empty chunk data object, it cannot contain data");
         }
 
         protected override VoxelData GetVoxelAtLocalCoordinates(int x, int y, int z)

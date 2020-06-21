@@ -19,7 +19,20 @@ namespace UniVox.Implementations.ChunkData
 
         public bool FullyGenerated { get; set; } = false;
 
+        public AbstractChunkData() { }
+
         public AbstractChunkData(Vector3Int ID, Vector3Int chunkDimensions)
+        {
+            Initialise(ID, chunkDimensions);
+        }
+
+        /// <summary>
+        /// Essentially a "lazy constructor" that forms part of the interface,
+        /// so that it can be accessed generically
+        /// </summary>
+        /// <param name="ID"></param>
+        /// <param name="chunkDimensions"></param>
+        public virtual void Initialise(Vector3Int ID, Vector3Int chunkDimensions) 
         {
             ChunkID = ID;
             Dimensions = chunkDimensions;
@@ -49,7 +62,10 @@ namespace UniVox.Implementations.ChunkData
 
         protected abstract VoxelData GetVoxelAtLocalCoordinates(int x, int y, int z);
 
-        #region Abstract implementation of interface methods
+        public abstract void FromNative(NativeArray<VoxelData> native);
+
+
+        #region interface methods
 
         public bool TryGetVoxelAtLocalCoordinates(Vector3Int coords, out VoxelData vox)
         {
@@ -75,7 +91,6 @@ namespace UniVox.Implementations.ChunkData
         {
             return this.ToNativeBruteForce(allocator);
         }
-
         #endregion
     }
 }

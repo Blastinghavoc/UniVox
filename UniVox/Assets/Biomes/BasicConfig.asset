@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 851aa3101d168054889bcfce13f4fef8, type: 3}
+  m_Name: BasicConfig
+  m_EditorClassIdentifier: 
+  defaultVoxelType: {fileID: 11400000, guid: a8aff50ee8c68ea4192732a3ece092b4, type: 2}
+  elevationLowToHigh:
+  - Name: Sea
+    moistureLevelsLowToHigh:
+    - biomeDefinition: {fileID: 11400000, guid: bc7732a614701f04ca9c506c02132cc4,
+        type: 2}
+      max: 1
+    max: 0.4
+  - Name: Beach
+    moistureLevelsLowToHigh:
+    - biomeDefinition: {fileID: 11400000, guid: c34188fb056ab5a4e9b10463754f8218,
+        type: 2}
+      max: 1
+    max: 0.5
+  - Name: MidGrounds
+    moistureLevelsLowToHigh:
+    - biomeDefinition: {fileID: 11400000, guid: 7a3c38c83c87eaf4986c14a4686f3042,
+        type: 2}
+      max: 0.25
+    - biomeDefinition: {fileID: 11400000, guid: e7a79b9e40a90804a939f56bf9a77297,
+        type: 2}
+      max: 0.75
+    - biomeDefinition: {fileID: 11400000, guid: 8ef4043749125a04d9adb8e6d8bbfc0f,
+        type: 2}
+      max: 1
+    max: 0.8
+  - Name: HighGrounds
+    moistureLevelsLowToHigh:
+    - biomeDefinition: {fileID: 11400000, guid: 602ae26054938c04a9c55122ca483e7e,
+        type: 2}
+      max: 0.25
+    - biomeDefinition: {fileID: 11400000, guid: ff0a79ad715b06b4bb4198d8b7d034bc,
+        type: 2}
+      max: 0.75
+    - biomeDefinition: {fileID: 11400000, guid: 8ef4043749125a04d9adb8e6d8bbfc0f,
+        type: 2}
+      max: 1
+    max: 1
