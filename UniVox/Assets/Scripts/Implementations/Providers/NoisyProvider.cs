@@ -18,10 +18,8 @@ namespace UniVox.Implementations.Providers
     public class NoisyProvider : AbstractProviderComponent<VoxelData>
     {
         public int Seed = 1337;
-        public int SeaLevel = 0;
-        public float Density = 0.5f;
-        public float MaxHeight = 32;
-        public float HeightmapScale = 1;
+
+        public WorldSettings worldSettings;
 
         public NoiseSettings noiseSettings;
 
@@ -56,6 +54,8 @@ namespace UniVox.Implementations.Providers
             {
                 minY = chunkManager.MinChunkY * chunkManager.ChunkDimensions.y;
             }
+            worldSettings.ChunkDimensions = chunkManager.ChunkDimensions.ToBurstable();
+            worldSettings.MinY = minY;
 
         }
 
@@ -77,15 +77,8 @@ namespace UniVox.Implementations.Providers
                 bedrock = bedrockID
             };
             jobWrapper.job.noiseSettings = noiseSettings;
-            jobWrapper.job.worldSettings = new WorldSettings()
-            {
-                CaveDensity = Density,
-                SeaLevel = SeaLevel,
-                HeightmapScale = HeightmapScale,
-                ChunkDimensions = new int3(chunkDimensions.x, chunkDimensions.y, chunkDimensions.z),
-                MaxHeightmapHeight = MaxHeight,
-                MinY = minY
-            };
+            jobWrapper.job.worldSettings = worldSettings;
+            
 
             var arrayLength = chunkDimensions.x * chunkDimensions.y * chunkDimensions.z;
 
@@ -171,10 +164,10 @@ namespace UniVox.Implementations.Providers
 
         private float CalculateHeightMapAt(int x, int z) 
         {
-            float rawHeightmap = fastNoise.GetSimplexFractal(x * HeightmapScale, z * HeightmapScale) * MaxHeight;
+            float rawHeightmap = fastNoise.GetSimplexFractal(x * worldSettings.HeightmapScale, z * worldSettings.HeightmapScale) * worldSettings.MaxHeightmapHeight;
 
             //add the raw heightmap to the base ground height
-            return SeaLevel + rawHeightmap;
+            return worldSettings.SeaLevel + rawHeightmap;
         }
 
         /// <summary>
@@ -201,7 +194,7 @@ namespace UniVox.Implementations.Providers
             //3D noise for caves
             float caveNoise = fastNoise.GetPerlinFractal(x * 5f, y * 10f, z * 5f);
 
-            if (caveNoise > Density)
+            if (caveNoise > worldSettings.CaveThreshold)
             {
                 //Cave
                 return id;
@@ -252,9 +245,10 @@ namespace UniVox.Implementations.Providers
         public float HeightmapScale;
         public float MaxHeightmapHeight;
         public float SeaLevel;
-        public float MinY;
-        public float CaveDensity;
-        public int3 ChunkDimensions;
+        [NonSerialized] public float MinY;
+        public float CaveThreshold;
+        public float CaveScale;
+        [NonSerialized] public int3 ChunkDimensions;
     }
 
     [BurstCompile]
@@ -334,9 +328,9 @@ namespace UniVox.Implementations.Providers
             }
 
             //3D noise for caves
-            float caveNoise = FractalNoise(pos * 0.01f);
+            float caveNoise = FractalNoise(pos * worldSettings.CaveScale);
 
-            if (caveNoise > worldSettings.CaveDensity)
+            if (caveNoise > worldSettings.CaveThreshold)
             {
                 //Cave
                 return id;

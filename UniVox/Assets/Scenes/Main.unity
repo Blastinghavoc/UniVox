@@ -138,6 +138,26 @@ PrefabInstance:
       propertyPath: Burst
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
+      propertyPath: worldSettings.HeightmapScale
+      value: 0.01
+      objectReference: {fileID: 0}
+    - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
+      propertyPath: worldSettings.MaxHeightmapHeight
+      value: 32
+      objectReference: {fileID: 0}
+    - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
+      propertyPath: worldSettings.CaveDensity
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
+      propertyPath: worldSettings.CaveScale
+      value: 0.01
+      objectReference: {fileID: 0}
+    - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
+      propertyPath: worldSettings.CaveThreshold
+      value: 0.2
+      objectReference: {fileID: 0}
     - target: {fileID: 398304577439083000, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
       propertyPath: m_LocalPosition.x
