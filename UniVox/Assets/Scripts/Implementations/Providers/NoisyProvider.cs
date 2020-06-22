@@ -57,8 +57,6 @@ namespace UniVox.Implementations.Providers
             }
             worldSettings.ChunkDimensions = chunkManager.ChunkDimensions.ToBurstable();
             worldSettings.MinY = minY;
-
-            noiseSettings.HashedSeed = math.hash(new int2(noiseSettings.Seed))/uint.MaxValue;
         }
 
         public override AbstractPipelineJob<IChunkData<VoxelData>> GenerateChunkDataJob(Vector3Int chunkID,Vector3Int chunkDimensions)
@@ -240,7 +238,6 @@ namespace UniVox.Implementations.Providers
         public float Persistence;//Aka gain
         public float Lacunarity;
         public int Seed;
-        [NonSerialized] public float HashedSeed;
     }
 
     public struct BlockIDs 
@@ -420,7 +417,7 @@ namespace UniVox.Implementations.Providers
             float amplitude = 1;
             for (int i = 0; i < noiseSettings.Octaves; i++)
             {
-                total += noise.snoise(new float4(pos*frequency,noiseSettings.HashedSeed)) * amplitude;
+                total += noise.snoise(new float4(pos*frequency,noiseSettings.Seed)) * amplitude;
                 amplitude *= noiseSettings.Persistence;
                 frequency *= noiseSettings.Lacunarity;
             }
@@ -435,7 +432,7 @@ namespace UniVox.Implementations.Providers
             float amplitude = 1;
             for (int i = 0; i < noiseSettings.Octaves; i++)
             {
-                total += noise.snoise(new float3(pos * frequency,noiseSettings.HashedSeed)) * amplitude;
+                total += noise.snoise(new float3(pos * frequency,noiseSettings.Seed)) * amplitude;
                 amplitude *= noiseSettings.Persistence;
                 frequency *= noiseSettings.Lacunarity;
             }
