@@ -321,29 +321,40 @@ namespace UniVox.Implementations.Providers
 
                     var currentLayerIndex = layers.start;
                     var currentLayer = biomeDatabase.allLayers[currentLayerIndex];
-                    int placedThisLayer = 0;
 
                     var yStart = (int)math.floor(math.min(height - chunkPosition.y, dimensions.y - 1));
 
+                    //Voxel to place according to the current layer
                     var layerVoxel = currentLayer.voxelID;
 
+                    //Accumulated depth from all layers
+                    var totalLayerDepth = currentLayer.depth;
+
+                    //Indicates whether there are still layers remainging to process, or if we are using the default voxel type instead
+                    bool stillHaveLayers = true;
+
+                    var distanceFromTop = height - (chunkPosition.y+yStart);
+
                     //top to bottom, skipping all that are above the height (as these are air)
-                    for (int y = yStart; y >= 0; y--)
+                    for (int y = yStart; y >= 0; y--,distanceFromTop++)
                     {
                         var pos = chunkPosition + new float3(x,y,z);
 
-                        if (placedThisLayer == currentLayer.depth)
+                        //Get next layer while necessary
+                        while (stillHaveLayers && distanceFromTop >= totalLayerDepth)
                         {
                             currentLayerIndex++;
                             if (currentLayerIndex == layers.end)
                             {
-                                //If out of layers, switch to default
+                                //If out of layers, switch to default voxel type
                                 layerVoxel = biomeDatabase.defaultVoxelId;
+                                stillHaveLayers = false;
+                                break;
                             }
                             else
                             {
-                                //Go to next layer, reset counter
-                                placedThisLayer = 0;
+                                //Go to next layer
+                                totalLayerDepth += currentLayer.depth;
                                 currentLayer = biomeDatabase.allLayers[currentLayerIndex];
                                 layerVoxel = currentLayer.voxelID;
                             }
@@ -370,7 +381,6 @@ namespace UniVox.Implementations.Providers
 
                         var flatIndex = Utils.Helper.MultiIndexToFlat(x, y, z, dx,dxdy);
                         chunkData[flatIndex] = new VoxelData(idToPlace);
-                        placedThisLayer++;
                     }
                 }
             }
@@ -456,55 +466,6 @@ namespace UniVox.Implementations.Providers
             //add the raw heightmap to the base ground height
             return worldSettings.SeaLevel + rawHeightmap;
         }
-
-        //public ushort CalculateVoxelIDAt(float3 pos, float height,StartEnd layers)
-        //{            
-        //    ushort id = VoxelTypeManager.AIR_ID;
-
-        //    for (int i = layers.start; i < layers.end; i++)
-        //    {
-                
-        //    }
-
-
-        //    if (pos.y > height)
-        //    {//Air
-        //        return id;
-        //    }
-
-        //    if (pos.y == worldSettings.MinY)
-        //    {
-        //        id = ids.bedrock;
-        //        return id;
-        //    }
-
-        //    //3D noise for caves
-        //    float caveNoise = FractalNoise(pos * worldSettings.CaveScale,noiseSettings.Seed);
-
-        //    if (caveNoise > worldSettings.CaveThreshold)
-        //    {
-        //        //Cave
-        //        return id;
-        //    }
-
-        //    if (pos.y > height - 1)
-        //    {
-        //        id = ids.grass;
-        //    }
-        //    else
-        //    {
-        //        if (pos.y < height - 4)
-        //        {
-        //            id = ids.stone;
-        //        }
-        //        else
-        //        {
-        //            id = ids.dirt;
-        //        }
-        //    }
-
-        //    return id;
-        //}
 
         private void PrecalculateMaxNoiseAmplitude() 
         {

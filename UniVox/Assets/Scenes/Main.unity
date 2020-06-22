@@ -190,7 +190,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
       propertyPath: worldSettings.HeightmapExponentNegative
-      value: 3
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
       propertyPath: worldSettings.HeightmapExponentPositive
@@ -223,6 +223,14 @@ PrefabInstance:
     - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
       propertyPath: noiseSettings.Lacunarity
       value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
+      propertyPath: worldSettings.CaveThreshold
+      value: 0.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
+      propertyPath: worldSettings.CaveScale
+      value: 0.01
       objectReference: {fileID: 0}
     - target: {fileID: 398304577423018871, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
@@ -308,10 +316,15 @@ PrefabInstance:
       propertyPath: m_Name
       value: GameSceneObjects
       objectReference: {fileID: 0}
+    - target: {fileID: 398304578996345519, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: m_IsKinematic
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5880167504519198129, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
       propertyPath: renderedChunksRadii.y
-      value: 4
+      value: 16
       objectReference: {fileID: 0}
     - target: {fileID: 5880167504519198129, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
