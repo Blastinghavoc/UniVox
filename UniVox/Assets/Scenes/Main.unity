@@ -184,6 +184,22 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
+      propertyPath: worldSettings.HeightmapExponent
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
+      propertyPath: worldSettings.HeightmapExponentNegative
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
+      propertyPath: worldSettings.HeightmapExponentPositive
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
+      propertyPath: noiseSettings.Seed
+      value: 1336
+      objectReference: {fileID: 0}
     - target: {fileID: 398304577423018871, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
       propertyPath: VoxelTypes.Array.data[8]
@@ -267,6 +283,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: GameSceneObjects
+      objectReference: {fileID: 0}
+    - target: {fileID: 5880167504519198129, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: renderedChunksRadii.y
+      value: 4
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 579d24a84d9385447b0eb6819a968722, type: 3}

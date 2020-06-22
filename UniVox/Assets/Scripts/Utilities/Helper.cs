@@ -1,4 +1,5 @@
 ﻿using System;
+using Unity.Burst;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -31,6 +32,7 @@ namespace Utils
         /// <param name="dx"></param>
         /// <param name="dxdy"></param>
         /// <returns></returns>
+        [BurstCompile]
         public static int MultiIndexToFlat(int x, int y, int z, int dx, int dxdy) 
         {
             return x + dx*y + dxdy * z;
@@ -56,6 +58,7 @@ namespace Utils
             FlatIndexToMulti(flat, new int2(dimensions.x, dimensions.y), out x, out y);
         }
 
+        [BurstCompile]
         public static int MultiIndexToFlat(int x,int y,int2 dimensions) 
         {
             return x + dimensions.x * y;

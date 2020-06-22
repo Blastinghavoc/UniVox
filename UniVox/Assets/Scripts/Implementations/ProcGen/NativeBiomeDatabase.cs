@@ -1,8 +1,10 @@
-﻿using Unity.Collections;
+﻿using Unity.Burst;
+using Unity.Collections;
 using UniVox.Framework.Jobified;
 
 namespace UniVox.Implementations.ProcGen
 {
+    [BurstCompile]
     public struct NativeBiomeDatabase 
     {
         /// <summary>
@@ -32,11 +34,44 @@ namespace UniVox.Implementations.ProcGen
         /// </summary>
         public NativeArray<NativeElevationZone> allElevationZones;
 
+        /// <summary>
+        /// The two parameters are the normalised (0->1) elevation and moisture values.
+        /// </summary>
+        /// <param name="elevationPercentage"></param>
+        /// <param name="moisturePercentage"></param>
+        /// <returns></returns>
+        public int GetBiomeID(float elevationPercentage, float moisturePercentage) 
+        {
+            //Simple linear search through elevation zones
+            StartEnd moisturelevels = new StartEnd() { start = 0, end = 0};
+            for (int i = 0; i < allElevationZones.Length; i++)
+            {
+                var zone = allElevationZones[i];
+                moisturelevels = zone.moistureLevels;
+                if (elevationPercentage < zone.maxElevationPercentage)
+                {
+                    break;
+                }
+            }
+
+            //Simple linear search through moisture levels
+            int biomeID = 0;
+            for (int i = moisturelevels.start; i < moisturelevels.end; i++)
+            {
+                var moistureDef = allMoistureDefs[i];
+                biomeID = moistureDef.biomeID;
+                if (moisturePercentage < moistureDef.maxMoisturePercentage)
+                {
+                    break;
+                }
+            }
+            return biomeID;
+        }
     }
 
     public struct NativeVoxelRange 
     {
-        public int voxelID;
+        public ushort voxelID;
         public int depth;
     }
 
