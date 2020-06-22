@@ -12,5 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5734e7a518664504eafc589ad33d4b6b, type: 3}
   m_Name: BareStone
   m_EditorClassIdentifier: 
-  topLayers: []
-  fillRemainderWith: {fileID: 11400000, guid: a8aff50ee8c68ea4192732a3ece092b4, type: 2}
+  topLayers:
+  - voxelType: {fileID: 11400000, guid: a8aff50ee8c68ea4192732a3ece092b4, type: 2}
+    depth: 0

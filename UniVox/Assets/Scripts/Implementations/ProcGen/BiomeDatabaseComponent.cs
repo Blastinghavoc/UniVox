@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Unity.Collections;
 using UnityEngine;
+using UnityEngine.Assertions;
 using UniVox.Framework;
 using UniVox.Framework.Jobified;
 
@@ -37,16 +38,13 @@ namespace UniVox.Implementations.ProcGen
                     NativeBiomeMoistureDefinition moistureDef = new NativeBiomeMoistureDefinition();
                     moistureDef.maxMoisturePercentage = moistureEntry.max;
 
-                    if (biomeIds.TryGetValue(moistureEntry.biomeDefinition,out var id))
-                    {
-                        //Biome id exist, just assign it
-                        moistureDef.biomeID = id;
-                    }
-                    else
-                    {
+                    if (!biomeIds.TryGetValue(moistureEntry.biomeDefinition,out var id))
+                    {                   
                         //Create new biome data
-                        biomeIds.Add(moistureEntry.biomeDefinition, allLayersList.Count);
+                        id = biomeLayersList.Count;
+                        biomeIds.Add(moistureEntry.biomeDefinition,id );
 
+                        Assert.IsTrue(moistureEntry.biomeDefinition.topLayers.Count > 0,$"All biome definitions must have at least one layer,{moistureEntry.biomeDefinition.name} does not");
                         StartEnd layersForThisBiome = new StartEnd() { start = allLayersList.Count };
 
                         foreach (var layer in moistureEntry.biomeDefinition.topLayers)
@@ -60,6 +58,8 @@ namespace UniVox.Implementations.ProcGen
                         layersForThisBiome.end = allLayersList.Count;
                         biomeLayersList.Add(layersForThisBiome);
                     }
+                    
+                    moistureDef.biomeID = id;
 
                     allMoistureDefsList.Add(moistureDef);
                 }

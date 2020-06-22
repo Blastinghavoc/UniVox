@@ -107,11 +107,11 @@ namespace UniVox.Implementations.Providers
             };
 
             //Single threaded version  DEBUG
-            return new BasicFunctionJob<IChunkData<VoxelData>>(() =>
-            {
-                jobWrapper.job.Run();
-                return cleanup();
-            });
+            //return new BasicFunctionJob<IChunkData<VoxelData>>(() =>
+            //{
+            //    jobWrapper.job.Run();
+            //    return cleanup();
+            //});
 
             return new PipelineUnityJob<IChunkData<VoxelData>, DataGenerationJob>(jobWrapper, cleanup);
         }
@@ -259,6 +259,7 @@ namespace UniVox.Implementations.Providers
     public struct WorldSettings 
     {
         public float HeightmapScale;
+        public float MoistureMapScale;
         public float MaxHeightmapHeight;
         public float HeightmapExponentPositive;
         public float HeightmapExponentNegative;
@@ -377,8 +378,8 @@ namespace UniVox.Implementations.Providers
 
         private void ComputeBiomeMap(ref NativeArray<float> heightMap, int3 dimensions) 
         {
-            var maxPossibleHmValue = worldSettings.MaxHeightmapHeight;
-            var minPossibleHmValue = -1 *worldSettings.MaxHeightmapHeight;
+            var maxPossibleHmValue = worldSettings.MaxHeightmapHeight + worldSettings.SeaLevel;
+            var minPossibleHmValue = -1 *worldSettings.MaxHeightmapHeight + worldSettings.SeaLevel;
 
             //Compute moisture map in range 0->1
             NativeArray<float> moistureMap = new NativeArray<float>(dimensions.x * dimensions.y, Allocator.Temp);
@@ -405,7 +406,11 @@ namespace UniVox.Implementations.Providers
             {
                 for (int x = 0; x < dimensions.x; x++)
                 {
-                    moistureMap[i] = ZeroToOne(FractalNoise(new float2(x + chunkPosition.x, z + chunkPosition.z),moistureSeed));
+                    moistureMap[i] = ZeroToOne(
+                        FractalNoise(
+                            new float2(x + chunkPosition.x, z + chunkPosition.z)*worldSettings.MoistureMapScale,
+                            moistureSeed)
+                        );
                     i++;
                 }
             }
@@ -452,54 +457,54 @@ namespace UniVox.Implementations.Providers
             return worldSettings.SeaLevel + rawHeightmap;
         }
 
-        public ushort CalculateVoxelIDAt(float3 pos, float height,StartEnd layers)
-        {            
-            ushort id = VoxelTypeManager.AIR_ID;
+        //public ushort CalculateVoxelIDAt(float3 pos, float height,StartEnd layers)
+        //{            
+        //    ushort id = VoxelTypeManager.AIR_ID;
 
-            for (int i = layers.start; i < layers.end; i++)
-            {
+        //    for (int i = layers.start; i < layers.end; i++)
+        //    {
                 
-            }
+        //    }
 
 
-            if (pos.y > height)
-            {//Air
-                return id;
-            }
+        //    if (pos.y > height)
+        //    {//Air
+        //        return id;
+        //    }
 
-            if (pos.y == worldSettings.MinY)
-            {
-                id = ids.bedrock;
-                return id;
-            }
+        //    if (pos.y == worldSettings.MinY)
+        //    {
+        //        id = ids.bedrock;
+        //        return id;
+        //    }
 
-            //3D noise for caves
-            float caveNoise = FractalNoise(pos * worldSettings.CaveScale,noiseSettings.Seed);
+        //    //3D noise for caves
+        //    float caveNoise = FractalNoise(pos * worldSettings.CaveScale,noiseSettings.Seed);
 
-            if (caveNoise > worldSettings.CaveThreshold)
-            {
-                //Cave
-                return id;
-            }
+        //    if (caveNoise > worldSettings.CaveThreshold)
+        //    {
+        //        //Cave
+        //        return id;
+        //    }
 
-            if (pos.y > height - 1)
-            {
-                id = ids.grass;
-            }
-            else
-            {
-                if (pos.y < height - 4)
-                {
-                    id = ids.stone;
-                }
-                else
-                {
-                    id = ids.dirt;
-                }
-            }
+        //    if (pos.y > height - 1)
+        //    {
+        //        id = ids.grass;
+        //    }
+        //    else
+        //    {
+        //        if (pos.y < height - 4)
+        //        {
+        //            id = ids.stone;
+        //        }
+        //        else
+        //        {
+        //            id = ids.dirt;
+        //        }
+        //    }
 
-            return id;
-        }
+        //    return id;
+        //}
 
         private void PrecalculateMaxNoiseAmplitude() 
         {

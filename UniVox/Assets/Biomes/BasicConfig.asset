@@ -19,21 +19,21 @@ MonoBehaviour:
     - biomeDefinition: {fileID: 11400000, guid: bc7732a614701f04ca9c506c02132cc4,
         type: 2}
       max: 1
-    max: 0.4
+    max: 0.5
   - Name: Beach
     moistureLevelsLowToHigh:
     - biomeDefinition: {fileID: 11400000, guid: c34188fb056ab5a4e9b10463754f8218,
         type: 2}
       max: 1
-    max: 0.5
+    max: 0.52
   - Name: MidGrounds
     moistureLevelsLowToHigh:
     - biomeDefinition: {fileID: 11400000, guid: 7a3c38c83c87eaf4986c14a4686f3042,
         type: 2}
-      max: 0.25
+      max: 0.33
     - biomeDefinition: {fileID: 11400000, guid: e7a79b9e40a90804a939f56bf9a77297,
         type: 2}
-      max: 0.75
+      max: 0.66
     - biomeDefinition: {fileID: 11400000, guid: 8ef4043749125a04d9adb8e6d8bbfc0f,
         type: 2}
       max: 1
@@ -42,10 +42,10 @@ MonoBehaviour:
     moistureLevelsLowToHigh:
     - biomeDefinition: {fileID: 11400000, guid: 602ae26054938c04a9c55122ca483e7e,
         type: 2}
-      max: 0.25
+      max: 0.33
     - biomeDefinition: {fileID: 11400000, guid: ff0a79ad715b06b4bb4198d8b7d034bc,
         type: 2}
-      max: 0.75
+      max: 0.66
     - biomeDefinition: {fileID: 11400000, guid: 8ef4043749125a04d9adb8e6d8bbfc0f,
         type: 2}
       max: 1
