@@ -17,20 +17,22 @@ namespace UniVox.Implementations.Providers
 {
     public class NoisyProvider : AbstractProviderComponent<VoxelData>
     {
-        public int Seed = 1337;
+        [SerializeField] private ChunkDataFactory chunkDataFactory = null;
 
-        public WorldSettings worldSettings;
+        [SerializeField] private int Seed = 1337;
 
-        public NoiseSettings noiseSettings;
+        [SerializeField] private WorldSettings worldSettings = new WorldSettings();
 
-        public SOVoxelTypeDefinition dirtType;
+        [SerializeField] private NoiseSettings noiseSettings = new NoiseSettings();
+
+        [SerializeField] private SOVoxelTypeDefinition dirtType = null;
         private ushort dirtID;
-        public SOVoxelTypeDefinition grassType;
+        [SerializeField] private SOVoxelTypeDefinition grassType = null;
         private ushort grassID;
-        public SOVoxelTypeDefinition stoneType;
+        [SerializeField] private SOVoxelTypeDefinition stoneType = null;
         private ushort stoneID;
 
-        public SOVoxelTypeDefinition bedrockType;
+        [SerializeField] private SOVoxelTypeDefinition bedrockType = null;
         private ushort bedrockID;
 
         private FastNoise fastNoise;
@@ -89,8 +91,9 @@ namespace UniVox.Implementations.Providers
             {
                 Profiler.BeginSample("DataJobCleanup");
 
-                //Pass flat array to chunk data.
-                var ChunkData = new FlatArrayChunkData(chunkID, chunkDimensions, voxelData.ToArray());
+                //Pass resulting array to chunk data.
+                var ChunkData = chunkDataFactory.Create(chunkID, chunkDimensions, voxelData.ToArray());
+                
                 //Dispose of native array
                 voxelData.Dispose();
 

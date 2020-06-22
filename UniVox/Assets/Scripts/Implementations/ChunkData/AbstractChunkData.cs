@@ -1,4 +1,5 @@
-﻿using Unity.Collections;
+﻿using System;
+using Unity.Collections;
 using UnityEngine;
 using UniVox.Framework;
 using UniVox.Framework.Jobified;
@@ -19,24 +20,21 @@ namespace UniVox.Implementations.ChunkData
 
         public bool FullyGenerated { get; set; } = false;
 
-        public AbstractChunkData() { }
-
-        public AbstractChunkData(Vector3Int ID, Vector3Int chunkDimensions)
-        {
-            Initialise(ID, chunkDimensions);
-        }
-
-        /// <summary>
-        /// Essentially a "lazy constructor" that forms part of the interface,
-        /// so that it can be accessed generically
-        /// </summary>
-        /// <param name="ID"></param>
-        /// <param name="chunkDimensions"></param>
-        public virtual void Initialise(Vector3Int ID, Vector3Int chunkDimensions) 
+        public AbstractChunkData(Vector3Int ID, Vector3Int chunkDimensions,VoxelData[] initialData = null)
         {
             ChunkID = ID;
             Dimensions = chunkDimensions;
+            if (initialData!= null)
+            {
+                var expectedLength = chunkDimensions.x * chunkDimensions.y * chunkDimensions.z;
+                if (initialData.Length != expectedLength)
+                {
+                    throw new ArgumentException($"Initial data array length {expectedLength} does not match given dimensions {chunkDimensions}" +
+                        $" with total size {expectedLength}");
+                }
+            }
         }
+
 
         #region Indexers
         public VoxelData this[Vector3Int index]
@@ -61,9 +59,6 @@ namespace UniVox.Implementations.ChunkData
         protected abstract void SetVoxelAtLocalCoordinates(int x, int y, int z, VoxelData voxel);
 
         protected abstract VoxelData GetVoxelAtLocalCoordinates(int x, int y, int z);
-
-        public abstract void FromNative(NativeArray<VoxelData> native);
-
 
         #region interface methods
 

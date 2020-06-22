@@ -20,26 +20,18 @@ namespace UniVox.Implementations.ChunkData
 
         //Dimensions.x*Dimensions.y cache
         private int dxdy;
-
-        public FlatArrayChunkData() { }
-
-        public FlatArrayChunkData(Vector3Int ID, Vector3Int chunkDimensions) : base(ID, chunkDimensions) 
+            
+        public FlatArrayChunkData(Vector3Int ID, Vector3Int chunkDimensions,VoxelData[] initialData = null) : base(ID, chunkDimensions,initialData) 
         {
-        }
-
-        public override void Initialise(Vector3Int ID, Vector3Int chunkDimensions)
-        {
-            base.Initialise(ID, chunkDimensions);
-        }
-
-        public FlatArrayChunkData(Vector3Int ID, Vector3Int chunkDimensions, VoxelData[] data) : base(ID, chunkDimensions)
-        {
-            if (chunkDimensions.x*chunkDimensions.y*chunkDimensions.z != data.Length)
+            if (initialData == null)
             {
-                throw new ArgumentException($"Chunk dimensions given {chunkDimensions} do not match size of data array {data.Length}");
+                voxels = new VoxelData[chunkDimensions.x * chunkDimensions.y * chunkDimensions.z];
             }
-            voxels = data;
-            dxdy = Dimensions.x * Dimensions.y;
+            else
+            {
+                voxels = initialData;
+            }
+            dxdy = chunkDimensions.x * chunkDimensions.y;
         }
 
         protected override VoxelData GetVoxelAtLocalCoordinates(int x, int y, int z)

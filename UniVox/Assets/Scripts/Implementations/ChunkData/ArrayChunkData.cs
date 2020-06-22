@@ -4,6 +4,7 @@ using UnityEngine.Assertions;
 using UniVox.Implementations.Common;
 using UniVox.Framework;
 using Unity.Collections;
+using Utils;
 
 namespace UniVox.Implementations.ChunkData
 {
@@ -18,40 +19,15 @@ namespace UniVox.Implementations.ChunkData
         /// </summary>
         protected VoxelData[,,] voxels;
 
-        /// <summary>
-        /// Constructor that does not initialise
-        /// </summary>
-        public ArrayChunkData() {}
-
-        /// <summary>
-        /// Initialising constructor
-        /// </summary>
-        /// <param name="ID"></param>
-        /// <param name="chunkDimensions"></param>
-        public ArrayChunkData(Vector3Int ID, Vector3Int chunkDimensions) : base(ID, chunkDimensions) 
-        { 
-        }
-
-        public override void Initialise(Vector3Int ID, Vector3Int chunkDimensions)
+        public ArrayChunkData(Vector3Int ID, Vector3Int chunkDimensions,VoxelData[] initialData = null) : base(ID, chunkDimensions,initialData) 
         {
-            base.Initialise(ID, chunkDimensions);
-            voxels = new VoxelData[chunkDimensions.x, chunkDimensions.y, chunkDimensions.z];
-        }
-
-        public override void FromNative(NativeArray<VoxelData> native)
-        {
-            int i = 0;
-            for (int z = 0; z < Dimensions.z; z++)
+            if (initialData == null)
             {
-                for (int y = 0; y < Dimensions.y; y++)
-                {
-                    for (int x = 0; x < Dimensions.x; x++)
-                    {
-                        voxels[x,y,z] = native[i];
-
-                        i++;
-                    }
-                }
+                voxels = new VoxelData[chunkDimensions.x, chunkDimensions.y, chunkDimensions.z];
+            }
+            else
+            {
+                voxels = initialData.Expand(chunkDimensions);
             }
         }
 

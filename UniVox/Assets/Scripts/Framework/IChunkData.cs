@@ -26,15 +26,6 @@ namespace UniVox.Framework
         bool TryGetVoxelAtLocalCoordinates(Vector3Int coords, out V vox);
         bool TryGetVoxelAtLocalCoordinates(int x, int y, int z, out V vox);
 
-        /// <summary>
-        /// Essentially a "lazy constructor" that forms part of the interface,
-        /// so that it can be accessed generically
-        /// </summary>
-        /// <param name="ID"></param>
-        /// <param name="chunkDimensions"></param>
-        public void Initialise(Vector3Int ID,Vector3Int chunkDimensions);
-
         NativeArray<V> ToNative(Allocator allocator = Allocator.Persistent);
-        void FromNative(NativeArray<V> native);
     }
 }

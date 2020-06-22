@@ -67,5 +67,24 @@ namespace Utils
             x = flat % dimensions.x;
         }
         #endregion
+
+        public static T[,,] Expand<T>(this T[] flat, Vector3Int dimensions) 
+        {
+            var result = new T[dimensions.x, dimensions.y, dimensions.z];
+            int i = 0;
+            for (int z = 0; z < dimensions.z; z++)
+            {
+                for (int y = 0; y < dimensions.y; y++)
+                {
+                    for (int x = 0; x < dimensions.x; x++)
+                    {
+                        result[x, y, z] = flat[i];
+
+                        i++;
+                    }
+                }
+            }
+            return result;
+        }
     }
 }
