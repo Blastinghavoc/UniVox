@@ -12,14 +12,13 @@ using UniVox.Framework.ChunkPipeline.VirtualJobs;
 using Unity.Burst;
 using UniVox.Framework.Jobified;
 using UnityEngine.Profiling;
+using UniVox.Implementations.ProcGen;
 
 namespace UniVox.Implementations.Providers
 {
     public class NoisyProvider : AbstractProviderComponent<VoxelData>
     {
         [SerializeField] private ChunkDataFactory chunkDataFactory = null;
-
-        [SerializeField] private int Seed = 1337;
 
         [SerializeField] private WorldSettings worldSettings = new WorldSettings();
 
@@ -47,7 +46,7 @@ namespace UniVox.Implementations.Providers
             stoneID = voxelTypeManager.GetId(stoneType);
             bedrockID = voxelTypeManager.GetId(bedrockType);
 
-            fastNoise = new FastNoise(Seed);
+            fastNoise = new FastNoise(noiseSettings.Seed);
             fastNoise.SetFractalLacunarity(noiseSettings.Lacunarity);
             fastNoise.SetFractalGain(noiseSettings.Persistence);
             fastNoise.SetFractalOctaves(noiseSettings.Octaves);
@@ -59,6 +58,7 @@ namespace UniVox.Implementations.Providers
             worldSettings.ChunkDimensions = chunkManager.ChunkDimensions.ToBurstable();
             worldSettings.MinY = minY;
 
+            noiseSettings.HashedSeed = math.hash(new int2(noiseSettings.Seed))/uint.MaxValue;
         }
 
         public override AbstractPipelineJob<IChunkData<VoxelData>> GenerateChunkDataJob(Vector3Int chunkID,Vector3Int chunkDimensions)
@@ -100,6 +100,13 @@ namespace UniVox.Implementations.Providers
                 Profiler.EndSample();
                 return ChunkData;
             };
+
+            //Single threaded version  DEBUG
+            return new BasicFunctionJob<IChunkData<VoxelData>>(() =>
+            {
+                jobWrapper.job.Run();
+                return cleanup();
+            });
 
             return new PipelineUnityJob<IChunkData<VoxelData>, DataGenerationJob>(jobWrapper, cleanup);
         }
@@ -232,6 +239,8 @@ namespace UniVox.Implementations.Providers
         public int Octaves;
         public float Persistence;//Aka gain
         public float Lacunarity;
+        public int Seed;
+        [NonSerialized] public float HashedSeed;
     }
 
     public struct BlockIDs 
@@ -247,7 +256,8 @@ namespace UniVox.Implementations.Providers
     {
         public float HeightmapScale;
         public float MaxHeightmapHeight;
-        public float HeightmapExponent;
+        public float HeightmapExponentPositive;
+        public float HeightmapExponentNegative;
         public float SeaLevel;
         [NonSerialized] public float MinY;
         public float CaveThreshold;
@@ -258,12 +268,15 @@ namespace UniVox.Implementations.Providers
     [BurstCompile]
     public struct DataGenerationJob : IJob
     {
-        public WorldSettings worldSettings;
-        public NoiseSettings noiseSettings;
-        public BlockIDs ids;
-        public float3 chunkPosition;
+        [ReadOnly] public WorldSettings worldSettings;
+        [ReadOnly] public NoiseSettings noiseSettings;
+        [ReadOnly] public BlockIDs ids;
+        [ReadOnly] public float3 chunkPosition;
 
+        //Output
         public NativeArray<VoxelData> chunkData;
+
+        //public NativeBiomeDatabase biomeDatabase;
 
         //Used for noise normalization
         private float MaxNoiseAmplitude;
@@ -272,24 +285,16 @@ namespace UniVox.Implementations.Providers
         {
             PrecalculateMaxNoiseAmplitude();
 
-
             int3 dimensions = worldSettings.ChunkDimensions;
 
-            //float[,] heightMap = new float[dimensions.x, dimensions.z];
             NativeArray<float> heightMap = new NativeArray<float>(dimensions.x*dimensions.y,Allocator.Temp);
-
-            int i = 0;
-            for (int z = 0; z < dimensions.z; z++)
-            {
-                for (int x = 0; x < dimensions.x; x++)
-                {
-                    heightMap[i] = CalculateHeightMapAt(new float2(x + chunkPosition.x, z + chunkPosition.z));
-                    i++;
-                }
-            }
+            ComputeHeightMap(ref heightMap, dimensions);           
             var heightMapDimensions = new int2(dimensions.x, dimensions.z);
 
-            i = 0;
+            NativeArray<float> moistureMap = new NativeArray<float>(dimensions.x * dimensions.y, Allocator.Temp);
+
+
+            int i = 0;
             for (int z = 0; z < dimensions.z; z++)
             {
                 for (int y = 0; y < dimensions.y; y++)
@@ -307,10 +312,36 @@ namespace UniVox.Implementations.Providers
             }
         }
 
+        public void ComputeHeightMap(ref NativeArray<float> heightMap, int3 dimensions) 
+        {
+            int i = 0;
+            for (int z = 0; z < dimensions.z; z++)
+            {
+                for (int x = 0; x < dimensions.x; x++)
+                {
+                    heightMap[i] = CalculateHeightMapAt(new float2(x + chunkPosition.x, z + chunkPosition.z));
+                    i++;
+                }
+            }
+        }
+
+        private float AdjustHeightMapNoiseValue(float val) 
+        {
+            if (val > 0)
+            {
+                return math.pow(val, worldSettings.HeightmapExponentPositive);
+            }
+            else
+            {
+                //Negative exponent
+                return -1 * math.pow(-1 * val, worldSettings.HeightmapExponentNegative);
+            }
+        }
+
         public float CalculateHeightMapAt(float2 pos)
         {            
             
-            float rawHeightmap = math.pow(ZeroToOne(FractalNoise(pos * worldSettings.HeightmapScale)),worldSettings.HeightmapExponent) * worldSettings.MaxHeightmapHeight;
+            float rawHeightmap = AdjustHeightMapNoiseValue(FractalNoise(pos * worldSettings.HeightmapScale)) * worldSettings.MaxHeightmapHeight;
 
             //add the raw heightmap to the base ground height
             return worldSettings.SeaLevel + rawHeightmap;
@@ -389,7 +420,7 @@ namespace UniVox.Implementations.Providers
             float amplitude = 1;
             for (int i = 0; i < noiseSettings.Octaves; i++)
             {
-                total += noise.snoise(pos*frequency) * amplitude;
+                total += noise.snoise(new float4(pos*frequency,noiseSettings.HashedSeed)) * amplitude;
                 amplitude *= noiseSettings.Persistence;
                 frequency *= noiseSettings.Lacunarity;
             }
@@ -404,7 +435,7 @@ namespace UniVox.Implementations.Providers
             float amplitude = 1;
             for (int i = 0; i < noiseSettings.Octaves; i++)
             {
-                total += noise.snoise(pos * frequency) * amplitude;
+                total += noise.snoise(new float3(pos * frequency,noiseSettings.HashedSeed)) * amplitude;
                 amplitude *= noiseSettings.Persistence;
                 frequency *= noiseSettings.Lacunarity;
             }
