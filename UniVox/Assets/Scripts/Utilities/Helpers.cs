@@ -5,7 +5,10 @@ using UnityEngine;
 
 namespace Utils
 {
-    public static class Helper
+    /// <summary>
+    /// Plain utility functions
+    /// </summary>
+    public static class Helpers
     {
         #region 3D index flattening
         public static int MultiIndexToFlat(int x, int y, int z,Vector3Int dimensions)

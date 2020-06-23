@@ -11,5 +11,20 @@ namespace UniVox.Framework.Jobified
     public class JobWrapper<JobType> where JobType : struct, IJob
     {
         public JobType job;
+
+        public void Run() 
+        {
+            job.Run();
+        }
+
+        public JobHandle Schedule() 
+        {
+            return job.Schedule();
+        }
+
+        public JobHandle Schedule(JobHandle dependsOn)
+        {
+            return job.Schedule(dependsOn);
+        }
     }
 }

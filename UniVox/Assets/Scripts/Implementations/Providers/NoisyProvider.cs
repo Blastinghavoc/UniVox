@@ -4,6 +4,8 @@ using UniVox.Framework;
 using UniVox.Implementations.ChunkData;
 using UniVox.Implementations.Common;
 using Utils.Noise;
+using static Utils.Helpers;
+using static Utils.Noise.Helpers;
 using System;
 using Unity.Jobs;
 using Unity.Mathematics;
@@ -13,6 +15,8 @@ using Unity.Burst;
 using UniVox.Framework.Jobified;
 using UnityEngine.Profiling;
 using UniVox.Implementations.ProcGen;
+using UnityEngine.Assertions;
+using System.Net.NetworkInformation;
 
 namespace UniVox.Implementations.Providers
 {
@@ -22,237 +26,121 @@ namespace UniVox.Implementations.Providers
 
         [SerializeField] private WorldSettings worldSettings = new WorldSettings();
 
-        [SerializeField] private NoiseSettings noiseSettings = new NoiseSettings();
-
-        [SerializeField] private SOVoxelTypeDefinition dirtType = null;
-        private ushort dirtID;
-        [SerializeField] private SOVoxelTypeDefinition grassType = null;
-        private ushort grassID;
-        [SerializeField] private SOVoxelTypeDefinition stoneType = null;
-        private ushort stoneID;
+        [SerializeField] private FractalNoise heightmapNoise = new FractalNoise();
+        [SerializeField] private FractalNoise moisturemapNoise = new FractalNoise();
 
         [SerializeField] private SOVoxelTypeDefinition bedrockType = null;
         private ushort bedrockID;
+        [SerializeField] private SOVoxelTypeDefinition waterType = null;
+        private ushort waterID;
 
-        private FastNoise fastNoise;
+        [SerializeField] private SOBiomeDefinition oceanBiome = null;
+        private OceanGenConfig oceanGenConfig = new OceanGenConfig();
 
         private int minY = int.MinValue;
 
-        private BiomeDatabaseComponent biomeDatabaseComponent;
+        [SerializeField] private BiomeDatabaseComponent biomeDatabaseComponent = null;
+
 
         public override void Initialise(VoxelTypeManager voxelTypeManager, IChunkManager chunkManager)
         {
             base.Initialise(voxelTypeManager, chunkManager);
-            dirtID = voxelTypeManager.GetId(dirtType);
-            grassID = voxelTypeManager.GetId(grassType);
-            stoneID = voxelTypeManager.GetId(stoneType);
-            bedrockID = voxelTypeManager.GetId(bedrockType);
 
-            fastNoise = new FastNoise(noiseSettings.Seed);
-            fastNoise.SetFractalLacunarity(noiseSettings.Lacunarity);
-            fastNoise.SetFractalGain(noiseSettings.Persistence);
-            fastNoise.SetFractalOctaves(noiseSettings.Octaves);
+            Assert.IsNotNull(bedrockType, $"{typeof(NoisyProvider)} must have a valid reference to a bedrock block type");
+            Assert.IsNotNull(waterType, $"{typeof(NoisyProvider)} must have a valid reference to a water block type");
+            Assert.IsNotNull(oceanBiome, $"{typeof(NoisyProvider)} must have a valid reference to an ocean biome");
+            Assert.IsNotNull(biomeDatabaseComponent, $"{typeof(NoisyProvider)} must have a valid reference to a biome database component");
+
+            bedrockID = voxelTypeManager.GetId(bedrockType);
+            waterID = voxelTypeManager.GetId(waterType);
 
             if (chunkManager.IsWorldHeightLimited)
             {
                 minY = chunkManager.MinChunkY * chunkManager.ChunkDimensions.y;
             }
-            worldSettings.ChunkDimensions = chunkManager.ChunkDimensions.ToBurstable();
-            worldSettings.MinY = minY;
 
-            biomeDatabaseComponent = FindObjectOfType<BiomeDatabaseComponent>();
+            worldSettings.Initialise(minY, chunkManager.ChunkDimensions.ToBurstable());
+
+            biomeDatabaseComponent.Initialise();
+
+            oceanGenConfig.oceanID = biomeDatabaseComponent.GetBiomeID(oceanBiome);
+            oceanGenConfig.sealevel = math.floor(math.unlerp(worldSettings.minPossibleHmValue,worldSettings.maxPossibleHmValue, biomeDatabaseComponent.GetMaxElevationFraction(oceanBiome)));
+            oceanGenConfig.waterID = waterID;
         }
 
         public override AbstractPipelineJob<IChunkData<VoxelData>> GenerateChunkDataJob(Vector3Int chunkID,Vector3Int chunkDimensions)
-        {
-            if (!Burst)
-            {
-                return new BasicFunctionJob<IChunkData<VoxelData>>(()=>GenerateChunkData(chunkID,chunkDimensions));
-            }
+        {           
 
-            var jobWrapper = new JobWrapper<DataGenerationJob>();
-            jobWrapper.job = new DataGenerationJob();
-            jobWrapper.job.chunkPosition = chunkManager.ChunkToWorldPosition(chunkID);
-            jobWrapper.job.ids = new BlockIDs()
-            {
-                dirt = dirtID,
-                grass = grassID,
-                stone = stoneID,
-                bedrock = bedrockID
-            };
-            jobWrapper.job.noiseSettings = noiseSettings;
-            jobWrapper.job.worldSettings = worldSettings;
+            var mainGenJob = new JobWrapper<DataGenerationJob>();
+            mainGenJob.job = new DataGenerationJob();
+            mainGenJob.job.chunkPosition = chunkManager.ChunkToWorldPosition(chunkID);
+           
+            mainGenJob.job.heightmapNoise = heightmapNoise;
+            mainGenJob.job.moisturemapNoise = moisturemapNoise;
+            mainGenJob.job.worldSettings = worldSettings;
 
-            jobWrapper.job.biomeDatabase = biomeDatabaseComponent.BiomeDatabase;            
-            jobWrapper.job.biomeMap = new NativeArray<int>(chunkDimensions.x * chunkDimensions.y, Allocator.Persistent);
+            mainGenJob.job.bedrockID = bedrockID;
+
+            mainGenJob.job.biomeDatabase = biomeDatabaseComponent.BiomeDatabase;
+
+            mainGenJob.job.heightMap = new NativeArray<int>(chunkDimensions.x * chunkDimensions.y, Allocator.Persistent);
+            mainGenJob.job.biomeMap = new NativeArray<int>(chunkDimensions.x * chunkDimensions.y, Allocator.Persistent);
 
             var arrayLength = chunkDimensions.x * chunkDimensions.y * chunkDimensions.z;
 
-            NativeArray<VoxelData> voxelData = new NativeArray<VoxelData>(arrayLength, Allocator.Persistent);
-            jobWrapper.job.chunkData = voxelData;
+            mainGenJob.job.chunkData = new NativeArray<VoxelData>(arrayLength, Allocator.Persistent);
+
+            //Setup ocean generation job
+            var oceanGenJob = new JobWrapper<OceanGenJob>();
+            oceanGenJob.job.config = oceanGenConfig;
+            oceanGenJob.job.dimensions = worldSettings.ChunkDimensions;
+            oceanGenJob.job.chunkPosition = mainGenJob.job.chunkPosition; 
+            oceanGenJob.job.chunkData = mainGenJob.job.chunkData;
+            oceanGenJob.job.heightMap = mainGenJob.job.heightMap;
+            oceanGenJob.job.biomeMap = mainGenJob.job.biomeMap;
 
             Func<IChunkData<VoxelData>> cleanup = () =>
             {
                 Profiler.BeginSample("DataJobCleanup");
 
                 //Pass resulting array to chunk data.
-                var ChunkData = chunkDataFactory.Create(chunkID, chunkDimensions, voxelData.ToArray());
-                
+                var ChunkData = chunkDataFactory.Create(chunkID, chunkDimensions, oceanGenJob.job.chunkData.ToArray());
+
                 //Dispose of native arrays
-                voxelData.Dispose();
-                jobWrapper.job.biomeMap.Dispose();
+                oceanGenJob.job.chunkData.Dispose();
+                oceanGenJob.job.heightMap.Dispose();
+                oceanGenJob.job.biomeMap.Dispose();
 
                 Profiler.EndSample();
                 return ChunkData;
             };
 
-            //Single threaded version  DEBUG
-            //return new BasicFunctionJob<IChunkData<VoxelData>>(() =>
-            //{
-            //    jobWrapper.job.Run();
-            //    return cleanup();
-            //});
 
-            return new PipelineUnityJob<IChunkData<VoxelData>, DataGenerationJob>(jobWrapper, cleanup);
-        }
-
-
-        #region Deprecated
-        /// <summary>
-        /// Main-thread chunk generation
-        /// </summary>
-        /// <param name="chunkID"></param>
-        /// <param name="chunkDimensions"></param>
-        /// <returns></returns>
-        private IChunkData<VoxelData> GenerateChunkData(Vector3Int chunkID, Vector3Int chunkDimensions)
-        {
-            if (chunkID.y < chunkManager.MinChunkY || chunkID.y > chunkManager.MaxChunkY)
+            if (!Parrallel)
             {
-                return new EmptyChunkData(chunkID, chunkManager.ChunkDimensions);
-            }
-
-            var chunkPosition = chunkManager.ChunkToWorldPosition(chunkID).ToInt();
-
-            var ChunkData = new ArrayChunkData(chunkID, chunkDimensions);
-
-            float[,] heightMap = new float[chunkDimensions.x, chunkDimensions.z];
-
-            for (int z = 0; z < chunkDimensions.z; z++)
-            {
-                for (int x = 0; x < chunkDimensions.x; x++)
+                //Single threaded version  DEBUG
+                return new BasicFunctionJob<IChunkData<VoxelData>>(() =>
                 {
-                    heightMap[x, z] = CalculateHeightMapAt(x+chunkPosition.x, z+chunkPosition.z);
-                }
-            }            
-
-            for (int z = 0; z < chunkDimensions.z; z++)
-            {                
-                for (int y = 0; y < chunkDimensions.y; y++)
-                {
-                    for (int x = 0; x < chunkDimensions.x; x++)
-                    {
-                        GenerateVoxelAt(ChunkData, chunkPosition, new Vector3Int(x, y, z),heightMap[x,z]);
-                    }
-                }
+                    mainGenJob.Run();
+                    oceanGenJob.Run();
+                    return cleanup();
+                });
             }
 
-            return ChunkData;
-        }
+            var mainHandle = mainGenJob.Schedule();
+            var finalHandle = oceanGenJob.Schedule(mainHandle);
 
-        protected virtual void GenerateVoxelAt(AbstractChunkData chunkData,Vector3Int chunkPosition, Vector3Int localCoords,float height) 
-        {
-            ushort id;
-
-            //World pos
-            var pos = chunkPosition + localCoords;
-
-            id = CalculateVoxelIDAt(pos,height);
-
-            if (id == VoxelTypeManager.AIR_ID)
-            {
-                return;
-            }
-
-            chunkData[localCoords] = new VoxelData(id);
-            
-        }
-
-        private float CalculateHeightMapAt(int x, int z) 
-        {
-            float rawHeightmap = fastNoise.GetSimplexFractal(x * worldSettings.HeightmapScale, z * worldSettings.HeightmapScale) * worldSettings.MaxHeightmapHeight;
-
-            //add the raw heightmap to the base ground height
-            return worldSettings.SeaLevel + rawHeightmap;
-        }
-
-        /// <summary>
-        /// Based on REF: https://github.com/samhogan/Minecraft-Unity3D/blob/master/Assets/Scripts/TerrainGenerator.cs        /// 
-        /// </summary>
-        /// <param name="pos"></param>
-        /// <returns></returns>
-        private ushort CalculateVoxelIDAt(Vector3Int pos,float height) 
-        {
-            var (x, y, z) = pos;
-            ushort id = VoxelTypeManager.AIR_ID;
-
-            if (y > height)
-            {//Air
-                return id;
-            }
-
-            if (y == minY )
-            {
-                id = bedrockID;
-                return id;
-            }
-
-            //3D noise for caves
-            float caveNoise = fastNoise.GetPerlinFractal(x * 5f, y * 10f, z * 5f);
-
-            if (caveNoise > worldSettings.CaveThreshold)
-            {
-                //Cave
-                return id;
-            }
-
-            if (y > height -1)
-            {
-                id = grassID;
-            }
-            else
-            {
-                if (y < height -4)
-                {
-                    id = stoneID;
-                }
-                else
-                {                    
-                    id = dirtID;
-                }
-            }
-
-
-            return id;
-        }
-        #endregion
+            return new PipelineUnityJob<IChunkData<VoxelData>>(finalHandle, cleanup);
+        }        
 
     }
 
     [System.Serializable]
-    public struct NoiseSettings
+    public struct OceanGenConfig 
     {
-        public int Octaves;
-        public float Persistence;//Aka gain
-        public float Lacunarity;
-        public int Seed;
-    }
-
-    public struct BlockIDs 
-    {
-        public ushort stone;
-        public ushort dirt;
-        public ushort grass;
-        public ushort bedrock;
+        public int oceanID;
+        public float sealevel;
+        public ushort waterID;
     }
 
     [System.Serializable]
@@ -262,20 +150,38 @@ namespace UniVox.Implementations.Providers
         public float MoistureMapScale;
         public float MaxHeightmapHeight;
         public float HeightmapExponentPositive;
-        public float HeightmapExponentNegative;
-        public float SeaLevel;
+        public float HeightmapExponentNegative;        
+        public int HeightmapYOffset;
         [NonSerialized] public float MinY;
         public float CaveThreshold;
         public float CaveScale;
         [NonSerialized] public int3 ChunkDimensions;
+        [NonSerialized] public float maxPossibleHmValue;
+        [NonSerialized] public float minPossibleHmValue;
+
+        public void Initialise(float miny, int3 chunkDimensions) 
+        {
+            MinY = miny;
+            ChunkDimensions = chunkDimensions;
+
+            ///Translate scale variables into the form needed by noise operations,
+            /// i.e, invert them
+            HeightmapScale = 1 / HeightmapScale;
+            MoistureMapScale = 1 / MoistureMapScale;
+            CaveScale = 1 / CaveScale;
+
+            maxPossibleHmValue = MaxHeightmapHeight + HeightmapYOffset;
+            minPossibleHmValue = -1 * MaxHeightmapHeight + HeightmapYOffset;
+        }
     }
 
     [BurstCompile]
     public struct DataGenerationJob : IJob
     {
         [ReadOnly] public WorldSettings worldSettings;
-        [ReadOnly] public NoiseSettings noiseSettings;
-        [ReadOnly] public BlockIDs ids;
+        [ReadOnly] public FractalNoise heightmapNoise;
+        [ReadOnly] public FractalNoise moisturemapNoise;
+        [ReadOnly] public ushort bedrockID;
         [ReadOnly] public float3 chunkPosition;
 
         //Output
@@ -283,25 +189,18 @@ namespace UniVox.Implementations.Providers
 
         [ReadOnly] public NativeBiomeDatabase biomeDatabase;
 
-        //Used for noise normalization
-        private float MaxNoiseAmplitude;
-
-        private float moistureSeed;
-
+        public NativeArray<int> heightMap;
         public NativeArray<int> biomeMap;
 
         public void Execute()
         {
-            PrecalculateMaxNoiseAmplitude();
-
-            var rand = new Unity.Mathematics.Random((uint)noiseSettings.Seed);
-            moistureSeed = rand.NextFloat();
+            heightmapNoise.Initialise();
+            moisturemapNoise.Initialise();
 
             int3 dimensions = worldSettings.ChunkDimensions;
-
-            NativeArray<float> heightMap = new NativeArray<float>(dimensions.x*dimensions.y,Allocator.Temp);
-            ComputeHeightMap(ref heightMap, dimensions);            
-            ComputeBiomeMap(ref heightMap, dimensions);
+            
+            ComputeHeightMap(dimensions);            
+            ComputeBiomeMap(dimensions);
 
             var mapDimensions = new int2(dimensions.x, dimensions.z);
 
@@ -314,7 +213,7 @@ namespace UniVox.Implementations.Providers
                 for (int x = 0; x < dimensions.x; x++)
                 {
                     //Process one column of voxels
-                    var mapIndex = Utils.Helper.MultiIndexToFlat(x, z, mapDimensions);
+                    var mapIndex = MultiIndexToFlat(x, z, mapDimensions);
                     var layers = biomeDatabase.biomeLayers[biomeMap[mapIndex]];
 
                     var height = heightMap[mapIndex];
@@ -365,12 +264,12 @@ namespace UniVox.Implementations.Providers
                         //handle bedrock and caves
                         if (pos.y <= worldSettings.MinY)
                         {
-                            idToPlace = ids.bedrock;
+                            idToPlace = bedrockID;
                         }
                         else
                         {
                             //3D noise for caves
-                            float caveNoise = FractalNoise(pos * worldSettings.CaveScale, noiseSettings.Seed);
+                            float caveNoise = noise.snoise(pos * worldSettings.CaveScale);
 
                             if (caveNoise > worldSettings.CaveThreshold)
                             {
@@ -379,17 +278,17 @@ namespace UniVox.Implementations.Providers
                             }
                         }
 
-                        var flatIndex = Utils.Helper.MultiIndexToFlat(x, y, z, dx,dxdy);
+                        var flatIndex = MultiIndexToFlat(x, y, z, dx,dxdy);
                         chunkData[flatIndex] = new VoxelData(idToPlace);
                     }
                 }
             }
         }
 
-        private void ComputeBiomeMap(ref NativeArray<float> heightMap, int3 dimensions) 
+        private void ComputeBiomeMap(int3 dimensions) 
         {
-            var maxPossibleHmValue = worldSettings.MaxHeightmapHeight + worldSettings.SeaLevel;
-            var minPossibleHmValue = -1 *worldSettings.MaxHeightmapHeight + worldSettings.SeaLevel;
+            var maxPossibleHmValue = worldSettings.maxPossibleHmValue;
+            var minPossibleHmValue = worldSettings.minPossibleHmValue;
 
             //Compute moisture map in range 0->1
             NativeArray<float> moistureMap = new NativeArray<float>(dimensions.x * dimensions.y, Allocator.Temp);
@@ -417,16 +316,15 @@ namespace UniVox.Implementations.Providers
                 for (int x = 0; x < dimensions.x; x++)
                 {
                     moistureMap[i] = ZeroToOne(
-                        FractalNoise(
-                            new float2(x + chunkPosition.x, z + chunkPosition.z)*worldSettings.MoistureMapScale,
-                            moistureSeed)
+                        moisturemapNoise.Sample(
+                            new float2(x + chunkPosition.x, z + chunkPosition.z)*worldSettings.MoistureMapScale                            )
                         );
                     i++;
                 }
             }
         }
 
-        private void ComputeHeightMap(ref NativeArray<float> heightMap, int3 dimensions) 
+        private void ComputeHeightMap(int3 dimensions) 
         {
             int i = 0;
             for (int z = 0; z < dimensions.z; z++)
@@ -458,66 +356,76 @@ namespace UniVox.Implementations.Providers
             }
         }
 
-        public float CalculateHeightMapAt(float2 pos)
+        public int CalculateHeightMapAt(float2 pos)
         {            
             
-            float rawHeightmap = AdjustHeightMapNoiseValue(FractalNoise(pos * worldSettings.HeightmapScale,noiseSettings.Seed)) * worldSettings.MaxHeightmapHeight;
+            int rawHeightmap = (int)math.floor(
+                AdjustHeightMapNoiseValue(heightmapNoise.Sample(pos * worldSettings.HeightmapScale)) 
+                * worldSettings.MaxHeightmapHeight
+                );
 
             //add the raw heightmap to the base ground height
-            return worldSettings.SeaLevel + rawHeightmap;
+            return worldSettings.HeightmapYOffset + rawHeightmap;
         }
+        
+    }
 
-        private void PrecalculateMaxNoiseAmplitude() 
+    [BurstCompile]
+    public struct OceanGenJob :IJob
+    {
+        [ReadOnly] public OceanGenConfig config;
+        [ReadOnly] public int3 dimensions;
+        [ReadOnly] public float3 chunkPosition;
+
+        //Input and Output
+        public NativeArray<VoxelData> chunkData;
+
+        //Input
+        [ReadOnly] public NativeArray<int> heightMap;
+        [ReadOnly] public NativeArray<int> biomeMap;
+
+        public void Execute()
         {
-            //Precalcuate max noise amplitude, to avoid having to do so for each noise calculation
-            float amplitude = 1;
-            MaxNoiseAmplitude = 0;
-            for (int n = 0; n < noiseSettings.Octaves; n++)
+            int dx = dimensions.x;
+            int dxdy = dimensions.x * dimensions.y;
+
+            int i = 0;
+            for (int z = 0; z < dimensions.z; z++)
             {
-                MaxNoiseAmplitude += amplitude;
-                amplitude *= noiseSettings.Persistence;
-            }
-        }
+                for (int x = 0; x < dimensions.x; x++,i++)
+                {
+                    if (biomeMap[i] == config.oceanID)
+                    {
+                        if (heightMap[i] <= config.sealevel)
+                        {
+                            var yStart = (int)math.floor(math.min(config.sealevel - chunkPosition.y, dimensions.y - 1));
 
-        /// <summary>
-        /// Transform a noise value from the -1->1 range that the noise functions
-        /// output to the 0->1 range
-        /// </summary>
-        /// <param name="rawNoise"></param>
-        /// <returns></returns>
-        private float ZeroToOne(float rawNoise) 
-        {
-            return math.unlerp(-1, 1, rawNoise);
-        }
+                            //This version is cheaper, but doesn't account for caves
+                            //var yEnd = (int)math.floor(math.max(heightMap[i] - chunkPosition.y, 0));
+                            //for (int y = yStart; y >= yEnd; y--)
+                            //{
+                            //    var flatIndex = MultiIndexToFlat(x, y, z, dx, dxdy);
+                            //    chunkData[flatIndex] = new VoxelData(config.waterID);
+                            //}
 
-        private float FractalNoise(float3 pos,float seed) 
-        {
-            float total = 0;
-            float frequency = 1;
-            float amplitude = 1;
-            for (int i = 0; i < noiseSettings.Octaves; i++)
-            {
-                total += noise.snoise(new float4(pos*frequency,seed)) * amplitude;
-                amplitude *= noiseSettings.Persistence;
-                frequency *= noiseSettings.Lacunarity;
-            }
-            //Return normalised
-            return total / MaxNoiseAmplitude;
-        }
+                            if (yStart < 0)
+                            {
+                                continue;
+                            }
 
-        private float FractalNoise(float2 pos,float seed)
-        {
-            float total = 0;
-            float frequency = 1;
-            float amplitude = 1;
-            for (int i = 0; i < noiseSettings.Octaves; i++)
-            {
-                total += noise.snoise(new float3(pos * frequency,seed)) * amplitude;
-                amplitude *= noiseSettings.Persistence;
-                frequency *= noiseSettings.Lacunarity;
+                            int y = yStart;
+                            int flatIndex = MultiIndexToFlat(x, y, z, dx, dxdy);
+                            do
+                            {
+                                chunkData[flatIndex] = new VoxelData(config.waterID);
+                                y--;
+                                flatIndex = MultiIndexToFlat(x, y, z, dx, dxdy);
+                            } while (y>=0 && chunkData[flatIndex].TypeID == VoxelTypeManager.AIR_ID);
+
+                        }
+                    }
+                }
             }
-            //Return normalised
-            return total / MaxNoiseAmplitude;
         }
     }
 }

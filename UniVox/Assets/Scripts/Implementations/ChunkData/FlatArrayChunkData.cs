@@ -36,12 +36,12 @@ namespace UniVox.Implementations.ChunkData
 
         protected override VoxelData GetVoxelAtLocalCoordinates(int x, int y, int z)
         {
-            return voxels[Utils.Helper.MultiIndexToFlat(x,y,z,Dimensions.x,dxdy)];
+            return voxels[Utils.Helpers.MultiIndexToFlat(x,y,z,Dimensions.x,dxdy)];
         }
 
         protected override void SetVoxelAtLocalCoordinates(int x, int y, int z, VoxelData voxel)
         {
-            voxels[Utils.Helper.MultiIndexToFlat(x, y, z, Dimensions.x, dxdy)] = voxel;
+            voxels[Utils.Helpers.MultiIndexToFlat(x, y, z, Dimensions.x, dxdy)] = voxel;
         }
 
         public override NativeArray<VoxelData> ToNative(Allocator allocator = Allocator.Persistent)

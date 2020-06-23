@@ -5,12 +5,10 @@ using UniVox.Framework.Jobified;
 namespace UniVox.Framework.ChunkPipeline.VirtualJobs
 {
     /// <summary>
-    /// Wrapper around a Unity IJob
+    /// Wrapper around a Unity JobHandle
     /// </summary>
-    public class PipelineUnityJob<T, JobType> : AbstractPipelineJob<T>
-        where JobType: struct, IJob
+    public class PipelineUnityJob<T> : AbstractPipelineJob<T>
     {
-        private JobWrapper<JobType> jobWrapper;
         private JobHandle handle;
         private Func<T> cleanup ;
 
@@ -28,15 +26,17 @@ namespace UniVox.Framework.ChunkPipeline.VirtualJobs
             } 
         }
 
-        public PipelineUnityJob(JobWrapper<JobType> jobWrapper, Func<T> cleanup)
+        /// <summary>
+        /// First parameter is a handle to a scheduled job, second is the 
+        /// cleanup (e.g native disposal) function to execute when the job is
+        /// complete.
+        /// </summary>
+        /// <param name="handle"></param>
+        /// <param name="cleanup"></param>
+        public PipelineUnityJob(JobHandle handle, Func<T> cleanup)
         {
-            this.jobWrapper = jobWrapper;
+            this.handle = handle;
             this.cleanup = cleanup;
-        }
-
-        public override void Start()
-        {
-            handle = jobWrapper.job.Schedule();
         }
 
         private void DoCleanup()

@@ -2,16 +2,10 @@
 
 namespace UniVox.Framework.ChunkPipeline.VirtualJobs
 {
+    //Simply executes the function and store the result
     public class BasicFunctionJob<T> : AbstractPipelineJob<T>
     {
-        Func<T> func;
-
         public BasicFunctionJob(Func<T> func)
-        {
-            this.func = func;
-        }
-
-        public override void Start()
         {
             Result = func();
             Done = true;

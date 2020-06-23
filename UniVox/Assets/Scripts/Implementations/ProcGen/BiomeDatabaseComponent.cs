@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -12,10 +14,43 @@ namespace UniVox.Implementations.ProcGen
         public SOBiomeConfiguration config;
         public NativeBiomeDatabase BiomeDatabase { get; private set; }
 
-        private void Start()
+        private Dictionary<SOBiomeDefinition, int> biomeIds = new Dictionary<SOBiomeDefinition, int>();
+
+        private bool initialised = false;
+
+        public void Initialise() 
         {
-            var typeManager = (VoxelTypeManager)FindObjectOfType(typeof(VoxelTypeManager));
-            BiomeDatabase = ConfigToNative(config, typeManager);
+            if (!initialised)
+            {
+                var typeManager = (VoxelTypeManager)FindObjectOfType(typeof(VoxelTypeManager));
+                BiomeDatabase = ConfigToNative(config, typeManager);
+            }
+        }
+
+        public int GetBiomeID(SOBiomeDefinition def) 
+        {
+            if (biomeIds.TryGetValue(def,out var id))
+            {
+                return id;
+            }
+            throw new ArgumentException($"No id has been generated for biome definition {def.name}");
+        }
+
+        public float GetMaxElevationFraction(SOBiomeDefinition def) 
+        {
+            try
+            {
+                var zonesContainingDef = config.elevationLowToHigh.Where(
+                    (_) => _.moistureLevelsLowToHigh.Any(
+                        (moistDef)=>moistDef.biomeDefinition.Equals(def)
+                        )
+                    );
+                return zonesContainingDef.Select((zone) => zone.max).Max();
+            }
+            catch (Exception e)
+            {
+                throw new ArgumentException($"A max elevation value could not be found for biome {def.name}",e);
+            }            
         }
 
         public NativeBiomeDatabase ConfigToNative(SOBiomeConfiguration config,VoxelTypeManager typeManager) 
@@ -25,7 +60,6 @@ namespace UniVox.Implementations.ProcGen
             List<NativeBiomeMoistureDefinition> allMoistureDefsList = new List<NativeBiomeMoistureDefinition>();
             List<NativeElevationZone> allElevationZonesList = new List<NativeElevationZone>();
 
-            Dictionary<SOBiomeDefinition, int> biomeIds = new Dictionary<SOBiomeDefinition, int>(); 
 
             foreach (var elevationEntry in config.elevationLowToHigh)
             {

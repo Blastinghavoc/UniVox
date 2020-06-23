@@ -80,35 +80,7 @@ namespace UniVox.Framework.ChunkPipeline
         {
             foreach (var item in incoming)
             {
-                //TODO remove DEBUG
-                if (jobs.ContainsKey(item))
-                {
-                    throw new ArgumentException($"Chunk {item} in incoming list already existed in stage {Name}" +
-                        $". The existing job status was {jobs[item].Done}." +
-                        $"Was it in the hashset : {this.Contains(item)}." +
-                        $"Were there any duplicates in the incoming list {incoming.Count((_)=>_==item)}");
-                }
-
-                if (PreconditionCheck != null)
-                {
-                    if (!PreconditionCheck(item))
-                    {
-                        throw new ArgumentException($"Preconditions failed for {item}");
-                    }
-                }
-
-                var job = makeJob(item);
-                //DEBUG
-                try
-                {
-                    jobs.Add(item, job);
-                    job.Start();
-                }
-                catch (ArgumentException e)
-                {
-                    throw new ArgumentException($"Chunk {item} in incoming list already existed in stage {Name}" +
-                        $". The existing job status was {jobs[item].Done}",e);
-                }
+                AddJob(item);
             }
 
             base.AddAll(incoming);
@@ -118,9 +90,38 @@ namespace UniVox.Framework.ChunkPipeline
         public override void Add(Vector3Int incoming)
         {
             base.Add(incoming);
-            var job = makeJob(incoming);
-            jobs.Add(incoming, job);
-            job.Start();
+            AddJob(incoming);
+        }
+
+        private void AddJob(Vector3Int item) 
+        {
+            //TODO remove DEBUG
+            if (jobs.ContainsKey(item))
+            {
+                throw new ArgumentException($"Chunk {item} in incoming list already existed in stage {Name}" +
+                    $". The existing job status was {jobs[item].Done}." +
+                    $"Was it in the hashset : {this.Contains(item)}.");
+            }
+
+            if (PreconditionCheck != null)
+            {
+                if (!PreconditionCheck(item))
+                {
+                    throw new ArgumentException($"Preconditions failed for {item}");
+                }
+            }
+
+            //DEBUG
+            try
+            {
+                var job = makeJob(item);
+                jobs.Add(item, job);
+            }
+            catch (ArgumentException e)
+            {
+                throw new ArgumentException($"Chunk {item} in incoming list already existed in stage {Name}" +
+                    $". The existing job status was {jobs[item].Done}", e);
+            }
         }
 
         /// <summary>

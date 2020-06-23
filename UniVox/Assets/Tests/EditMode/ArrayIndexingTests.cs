@@ -29,7 +29,7 @@ namespace Tests
 
             var testCoords = new Vector3Int(1, 1, 0);
 
-            var flatIndex = Utils.Helper.MultiIndexToFlat(testCoords.x, testCoords.y, testCoords.z, dimensions);
+            var flatIndex = Utils.Helpers.MultiIndexToFlat(testCoords.x, testCoords.y, testCoords.z, dimensions);
 
             Assert.AreEqual(11,flatIndex);
 
@@ -39,7 +39,7 @@ namespace Tests
                 {
                     for (int x = 0; x < dimensions.x; x++)
                     {
-                        Debug.Log(Utils.Helper.MultiIndexToFlat(x, y, z, dimensions));
+                        Debug.Log(Utils.Helpers.MultiIndexToFlat(x, y, z, dimensions));
                     }
                 }
             }
@@ -53,18 +53,18 @@ namespace Tests
 
             var testCoords = new Vector3Int(5, 2, 1);
             
-            var flatIndex = Utils.Helper.MultiIndexToFlat(testCoords.x,testCoords.y,testCoords.z, dimensions);
+            var flatIndex = Utils.Helpers.MultiIndexToFlat(testCoords.x,testCoords.y,testCoords.z, dimensions);
 
             Debug.Log($"Flattened {testCoords} to {flatIndex}");
 
-            Utils.Helper.FlatIndexToMulti(flatIndex, dimensions, out var x, out var y, out var z);
+            Utils.Helpers.FlatIndexToMulti(flatIndex, dimensions, out var x, out var y, out var z);
             var backAgain = new Vector3Int(x,y,z);
 
             Assert.AreEqual(testCoords, backAgain);
 
             for (int i = 0; i < dimensions.x * dimensions.y * dimensions.z; i++)
             {
-                Utils.Helper.FlatIndexToMulti(i, dimensions, out x, out y, out z);
+                Utils.Helpers.FlatIndexToMulti(i, dimensions, out x, out y, out z);
                 Debug.Log($"{x},{y},{z}");
             }
 
@@ -77,18 +77,18 @@ namespace Tests
 
             var testCoords = new Vector2Int(5, 2);
 
-            var flatIndex = Utils.Helper.MultiIndexToFlat(testCoords.x, testCoords.y, dimensions);
+            var flatIndex = Utils.Helpers.MultiIndexToFlat(testCoords.x, testCoords.y, dimensions);
 
             Debug.Log($"Flattened {testCoords} to {flatIndex}");
 
-            Utils.Helper.FlatIndexToMulti(flatIndex, dimensions, out var x, out var y);
+            Utils.Helpers.FlatIndexToMulti(flatIndex, dimensions, out var x, out var y);
             var backAgain = new Vector2Int(x, y);
 
             Assert.AreEqual(testCoords, backAgain);
 
             for (int i = 0; i < dimensions.x * dimensions.y; i++)
             {
-                Utils.Helper.FlatIndexToMulti(i, dimensions, out x, out y);
+                Utils.Helpers.FlatIndexToMulti(i, dimensions, out x, out y);
                 Debug.Log($"{x},{y}");
             }
         }

@@ -15,7 +15,7 @@ namespace UniVox.Framework
         protected IChunkManager chunkManager;
 
         //TODO remove, testing only
-        public bool Burst = true;
+        public bool Parrallel = true;
 
         /// <summary>
         /// Chunk Data for chunks that are not active, but have been modified.

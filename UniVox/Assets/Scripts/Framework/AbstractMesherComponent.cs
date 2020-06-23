@@ -273,7 +273,7 @@ namespace UniVox.Framework
             //    return cleanup();
             //});
 
-            return new PipelineUnityJob<Mesh, MeshingJob<V>>(jobWrapper, cleanup);
+            return new PipelineUnityJob<Mesh>(jobWrapper.Schedule(), cleanup);
 
         }
 
@@ -394,7 +394,7 @@ namespace UniVox.Framework
 
                 var neighbourDimensions = DirectionToIndicesInSlice(directionVector, dimensions);
 
-                var flattenedIndex = Utils.Helper.MultiIndexToFlat(localIndexOfAdjacentVoxelInNeighbour.x, localIndexOfAdjacentVoxelInNeighbour.y, neighbourDimensions);
+                var flattenedIndex = Utils.Helpers.MultiIndexToFlat(localIndexOfAdjacentVoxelInNeighbour.x, localIndexOfAdjacentVoxelInNeighbour.y, neighbourDimensions);
 
                 return IncludeFaceOfAdjacentWithID(neighbourChunkData[flattenedIndex].TypeID, directionIndex);
             }
@@ -421,7 +421,7 @@ namespace UniVox.Framework
                 pos.y >= 0 && pos.y < dimensions.y &&
                 pos.z >= 0 && pos.z < dimensions.z)
             {
-                voxelId = voxels[Utils.Helper.MultiIndexToFlat(pos.x, pos.y, pos.z, dimensions)].TypeID;
+                voxelId = voxels[Utils.Helpers.MultiIndexToFlat(pos.x, pos.y, pos.z, dimensions)].TypeID;
                 return true;
             }
             voxelId = VoxelTypeManager.AIR_ID;
