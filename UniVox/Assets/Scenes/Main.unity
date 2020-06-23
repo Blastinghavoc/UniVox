@@ -162,7 +162,7 @@ PrefabInstance:
       objectReference: {fileID: 18352215}
     - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
       propertyPath: Parrallel
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 398304577439083000, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
@@ -232,7 +232,7 @@ PrefabInstance:
     - target: {fileID: 5880167504519198129, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
       propertyPath: MaxGeneratedPerUpdate
-      value: 12
+      value: 24
       objectReference: {fileID: 0}
     - target: {fileID: 5880167504519198129, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
