@@ -10,5 +10,6 @@ namespace UniVox.Framework
         public string DisplayName;
         public Texture2D[] FaceTextures = new Texture2D[Directions.NumDirections];
         public SOMeshDefinition meshDefinition;
+        public Material material;
     }
 }

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Unity.Burst;
 using Unity.Collections;
-using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Profiling;
@@ -19,7 +17,7 @@ namespace UniVox.Framework
         public bool IsMeshDependentOnNeighbourChunks { get; protected set; } = false;
 
         //TODO remove, testing only
-        public bool Burst = true;
+        public bool Parrallel = true;
 
         protected VoxelTypeManager voxelTypeManager;
         protected AbstractChunkManager<V> chunkManager;
@@ -179,11 +177,6 @@ namespace UniVox.Framework
 
         public AbstractPipelineJob<Mesh> CreateMeshJob(Vector3Int chunkID)
         {
-            if (!Burst)
-            {
-                return new BasicFunctionJob<Mesh>(() => CreateMesh(chunkManager.GetReadOnlyChunkData(chunkID)));
-            }
-
             Profiler.BeginSample("CreateMeshJob");
 
             var jobWrapper = new JobWrapper<MeshingJob<V>>();
@@ -233,7 +226,8 @@ namespace UniVox.Framework
             jobWrapper.job.vertices = new NativeList<Vector3>(Allocator.Persistent);
             jobWrapper.job.uvs = new NativeList<Vector3>(Allocator.Persistent);
             jobWrapper.job.normals = new NativeList<Vector3>(Allocator.Persistent);
-            jobWrapper.job.triangleIndices = new NativeList<int>(Allocator.Persistent);
+            jobWrapper.job.allTriangleIndices = new NativeList<int>(Allocator.Persistent);
+            jobWrapper.job.materialRuns = new NativeList<MaterialRun>(Allocator.Persistent);
 
             Func<Mesh> cleanup = () =>
             {
@@ -249,12 +243,13 @@ namespace UniVox.Framework
                 mesh.vertices = jobWrapper.job.vertices.ToArray();
                 mesh.SetUVs(0, jobWrapper.job.uvs.ToArray());
                 mesh.normals = jobWrapper.job.normals.ToArray();
-                mesh.triangles = jobWrapper.job.triangleIndices.ToArray();
+                mesh.triangles = jobWrapper.job.allTriangleIndices.ToArray();
 
                 jobWrapper.job.vertices.Dispose();
                 jobWrapper.job.uvs.Dispose();
                 jobWrapper.job.normals.Dispose();
-                jobWrapper.job.triangleIndices.Dispose();
+                jobWrapper.job.allTriangleIndices.Dispose();
+                jobWrapper.job.materialRuns.Dispose();
 
                 jobWrapper.job.voxels.Dispose();
                 jobWrapper.job.neighbourData.Dispose();
@@ -268,10 +263,14 @@ namespace UniVox.Framework
 
 
             //Single threaded version
-            //return new BasicFunctionJob<Mesh>(() => {
-            //    jobWrapper.job.Run();
-            //    return cleanup();
-            //});
+            if (!Parrallel)
+            {
+                return new BasicFunctionJob<Mesh>(() =>
+                {
+                    jobWrapper.Run();
+                    return cleanup();
+                });
+            }
 
             return new PipelineUnityJob<Mesh>(jobWrapper.Schedule(), cleanup);
 
@@ -279,202 +278,4 @@ namespace UniVox.Framework
 
     }
 
-    [BurstCompile]
-    public struct MeshingJob<V> : IJob
-        where V:struct, IVoxelData
-    {
-        [ReadOnly] public bool cullfaces;
-        [ReadOnly] public int3 dimensions;
-        [ReadOnly] private const int numDirections = Directions.NumDirections;
-
-        [ReadOnly] public NativeArray<V> voxels;
-
-        [ReadOnly] public NeighbourData<V> neighbourData;
-
-        [ReadOnly] public NativeMeshDatabase meshDatabase;
-
-        [ReadOnly] public NativeVoxelTypeDatabase voxelTypeDatabase;
-
-        [ReadOnly] public NativeArray<int3> DirectionVectors;
-        [ReadOnly] public NativeArray<byte> DirectionOpposites;
-
-        public NativeList<Vector3> vertices;
-        public NativeList<Vector3> uvs;
-        public NativeList<Vector3> normals;
-        public NativeList<int> triangleIndices;
-
-        public void Execute()
-        {
-            int currentIndex = 0;//Current index for indices list
-
-            int i = 0;//current index into voxelData
-            for (int z = 0; z < dimensions.z; z++)
-            {
-                for (int y = 0; y < dimensions.y; y++)
-                {
-                    for (int x = 0; x < dimensions.x; x++)
-                    {
-                        var voxelTypeID = voxels[i].TypeID;
-
-                        if (voxelTypeID != VoxelTypeManager.AIR_ID)
-                        {            
-                            AddMeshDataForVoxel(voxelTypeID,new int3(x,y,z),ref currentIndex);
-                        }
-
-                        i++;
-                    }
-                }
-            }
-        }
-
-        private void AddMeshDataForVoxel(ushort id, int3 position, ref int currentIndex)
-        {
-            var meshID = meshDatabase.voxelTypeToMeshTypeMap[id];
-            var faceZRange = voxelTypeDatabase.voxelTypeToZIndicesRangeMap[id];
-
-            //Add single voxel's data
-            for (int i = 0; i < numDirections; i++)
-            {
-                if (IncludeFace(position, i))
-                {
-                    AddFace(meshID, voxelTypeDatabase.zIndicesPerFace[faceZRange.start+i], i, position,ref currentIndex);
-                }
-            }
-        }
-
-        private void AddFace(int meshID, float uvZ, int direction,int3 position,ref int currentIndex)
-        {
-            var meshRange = meshDatabase.meshTypeRanges[meshID];
-
-            var usedNodesSlice = meshDatabase.nodesUsedByFaces[meshRange.start+direction];
-
-            //Add all the nodes used by this face
-            for (int i = usedNodesSlice.start; i < usedNodesSlice.end; i++)
-            {
-                var node = meshDatabase.allMeshNodes[i];
-                vertices.Add(node.vertex + position);
-                uvs.Add(new float3(node.uv, uvZ));
-                normals.Add(node.normal);
-            }
-
-            //Add the triangleIndices used by this face
-
-            var relativeTrianglesSlice = meshDatabase.relativeTrianglesByFaces[meshRange.start + direction];
-
-            for (int i = relativeTrianglesSlice.start; i < relativeTrianglesSlice.end; i++)
-            {
-                triangleIndices.Add(meshDatabase.allRelativeTriangles[i] + currentIndex);
-            }
-
-            //Update indexing
-            currentIndex += usedNodesSlice.end - usedNodesSlice.start;
-        }
-
-        private bool IncludeFace(int3 position, int directionIndex)
-        {
-            if (!cullfaces)
-            {
-                return true;
-            }          
-            var directionVector = DirectionVectors[directionIndex];
-            var adjacentVoxelIndex = position + directionVector;
-
-            if (TryGetVoxelAt(adjacentVoxelIndex, out var adjacentID))
-            {//If adjacent voxel is in the chunk
-
-                return IncludeFaceOfAdjacentWithID(adjacentID, directionIndex);
-            }
-            else
-            {
-                //If adjacent voxel is in the neighbouring chunk
-
-                var localIndexOfAdjacentVoxelInNeighbour = DirectionToIndicesInSlice(directionVector, LocalVoxelIndexOfPosition(adjacentVoxelIndex));
-
-                var neighbourChunkData = neighbourData[directionIndex];
-
-                var neighbourDimensions = DirectionToIndicesInSlice(directionVector, dimensions);
-
-                var flattenedIndex = Utils.Helpers.MultiIndexToFlat(localIndexOfAdjacentVoxelInNeighbour.x, localIndexOfAdjacentVoxelInNeighbour.y, neighbourDimensions);
-
-                return IncludeFaceOfAdjacentWithID(neighbourChunkData[flattenedIndex].TypeID, directionIndex);
-            }
-        }
-
-        private bool IncludeFaceOfAdjacentWithID(ushort voxelTypeID, int direction)
-        {
-            if (voxelTypeID == VoxelTypeManager.AIR_ID)
-            {
-                //Include the face if the adjacent voxel is air
-                return true;
-            }
-            var meshID = meshDatabase.voxelTypeToMeshTypeMap[voxelTypeID];
-            var meshRange = meshDatabase.meshTypeRanges[meshID];
-            var faceIsSolid = meshDatabase.isFaceSolid[meshRange.start + DirectionOpposites[direction]];
-
-            //Exclude this face if adjacent face is solid
-            return !faceIsSolid;
-        }
-
-        private bool TryGetVoxelAt(int3 pos, out ushort voxelId) 
-        {
-            if (pos.x >= 0 && pos.x < dimensions.x &&
-                pos.y >= 0 && pos.y < dimensions.y &&
-                pos.z >= 0 && pos.z < dimensions.z)
-            {
-                voxelId = voxels[Utils.Helpers.MultiIndexToFlat(pos.x, pos.y, pos.z, dimensions)].TypeID;
-                return true;
-            }
-            voxelId = VoxelTypeManager.AIR_ID;
-            return false;
-        }
-
-        /// <summary>
-        /// Verbose version of ChunkManager's method with the same name.
-        /// </summary>
-        /// <param name="position"></param>
-        /// <returns></returns>
-        private int3 LocalVoxelIndexOfPosition(int3 position)
-        {
-            var remainder = position % dimensions;
-
-            if (remainder.x < 0)
-            {
-                remainder.x += dimensions.x;
-            }
-
-            if (remainder.y < 0)
-            {
-                remainder.y += dimensions.y;
-            }
-
-            if (remainder.z < 0)
-            {
-                remainder.z += dimensions.z;
-            }
-
-            return remainder;
-        }
-
-        /// <summary>
-        /// Takes a direction vector, assumed to have just one non-zero element,
-        /// and returns the values of fullCoords for the dimensions that are
-        /// zero in the direction. I.e, projects fullCoords to 2D in the relevant direction
-        /// </summary>
-        /// <param name="direction"></param>
-        /// <returns></returns>
-        private int2 DirectionToIndicesInSlice(int3 direction,int3 fullCoords) 
-        {
-            if (direction.x != 0)
-            {
-                return new int2(fullCoords.y, fullCoords.z);
-            }
-            if (direction.y != 0)
-            {
-                return new int2(fullCoords.x, fullCoords.z);
-            }
-            //if (direction.z != 0)
-            return new int2(fullCoords.x, fullCoords.y);
-
-        }
-    }
 }

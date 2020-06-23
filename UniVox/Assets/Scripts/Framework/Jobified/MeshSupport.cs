@@ -55,6 +55,11 @@ namespace UniVox.Framework.Jobified
         /// meshTypeRanges array.
         /// </summary>
         [ReadOnly] public NativeArray<int> voxelTypeToMeshTypeMap;        
+
+        /// <summary>
+        /// Array mapping voxel types (index) to material ID
+        /// </summary>
+        [ReadOnly] public NativeArray<ushort> voxelTypeToMaterialIDMap;        
     }
 
     public static class NativeMeshDatabaseExtensions
@@ -72,11 +77,13 @@ namespace UniVox.Framework.Jobified
 
             List<StartEnd> meshTypeRangesList = new List<StartEnd>();
             List<int> voxelTypeToMeshTypeMapList = new List<int>();
+            List<ushort> voxelTypeToMaterialIDMapList = new List<ushort>();
 
             Dictionary<SOMeshDefinition, int> uniqueMeshIDs = new Dictionary<SOMeshDefinition, int>();
 
             //AIR
             voxelTypeToMeshTypeMapList.Add(0);
+            voxelTypeToMaterialIDMapList.Add(0);
 
             for (ushort voxelId = 1; voxelId < typeData.Count; voxelId++)
             {
@@ -98,6 +105,7 @@ namespace UniVox.Framework.Jobified
                     meshTypeRangesList.Add(meshTypeRange);
                 }
                 voxelTypeToMeshTypeMapList.Add(meshID);
+                voxelTypeToMaterialIDMapList.Add(item.materialID);
             }
 
             NativeMeshDatabase nativeMeshDatabase = new NativeMeshDatabase();
@@ -108,6 +116,7 @@ namespace UniVox.Framework.Jobified
             nativeMeshDatabase.isFaceSolid = new NativeArray<bool>(isFaceSolidList.ToArray(), Allocator.Persistent);
             nativeMeshDatabase.meshTypeRanges = new NativeArray<StartEnd>(meshTypeRangesList.ToArray(), Allocator.Persistent);
             nativeMeshDatabase.voxelTypeToMeshTypeMap = new NativeArray<int>(voxelTypeToMeshTypeMapList.ToArray(), Allocator.Persistent);
+            nativeMeshDatabase.voxelTypeToMaterialIDMap = new NativeArray<ushort>(voxelTypeToMaterialIDMapList.ToArray(), Allocator.Persistent);
 
             return nativeMeshDatabase;
         }
@@ -175,6 +184,7 @@ namespace UniVox.Framework.Jobified
             database.isFaceSolid.SmartDispose();
             database.meshTypeRanges.SmartDispose();
             database.voxelTypeToMeshTypeMap.SmartDispose();
+            database.voxelTypeToMaterialIDMap.SmartDispose();
         }
     }
 

@@ -5,6 +5,7 @@ using UnityEngine.Assertions;
 using System;
 using Unity.Collections;
 using UniVox.Framework.Jobified;
+using System.Data;
 
 namespace UniVox.Framework
 {
@@ -14,15 +15,16 @@ namespace UniVox.Framework
         {
             public SOVoxelTypeDefinition definition;
             public float[] zIndicesPerFace;
+            public ushort materialID;
         }
-
-        public Material VoxelMaterial;
 
         [SerializeField] private SOVoxelTypeDefinition[] VoxelTypes = new SOVoxelTypeDefinition[1];
 
         private Dictionary<SOVoxelTypeDefinition, ushort> DefinitionToIDMap;
 
         private List<VoxelTypeData> typeData;
+
+        private Material[] materialIdToMaterialMap;
 
         #region Job Compatibility
         public NativeMeshDatabase nativeMeshDatabase;
@@ -43,53 +45,84 @@ namespace UniVox.Framework
 
             DefinitionToIDMap = new Dictionary<SOVoxelTypeDefinition, ushort>();
             typeData = new List<VoxelTypeData>();
+            typeData.Add(null);//Add null entry for air
 
             Debug.Log($"Generating texture array for {VoxelTypes.Length} voxel types");
 
             Assert.IsTrue(VoxelTypes.Length < ushort.MaxValue - 1, $"Can only have a maximum of {ushort.MaxValue - 1} voxel types");
 
-            Dictionary<Texture2D, int> uniqueTextures = new Dictionary<Texture2D, int>();
+            var materialIDMap = new Dictionary<Material, ushort>();
+            var typesByMaterialID = new List<List<SOVoxelTypeDefinition>>();
 
-            typeData.Add(null);//Add null entry for air
-
+            //Process voxel types and split by material used
             ushort currentID = AIR_ID + 1;
-
-            int currentZ = 0;
-
-            RectInt commonTexSize = new RectInt(0, 0, VoxelTypes[0].FaceTextures[0].width, VoxelTypes[0].FaceTextures[0].height);
-
             foreach (var item in VoxelTypes)
             {
                 Assert.AreEqual(Directions.NumDirections, item.FaceTextures.Length, $"Voxel type {item.name} does not define a texture for each face");
 
                 DefinitionToIDMap.Add(item, currentID);
 
-                float[] FaceZIndices = new float[Directions.NumDirections];
-
-                //Determine Z indices for each face
-                for (int i = 0; i < Directions.NumDirections; i++)
+                if (!materialIDMap.TryGetValue(item.material,out var matID))
                 {
-                    var tex = item.FaceTextures[i];
-                    if (uniqueTextures.TryGetValue(tex, out var ZIndex))
-                    {
-                        //Reuse existing texture
-                        FaceZIndices[i] = ZIndex;
-                    }
-                    else
-                    {
-                        //Add new texture and increment currentZ
-                        uniqueTextures.Add(tex, currentZ);
-                        FaceZIndices[i] = currentZ;
-                        currentZ++;
-                    }
+                    //New material
+                    matID = (ushort)materialIDMap.Count;
+                    typesByMaterialID.Add(new List<SOVoxelTypeDefinition>());
+                    materialIDMap.Add(item.material, matID);
                 }
 
-                typeData.Add(new VoxelTypeData() { definition = item, zIndicesPerFace = FaceZIndices });
+                typesByMaterialID[matID].Add(item);
+                typeData.Add(new VoxelTypeData() { definition = item,materialID = matID });
 
                 currentID++;
             }
 
-            CreateTextureArray(uniqueTextures, commonTexSize);
+            RectInt commonTexSize = new RectInt(0, 0, VoxelTypes[0].FaceTextures[0].width, VoxelTypes[0].FaceTextures[0].height);
+            //For each unique material, create texture array and record zIndices
+
+            foreach (var pair in materialIDMap)
+            {
+                var material = pair.Key;
+                var types = typesByMaterialID[pair.Value];
+
+                Dictionary<Texture2D, int> uniqueTextures = new Dictionary<Texture2D, int>();     
+                int currentZ = 0;
+
+                foreach (var item in types)
+                {
+                    Assert.AreEqual(Directions.NumDirections, item.FaceTextures.Length, $"Voxel type {item.name} does not define a texture for each face");
+
+                    float[] FaceZIndices = new float[Directions.NumDirections];
+
+                    //Determine Z indices for each face
+                    for (int i = 0; i < Directions.NumDirections; i++)
+                    {
+                        var tex = item.FaceTextures[i];
+                        if (uniqueTextures.TryGetValue(tex, out var ZIndex))
+                        {
+                            //Reuse existing texture
+                            FaceZIndices[i] = ZIndex;
+                        }
+                        else
+                        {
+                            //Add new texture and increment currentZ
+                            uniqueTextures.Add(tex, currentZ);
+                            FaceZIndices[i] = currentZ;
+                            currentZ++;
+                        }
+                    }
+
+                    typeData[DefinitionToIDMap[item]].zIndicesPerFace = FaceZIndices;
+
+                }
+
+                CreateTextureArray(material,uniqueTextures, commonTexSize);
+            }
+
+            materialIdToMaterialMap = new Material[materialIDMap.Count];
+            foreach (var item in materialIDMap)
+            {
+                materialIdToMaterialMap[item.Value] = item.Key;
+            }
 
             InitialiseJobified();
         }
@@ -141,7 +174,7 @@ namespace UniVox.Framework
             }
         }
 
-        public void CreateTextureArray(Dictionary<Texture2D, int> SourceTextures, RectInt commonTexSize)
+        public void CreateTextureArray(Material material,Dictionary<Texture2D, int> SourceTextures, RectInt commonTexSize)
         {
             //REF: Based on https://medium.com/@calebfaith/how-to-use-texture-arrays-in-unity-a830ae04c98b
 
@@ -169,7 +202,7 @@ namespace UniVox.Framework
             texture2DArray.Apply();
 
             // Apply the texture to material
-            VoxelMaterial.SetTexture("_MainTex", texture2DArray);
+            material.SetTexture("_MainTex", texture2DArray);
 
         }
     }
