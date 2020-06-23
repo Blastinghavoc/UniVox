@@ -150,9 +150,10 @@ namespace UniVox.Implementations.Providers
         public float MoistureMapScale;
         public float MaxHeightmapHeight;
         public float HeightmapExponentPositive;
-        public float HeightmapExponentNegative;        
+        public float HeightmapExponentNegative;
         public int HeightmapYOffset;
         [NonSerialized] public float MinY;
+        public bool MakeCaves;
         public float CaveThreshold;
         public float CaveScale;
         [NonSerialized] public int3 ChunkDimensions;
@@ -268,13 +269,16 @@ namespace UniVox.Implementations.Providers
                         }
                         else
                         {
-                            //3D noise for caves
-                            float caveNoise = noise.snoise(pos * worldSettings.CaveScale);
-
-                            if (caveNoise > worldSettings.CaveThreshold)
+                            if (worldSettings.MakeCaves)
                             {
-                                //Cave
-                                idToPlace = VoxelTypeManager.AIR_ID;
+                                //3D noise for caves
+                                float caveNoise = noise.snoise(pos * worldSettings.CaveScale);
+
+                                if (caveNoise > worldSettings.CaveThreshold)
+                                {
+                                    //Cave
+                                    idToPlace = VoxelTypeManager.AIR_ID;
+                                }
                             }
                         }
 

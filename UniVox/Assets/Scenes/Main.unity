@@ -164,6 +164,10 @@ PrefabInstance:
       propertyPath: Parrallel
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
+      propertyPath: worldSettings.MakeCaves
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 398304577439083000, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
       propertyPath: m_LocalPosition.x
