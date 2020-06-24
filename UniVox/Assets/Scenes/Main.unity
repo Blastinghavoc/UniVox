@@ -168,6 +168,17 @@ PrefabInstance:
       propertyPath: worldSettings.MakeCaves
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 398304577423018871, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: VoxelTypes.Array.size
+      value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: 398304577423018871, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: VoxelTypes.Array.data[8]
+      value: 
+      objectReference: {fileID: 11400000, guid: 87614466a334d894aa80e5f6226a40ad,
+        type: 2}
     - target: {fileID: 398304577439083000, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -248,5 +259,11 @@ PrefabInstance:
       propertyPath: MaxMeshedPerUpdate
       value: 12
       objectReference: {fileID: 0}
+    - target: {fileID: 6215028733184748506, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: blockToPlace
+      value: 
+      objectReference: {fileID: 11400000, guid: 87614466a334d894aa80e5f6226a40ad,
+        type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
