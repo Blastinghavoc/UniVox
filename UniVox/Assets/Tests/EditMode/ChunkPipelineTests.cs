@@ -32,9 +32,14 @@ namespace Tests
                 return new Mesh();
             }
 
-            public AbstractPipelineJob<Mesh> CreateMeshJob(Vector3Int chunkID)
+            public AbstractPipelineJob<MeshDescriptor> CreateMeshJob(Vector3Int chunkID)
             {
-                return new BasicFunctionJob<Mesh>(() => CreateMesh(mockGetComponent(chunkID).Data));
+                return new BasicFunctionJob<MeshDescriptor>(() => 
+                new MeshDescriptor() {                
+                    mesh= CreateMesh(mockGetComponent(chunkID).Data)
+                }
+                
+                );
             }
         }
 
@@ -85,9 +90,9 @@ namespace Tests
                 CollisionMesh = mesh;
             }
 
-            public void SetRenderMesh(Mesh mesh)
+            public void SetRenderMesh(MeshDescriptor meshDesc)
             {
-                RenderMesh = mesh;
+                RenderMesh = meshDesc.mesh;                
             }
         }
 

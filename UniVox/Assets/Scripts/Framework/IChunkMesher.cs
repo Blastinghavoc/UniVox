@@ -8,6 +8,6 @@ namespace UniVox.Framework
     {
         bool IsMeshDependentOnNeighbourChunks { get; }
 
-        AbstractPipelineJob<Mesh> CreateMeshJob(Vector3Int chunkID);
+        AbstractPipelineJob<MeshDescriptor> CreateMeshJob(Vector3Int chunkID);
     }
 }

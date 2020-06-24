@@ -174,6 +174,18 @@ namespace UniVox.Framework
             }
         }
 
+        public Material GetMaterial(ushort materialID) 
+        {
+            try
+            {
+                return materialIdToMaterialMap[materialID];
+            }
+            catch (IndexOutOfRangeException e)
+            {
+                throw new IndexOutOfRangeException($"No material exists with id {materialID}", e);
+            }
+        }
+
         public void CreateTextureArray(Material material,Dictionary<Texture2D, int> SourceTextures, RectInt commonTexSize)
         {
             //REF: Based on https://medium.com/@calebfaith/how-to-use-texture-arrays-in-unity-a830ae04c98b

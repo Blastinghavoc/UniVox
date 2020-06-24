@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
@@ -18,16 +19,16 @@ namespace UniVox.Framework.Jobified
     [BurstCompile]
     public struct SortIndicesByMaterial : IJob
     {
-        public NativeList<int> allTriangleIndices;
-        public NativeList<MaterialRun> materialRuns;
+        [ReadOnly] public NativeArray<int> allTriangleIndices;
+        public NativeArray<MaterialRun> materialRuns;
         public NativeList<MaterialRun> packedRuns;
-        public NativeArray<int> packedIndices;
+        public NativeList<int> packedIndices;
 
         private struct RunComparer : IComparer<MaterialRun>
         {
             public int Compare(MaterialRun x, MaterialRun y)
             {
-                return x.materialID.CompareTo(y);
+                return x.materialID.CompareTo(y.materialID);
             }
         }
 
@@ -36,14 +37,43 @@ namespace UniVox.Framework.Jobified
             var comparer = new RunComparer();
             //Sort the runs by material ID
             materialRuns.Sort(comparer);
+
+            //Resize packedIndices list to required capacity
+            packedIndices.Capacity = allTriangleIndices.Length;            
+
             //Apply the ordering of the runs to the triangle indices
+            MaterialRun currentPackedRun = new MaterialRun();
+            currentPackedRun.materialID = materialRuns[0].materialID;
+            currentPackedRun.range.start = 0;
             for (int i = 0; i < materialRuns.Length; i++)
             {
                 var run = materialRuns[i];
-                for (int i = 0; i < length; i++)
+
+                if (run.materialID != currentPackedRun.materialID)
                 {
-                    //WIP
+                    currentPackedRun.range.end = packedIndices.Length;
+                    if (currentPackedRun.range.Length > 0)
+                    {
+                        packedRuns.Add(currentPackedRun);
+                    }
+                    currentPackedRun.materialID = run.materialID;
+                    currentPackedRun.range.start = packedIndices.Length;
                 }
+
+                //Copy ranges into the packedIndices array in order by material
+                var allSlice = allTriangleIndices.GetSubArray(run.range.start, run.range.Length);
+                packedIndices.AddRange(allSlice);
+
+                //for (int j = run.range.start; j < run.range.end; j++)
+                //{                    
+                //    packedIndices[packedIndex++] = allTriangleIndices[j];
+                //}
+            }
+
+            currentPackedRun.range.end = packedIndices.Length;
+            if (currentPackedRun.range.Length > 0)
+            {
+                packedRuns.Add(currentPackedRun);
             }
         }
     }
@@ -111,6 +141,9 @@ namespace UniVox.Framework.Jobified
             var faceZRange = voxelTypeDatabase.voxelTypeToZIndicesRangeMap[id];
             var materialID = meshDatabase.voxelTypeToMaterialIDMap[id];
 
+            var meshRange = meshDatabase.meshTypeRanges[meshID];
+            
+
             if (materialID != currentRun.materialID)
             {
                 currentRun.range.end = allTriangleIndices.Length;
@@ -120,11 +153,12 @@ namespace UniVox.Framework.Jobified
             }
 
             //Add single voxel's data
-            for (int i = 0; i < numDirections; i++)
+            for (int dir = 0; dir < numDirections; dir++)
             {
-                if (IncludeFace(position, i))
+                var faceIsSolid = meshDatabase.isFaceSolid[meshRange.start + dir];
+                if (IncludeFace(id,position, dir,faceIsSolid))
                 {
-                    AddFace(meshID, voxelTypeDatabase.zIndicesPerFace[faceZRange.start + i], i, position, ref currentIndex);
+                    AddFace(meshID, voxelTypeDatabase.zIndicesPerFace[faceZRange.start + dir], dir, position, ref currentIndex);
                 }
             }
         }
@@ -157,7 +191,7 @@ namespace UniVox.Framework.Jobified
             currentIndex += usedNodesSlice.end - usedNodesSlice.start;
         }
 
-        private bool IncludeFace(int3 position, int directionIndex)
+        private bool IncludeFace(ushort voxelID,int3 position, int directionIndex,bool faceIsSolid)
         {
             if (!cullfaces)
             {
@@ -168,6 +202,11 @@ namespace UniVox.Framework.Jobified
 
             if (TryGetVoxelAt(adjacentVoxelIndex, out var adjacentID))
             {//If adjacent voxel is in the chunk
+
+                if (adjacentID == voxelID)
+                {
+                    return false;
+                }
 
                 return IncludeFaceOfAdjacentWithID(adjacentID, directionIndex);
             }
@@ -183,7 +222,14 @@ namespace UniVox.Framework.Jobified
 
                 var flattenedIndex = Utils.Helpers.MultiIndexToFlat(localIndexOfAdjacentVoxelInNeighbour.x, localIndexOfAdjacentVoxelInNeighbour.y, neighbourDimensions);
 
-                return IncludeFaceOfAdjacentWithID(neighbourChunkData[flattenedIndex].TypeID, directionIndex);
+                adjacentID = neighbourChunkData[flattenedIndex].TypeID;
+
+                if (adjacentID == voxelID)
+                {
+                    return false;
+                }
+
+                return IncludeFaceOfAdjacentWithID(adjacentID, directionIndex);
             }
         }
 

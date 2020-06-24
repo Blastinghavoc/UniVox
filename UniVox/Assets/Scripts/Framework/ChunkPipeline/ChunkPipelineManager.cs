@@ -86,8 +86,8 @@ namespace UniVox.Framework.ChunkPipeline
             }
             stages.Add(ScheduledForMesh);
 
-            var GeneratingMesh = new WaitForJobStage<Mesh>("GeneratingMesh", i++, TargetStageGreaterThanCurrent, chunkMesher.CreateMeshJob,
-                (cId, mesh) => getChunkComponent(cId).SetRenderMesh(mesh),maxMeshPerUpdate);
+            var GeneratingMesh = new WaitForJobStage<MeshDescriptor>("GeneratingMesh", i++, TargetStageGreaterThanCurrent, chunkMesher.CreateMeshJob,
+                (cId, meshDescriptor) => getChunkComponent(cId).SetRenderMesh(meshDescriptor),maxMeshPerUpdate);
             stages.Add(GeneratingMesh);
 
             //TODO remove DEBUG

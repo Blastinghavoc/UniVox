@@ -362,6 +362,7 @@ namespace UniVox.Framework.Jobified
         public float3 normal;
     }
 
+    [BurstCompile]
     public struct StartEnd 
     {
         public int start;

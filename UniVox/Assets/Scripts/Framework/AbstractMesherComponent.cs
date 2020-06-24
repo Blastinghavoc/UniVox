@@ -175,15 +175,15 @@ namespace UniVox.Framework
 
         #endregion
 
-        public AbstractPipelineJob<Mesh> CreateMeshJob(Vector3Int chunkID)
+        public AbstractPipelineJob<MeshDescriptor> CreateMeshJob(Vector3Int chunkID)
         {
             Profiler.BeginSample("CreateMeshJob");
 
-            var jobWrapper = new JobWrapper<MeshingJob<V>>();
-            jobWrapper.job = new MeshingJob<V>();
-            jobWrapper.job.cullfaces = IsMeshDependentOnNeighbourChunks;
+            var meshingWrapper = new JobWrapper<MeshingJob<V>>();
+            meshingWrapper.job = new MeshingJob<V>();
+            meshingWrapper.job.cullfaces = IsMeshDependentOnNeighbourChunks;
             var chunkDimensions = chunkManager.ChunkDimensions;
-            jobWrapper.job.dimensions = new int3(chunkDimensions.x, chunkDimensions.y, chunkDimensions.z);
+            meshingWrapper.job.dimensions = new int3(chunkDimensions.x, chunkDimensions.y, chunkDimensions.z);
 
             var chunkData = chunkManager.GetReadOnlyChunkData(chunkID);
 
@@ -192,7 +192,7 @@ namespace UniVox.Framework
             NativeArray<V> voxels = chunkData.ToNative();
             Profiler.EndSample();
 
-            jobWrapper.job.voxels = voxels;
+            meshingWrapper.job.voxels = voxels;
 
             NeighbourData<V> neighbourData = new NeighbourData<V>();
             //Cache neighbour data if necessary
@@ -216,47 +216,78 @@ namespace UniVox.Framework
             }
             Profiler.EndSample();
 
-            jobWrapper.job.neighbourData = neighbourData;
+            meshingWrapper.job.neighbourData = neighbourData;
 
-            jobWrapper.job.meshDatabase = voxelTypeManager.nativeMeshDatabase;
-            jobWrapper.job.voxelTypeDatabase = voxelTypeManager.nativeVoxelTypeDatabase;
-            jobWrapper.job.DirectionVectors = directionVectors;
-            jobWrapper.job.DirectionOpposites = directionOpposites;
+            meshingWrapper.job.meshDatabase = voxelTypeManager.nativeMeshDatabase;
+            meshingWrapper.job.voxelTypeDatabase = voxelTypeManager.nativeVoxelTypeDatabase;
+            meshingWrapper.job.DirectionVectors = directionVectors;
+            meshingWrapper.job.DirectionOpposites = directionOpposites;
 
-            jobWrapper.job.vertices = new NativeList<Vector3>(Allocator.Persistent);
-            jobWrapper.job.uvs = new NativeList<Vector3>(Allocator.Persistent);
-            jobWrapper.job.normals = new NativeList<Vector3>(Allocator.Persistent);
-            jobWrapper.job.allTriangleIndices = new NativeList<int>(Allocator.Persistent);
-            jobWrapper.job.materialRuns = new NativeList<MaterialRun>(Allocator.Persistent);
+            meshingWrapper.job.vertices = new NativeList<Vector3>(Allocator.Persistent);
+            meshingWrapper.job.uvs = new NativeList<Vector3>(Allocator.Persistent);
+            meshingWrapper.job.normals = new NativeList<Vector3>(Allocator.Persistent);
+            meshingWrapper.job.allTriangleIndices = new NativeList<int>(Allocator.Persistent);
+            meshingWrapper.job.materialRuns = new NativeList<MaterialRun>(Allocator.Persistent);
 
-            Func<Mesh> cleanup = () =>
+            var indexingWrapper = new JobWrapper<SortIndicesByMaterial>();
+            //AsDeferredJobArray takes the length etc at the time of execution, rather than now.
+            indexingWrapper.job.allTriangleIndices = meshingWrapper.job.allTriangleIndices.AsDeferredJobArray();
+            indexingWrapper.job.materialRuns = meshingWrapper.job.materialRuns.AsDeferredJobArray();
+            indexingWrapper.job.packedRuns = new NativeList<MaterialRun>(Allocator.Persistent);
+            indexingWrapper.job.packedIndices = new NativeList<int>(Allocator.Persistent);
+
+
+
+            Func<MeshDescriptor> cleanup = () =>
             {
                 Profiler.BeginSample("MeshJobCleanup");
                 Mesh mesh = new Mesh();
 
-                if (jobWrapper.job.vertices.Length >= ushort.MaxValue)
+                if (meshingWrapper.job.vertices.Length >= ushort.MaxValue)
                 {
                     //Cope with bigger meshes
                     mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
                 }
 
-                mesh.vertices = jobWrapper.job.vertices.ToArray();
-                mesh.SetUVs(0, jobWrapper.job.uvs.ToArray());
-                mesh.normals = jobWrapper.job.normals.ToArray();
-                mesh.triangles = jobWrapper.job.allTriangleIndices.ToArray();
+                mesh.vertices = meshingWrapper.job.vertices.ToArray();
+                mesh.SetUVs(0, meshingWrapper.job.uvs.ToArray());
+                mesh.normals = meshingWrapper.job.normals.ToArray();
 
-                jobWrapper.job.vertices.Dispose();
-                jobWrapper.job.uvs.Dispose();
-                jobWrapper.job.normals.Dispose();
-                jobWrapper.job.allTriangleIndices.Dispose();
-                jobWrapper.job.materialRuns.Dispose();
+                mesh.subMeshCount = indexingWrapper.job.packedRuns.Length;
 
-                jobWrapper.job.voxels.Dispose();
-                jobWrapper.job.neighbourData.Dispose();
+                MeshDescriptor meshDescriptor = new MeshDescriptor();
+                meshDescriptor.materialsBySubmesh = new Material[mesh.subMeshCount];
+
+                for (int i = 0; i < indexingWrapper.job.packedRuns.Length; i++)
+                {
+                    var run = indexingWrapper.job.packedRuns[i];
+                    var slice = new NativeSlice<int>(indexingWrapper.job.packedIndices, run.range.start, run.range.Length);
+                    mesh.SetTriangles(slice.ToArray(), i);
+                    meshDescriptor.materialsBySubmesh[i] = voxelTypeManager.GetMaterial(run.materialID);
+                }
+
+                meshDescriptor.mesh = mesh;
+
+                //mesh.SetTriangles()
+
+                //mesh.triangles = meshingWrapper.job.allTriangleIndices.ToArray();
+
+                meshingWrapper.job.vertices.Dispose();
+                meshingWrapper.job.uvs.Dispose();
+                meshingWrapper.job.normals.Dispose();
+                meshingWrapper.job.allTriangleIndices.Dispose();
+                meshingWrapper.job.materialRuns.Dispose();
+
+                meshingWrapper.job.voxels.Dispose();
+                meshingWrapper.job.neighbourData.Dispose();
+
+                //Dispose of packed containers
+                indexingWrapper.job.packedIndices.Dispose();
+                indexingWrapper.job.packedRuns.Dispose();
 
                 Profiler.EndSample();
 
-                return mesh;
+                return meshDescriptor;
             };
 
             Profiler.EndSample();
@@ -265,14 +296,18 @@ namespace UniVox.Framework
             //Single threaded version
             if (!Parrallel)
             {
-                return new BasicFunctionJob<Mesh>(() =>
+                return new BasicFunctionJob<MeshDescriptor>(() =>
                 {
-                    jobWrapper.Run();
+                    meshingWrapper.Run();
+                    indexingWrapper.Run();
                     return cleanup();
                 });
             }
 
-            return new PipelineUnityJob<Mesh>(jobWrapper.Schedule(), cleanup);
+            var meshingHandle = meshingWrapper.Schedule();
+            var handle = indexingWrapper.Schedule(meshingHandle);
+
+            return new PipelineUnityJob<MeshDescriptor>(handle, cleanup);
 
         }
 
