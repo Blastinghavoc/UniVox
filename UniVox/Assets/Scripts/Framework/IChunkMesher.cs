@@ -9,5 +9,6 @@ namespace UniVox.Framework
         bool IsMeshDependentOnNeighbourChunks { get; }
 
         AbstractPipelineJob<MeshDescriptor> CreateMeshJob(Vector3Int chunkID);
+        AbstractPipelineJob<Mesh> ApplyCollisionMeshJob(Vector3Int chunkID);
     }
 }

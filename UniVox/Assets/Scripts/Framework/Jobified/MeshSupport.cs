@@ -192,6 +192,10 @@ namespace UniVox.Framework.Jobified
     {
         [ReadOnly] public NativeArray<float> zIndicesPerFace;
         [ReadOnly] public NativeArray<StartEnd> voxelTypeToZIndicesRangeMap;
+        /// <summary>
+        /// Whether or not each voxel type is passable (should be included in collision mesh)
+        /// </summary>
+        [ReadOnly] public NativeArray<bool> voxelTypeToIsPassableMap;
     }
 
     public static class NativeVoxelTypeDatabaseExtensions 
@@ -200,9 +204,11 @@ namespace UniVox.Framework.Jobified
         {
             List<float> zIndicesPerFaceList = new List<float>();
             List<StartEnd> voxelTypeToZIndicesRangeMapList = new List<StartEnd>();
+            List<bool> voxelTypeToIsPassableMapList = new List<bool>();
 
             //AIR
             voxelTypeToZIndicesRangeMapList.Add(new StartEnd());
+            voxelTypeToIsPassableMapList.Add(true);
 
             for (int i = 1; i < typeData.Count; i++)
             {
@@ -214,11 +220,13 @@ namespace UniVox.Framework.Jobified
 
                 range.end = zIndicesPerFaceList.Count;
                 voxelTypeToZIndicesRangeMapList.Add(range);
+                voxelTypeToIsPassableMapList.Add(typeData[i].definition.isPassable);
             }
 
             NativeVoxelTypeDatabase database = new NativeVoxelTypeDatabase();
             database.zIndicesPerFace = new NativeArray<float>(zIndicesPerFaceList.ToArray(), Allocator.Persistent);
             database.voxelTypeToZIndicesRangeMap = new NativeArray<StartEnd>(voxelTypeToZIndicesRangeMapList.ToArray(), Allocator.Persistent);
+            database.voxelTypeToIsPassableMap = new NativeArray<bool>(voxelTypeToIsPassableMapList.ToArray(), Allocator.Persistent);
             return database;
         }
 
@@ -226,6 +234,7 @@ namespace UniVox.Framework.Jobified
         {
             database.voxelTypeToZIndicesRangeMap.SmartDispose();
             database.zIndicesPerFace.SmartDispose();
+            database.voxelTypeToIsPassableMap.SmartDispose();
         }
     }
 

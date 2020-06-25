@@ -21,13 +21,15 @@ namespace UniVox.Framework
         public MeshCollider meshCollider;
         public MeshRenderer meshRenderer;
 
+        public MeshDescriptor meshDescriptor { get; protected set; }
+
         public void Initialise(Vector3Int id, Vector3 position)
         {
             ChunkID = id;
             this.name = $"Chunk ({id.x},{id.y},{id.z})";
             transform.position = position;
 
-            SetRenderMesh(MeshDescriptor.Blank);
+            SetRenderMesh(null);
             SetCollisionMesh(null);
         }
 
@@ -38,7 +40,13 @@ namespace UniVox.Framework
 
         public void SetRenderMesh(MeshDescriptor meshDesc)
         {
+            if (meshDesc == null)
+            {
+                meshFilter.mesh = null;
+                return;
+            }
             meshFilter.mesh = meshDesc.mesh;
+            meshDescriptor = meshDesc;
             if (meshDesc.materialsBySubmesh!=null)
             {
                 meshRenderer.materials = meshDesc.materialsBySubmesh;
@@ -61,11 +69,11 @@ namespace UniVox.Framework
 
     }
 
-    public struct MeshDescriptor 
+    public class MeshDescriptor 
     {
         public Mesh mesh;
         public Material[] materialsBySubmesh;
-
-        public static MeshDescriptor Blank { get; } = new MeshDescriptor();
+        public int collidableLengthVertices;
+        public int collidableLengthIndices;
     }
 }

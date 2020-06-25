@@ -242,7 +242,7 @@ PrefabInstance:
     - target: {fileID: 398304578996345519, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
       propertyPath: m_IsKinematic
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4363647225878257416, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
@@ -258,6 +258,21 @@ PrefabInstance:
         type: 3}
       propertyPath: MaxMeshedPerUpdate
       value: 12
+      objectReference: {fileID: 0}
+    - target: {fileID: 5880167504519198129, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: renderedChunksRadii.x
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5880167504519198129, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: renderedChunksRadii.z
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5880167504519198129, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: renderedChunksRadii.y
+      value: 16
       objectReference: {fileID: 0}
     - target: {fileID: 6215028733184748506, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}

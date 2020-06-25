@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UniVox.Framework;
@@ -203,6 +204,16 @@ public abstract class AbstractChunkManager<VoxelDataType> : MonoBehaviour, IChun
             return chunkComponent;
         }
         throw new Exception($"Tried to get a chunk component that for chunk ID {chunkID} that is not loaded");
+    }
+
+    public MeshDescriptor GetMeshDescriptor(Vector3Int chunkID) 
+    {
+        var desc = GetChunkComponent(chunkID).meshDescriptor;
+        if (desc == null)
+        {
+            throw new Exception($"Chunk with id {chunkID} does not have a valid mesh descriptor");
+        }
+        return desc;
     }
 
     protected void DeactivateChunk(Vector3Int chunkID)

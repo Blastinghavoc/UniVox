@@ -41,6 +41,13 @@ namespace Tests
                 
                 );
             }
+
+            public AbstractPipelineJob<Mesh> ApplyCollisionMeshJob(Vector3Int chunkID)
+            {
+                return new BasicFunctionJob<Mesh>(() =>
+                CreateMesh(mockGetComponent(chunkID).Data)
+                ); 
+            }
         }
 
         class MockProvider : IChunkProvider<VoxelData>

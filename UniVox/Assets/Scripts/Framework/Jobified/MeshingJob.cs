@@ -24,6 +24,9 @@ namespace UniVox.Framework.Jobified
         public NativeList<MaterialRun> packedRuns;
         public NativeList<int> packedIndices;
 
+        //Single element array
+        [ReadOnly] public NativeArray<int> collisionMeshMaterialRunLength;
+
         private struct RunComparer : IComparer<MaterialRun>
         {
             public int Compare(MaterialRun x, MaterialRun y)
@@ -36,7 +39,16 @@ namespace UniVox.Framework.Jobified
         {
             var comparer = new RunComparer();
             //Sort the runs by material ID
-            materialRuns.Sort(comparer);
+            //materialRuns.Sort(comparer);
+
+            var collidableRunLength = collisionMeshMaterialRunLength[0];
+
+            var collidableRuns = materialRuns.GetSubArray(0, collidableRunLength);
+            collidableRuns.Sort(comparer);
+            
+            var nonCollidableRuns = materialRuns.GetSubArray(collidableRunLength, materialRuns.Length - collidableRunLength);
+            nonCollidableRuns.Sort(comparer);
+
 
             //Resize packedIndices list to required capacity
             packedIndices.Capacity = allTriangleIndices.Length;            
@@ -63,11 +75,6 @@ namespace UniVox.Framework.Jobified
                 //Copy ranges into the packedIndices array in order by material
                 var allSlice = allTriangleIndices.GetSubArray(run.range.start, run.range.Length);
                 packedIndices.AddRange(allSlice);
-
-                //for (int j = run.range.start; j < run.range.end; j++)
-                //{                    
-                //    packedIndices[packedIndex++] = allTriangleIndices[j];
-                //}
             }
 
             currentPackedRun.range.end = packedIndices.Length;
@@ -105,11 +112,25 @@ namespace UniVox.Framework.Jobified
 
         public NativeList<MaterialRun> materialRuns;
 
+        //Single element lists to be passed as deffered to later jobs
+        public NativeList<int> collisionMeshLengthVertices;
+        public NativeList<int> collisionMeshLengthTriangleIndices;
+        public NativeList<int> collisionMeshMaterialRunLength;
+
+        //Private temporaries
         private MaterialRun currentRun;
+
+        private struct DoLater 
+        {
+            public int3 position;
+            public ushort typeID;
+        }
 
         public void Execute()
         {
             int currentIndex = 0;//Current index for indices list
+
+            var nonCollidable = new NativeList<DoLater>(Allocator.Temp);
 
             currentRun = new MaterialRun();
 
@@ -124,13 +145,36 @@ namespace UniVox.Framework.Jobified
 
                         if (voxelTypeID != VoxelTypeManager.AIR_ID)
                         {
-                            AddMeshDataForVoxel(voxelTypeID, new int3(x, y, z), ref currentIndex);
+                            if (voxelTypeDatabase.voxelTypeToIsPassableMap[voxelTypeID])
+                            {
+                                //Save non-collidable voxels for later, so that they appear contiguously in the mesh arrays
+                                nonCollidable.Add(new DoLater() { position = new int3(x, y, z),typeID = voxelTypeID });
+                            }
+                            else
+                            {
+                                AddMeshDataForVoxel(voxelTypeID, new int3(x, y, z), ref currentIndex);
+                            }
                         }
 
                         i++;
                     }
                 }
             }
+            //Record length of collidable mesh section
+            collisionMeshLengthVertices.Add(vertices.Length);
+            collisionMeshLengthTriangleIndices.Add(allTriangleIndices.Length);
+            currentRun.range.end = allTriangleIndices.Length;
+            materialRuns.Add(currentRun);
+            collisionMeshMaterialRunLength.Add(materialRuns.Length);
+
+            currentRun.range.start = allTriangleIndices.Length;
+
+            for (int j = 0; j < nonCollidable.Length; j++)
+            {
+                var item = nonCollidable[j];
+                AddMeshDataForVoxel(item.typeID, item.position, ref currentIndex);
+            }
+
             currentRun.range.end = allTriangleIndices.Length;
             materialRuns.Add(currentRun);
         }
