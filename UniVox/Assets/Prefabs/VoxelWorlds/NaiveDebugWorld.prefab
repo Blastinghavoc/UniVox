@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2981057896917559128}
-  - component: {fileID: 2981057896917559129}
+  - component: {fileID: -4221288470819912599}
   - component: {fileID: 2981057896917559127}
   - component: {fileID: 2981057896917559126}
   m_Layer: 8
@@ -33,7 +33,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2981057896917559129
+--- !u!114 &-4221288470819912599
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -42,18 +42,19 @@ MonoBehaviour:
   m_GameObject: {fileID: 2981057896917559131}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d42a63e2b96aa434099f553379b8493a, type: 3}
+  m_Script: {fileID: 11500000, guid: adf42b26e5cc41e48babbdfb89bd2bb2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  chunkDimensions: {x: 32, y: 32, z: 32}
+  chunkDimensions: {x: 16, y: 16, z: 16}
   voxelSize: 1
-  VoxelTypeManager: {fileID: 0}
+  collidableChunksRadii: {x: 1, y: 1, z: 1}
+  renderedChunksRadii: {x: 10, y: 16, z: 10}
+  limitWorldHeight: 1
+  verticalChunkLimit: 8
   chunkPrefab: {fileID: 5697091069406414600, guid: 9bd18ceaff69a844299df4d590e1d694,
     type: 3}
   Player: {fileID: 0}
-  collidableChunksRadii: {x: 1, y: 1, z: 1}
-  renderedChunksRadii: {x: 2, y: 1, z: 2}
-  MaxGeneratedPerUpdate: 6
+  MaxGeneratedPerUpdate: 1
   MaxMeshedPerUpdate: 1
 --- !u!114 &2981057896917559127
 MonoBehaviour:
@@ -67,6 +68,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9edb96263ac8fb54b8913a432ff2bdae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Parrallel: 1
   dirtType: {fileID: 11400000, guid: a03c76065d9f24749ae1e10da8247535, type: 2}
   grassType: {fileID: 11400000, guid: da8f3cdeb3374df40a2e8e80b40a9e01, type: 2}
 --- !u!114 &2981057896917559126
@@ -81,3 +83,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee8518fb812c19841ba7a855ed1439a1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Parrallel: 1

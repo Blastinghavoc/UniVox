@@ -762,6 +762,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 398304577544639592}
     m_Modifications:
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: Player
+      value: 
+      objectReference: {fileID: 398304578996345519}
     - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: VoxelTypeManager
@@ -909,6 +914,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 398304577544639592}
     m_Modifications:
+    - target: {fileID: -4221288470819912599, guid: 55373a8976e0c014e90e0bb7e64d046a,
+        type: 3}
+      propertyPath: Player
+      value: 
+      objectReference: {fileID: 398304578996345519}
     - target: {fileID: 2981057896917559128, guid: 55373a8976e0c014e90e0bb7e64d046a,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -1090,6 +1100,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 398304577544639592}
     m_Modifications:
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: Player
+      value: 
+      objectReference: {fileID: 398304578996345519}
     - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: VoxelTypeManager

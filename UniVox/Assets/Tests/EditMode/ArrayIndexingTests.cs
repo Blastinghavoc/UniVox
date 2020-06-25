@@ -1,21 +1,11 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using NUnit.Framework.Internal;
-using UnityEditor.SceneManagement;
 using UnityEngine;
-using UnityEngine.TestTools;
-using UniVox.Framework;
-using UniVox.Framework.ChunkPipeline;
-using UniVox.Framework.ChunkPipeline.VirtualJobs;
-using UniVox.Implementations.ChunkData;
-using UniVox.Implementations.Common;
 
 namespace Tests
 {
     public class ArrayIndexingTests
-    {    
+    {
 
         [SetUp]
         public void Reset()
@@ -31,7 +21,7 @@ namespace Tests
 
             var flatIndex = Utils.Helpers.MultiIndexToFlat(testCoords.x, testCoords.y, testCoords.z, dimensions);
 
-            Assert.AreEqual(11,flatIndex);
+            Assert.AreEqual(11, flatIndex);
 
             for (int z = 0; z < dimensions.z; z++)
             {
@@ -46,19 +36,19 @@ namespace Tests
 
         }
 
-        [Test] 
-        public void ToFlatAndBack3D() 
+        [Test]
+        public void ToFlatAndBack3D()
         {
             Vector3Int dimensions = new Vector3Int(10, 3, 7);
 
             var testCoords = new Vector3Int(5, 2, 1);
-            
-            var flatIndex = Utils.Helpers.MultiIndexToFlat(testCoords.x,testCoords.y,testCoords.z, dimensions);
+
+            var flatIndex = Utils.Helpers.MultiIndexToFlat(testCoords.x, testCoords.y, testCoords.z, dimensions);
 
             Debug.Log($"Flattened {testCoords} to {flatIndex}");
 
             Utils.Helpers.FlatIndexToMulti(flatIndex, dimensions, out var x, out var y, out var z);
-            var backAgain = new Vector3Int(x,y,z);
+            var backAgain = new Vector3Int(x, y, z);
 
             Assert.AreEqual(testCoords, backAgain);
 
@@ -71,7 +61,7 @@ namespace Tests
         }
 
         [Test]
-        public void ToFlatAndBack2D() 
+        public void ToFlatAndBack2D()
         {
             Vector2Int dimensions = new Vector2Int(10, 7);
 
@@ -92,6 +82,6 @@ namespace Tests
                 Debug.Log($"{x},{y}");
             }
         }
-       
+
     }
 }

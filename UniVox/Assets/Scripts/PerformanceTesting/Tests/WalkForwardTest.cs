@@ -1,11 +1,6 @@
-﻿using UnityEngine;
-using System.Collections;
-using UniVox.Framework;
-using System.Collections.Generic;
+﻿using System.Collections;
 using System.Linq;
-using UniVox.Implementations.ChunkData;
-using UniVox.Implementations.Common;
-using UnityEngine.Assertions;
+using UnityEngine;
 
 namespace PerformanceTesting
 {
@@ -41,7 +36,7 @@ namespace PerformanceTesting
             TestFacilitator.virtualPlayer.SetAxis("Vertical", 1);
 
             //Wait until they've walked far enough
-            while (Vector3.SqrMagnitude(player.position-startpos) < distanceSqr)
+            while (Vector3.SqrMagnitude(player.position - startpos) < distanceSqr)
             {
                 UpdatePerFrameCounters();
                 yield return null;

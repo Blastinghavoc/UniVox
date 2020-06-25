@@ -295,6 +295,16 @@ PrefabInstance:
       propertyPath: Parrallel
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 4444681113471702657, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: MaxMeshedPerUpdate
+      value: 12
+      objectReference: {fileID: 0}
+    - target: {fileID: 4444681113471702657, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: MaxGeneratedPerUpdate
+      value: 24
+      objectReference: {fileID: 0}
     - target: {fileID: 5807090801606666973, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
       propertyPath: m_IsActive

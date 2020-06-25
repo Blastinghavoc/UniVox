@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 4127103875275953788}
   - component: {fileID: 3846752648109872849}
   - component: {fileID: 249239860000639409}
-  - component: {fileID: 2394141631892242057}
+  - component: {fileID: 7437209107601460113}
   m_Layer: 8
   m_Name: Chunk
   m_TagString: Untagged
@@ -95,7 +95,7 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 0}
---- !u!114 &2394141631892242057
+--- !u!114 &7437209107601460113
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -104,10 +104,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 5697091069406414600}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e83c83a7dcfba84ba5fb92549130120, type: 3}
+  m_Script: {fileID: 11500000, guid: a318acd7a4907fe46b3bfbbb11ecd052, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   meshFilter: {fileID: 4127103875275953788}
   meshCollider: {fileID: 249239860000639409}
   meshRenderer: {fileID: 3846752648109872849}
-  inMeshRadius: 0
