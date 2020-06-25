@@ -15,12 +15,12 @@ namespace UniVox.Implementations.ChunkData
         {
         }
 
-        protected override VoxelTypeID GetVoxelAtLocalCoordinates(int x, int y, int z)
+        protected override VoxelTypeID GetVoxelID(int x, int y, int z)
         {
             return new VoxelTypeID(VoxelTypeManager.AIR_ID);
         }
 
-        protected override void SetVoxelAtLocalCoordinates(int x, int y, int z, VoxelTypeID voxel)
+        protected override void SetVoxelID(int x, int y, int z, VoxelTypeID voxel)
         {
             throw new InvalidOperationException($"An {typeof(EmptyChunkData)} object cannot have voxels set");
         }

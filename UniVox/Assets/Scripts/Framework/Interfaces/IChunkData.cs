@@ -2,6 +2,7 @@
 using System.Collections;
 using System;
 using Unity.Collections;
+using System.Collections.Generic;
 
 namespace UniVox.Framework
 {
@@ -22,9 +23,12 @@ namespace UniVox.Framework
         VoxelTypeID this[int i, int j, int k] { get; set; }
         VoxelTypeID this[Vector3Int index] { get; set; }
 
-        bool TryGetVoxelAtLocalCoordinates(Vector3Int coords, out VoxelTypeID vox);
-        bool TryGetVoxelAtLocalCoordinates(int x, int y, int z, out VoxelTypeID vox);
+        //Coords are local to the chunk
+        bool TryGetVoxelID(Vector3Int coords, out VoxelTypeID vox);
+        bool TryGetVoxelID(int x, int y, int z, out VoxelTypeID vox);
 
         NativeArray<VoxelTypeID> ToNative(Allocator allocator = Allocator.Persistent);
+
+        NativeArray<KeyValuePair<int,VoxelRotation>> NativeRotations(Allocator allocator = Allocator.Persistent);
     }
 }

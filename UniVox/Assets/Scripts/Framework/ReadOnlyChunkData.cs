@@ -26,14 +26,14 @@ namespace UniVox.Framework
             return realData.ToNative(allocator);
         }
 
-        public bool TryGetVoxelAtLocalCoordinates(Vector3Int coords, out VoxelTypeID vox)
+        public bool TryGetVoxelID(Vector3Int coords, out VoxelTypeID vox)
         {
-            return realData.TryGetVoxelAtLocalCoordinates(coords, out vox);
+            return realData.TryGetVoxelID(coords, out vox);
         }
 
-        public bool TryGetVoxelAtLocalCoordinates(int x, int y, int z, out VoxelTypeID vox)
+        public bool TryGetVoxelID(int x, int y, int z, out VoxelTypeID vox)
         {
-            return realData.TryGetVoxelAtLocalCoordinates(x,y,z, out vox);
+            return realData.TryGetVoxelID(x,y,z, out vox);
         }
     }
 }

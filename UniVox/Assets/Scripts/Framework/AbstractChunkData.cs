@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Unity.Collections;
 using UnityEngine;
 using UniVox.Framework.Jobified;
@@ -18,10 +20,17 @@ namespace UniVox.Framework
 
         public bool FullyGenerated { get; set; } = false;
 
+        /// <summary>
+        /// Store flattended indices of voxels that have a non-default rotation.
+        /// Efficient only under the assumption that there are relatively few such voxels in the chunk
+        /// </summary>
+        protected Dictionary<int, VoxelRotation> rotatedVoxels;
+
         public AbstractChunkData(Vector3Int ID, Vector3Int chunkDimensions, VoxelTypeID[] initialData = null)
         {
             ChunkID = ID;
             Dimensions = chunkDimensions;
+            rotatedVoxels = new Dictionary<int, VoxelRotation>();
             if (initialData != null)
             {
                 var expectedLength = chunkDimensions.x * chunkDimensions.y * chunkDimensions.z;
@@ -44,11 +53,11 @@ namespace UniVox.Framework
         {
             get
             {
-                return GetVoxelAtLocalCoordinates(i, j, k);
+                return GetVoxelID(i, j, k);
             }
             set
             {
-                SetVoxelAtLocalCoordinates(i, j, k, value);
+                SetVoxelID(i, j, k, value);
                 if (FullyGenerated)
                 {
                     ModifiedSinceGeneration = true;
@@ -56,18 +65,18 @@ namespace UniVox.Framework
             }
         }
         #endregion
-        protected abstract void SetVoxelAtLocalCoordinates(int x, int y, int z, VoxelTypeID voxel);
+        protected abstract void SetVoxelID(int x, int y, int z, VoxelTypeID voxel);
 
-        protected abstract VoxelTypeID GetVoxelAtLocalCoordinates(int x, int y, int z);
+        protected abstract VoxelTypeID GetVoxelID(int x, int y, int z);
 
         #region interface methods
 
-        public bool TryGetVoxelAtLocalCoordinates(Vector3Int coords, out VoxelTypeID vox)
+        public bool TryGetVoxelID(Vector3Int coords, out VoxelTypeID vox)
         {
-            return TryGetVoxelAtLocalCoordinates(coords.x, coords.y, coords.z, out vox);
+            return TryGetVoxelID(coords.x, coords.y, coords.z, out vox);
         }
 
-        public bool TryGetVoxelAtLocalCoordinates(int x, int y, int z, out VoxelTypeID vox)
+        public bool TryGetVoxelID(int x, int y, int z, out VoxelTypeID vox)
         {
             bool xValid = x >= 0 && x < Dimensions.x;
             bool yValid = y >= 0 && y < Dimensions.y;
@@ -75,7 +84,7 @@ namespace UniVox.Framework
 
             if (xValid && yValid && zValid)
             {
-                vox = GetVoxelAtLocalCoordinates(x, y, z);
+                vox = GetVoxelID(x, y, z);
                 return true;
             }
             vox = default;
@@ -85,6 +94,13 @@ namespace UniVox.Framework
         public virtual NativeArray<VoxelTypeID> ToNative(Allocator allocator = Allocator.Persistent)
         {
             return this.ToNativeBruteForce(allocator);
+        }
+
+        public NativeArray<KeyValuePair<int, VoxelRotation>> NativeRotations(Allocator allocator = Allocator.Persistent) 
+        {
+            //This conversion from dictionary to array is only efficient under the assumption that there will be few rotated voxels per chunk
+            NativeArray<KeyValuePair<int, VoxelRotation>> rotations = new NativeArray<KeyValuePair<int, VoxelRotation>>(rotatedVoxels.ToList().ToArray(),allocator);
+            return rotations;
         }
         #endregion
     }

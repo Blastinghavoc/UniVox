@@ -30,12 +30,12 @@ namespace UniVox.Implementations.ChunkData
             }
         }
 
-        protected override VoxelTypeID GetVoxelAtLocalCoordinates(int x, int y, int z)
+        protected override VoxelTypeID GetVoxelID(int x, int y, int z)
         {
             return voxels[x, y, z];
         }
 
-        protected override void SetVoxelAtLocalCoordinates(int x, int y, int z, VoxelTypeID voxel)
+        protected override void SetVoxelID(int x, int y, int z, VoxelTypeID voxel)
         {
             voxels[x, y, z] = voxel;
         }

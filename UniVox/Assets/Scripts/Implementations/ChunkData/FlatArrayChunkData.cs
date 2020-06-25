@@ -34,12 +34,12 @@ namespace UniVox.Implementations.ChunkData
             dxdy = chunkDimensions.x * chunkDimensions.y;
         }
 
-        protected override VoxelTypeID GetVoxelAtLocalCoordinates(int x, int y, int z)
+        protected override VoxelTypeID GetVoxelID(int x, int y, int z)
         {
             return voxels[Utils.Helpers.MultiIndexToFlat(x,y,z,Dimensions.x,dxdy)];
         }
 
-        protected override void SetVoxelAtLocalCoordinates(int x, int y, int z, VoxelTypeID voxel)
+        protected override void SetVoxelID(int x, int y, int z, VoxelTypeID voxel)
         {
             voxels[Utils.Helpers.MultiIndexToFlat(x, y, z, Dimensions.x, dxdy)] = voxel;
         }
