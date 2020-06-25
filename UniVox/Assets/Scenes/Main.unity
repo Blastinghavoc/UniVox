@@ -133,9 +133,35 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2f568bfa1bc8a12488d51c12fe1ef120, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &667016176 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 398304578991225289, guid: 579d24a84d9385447b0eb6819a968722,
+    type: 3}
+  m_PrefabInstance: {fileID: 398304578466534659}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &667016182
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 667016176}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad2216f06b681b44ead0bf48d897c21a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  underwaterOverlay: {fileID: 1183609387}
+  waterType: {fileID: 11400000, guid: 29a81a7c3885cee43ad6f88a9ba44766, type: 2}
 --- !u!108 &705507994 stripped
 Light:
   m_CorrespondingSourceObject: {fileID: 398304578835441561, guid: 579d24a84d9385447b0eb6819a968722,
+    type: 3}
+  m_PrefabInstance: {fileID: 398304578466534659}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1183609387 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5807090801606666973, guid: 579d24a84d9385447b0eb6819a968722,
     type: 3}
   m_PrefabInstance: {fileID: 398304578466534659}
   m_PrefabAsset: {fileID: 0}
@@ -244,10 +270,35 @@ PrefabInstance:
       propertyPath: m_IsKinematic
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3150308927941961353, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: m_Color.r
+      value: 0.08235294
+      objectReference: {fileID: 0}
+    - target: {fileID: 3150308927941961353, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: m_Color.g
+      value: 0.4901961
+      objectReference: {fileID: 0}
+    - target: {fileID: 3150308927941961353, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: m_Color.b
+      value: 0.8313726
+      objectReference: {fileID: 0}
+    - target: {fileID: 3150308927941961353, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: m_Color.a
+      value: 0.49411765
+      objectReference: {fileID: 0}
     - target: {fileID: 4363647225878257416, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
       propertyPath: Parrallel
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5807090801606666973, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5880167504519198129, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}

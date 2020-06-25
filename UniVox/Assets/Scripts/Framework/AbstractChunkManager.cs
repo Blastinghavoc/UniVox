@@ -6,6 +6,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using UnityEngine;
 using UnityEngine.Assertions;
+using UnityEngine.Profiling;
 using UniVox.Framework;
 using UniVox.Framework.ChunkPipeline;
 using Utils.FSM;
@@ -164,6 +165,8 @@ public abstract class AbstractChunkManager<VoxelDataType> : MonoBehaviour, IChun
     /// </summary>
     protected void UpdatePlayerArea()
     {
+        Profiler.BeginSample("UpdatePlayArea");
+
         //Deactivate any chunks that are outside the data radius
         var deactivate = loadedChunks.Select((pair) => pair.Key)
             .Where((id) => !InsideChunkRadius(id, dataChunksRadii))
@@ -195,6 +198,7 @@ public abstract class AbstractChunkManager<VoxelDataType> : MonoBehaviour, IChun
                 }
             }
         }
+        Profiler.EndSample();
     }
 
     private AbstractChunkComponent<VoxelDataType> GetChunkComponent(Vector3Int chunkID) 
@@ -218,6 +222,7 @@ public abstract class AbstractChunkManager<VoxelDataType> : MonoBehaviour, IChun
 
     protected void DeactivateChunk(Vector3Int chunkID)
     {
+        Profiler.BeginSample("DeactivateChunk");
         if (loadedChunks.TryGetValue(chunkID, out var chunkComponent))
         {
             pipeline.RemoveChunk(chunkID);
@@ -242,7 +247,7 @@ public abstract class AbstractChunkManager<VoxelDataType> : MonoBehaviour, IChun
         {
             throw new ArgumentException($"Cannot deactivate chunk {chunkID} as it is already inactive or nonexistent");
         }
-
+        Profiler.EndSample();
     }
 
     /// <summary>

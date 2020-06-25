@@ -45,7 +45,7 @@ namespace UniVox.Framework
 
             DefinitionToIDMap = new Dictionary<SOVoxelTypeDefinition, ushort>();
             typeData = new List<VoxelTypeData>();
-            typeData.Add(null);//Add null entry for air
+            typeData.Add(new VoxelTypeData());//Add empty entry for air
 
             Debug.Log($"Generating texture array for {VoxelTypes.Length} voxel types");
 
