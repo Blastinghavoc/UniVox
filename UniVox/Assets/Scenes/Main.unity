@@ -278,7 +278,7 @@ PrefabInstance:
         type: 3}
       propertyPath: blockToPlace
       value: 
-      objectReference: {fileID: 11400000, guid: 87614466a334d894aa80e5f6226a40ad,
+      objectReference: {fileID: 11400000, guid: 29a81a7c3885cee43ad6f88a9ba44766,
         type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
