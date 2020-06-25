@@ -2,8 +2,8 @@
 using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Assertions;
+using UniVox.Framework;
 using UniVox.Framework.Jobified;
-using UniVox.Implementations.Common;
 
 namespace UniVox.Implementations.ChunkData
 {
@@ -16,16 +16,16 @@ namespace UniVox.Implementations.ChunkData
         /// <summary>
         /// XYZ Voxel Data
         /// </summary>
-        protected VoxelData[] voxels;
+        protected VoxelTypeID[] voxels;
 
         //Dimensions.x*Dimensions.y cache
         private int dxdy;
             
-        public FlatArrayChunkData(Vector3Int ID, Vector3Int chunkDimensions,VoxelData[] initialData = null) : base(ID, chunkDimensions,initialData) 
+        public FlatArrayChunkData(Vector3Int ID, Vector3Int chunkDimensions,VoxelTypeID[] initialData = null) : base(ID, chunkDimensions,initialData) 
         {
             if (initialData == null)
             {
-                voxels = new VoxelData[chunkDimensions.x * chunkDimensions.y * chunkDimensions.z];
+                voxels = new VoxelTypeID[chunkDimensions.x * chunkDimensions.y * chunkDimensions.z];
             }
             else
             {
@@ -34,19 +34,19 @@ namespace UniVox.Implementations.ChunkData
             dxdy = chunkDimensions.x * chunkDimensions.y;
         }
 
-        protected override VoxelData GetVoxelAtLocalCoordinates(int x, int y, int z)
+        protected override VoxelTypeID GetVoxelAtLocalCoordinates(int x, int y, int z)
         {
             return voxels[Utils.Helpers.MultiIndexToFlat(x,y,z,Dimensions.x,dxdy)];
         }
 
-        protected override void SetVoxelAtLocalCoordinates(int x, int y, int z, VoxelData voxel)
+        protected override void SetVoxelAtLocalCoordinates(int x, int y, int z, VoxelTypeID voxel)
         {
             voxels[Utils.Helpers.MultiIndexToFlat(x, y, z, Dimensions.x, dxdy)] = voxel;
         }
 
-        public override NativeArray<VoxelData> ToNative(Allocator allocator = Allocator.Persistent)
+        public override NativeArray<VoxelTypeID> ToNative(Allocator allocator = Allocator.Persistent)
         {
-            return new NativeArray<VoxelData>(voxels, allocator);
+            return new NativeArray<VoxelTypeID>(voxels, allocator);
         }
     }
 }

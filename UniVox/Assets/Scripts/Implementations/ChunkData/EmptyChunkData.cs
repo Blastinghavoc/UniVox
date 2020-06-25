@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UniVox.Implementations.Common;
 using UniVox.Framework;
 using Unity.Collections;
 using System;
@@ -16,12 +15,12 @@ namespace UniVox.Implementations.ChunkData
         {
         }
 
-        protected override VoxelData GetVoxelAtLocalCoordinates(int x, int y, int z)
+        protected override VoxelTypeID GetVoxelAtLocalCoordinates(int x, int y, int z)
         {
-            return new VoxelData(VoxelTypeManager.AIR_ID);
+            return new VoxelTypeID(VoxelTypeManager.AIR_ID);
         }
 
-        protected override void SetVoxelAtLocalCoordinates(int x, int y, int z, VoxelData voxel)
+        protected override void SetVoxelAtLocalCoordinates(int x, int y, int z, VoxelTypeID voxel)
         {
             throw new InvalidOperationException($"An {typeof(EmptyChunkData)} object cannot have voxels set");
         }

@@ -10,13 +10,12 @@ using UniVox.Framework;
 using UniVox.Framework.ChunkPipeline;
 using UniVox.Framework.ChunkPipeline.VirtualJobs;
 using UniVox.Implementations.ChunkData;
-using UniVox.Implementations.Common;
 
 namespace Tests
 {
     public class ChunkPipelineTests
     {
-        class MockMesher : IChunkMesher<VoxelData>
+        class MockMesher : IChunkMesher
         {
             public bool IsMeshDependentOnNeighbourChunks { get; set; } = false;
 
@@ -27,7 +26,7 @@ namespace Tests
                 this.mockGetComponent = mockGetComponent;
             }
 
-            public Mesh CreateMesh(IChunkData<VoxelData> chunk)
+            public Mesh CreateMesh(IChunkData chunk)
             {
                 return new Mesh();
             }
@@ -48,26 +47,41 @@ namespace Tests
                 CreateMesh(mockGetComponent(chunkID).Data)
                 ); 
             }
+
+            public void Initialise(VoxelTypeManager voxelTypeManager, IChunkManager chunkManager)
+            {
+                throw new NotImplementedException();
+            }
         }
 
-        class MockProvider : IChunkProvider<VoxelData>
+        class MockProvider : IChunkProvider
         {
-            public IChunkData<VoxelData> ProvideChunkData(Vector3Int chunkID)
+            public void Initialise(VoxelTypeManager voxelTypeManager, IChunkManager chunkManager)
+            {
+                throw new NotImplementedException();
+            }
+
+            public IChunkData ProvideChunkData(Vector3Int chunkID)
             {
                 return new ArrayChunkData(chunkID, new Vector3Int(1, 1, 1));
             }
 
-            public AbstractPipelineJob<IChunkData<VoxelData>> ProvideChunkDataJob(Vector3Int chunkID)
+            public AbstractPipelineJob<IChunkData> ProvideChunkDataJob(Vector3Int chunkID)
             {
-                return new BasicFunctionJob<IChunkData<VoxelData>>(() => ProvideChunkData(chunkID));
+                return new BasicFunctionJob<IChunkData>(() => ProvideChunkData(chunkID));
+            }
+
+            public void StoreModifiedChunkData(Vector3Int chunkID, IChunkData data)
+            {
+                throw new NotImplementedException();
             }
         }
 
-        class MockChunkComponent : IChunkComponent<VoxelData>
+        class MockChunkComponent : IChunkComponent
         {
             public Vector3Int ChunkID { get; set; }
 
-            public IChunkData<VoxelData> Data { get; set; }
+            public IChunkData Data { get; set; }
 
             public Mesh RenderMesh { get; set; }
 
@@ -132,7 +146,7 @@ namespace Tests
             return absDisplacement.x + absDisplacement.y + absDisplacement.z;
         }
 
-        ChunkPipelineManager<VoxelData> pipeline;
+        ChunkPipelineManager pipeline;
 
 
         [SetUp]
@@ -148,7 +162,7 @@ namespace Tests
         [Test] 
         public void CompletePassNoChunkDependencies() 
         {
-            pipeline = new ChunkPipelineManager<VoxelData>(
+            pipeline = new ChunkPipelineManager(
                 mockProvider,
                 mockMesher,
                 mockGetComponent,
@@ -176,7 +190,7 @@ namespace Tests
         {
             mockMesher.IsMeshDependentOnNeighbourChunks = true;
 
-            pipeline = new ChunkPipelineManager<VoxelData>(
+            pipeline = new ChunkPipelineManager(
                mockProvider,
                mockMesher,
                mockGetComponent,
@@ -210,7 +224,7 @@ namespace Tests
         [Test]
         public void SetTargetHigherThanCurrentNoWIP() 
         {
-            pipeline = new ChunkPipelineManager<VoxelData>(
+            pipeline = new ChunkPipelineManager(
                mockProvider,
                mockMesher,
                mockGetComponent,
@@ -257,7 +271,7 @@ namespace Tests
         [Test]
         public void SetTargetHigherThanCurrentWithWIP() 
         {
-            pipeline = new ChunkPipelineManager<VoxelData>(
+            pipeline = new ChunkPipelineManager(
                mockProvider,
                mockMesher,
                mockGetComponent,
@@ -300,7 +314,7 @@ namespace Tests
         [Test]
         public void SetTargetLowerThanCurrentAndMax() 
         {
-            pipeline = new ChunkPipelineManager<VoxelData>(
+            pipeline = new ChunkPipelineManager(
               mockProvider,
               mockMesher,
               mockGetComponent,
@@ -340,7 +354,7 @@ namespace Tests
         [Test]
         public void SetTargetLowerThanCurrentGreaterThanMax() 
         {
-            pipeline = new ChunkPipelineManager<VoxelData>(
+            pipeline = new ChunkPipelineManager(
               mockProvider,
               mockMesher,
               mockGetComponent,
@@ -384,7 +398,7 @@ namespace Tests
         [Test]
         public void PriorityCorrectOrderTest() 
         {
-            pipeline = new ChunkPipelineManager<VoxelData>(
+            pipeline = new ChunkPipelineManager(
               mockProvider,
               mockMesher,
               mockGetComponent,
@@ -423,7 +437,7 @@ namespace Tests
        [Test]
         public void ChunkRemovedWhileScheduledForData() 
         {
-            pipeline = new ChunkPipelineManager<VoxelData>(
+            pipeline = new ChunkPipelineManager(
               mockProvider,
               mockMesher,
               mockGetComponent,
@@ -466,7 +480,7 @@ namespace Tests
         public void ChunkRemovedWhileScheduledForMeshWithDependencies()
         {
             mockMesher.IsMeshDependentOnNeighbourChunks = true;
-            pipeline = new ChunkPipelineManager<VoxelData>(
+            pipeline = new ChunkPipelineManager(
               mockProvider,
               mockMesher,
               mockGetComponent,
@@ -531,7 +545,7 @@ namespace Tests
         public void OneOfNeighboursRemovedWhileScheduledForMesh()
         {
             mockMesher.IsMeshDependentOnNeighbourChunks = true;
-            pipeline = new ChunkPipelineManager<VoxelData>(
+            pipeline = new ChunkPipelineManager(
               mockProvider,
               mockMesher,
               mockGetComponent,
@@ -588,7 +602,7 @@ namespace Tests
         {
             mockMesher.IsMeshDependentOnNeighbourChunks = true;
             int maxData = 100;
-            pipeline = new ChunkPipelineManager<VoxelData>(
+            pipeline = new ChunkPipelineManager(
               mockProvider,
               mockMesher,
               mockGetComponent,

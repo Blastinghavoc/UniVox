@@ -2,12 +2,11 @@
 using System.Collections;
 using UniVox.Framework;
 using UniVox.Implementations.ChunkData;
-using UniVox.Implementations.Common;
 using UniVox.Framework.ChunkPipeline.VirtualJobs;
 
 namespace UniVox.Implementations.Providers
 {
-    public class DebugProvider : AbstractProviderComponent<VoxelData>
+    public class DebugProvider : AbstractProviderComponent
     {
         public SOVoxelTypeDefinition dirtType;
         private ushort dirtID;
@@ -21,9 +20,9 @@ namespace UniVox.Implementations.Providers
             grassID = voxelTypeManager.GetId(grassType);
         }
 
-        public override AbstractPipelineJob<IChunkData<VoxelData>> GenerateChunkDataJob(Vector3Int chunkID, Vector3Int chunkDimensions)
+        public override AbstractPipelineJob<IChunkData> GenerateChunkDataJob(Vector3Int chunkID, Vector3Int chunkDimensions)
         {
-            return new BasicFunctionJob<IChunkData<VoxelData>>(() => FlatWorld(chunkID, chunkDimensions));
+            return new BasicFunctionJob<IChunkData>(() => FlatWorld(chunkID, chunkDimensions));
         }
 
         private AbstractChunkData FlatWorld(Vector3Int chunkID, Vector3Int chunkDimensions) 
@@ -46,11 +45,11 @@ namespace UniVox.Implementations.Providers
                             var height = y + chunkPosition.y;
                             if (height == groundHeight)
                             {
-                                ChunkData[x, y, z] = new VoxelData(grassID);
+                                ChunkData[x, y, z] = new VoxelTypeID(grassID);
                             }
                             else if (height < groundHeight)
                             {
-                                ChunkData[x, y, z] = new VoxelData(dirtID);
+                                ChunkData[x, y, z] = new VoxelTypeID(dirtID);
                             }
                         }
                     }
@@ -73,11 +72,11 @@ namespace UniVox.Implementations.Providers
                     {
                         if (y == maxY - 1)
                         {
-                            ChunkData[x, y, z] = new VoxelData(grassID);
+                            ChunkData[x, y, z] = new VoxelTypeID(grassID);
                         }
                         else
                         {
-                            ChunkData[x, y, z] = new VoxelData(dirtID);
+                            ChunkData[x, y, z] = new VoxelTypeID(dirtID);
                         }
                     }
                 }
@@ -102,7 +101,7 @@ namespace UniVox.Implementations.Providers
                         {
                             continue;
                         }
-                        ChunkData[x, y, z] = new VoxelData(dirtID);
+                        ChunkData[x, y, z] = new VoxelTypeID(dirtID);
                     }
                 }
             }

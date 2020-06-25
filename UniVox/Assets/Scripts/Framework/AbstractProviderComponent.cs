@@ -8,8 +8,7 @@ using UnityEngine.Profiling;
 
 namespace UniVox.Framework
 {
-    public abstract class AbstractProviderComponent<V> : MonoBehaviour, IChunkProvider<V>
-        where V : struct,IVoxelData
+    public abstract class AbstractProviderComponent : MonoBehaviour, IChunkProvider
     {
         protected VoxelTypeManager voxelTypeManager;
         protected IChunkManager chunkManager;
@@ -22,7 +21,7 @@ namespace UniVox.Framework
         /// If a request is made to provide any of these chunks, the modified
         /// data must be returned.
         /// </summary>
-        protected Dictionary<Vector3Int, IChunkData<V>> ModifiedChunkData = new Dictionary<Vector3Int, IChunkData<V>>();
+        protected Dictionary<Vector3Int, IChunkData> ModifiedChunkData = new Dictionary<Vector3Int, IChunkData>();
 
         public virtual void Initialise(VoxelTypeManager voxelTypeManager,IChunkManager chunkManager)
         {
@@ -31,16 +30,16 @@ namespace UniVox.Framework
         }
 
         //Add or replace modified data for the given chunk
-        public void AddModifiedChunkData(Vector3Int chunkID, IChunkData<V> data) 
+        public void StoreModifiedChunkData(Vector3Int chunkID, IChunkData data) 
         {
             ModifiedChunkData[chunkID] = data;
         }
 
-        public AbstractPipelineJob<IChunkData<V>> ProvideChunkDataJob(Vector3Int chunkID) 
+        public AbstractPipelineJob<IChunkData> ProvideChunkDataJob(Vector3Int chunkID) 
         {
             if (ModifiedChunkData.TryGetValue(chunkID, out var data))
             {
-                return new BasicFunctionJob<IChunkData<V>>(() => data);
+                return new BasicFunctionJob<IChunkData>(() => data);
             }
 
             Profiler.BeginSample("CreateGenerationJob");
@@ -56,6 +55,6 @@ namespace UniVox.Framework
         /// <param name="chunkID"></param>
         /// <param name="chunkDimensions"></param>
         /// <returns></returns>
-        public abstract AbstractPipelineJob<IChunkData<V>> GenerateChunkDataJob(Vector3Int chunkID, Vector3Int chunkDimensions);
+        public abstract AbstractPipelineJob<IChunkData> GenerateChunkDataJob(Vector3Int chunkID, Vector3Int chunkDimensions);
     }
 }

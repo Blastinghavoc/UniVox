@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.Assertions;
-using UniVox.Implementations.Common;
 using UniVox.Framework;
 using Unity.Collections;
 using Utils;
@@ -17,13 +16,13 @@ namespace UniVox.Implementations.ChunkData
         /// <summary>
         /// XYZ Voxel Data
         /// </summary>
-        protected VoxelData[,,] voxels;
+        protected VoxelTypeID[,,] voxels;
 
-        public ArrayChunkData(Vector3Int ID, Vector3Int chunkDimensions,VoxelData[] initialData = null) : base(ID, chunkDimensions,initialData) 
+        public ArrayChunkData(Vector3Int ID, Vector3Int chunkDimensions,VoxelTypeID[] initialData = null) : base(ID, chunkDimensions,initialData) 
         {
             if (initialData == null)
             {
-                voxels = new VoxelData[chunkDimensions.x, chunkDimensions.y, chunkDimensions.z];
+                voxels = new VoxelTypeID[chunkDimensions.x, chunkDimensions.y, chunkDimensions.z];
             }
             else
             {
@@ -31,12 +30,12 @@ namespace UniVox.Implementations.ChunkData
             }
         }
 
-        protected override VoxelData GetVoxelAtLocalCoordinates(int x, int y, int z)
+        protected override VoxelTypeID GetVoxelAtLocalCoordinates(int x, int y, int z)
         {
             return voxels[x, y, z];
         }
 
-        protected override void SetVoxelAtLocalCoordinates(int x, int y, int z, VoxelData voxel)
+        protected override void SetVoxelAtLocalCoordinates(int x, int y, int z, VoxelTypeID voxel)
         {
             voxels[x, y, z] = voxel;
         }

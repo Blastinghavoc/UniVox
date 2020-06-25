@@ -1,18 +1,16 @@
 ﻿using System;
 using Unity.Collections;
 using UnityEngine;
-using UniVox.Framework;
 using UniVox.Framework.Jobified;
-using UniVox.Implementations.Common;
 
-namespace UniVox.Implementations.ChunkData
+namespace UniVox.Framework
 {
 
     /// <summary>
     /// Abstract implementation of IChunkData, providing helpful indexers
     /// and the basic data required by the interface.
     /// </summary>
-    public abstract class AbstractChunkData : IChunkData<VoxelData>
+    public abstract class AbstractChunkData : IChunkData
     {
         public Vector3Int ChunkID { get; set; }
         public Vector3Int Dimensions { get; set; }
@@ -20,11 +18,11 @@ namespace UniVox.Implementations.ChunkData
 
         public bool FullyGenerated { get; set; } = false;
 
-        public AbstractChunkData(Vector3Int ID, Vector3Int chunkDimensions,VoxelData[] initialData = null)
+        public AbstractChunkData(Vector3Int ID, Vector3Int chunkDimensions, VoxelTypeID[] initialData = null)
         {
             ChunkID = ID;
             Dimensions = chunkDimensions;
-            if (initialData!= null)
+            if (initialData != null)
             {
                 var expectedLength = chunkDimensions.x * chunkDimensions.y * chunkDimensions.z;
                 if (initialData.Length != expectedLength)
@@ -37,17 +35,19 @@ namespace UniVox.Implementations.ChunkData
 
 
         #region Indexers
-        public VoxelData this[Vector3Int index]
+        public VoxelTypeID this[Vector3Int index]
         {
             get { return this[index.x, index.y, index.z]; }
             set { this[index.x, index.y, index.z] = value; }
         }
-        public VoxelData this[int i, int j, int k]
+        public VoxelTypeID this[int i, int j, int k]
         {
-            get { 
-                return GetVoxelAtLocalCoordinates(i, j, k); 
+            get
+            {
+                return GetVoxelAtLocalCoordinates(i, j, k);
             }
-            set { 
+            set
+            {
                 SetVoxelAtLocalCoordinates(i, j, k, value);
                 if (FullyGenerated)
                 {
@@ -56,18 +56,18 @@ namespace UniVox.Implementations.ChunkData
             }
         }
         #endregion
-        protected abstract void SetVoxelAtLocalCoordinates(int x, int y, int z, VoxelData voxel);
+        protected abstract void SetVoxelAtLocalCoordinates(int x, int y, int z, VoxelTypeID voxel);
 
-        protected abstract VoxelData GetVoxelAtLocalCoordinates(int x, int y, int z);
+        protected abstract VoxelTypeID GetVoxelAtLocalCoordinates(int x, int y, int z);
 
         #region interface methods
 
-        public bool TryGetVoxelAtLocalCoordinates(Vector3Int coords, out VoxelData vox)
+        public bool TryGetVoxelAtLocalCoordinates(Vector3Int coords, out VoxelTypeID vox)
         {
             return TryGetVoxelAtLocalCoordinates(coords.x, coords.y, coords.z, out vox);
         }
 
-        public bool TryGetVoxelAtLocalCoordinates(int x, int y, int z, out VoxelData vox)
+        public bool TryGetVoxelAtLocalCoordinates(int x, int y, int z, out VoxelTypeID vox)
         {
             bool xValid = x >= 0 && x < Dimensions.x;
             bool yValid = y >= 0 && y < Dimensions.y;
@@ -82,7 +82,7 @@ namespace UniVox.Implementations.ChunkData
             return false;
         }
 
-        public virtual NativeArray<VoxelData> ToNative(Allocator allocator = Allocator.Persistent)
+        public virtual NativeArray<VoxelTypeID> ToNative(Allocator allocator = Allocator.Persistent)
         {
             return this.ToNativeBruteForce(allocator);
         }

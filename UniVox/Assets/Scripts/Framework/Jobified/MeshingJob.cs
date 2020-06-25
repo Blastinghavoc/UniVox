@@ -86,16 +86,15 @@ namespace UniVox.Framework.Jobified
     }
 
     [BurstCompile]
-    public struct MeshingJob<V> : IJob
-        where V : struct, IVoxelData
+    public struct MeshingJob : IJob
     {
         [ReadOnly] public bool cullfaces;
         [ReadOnly] public int3 dimensions;
         [ReadOnly] private const int numDirections = Directions.NumDirections;
 
-        [ReadOnly] public NativeArray<V> voxels;
+        [ReadOnly] public NativeArray<VoxelTypeID> voxels;
 
-        [ReadOnly] public NeighbourData<V> neighbourData;
+        [ReadOnly] public NeighbourData neighbourData;
 
         [ReadOnly] public NativeMeshDatabase meshDatabase;
 
@@ -141,7 +140,7 @@ namespace UniVox.Framework.Jobified
                 {
                     for (int x = 0; x < dimensions.x; x++)
                     {
-                        var voxelTypeID = voxels[i].TypeID;
+                        var voxelTypeID = voxels[i];
 
                         if (voxelTypeID != VoxelTypeManager.AIR_ID)
                         {
@@ -266,7 +265,7 @@ namespace UniVox.Framework.Jobified
 
                 var flattenedIndex = Utils.Helpers.MultiIndexToFlat(localIndexOfAdjacentVoxelInNeighbour.x, localIndexOfAdjacentVoxelInNeighbour.y, neighbourDimensions);
 
-                adjacentID = neighbourChunkData[flattenedIndex].TypeID;
+                adjacentID = neighbourChunkData[flattenedIndex];
 
                 if (adjacentID == voxelID)
                 {
@@ -298,7 +297,7 @@ namespace UniVox.Framework.Jobified
                 pos.y >= 0 && pos.y < dimensions.y &&
                 pos.z >= 0 && pos.z < dimensions.z)
             {
-                voxelId = voxels[Utils.Helpers.MultiIndexToFlat(pos.x, pos.y, pos.z, dimensions)].TypeID;
+                voxelId = voxels[Utils.Helpers.MultiIndexToFlat(pos.x, pos.y, pos.z, dimensions)];
                 return true;
             }
             voxelId = VoxelTypeManager.AIR_ID;

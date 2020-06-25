@@ -20,7 +20,7 @@ namespace UniVox.Framework
 
         [SerializeField] private SOVoxelTypeDefinition[] VoxelTypes = new SOVoxelTypeDefinition[1];
 
-        private Dictionary<SOVoxelTypeDefinition, ushort> DefinitionToIDMap;
+        private Dictionary<SOVoxelTypeDefinition, VoxelTypeID> DefinitionToIDMap;
 
         private List<VoxelTypeData> typeData;
 
@@ -43,7 +43,7 @@ namespace UniVox.Framework
                 return;
             }
 
-            DefinitionToIDMap = new Dictionary<SOVoxelTypeDefinition, ushort>();
+            DefinitionToIDMap = new Dictionary<SOVoxelTypeDefinition, VoxelTypeID>();
             typeData = new List<VoxelTypeData>();
             typeData.Add(new VoxelTypeData());//Add empty entry for air
 
@@ -60,7 +60,7 @@ namespace UniVox.Framework
             {
                 Assert.AreEqual(Directions.NumDirections, item.FaceTextures.Length, $"Voxel type {item.name} does not define a texture for each face");
 
-                DefinitionToIDMap.Add(item, currentID);
+                DefinitionToIDMap.Add(item, (VoxelTypeID)currentID);
 
                 if (!materialIDMap.TryGetValue(item.material,out var matID))
                 {
@@ -153,7 +153,7 @@ namespace UniVox.Framework
             return typeData[voxelTypeID];
         }
 
-        public ushort GetId(SOVoxelTypeDefinition def)
+        public VoxelTypeID GetId(SOVoxelTypeDefinition def)
         {
             if (DefinitionToIDMap.TryGetValue(def, out var id))
             {

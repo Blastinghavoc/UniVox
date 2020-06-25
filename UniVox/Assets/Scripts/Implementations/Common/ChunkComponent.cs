@@ -5,7 +5,7 @@ using UniVox.Implementations.ChunkData;
 
 namespace UniVox.Implementations.Common
 {
-    public class ChunkComponent : AbstractChunkComponent<VoxelData>
+    public class ChunkComponent : AbstractChunkComponent
     {
     }
 }

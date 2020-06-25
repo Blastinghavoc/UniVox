@@ -10,11 +10,10 @@ namespace UniVox.Framework
     /// The Component managing the operation of a Chunk GameObject
     /// </summary>
     [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider))]
-    public abstract class AbstractChunkComponent<V> : MonoBehaviour, 
-        IChunkComponent<V> 
-        where V :struct, IVoxelData
+    public abstract class AbstractChunkComponent : MonoBehaviour, 
+        IChunkComponent
     {
-        public IChunkData<V> Data { get; set; }
+        public IChunkData Data { get; set; }
         public Vector3Int ChunkID { get; private set; }
 
         public MeshFilter meshFilter;

@@ -12,8 +12,7 @@ using UniVox.Framework.ChunkPipeline;
 using Utils.FSM;
 using Utils.Pooling;
 
-public abstract class AbstractChunkManager<VoxelDataType> : MonoBehaviour, IChunkManager, ITestableChunkManager    
-    where VoxelDataType :struct, IVoxelData
+public abstract class AbstractChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
 {
     #region Shown in inspector
 
@@ -60,16 +59,16 @@ public abstract class AbstractChunkManager<VoxelDataType> : MonoBehaviour, IChun
     #endregion
 
 
-    protected AbstractProviderComponent<VoxelDataType> chunkProvider { get; set; }
-    protected AbstractMesherComponent<VoxelDataType> chunkMesher { get; set; }
+    protected IChunkProvider chunkProvider { get; set; }
+    protected IChunkMesher chunkMesher { get; set; }
 
-    protected Dictionary<Vector3Int, AbstractChunkComponent<VoxelDataType>> loadedChunks;
+    protected Dictionary<Vector3Int, AbstractChunkComponent> loadedChunks;
 
     //Current chunkID occupied by the Player
     protected Vector3Int playerChunkID;
     protected Vector3Int prevPlayerChunkID;
 
-    private ChunkPipelineManager<VoxelDataType> pipeline;
+    private ChunkPipelineManager pipeline;
 
     public virtual void Initialise() 
     {
@@ -83,7 +82,7 @@ public abstract class AbstractChunkManager<VoxelDataType> : MonoBehaviour, IChun
         transform.position = Vector3.zero;
         transform.rotation = Quaternion.Euler(0, 0, 0);
 
-        loadedChunks = new Dictionary<Vector3Int, AbstractChunkComponent<VoxelDataType>>();
+        loadedChunks = new Dictionary<Vector3Int, AbstractChunkComponent>();
 
         chunkPool = new PrefabPool() { prefab = chunkPrefab};
 
@@ -94,15 +93,15 @@ public abstract class AbstractChunkManager<VoxelDataType> : MonoBehaviour, IChun
         var worldInterface = FindObjectOfType<VoxelWorldInterface>();
         worldInterface.Intialise(this, VoxelTypeManager);
 
-        chunkProvider = GetComponent<AbstractProviderComponent<VoxelDataType>>();
-        chunkMesher = GetComponent<AbstractMesherComponent<VoxelDataType>>();
+        chunkProvider = GetComponent<IChunkProvider>();
+        chunkMesher = GetComponent<IChunkMesher>();
         Assert.IsNotNull(chunkProvider, "Chunk Manager must have a chunk provider component");
         Assert.IsNotNull(chunkMesher, "Chunk Manager must have a chunk mesher component");
 
         chunkProvider.Initialise(VoxelTypeManager, this);
         chunkMesher.Initialise(VoxelTypeManager, this);
 
-        pipeline = new ChunkPipelineManager<VoxelDataType>(
+        pipeline = new ChunkPipelineManager(
             chunkProvider,
             chunkMesher,
             GetChunkComponent,
@@ -157,7 +156,16 @@ public abstract class AbstractChunkManager<VoxelDataType> : MonoBehaviour, IChun
     {
         pipeline.Dispose();
         VoxelTypeManager.Dispose();
-        chunkMesher.Dispose();
+        if (chunkMesher is IDisposable disposableChunkMesher)
+        {
+            disposableChunkMesher.Dispose();
+        }
+
+        if (chunkProvider is IDisposable disposableChunkProvider)
+        {
+            disposableChunkProvider.Dispose();
+        }
+
     }
 
     /// <summary>
@@ -201,7 +209,7 @@ public abstract class AbstractChunkManager<VoxelDataType> : MonoBehaviour, IChun
         Profiler.EndSample();
     }
 
-    private AbstractChunkComponent<VoxelDataType> GetChunkComponent(Vector3Int chunkID) 
+    private AbstractChunkComponent GetChunkComponent(Vector3Int chunkID) 
     {
         if (loadedChunks.TryGetValue(chunkID, out var chunkComponent))
         {
@@ -233,7 +241,7 @@ public abstract class AbstractChunkManager<VoxelDataType> : MonoBehaviour, IChun
                 if (chunkComponent.Data.ModifiedSinceGeneration)
                 {
                     //If it was modified, don't dispose of it yet, give it back to the provider
-                    chunkProvider.AddModifiedChunkData(chunkComponent.ChunkID, chunkComponent.Data);
+                    chunkProvider.StoreModifiedChunkData(chunkComponent.ChunkID, chunkComponent.Data);
                 }
             }
 
@@ -276,7 +284,7 @@ public abstract class AbstractChunkManager<VoxelDataType> : MonoBehaviour, IChun
         {
             //Get a new Chunk GameObject to house the generated Chunk data.
             var ChunkObject = chunkPool.Next(transform);
-            ChunkComponent = ChunkObject.GetComponent<AbstractChunkComponent<VoxelDataType>>();
+            ChunkComponent = ChunkObject.GetComponent<AbstractChunkComponent>();
             ChunkComponent.Initialise(chunkID, ChunkToWorldPosition(chunkID));
             //Add to set of loaded chunks
             loadedChunks[chunkID] = ChunkComponent;
@@ -337,7 +345,7 @@ public abstract class AbstractChunkManager<VoxelDataType> : MonoBehaviour, IChun
     /// <param name="newTypeID"></param>
     /// <param name="chunkComponent"></param>
     /// <param name="localVoxelIndex"></param>
-    protected void OnVoxelSet(ushort previousTypeID,ushort newTypeID, AbstractChunkComponent<VoxelDataType> chunkComponent, Vector3Int localVoxelIndex) 
+    protected void OnVoxelSet(ushort previousTypeID,ushort newTypeID, AbstractChunkComponent chunkComponent, Vector3Int localVoxelIndex) 
     {
         if (previousTypeID == newTypeID)
         {
@@ -404,7 +412,7 @@ public abstract class AbstractChunkManager<VoxelDataType> : MonoBehaviour, IChun
         return borderDirections;
     }
 
-    public ReadOnlyChunkData<VoxelDataType> GetReadOnlyChunkData(Vector3Int chunkID) 
+    public ReadOnlyChunkData GetReadOnlyChunkData(Vector3Int chunkID) 
     {
         if (loadedChunks.TryGetValue(chunkID,out var chunkComponent))
         {
@@ -412,12 +420,12 @@ public abstract class AbstractChunkManager<VoxelDataType> : MonoBehaviour, IChun
             {
                 throw new ArgumentException($"It is not valid to get read-only data for chunk ID {chunkID}, as its data is null");
             }
-            return new ReadOnlyChunkData<VoxelDataType>(chunkComponent.Data);
+            return new ReadOnlyChunkData(chunkComponent.Data);
         }
         return null;    
     }
 
-    public bool TrySetVoxel(Vector3 worldPos, ushort voxelTypeID,bool overrideExisting)
+    public bool TrySetVoxel(Vector3 worldPos, VoxelTypeID voxelTypeID,bool overrideExisting)
     {
         Vector3Int localVoxelIndex;
         var chunkID = WorldToChunkPosition(worldPos,out localVoxelIndex);
@@ -430,10 +438,10 @@ public abstract class AbstractChunkManager<VoxelDataType> : MonoBehaviour, IChun
                 return false;
             }
 
-            var newVox = default(VoxelDataType);
-            newVox.TypeID = voxelTypeID;
+            var newVoxID = new VoxelTypeID();
+            newVoxID = voxelTypeID;
 
-            ushort prevID = chunkComponent.Data[localVoxelIndex].TypeID;
+            ushort prevID = chunkComponent.Data[localVoxelIndex];
 
             if (!overrideExisting)
             {
@@ -444,7 +452,7 @@ public abstract class AbstractChunkManager<VoxelDataType> : MonoBehaviour, IChun
                 }
             }
 
-            chunkComponent.Data[localVoxelIndex] = newVox;
+            chunkComponent.Data[localVoxelIndex] = newVoxID;
 
             OnVoxelSet(prevID, voxelTypeID, chunkComponent, localVoxelIndex);            
 
@@ -453,7 +461,7 @@ public abstract class AbstractChunkManager<VoxelDataType> : MonoBehaviour, IChun
         return false;
     }
 
-    public bool TryGetVoxel(Vector3 worldPos,out ushort voxelTypeID)
+    public bool TryGetVoxel(Vector3 worldPos,out VoxelTypeID voxelTypeID)
     {
         Vector3Int localVoxelIndex;
         var chunkID = WorldToChunkPosition(worldPos, out localVoxelIndex);
@@ -461,9 +469,9 @@ public abstract class AbstractChunkManager<VoxelDataType> : MonoBehaviour, IChun
         return TryGetVoxel(chunkID, localVoxelIndex, out voxelTypeID);
     }
 
-    public bool TryGetVoxel(Vector3Int chunkID,Vector3Int localVoxelIndex, out ushort voxelTypeID)
+    public bool TryGetVoxel(Vector3Int chunkID,Vector3Int localVoxelIndex, out VoxelTypeID voxelTypeID)
     {
-        voxelTypeID = VoxelTypeManager.AIR_ID;
+        voxelTypeID = (VoxelTypeID)VoxelTypeManager.AIR_ID;
 
         if (loadedChunks.TryGetValue(chunkID, out var chunkComponent))
         {
@@ -473,7 +481,7 @@ public abstract class AbstractChunkManager<VoxelDataType> : MonoBehaviour, IChun
                 return false;
             }
 
-            voxelTypeID = chunkComponent.Data[localVoxelIndex].TypeID;
+            voxelTypeID = chunkComponent.Data[localVoxelIndex];
 
             return true;
         }

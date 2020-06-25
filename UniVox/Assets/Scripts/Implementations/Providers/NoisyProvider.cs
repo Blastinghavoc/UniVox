@@ -2,7 +2,6 @@
 using System.Collections;
 using UniVox.Framework;
 using UniVox.Implementations.ChunkData;
-using UniVox.Implementations.Common;
 using Utils.Noise;
 using System;
 using Unity.Mathematics;
@@ -16,7 +15,7 @@ using System.Net.NetworkInformation;
 
 namespace UniVox.Implementations.Providers
 {
-    public class NoisyProvider : AbstractProviderComponent<VoxelData>
+    public class NoisyProvider : AbstractProviderComponent
     {
         [SerializeField] private ChunkDataFactory chunkDataFactory = null;
 
@@ -64,7 +63,7 @@ namespace UniVox.Implementations.Providers
             oceanGenConfig.waterID = waterID;
         }
 
-        public override AbstractPipelineJob<IChunkData<VoxelData>> GenerateChunkDataJob(Vector3Int chunkID,Vector3Int chunkDimensions)
+        public override AbstractPipelineJob<IChunkData> GenerateChunkDataJob(Vector3Int chunkID,Vector3Int chunkDimensions)
         {           
 
             var mainGenJob = new JobWrapper<DataGenerationJob>();
@@ -84,7 +83,7 @@ namespace UniVox.Implementations.Providers
 
             var arrayLength = chunkDimensions.x * chunkDimensions.y * chunkDimensions.z;
 
-            mainGenJob.job.chunkData = new NativeArray<VoxelData>(arrayLength, Allocator.Persistent);
+            mainGenJob.job.chunkData = new NativeArray<VoxelTypeID>(arrayLength, Allocator.Persistent);
 
             //Setup ocean generation job
             var oceanGenJob = new JobWrapper<OceanGenJob>();
@@ -95,7 +94,7 @@ namespace UniVox.Implementations.Providers
             oceanGenJob.job.heightMap = mainGenJob.job.heightMap;
             oceanGenJob.job.biomeMap = mainGenJob.job.biomeMap;
 
-            Func<IChunkData<VoxelData>> cleanup = () =>
+            Func<IChunkData> cleanup = () =>
             {
                 Profiler.BeginSample("DataJobCleanup");
 
@@ -115,7 +114,7 @@ namespace UniVox.Implementations.Providers
             if (!Parrallel)
             {
                 //Single threaded version  DEBUG
-                return new BasicFunctionJob<IChunkData<VoxelData>>(() =>
+                return new BasicFunctionJob<IChunkData>(() =>
                 {
                     mainGenJob.Run();
                     oceanGenJob.Run();
@@ -126,7 +125,7 @@ namespace UniVox.Implementations.Providers
             var mainHandle = mainGenJob.Schedule();
             var finalHandle = oceanGenJob.Schedule(mainHandle);
 
-            return new PipelineUnityJob<IChunkData<VoxelData>>(finalHandle, cleanup);
+            return new PipelineUnityJob<IChunkData>(finalHandle, cleanup);
         }        
 
     }

@@ -22,7 +22,7 @@ namespace UniVox.Framework
             this.voxelTypeManager = voxelTypeManager;
         }
 
-        public void PlaceVoxel(Vector3 position, ushort voxelTypeID)
+        public void PlaceVoxel(Vector3 position, VoxelTypeID voxelTypeID)
         {
             chunkManager.TrySetVoxel(position, voxelTypeID);
         }
@@ -34,7 +34,7 @@ namespace UniVox.Framework
 
         public void RemoveVoxel(Vector3 position)
         {
-            chunkManager.TrySetVoxel(position, VoxelTypeManager.AIR_ID, true);
+            chunkManager.TrySetVoxel(position, (VoxelTypeID)VoxelTypeManager.AIR_ID, true);
         }
 
         public Vector3 CenterOfVoxelAt(Vector3 position)

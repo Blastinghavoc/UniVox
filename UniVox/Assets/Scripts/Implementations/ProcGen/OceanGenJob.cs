@@ -1,5 +1,4 @@
 ﻿using UniVox.Framework;
-using UniVox.Implementations.Common;
 using static Utils.Helpers;
 using Unity.Jobs;
 using Unity.Mathematics;
@@ -17,7 +16,7 @@ namespace UniVox.Implementations.ProcGen
         [ReadOnly] public float3 chunkPosition;
 
         //Input and Output
-        public NativeArray<VoxelData> chunkData;
+        public NativeArray<VoxelTypeID> chunkData;
 
         //Input
         [ReadOnly] public NativeArray<int> heightMap;
@@ -46,9 +45,9 @@ namespace UniVox.Implementations.ProcGen
 
                             int y = yStart;
                             int flatIndex = MultiIndexToFlat(x, y, z, dx, dxdy);
-                            while (y >= 0 && chunkData[flatIndex].TypeID == VoxelTypeManager.AIR_ID)
+                            while (y >= 0 && chunkData[flatIndex] == VoxelTypeManager.AIR_ID)
                             {
-                                chunkData[flatIndex] = new VoxelData(config.waterID);
+                                chunkData[flatIndex] = new VoxelTypeID(config.waterID);
                                 y--;
                                 flatIndex = MultiIndexToFlat(x, y, z, dx, dxdy);
                             }

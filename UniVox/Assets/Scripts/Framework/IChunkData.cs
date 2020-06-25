@@ -9,8 +9,7 @@ namespace UniVox.Framework
     /// <summary>
     /// The data representation of a Chunk
     /// </summary>
-    public interface IChunkData<V>
-        where V : struct, IVoxelData
+    public interface IChunkData
     {
         Vector3Int ChunkID { get; set; }
 
@@ -20,12 +19,12 @@ namespace UniVox.Framework
 
         bool FullyGenerated { get; set; }
 
-        V this[int i, int j, int k] { get; set; }
-        V this[Vector3Int index] { get; set; }
+        VoxelTypeID this[int i, int j, int k] { get; set; }
+        VoxelTypeID this[Vector3Int index] { get; set; }
 
-        bool TryGetVoxelAtLocalCoordinates(Vector3Int coords, out V vox);
-        bool TryGetVoxelAtLocalCoordinates(int x, int y, int z, out V vox);
+        bool TryGetVoxelAtLocalCoordinates(Vector3Int coords, out VoxelTypeID vox);
+        bool TryGetVoxelAtLocalCoordinates(int x, int y, int z, out VoxelTypeID vox);
 
-        NativeArray<V> ToNative(Allocator allocator = Allocator.Persistent);
+        NativeArray<VoxelTypeID> ToNative(Allocator allocator = Allocator.Persistent);
     }
 }

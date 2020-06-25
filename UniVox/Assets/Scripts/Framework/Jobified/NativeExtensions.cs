@@ -7,11 +7,10 @@ namespace UniVox.Framework.Jobified
 {
     public static class NativeExtensions
     {
-        public static NativeArray<V> ToNativeBruteForce<V>(this IChunkData<V> chunkData,Allocator allocator = Allocator.Persistent)
-            where V : struct, IVoxelData
+        public static NativeArray<VoxelTypeID> ToNativeBruteForce(this IChunkData chunkData,Allocator allocator = Allocator.Persistent)
         {
             //Copy chunk data to native array
-            NativeArray<V> voxels = new NativeArray<V>(chunkData.Dimensions.x * chunkData.Dimensions.y * chunkData.Dimensions.z, allocator);
+            NativeArray<VoxelTypeID> voxels = new NativeArray<VoxelTypeID>(chunkData.Dimensions.x * chunkData.Dimensions.y * chunkData.Dimensions.z, allocator);
 
             int i = 0;
             for (int z = 0; z < chunkData.Dimensions.z; z++)
@@ -39,8 +38,7 @@ namespace UniVox.Framework.Jobified
         /// <param name="chunkData"></param>
         /// <param name="Direction"></param>
         /// <returns></returns>
-        public static NativeArray<V> BorderToNative<V>(this IChunkData<V> chunkData, int Direction)
-            where V : struct, IVoxelData
+        public static NativeArray<VoxelTypeID> BorderToNative(this IChunkData chunkData, int Direction)
         {
             StartEnd xRange = new StartEnd() { start = 0, end = chunkData.Dimensions.x };
             StartEnd yRange = new StartEnd() { start = 0, end = chunkData.Dimensions.y };
@@ -70,7 +68,7 @@ namespace UniVox.Framework.Jobified
                     throw new ArgumentException($"direction {Direction} was not recognised");
             }
 
-            NativeArray<V> voxelData = new NativeArray<V>(xRange.Length * yRange.Length * zRange.Length, Allocator.Persistent);
+            NativeArray<VoxelTypeID> voxelData = new NativeArray<VoxelTypeID>(xRange.Length * yRange.Length * zRange.Length, Allocator.Persistent);
 
             int i = 0;
             for (int z = zRange.start; z < zRange.end; z++)

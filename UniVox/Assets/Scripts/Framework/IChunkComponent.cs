@@ -2,11 +2,10 @@
 
 namespace UniVox.Framework
 {
-    public interface IChunkComponent<VoxelDataType>      
-        where VoxelDataType : struct,IVoxelData
+    public interface IChunkComponent
     {
         Vector3Int ChunkID { get; }
-        IChunkData<VoxelDataType> Data { get; set; }
+        IChunkData Data { get; set; }
 
         Mesh GetRenderMesh();
 

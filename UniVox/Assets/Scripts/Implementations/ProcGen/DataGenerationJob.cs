@@ -1,5 +1,4 @@
 ﻿using UniVox.Framework;
-using UniVox.Implementations.Common;
 using Utils.Noise;
 using static Utils.Helpers;
 using static Utils.Noise.Helpers;
@@ -21,7 +20,7 @@ namespace UniVox.Implementations.ProcGen
         [ReadOnly] public float3 chunkPosition;
 
         //Output
-        public NativeArray<VoxelData> chunkData;
+        public NativeArray<VoxelTypeID> chunkData;
 
         [ReadOnly] public NativeBiomeDatabase biomeDatabase;
 
@@ -118,7 +117,7 @@ namespace UniVox.Implementations.ProcGen
                         }
 
                         var flatIndex = MultiIndexToFlat(x, y, z, dx, dxdy);
-                        chunkData[flatIndex] = new VoxelData(idToPlace);
+                        chunkData[flatIndex] = new VoxelTypeID(idToPlace);
                     }
                 }
             }

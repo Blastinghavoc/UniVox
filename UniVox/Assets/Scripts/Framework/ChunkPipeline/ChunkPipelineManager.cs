@@ -10,14 +10,13 @@ using System.Linq;
 
 namespace UniVox.Framework.ChunkPipeline
 {
-    public class ChunkPipelineManager<V>: IDisposable
-        where V :struct, IVoxelData
+    public class ChunkPipelineManager: IDisposable
     {
         private List<PipelineStage> stages = new List<PipelineStage>();
 
         private Dictionary<Vector3Int, ChunkStageData> chunkStageMap = new Dictionary<Vector3Int, ChunkStageData>();
 
-        private Func<Vector3Int, IChunkComponent<V>> getChunkComponent;
+        private Func<Vector3Int, IChunkComponent> getChunkComponent;
 
         private Action<Vector3Int, int> createNewChunkWithTarget;
 
@@ -26,9 +25,9 @@ namespace UniVox.Framework.ChunkPipeline
         public int RenderedStage { get; private set; }
         public int CompleteStage { get; private set; }
 
-        public ChunkPipelineManager(IChunkProvider<V> chunkProvider,
-            IChunkMesher<V> chunkMesher,
-            Func<Vector3Int,IChunkComponent<V>> getChunkComponent,
+        public ChunkPipelineManager(IChunkProvider chunkProvider,
+            IChunkMesher chunkMesher,
+            Func<Vector3Int,IChunkComponent> getChunkComponent,
             Action<Vector3Int, int> createNewChunkWithTarget,
             Func<Vector3Int,float> getPriorityOfChunk,
             int maxDataPerUpdate,int maxMeshPerUpdate,int maxCollisionPerUpdate) 
@@ -45,7 +44,7 @@ namespace UniVox.Framework.ChunkPipeline
                 getPriorityOfChunk);
             stages.Add(ScheduledForData);
 
-            var GeneratingData = new WaitForJobStage<IChunkData<V>>("GeneratingData", i++, 
+            var GeneratingData = new WaitForJobStage<IChunkData>("GeneratingData", i++, 
                 TargetStageGreaterThanCurrent, 
                 chunkProvider.ProvideChunkDataJob,
                 OnDataGenJobDone, 
@@ -333,7 +332,7 @@ namespace UniVox.Framework.ChunkPipeline
             return ChunkDataReadable(stageData);
         }
 
-        private void OnDataGenJobDone(Vector3Int cId,IChunkData<V> dat) 
+        private void OnDataGenJobDone(Vector3Int cId,IChunkData dat) 
         {
             dat.FullyGenerated = true;
             getChunkComponent(cId).Data = dat;

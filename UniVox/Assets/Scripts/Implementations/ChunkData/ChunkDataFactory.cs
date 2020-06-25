@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using UniVox.Framework;
-using UniVox.Implementations.Common;
 
 namespace UniVox.Implementations.ChunkData
 {
@@ -18,7 +17,7 @@ namespace UniVox.Implementations.ChunkData
 
         public ChunkDataType typeToCreate;
 
-        public IChunkData<VoxelData> Create(Vector3Int chunkID,Vector3Int chunkDimensions , VoxelData[] initialData = null) 
+        public IChunkData Create(Vector3Int chunkID,Vector3Int chunkDimensions , VoxelTypeID[] initialData = null) 
         {
             switch (typeToCreate)
             {
@@ -27,7 +26,7 @@ namespace UniVox.Implementations.ChunkData
                 case ChunkDataType.MultiArray:
                     return new ArrayChunkData(chunkID, chunkDimensions, initialData);
                 default:
-                    throw new System.Exception($"No definition exists for chunk data type {typeToCreate.ToString()}");
+                    throw new System.Exception($"No definition exists for chunk data type {typeToCreate}");
             }
         }
 

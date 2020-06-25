@@ -17,8 +17,10 @@ namespace UniVox.Framework
 
         void Initialise();
 
-        bool TrySetVoxel(Vector3 worldPos, ushort voxelTypeID, bool overrideExisting = false);
-        bool TryGetVoxel(Vector3 worldPos,out ushort voxelTypeID);
-        bool TryGetVoxel(Vector3Int chunkID, Vector3Int localVoxelIndex, out ushort voxelTypeID);
+        bool TrySetVoxel(Vector3 worldPos, VoxelTypeID voxelTypeID, bool overrideExisting = false);
+        bool TryGetVoxel(Vector3 worldPos,out VoxelTypeID voxelTypeID);
+        bool TryGetVoxel(Vector3Int chunkID, Vector3Int localVoxelIndex, out VoxelTypeID voxelTypeID);
+        ReadOnlyChunkData GetReadOnlyChunkData(Vector3Int chunkID);
+        MeshDescriptor GetMeshDescriptor(Vector3Int chunkID);
     }
 }
