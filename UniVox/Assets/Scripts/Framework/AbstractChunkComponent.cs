@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System;
+using System.Collections.Generic;
 
 namespace UniVox.Framework
 {
@@ -18,9 +19,9 @@ namespace UniVox.Framework
 
         public MeshFilter meshFilter;
         public MeshCollider meshCollider;
+        public MeshRenderer meshRenderer;
 
-        //DEBUG
-        public bool inMeshRadius = false;
+        public MeshDescriptor meshDescriptor { get; protected set; }
 
         public void Initialise(Vector3Int id, Vector3 position)
         {
@@ -37,9 +38,19 @@ namespace UniVox.Framework
             return meshFilter.mesh;
         }
 
-        public void SetRenderMesh(Mesh mesh)
+        public void SetRenderMesh(MeshDescriptor meshDesc)
         {
-            meshFilter.mesh = mesh;
+            if (meshDesc == null)
+            {
+                meshFilter.mesh = null;
+                return;
+            }
+            meshFilter.mesh = meshDesc.mesh;
+            meshDescriptor = meshDesc;
+            if (meshDesc.materialsBySubmesh!=null)
+            {
+                meshRenderer.materials = meshDesc.materialsBySubmesh;
+            }
         }
 
         public void SetCollisionMesh(Mesh mesh)
@@ -56,5 +67,13 @@ namespace UniVox.Framework
             meshCollider.sharedMesh = null;
         }
 
+    }
+
+    public class MeshDescriptor 
+    {
+        public Mesh mesh;
+        public Material[] materialsBySubmesh;
+        public int collidableLengthVertices;
+        public int collidableLengthIndices;
     }
 }

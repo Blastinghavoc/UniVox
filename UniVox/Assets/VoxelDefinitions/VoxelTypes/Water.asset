@@ -20,4 +20,6 @@ MonoBehaviour:
   - {fileID: 2800000, guid: 5685034da60868d4c9268c72fbdaed51, type: 3}
   - {fileID: 2800000, guid: 5685034da60868d4c9268c72fbdaed51, type: 3}
   - {fileID: 2800000, guid: 5685034da60868d4c9268c72fbdaed51, type: 3}
-  meshDefinition: {fileID: 11400000, guid: ceb9d116af1d072479bb06beaf15efac, type: 2}
+  meshDefinition: {fileID: 11400000, guid: ce825a79023695944b76eb2dcdd48c92, type: 2}
+  material: {fileID: 2100000, guid: b37b6f729ea188a4bb49677dc0d6b05c, type: 2}
+  isPassable: 1

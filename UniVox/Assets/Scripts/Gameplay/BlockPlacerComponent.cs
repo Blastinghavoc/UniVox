@@ -28,6 +28,8 @@ namespace UniVox.Gameplay
             Indicator.transform.parent = transform;
             Indicator.transform.position = transform.position;
             Indicator.SetActive(false);
+            //Ensure the indicator is rendered after other transparent materials
+            Indicator.GetComponent<MeshRenderer>().material.renderQueue++;
 
             Assert.IsNotNull(WorldInterface, "A BlockPlacer must have a reference to a VoxelWorldInterface to operate");
 

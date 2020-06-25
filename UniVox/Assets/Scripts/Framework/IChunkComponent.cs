@@ -14,6 +14,6 @@ namespace UniVox.Framework
         void RemoveCollisionMesh();
         void RemoveRenderMesh();
         void SetCollisionMesh(Mesh mesh);
-        void SetRenderMesh(Mesh mesh);
+        void SetRenderMesh(MeshDescriptor meshDesc);
     }
 }

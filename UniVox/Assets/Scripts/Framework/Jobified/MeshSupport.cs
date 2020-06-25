@@ -55,6 +55,11 @@ namespace UniVox.Framework.Jobified
         /// meshTypeRanges array.
         /// </summary>
         [ReadOnly] public NativeArray<int> voxelTypeToMeshTypeMap;        
+
+        /// <summary>
+        /// Array mapping voxel types (index) to material ID
+        /// </summary>
+        [ReadOnly] public NativeArray<ushort> voxelTypeToMaterialIDMap;        
     }
 
     public static class NativeMeshDatabaseExtensions
@@ -72,11 +77,13 @@ namespace UniVox.Framework.Jobified
 
             List<StartEnd> meshTypeRangesList = new List<StartEnd>();
             List<int> voxelTypeToMeshTypeMapList = new List<int>();
+            List<ushort> voxelTypeToMaterialIDMapList = new List<ushort>();
 
             Dictionary<SOMeshDefinition, int> uniqueMeshIDs = new Dictionary<SOMeshDefinition, int>();
 
             //AIR
             voxelTypeToMeshTypeMapList.Add(0);
+            voxelTypeToMaterialIDMapList.Add(0);
 
             for (ushort voxelId = 1; voxelId < typeData.Count; voxelId++)
             {
@@ -98,6 +105,7 @@ namespace UniVox.Framework.Jobified
                     meshTypeRangesList.Add(meshTypeRange);
                 }
                 voxelTypeToMeshTypeMapList.Add(meshID);
+                voxelTypeToMaterialIDMapList.Add(item.materialID);
             }
 
             NativeMeshDatabase nativeMeshDatabase = new NativeMeshDatabase();
@@ -108,6 +116,7 @@ namespace UniVox.Framework.Jobified
             nativeMeshDatabase.isFaceSolid = new NativeArray<bool>(isFaceSolidList.ToArray(), Allocator.Persistent);
             nativeMeshDatabase.meshTypeRanges = new NativeArray<StartEnd>(meshTypeRangesList.ToArray(), Allocator.Persistent);
             nativeMeshDatabase.voxelTypeToMeshTypeMap = new NativeArray<int>(voxelTypeToMeshTypeMapList.ToArray(), Allocator.Persistent);
+            nativeMeshDatabase.voxelTypeToMaterialIDMap = new NativeArray<ushort>(voxelTypeToMaterialIDMapList.ToArray(), Allocator.Persistent);
 
             return nativeMeshDatabase;
         }
@@ -175,6 +184,7 @@ namespace UniVox.Framework.Jobified
             database.isFaceSolid.SmartDispose();
             database.meshTypeRanges.SmartDispose();
             database.voxelTypeToMeshTypeMap.SmartDispose();
+            database.voxelTypeToMaterialIDMap.SmartDispose();
         }
     }
 
@@ -182,6 +192,10 @@ namespace UniVox.Framework.Jobified
     {
         [ReadOnly] public NativeArray<float> zIndicesPerFace;
         [ReadOnly] public NativeArray<StartEnd> voxelTypeToZIndicesRangeMap;
+        /// <summary>
+        /// Whether or not each voxel type is passable (should be included in collision mesh)
+        /// </summary>
+        [ReadOnly] public NativeArray<bool> voxelTypeToIsPassableMap;
     }
 
     public static class NativeVoxelTypeDatabaseExtensions 
@@ -190,9 +204,11 @@ namespace UniVox.Framework.Jobified
         {
             List<float> zIndicesPerFaceList = new List<float>();
             List<StartEnd> voxelTypeToZIndicesRangeMapList = new List<StartEnd>();
+            List<bool> voxelTypeToIsPassableMapList = new List<bool>();
 
             //AIR
             voxelTypeToZIndicesRangeMapList.Add(new StartEnd());
+            voxelTypeToIsPassableMapList.Add(true);
 
             for (int i = 1; i < typeData.Count; i++)
             {
@@ -204,11 +220,13 @@ namespace UniVox.Framework.Jobified
 
                 range.end = zIndicesPerFaceList.Count;
                 voxelTypeToZIndicesRangeMapList.Add(range);
+                voxelTypeToIsPassableMapList.Add(typeData[i].definition.isPassable);
             }
 
             NativeVoxelTypeDatabase database = new NativeVoxelTypeDatabase();
             database.zIndicesPerFace = new NativeArray<float>(zIndicesPerFaceList.ToArray(), Allocator.Persistent);
             database.voxelTypeToZIndicesRangeMap = new NativeArray<StartEnd>(voxelTypeToZIndicesRangeMapList.ToArray(), Allocator.Persistent);
+            database.voxelTypeToIsPassableMap = new NativeArray<bool>(voxelTypeToIsPassableMapList.ToArray(), Allocator.Persistent);
             return database;
         }
 
@@ -216,6 +234,7 @@ namespace UniVox.Framework.Jobified
         {
             database.voxelTypeToZIndicesRangeMap.SmartDispose();
             database.zIndicesPerFace.SmartDispose();
+            database.voxelTypeToIsPassableMap.SmartDispose();
         }
     }
 
@@ -352,6 +371,7 @@ namespace UniVox.Framework.Jobified
         public float3 normal;
     }
 
+    [BurstCompile]
     public struct StartEnd 
     {
         public int start;

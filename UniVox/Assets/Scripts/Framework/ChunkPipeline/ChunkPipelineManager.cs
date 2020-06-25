@@ -86,8 +86,8 @@ namespace UniVox.Framework.ChunkPipeline
             }
             stages.Add(ScheduledForMesh);
 
-            var GeneratingMesh = new WaitForJobStage<Mesh>("GeneratingMesh", i++, TargetStageGreaterThanCurrent, chunkMesher.CreateMeshJob,
-                (cId, mesh) => getChunkComponent(cId).SetRenderMesh(mesh),maxMeshPerUpdate);
+            var GeneratingMesh = new WaitForJobStage<MeshDescriptor>("GeneratingMesh", i++, TargetStageGreaterThanCurrent, chunkMesher.CreateMeshJob,
+                (cId, meshDescriptor) => getChunkComponent(cId).SetRenderMesh(meshDescriptor),maxMeshPerUpdate);
             stages.Add(GeneratingMesh);
 
             //TODO remove DEBUG
@@ -104,7 +104,7 @@ namespace UniVox.Framework.ChunkPipeline
             var ScheduledForCollisionMesh = new PrioritizedStage("ScheduledForCollisionMesh", i++, maxCollisionPerUpdate, TargetStageGreaterThanCurrent, NextStageFreeForChunk, getPriorityOfChunk);
             stages.Add(ScheduledForCollisionMesh);
 
-            var ApplyingCollisionMesh = new WaitForJobStage<Mesh>("ApplyingCollisionMesh", i++, TargetStageGreaterThanCurrent, makeCollisionMeshingJob,
+            var ApplyingCollisionMesh = new WaitForJobStage<Mesh>("ApplyingCollisionMesh", i++, TargetStageGreaterThanCurrent, chunkMesher.ApplyCollisionMeshJob,
                 (cId, mesh) => getChunkComponent(cId).SetCollisionMesh(mesh),maxCollisionPerUpdate);
             stages.Add(ApplyingCollisionMesh);
             CompleteStage = i;
@@ -361,11 +361,6 @@ namespace UniVox.Framework.ChunkPipeline
         {
             return stageData.minStage >= DataStage;
         }        
-
-        private AbstractPipelineJob<Mesh> makeCollisionMeshingJob(Vector3Int chunkID) 
-        {
-            return new BasicFunctionJob<Mesh>(() => getChunkComponent(chunkID).GetRenderMesh());
-        }
 
         /// <summary>
         /// Checks whether all neighbours of the given chunk ID have data,
