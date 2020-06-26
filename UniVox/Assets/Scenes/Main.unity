@@ -211,6 +211,11 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: 2269b894a3c39474f93f612313029305,
         type: 2}
+    - target: {fileID: 398304577423018871, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: VoxelTypes.Array.data[10]
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 398304577439083000, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -365,7 +370,7 @@ PrefabInstance:
     - target: {fileID: 6215028733184748506, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
       propertyPath: rotationX
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
