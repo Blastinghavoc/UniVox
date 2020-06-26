@@ -29,6 +29,8 @@ namespace UniVox.Framework
 
         NativeArray<VoxelTypeID> ToNative(Allocator allocator = Allocator.Persistent);
 
-        NativeArray<KeyValuePair<int,VoxelRotation>> NativeRotations(Allocator allocator = Allocator.Persistent);
+        void SetRotation(Vector3Int coords, VoxelRotation rotation);
+
+        NativeArray<RotatedVoxelEntry> NativeRotations(Allocator allocator = Allocator.Persistent);
     }
 }

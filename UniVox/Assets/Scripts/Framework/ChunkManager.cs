@@ -343,7 +343,7 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
     /// <param name="newTypeID"></param>
     /// <param name="chunkComponent"></param>
     /// <param name="localVoxelIndex"></param>
-    protected void OnVoxelSet(ushort previousTypeID, ushort newTypeID, ChunkComponent chunkComponent, Vector3Int localVoxelIndex)
+    protected void OnVoxelSet(VoxelTypeID previousTypeID, VoxelTypeID newTypeID, ChunkComponent chunkComponent, Vector3Int localVoxelIndex)
     {
         if (previousTypeID == newTypeID)
         {
@@ -423,7 +423,7 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
         return null;
     }
 
-    public bool TrySetVoxel(Vector3 worldPos, VoxelTypeID voxelTypeID, bool overrideExisting)
+    public bool TrySetVoxel(Vector3 worldPos, VoxelTypeID voxelTypeID, VoxelRotation voxelRotation = default, bool overrideExisting = false)
     {
         Vector3Int localVoxelIndex;
         var chunkID = WorldToChunkPosition(worldPos, out localVoxelIndex);
@@ -439,18 +439,19 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
             var newVoxID = new VoxelTypeID();
             newVoxID = voxelTypeID;
 
-            ushort prevID = chunkComponent.Data[localVoxelIndex];
+            VoxelTypeID prevID = chunkComponent.Data[localVoxelIndex];
 
             if (!overrideExisting)
             {
                 //Disallow setting voxel if one already exists
-                if (prevID != VoxelTypeManager.AIR_ID)
+                if (prevID != (VoxelTypeID)VoxelTypeManager.AIR_ID)
                 {
                     return false;
                 }
             }
 
             chunkComponent.Data[localVoxelIndex] = newVoxID;
+            chunkComponent.Data.SetRotation(localVoxelIndex, voxelRotation);
 
             OnVoxelSet(prevID, voxelTypeID, chunkComponent, localVoxelIndex);
 

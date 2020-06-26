@@ -17,7 +17,7 @@ namespace UniVox.Framework
 
         void Initialise();
 
-        bool TrySetVoxel(Vector3 worldPos, VoxelTypeID voxelTypeID, bool overrideExisting = false);
+        bool TrySetVoxel(Vector3 worldPos, VoxelTypeID voxelTypeID,VoxelRotation voxelRotation = default, bool overrideExisting = false);
         bool TryGetVoxel(Vector3 worldPos,out VoxelTypeID voxelTypeID);
         bool TryGetVoxel(Vector3Int chunkID, Vector3Int localVoxelIndex, out VoxelTypeID voxelTypeID);
         ReadOnlyChunkData GetReadOnlyChunkData(Vector3Int chunkID);

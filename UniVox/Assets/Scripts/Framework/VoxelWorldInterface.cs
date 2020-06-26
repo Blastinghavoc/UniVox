@@ -22,19 +22,37 @@ namespace UniVox.Framework
             this.voxelTypeManager = voxelTypeManager;
         }
 
-        public void PlaceVoxel(Vector3 position, VoxelTypeID voxelTypeID)
+        public void PlaceVoxel(Vector3 position, SOVoxelTypeDefinition voxelType,VoxelRotation rotation = default)
         {
-            chunkManager.TrySetVoxel(position, voxelTypeID);
-        }
+            if (voxelType.rotationConfiguration == null)
+            {
+                if (rotation.x != 0 || rotation.y != 0 || rotation.z != 0)
+                {
+                    return;//Cannot place non-rotable voxel with a rotation value
+                }
+                else
+                {
+                    chunkManager.TrySetVoxel(position, voxelTypeManager.GetId(voxelType));
+                }
+            }
+            else
+            {
+                if (voxelType.rotationConfiguration.RotationValid(rotation))
+                {
+                    Debug.Log($"Placed voxel {voxelType.DisplayName} with rotation x:{rotation.x}, y:{rotation.y}, z{rotation.z}");
 
-        public void PlaceVoxel(Vector3 position, SOVoxelTypeDefinition voxelType)
-        {
-            chunkManager.TrySetVoxel(position, voxelTypeManager.GetId(voxelType));
+                    chunkManager.TrySetVoxel(position, voxelTypeManager.GetId(voxelType),rotation);
+                }
+                else
+                {
+                    Debug.Log($"Failed to place voxel {voxelType.DisplayName} because the rotation was not valid");
+                }
+            }
         }
 
         public void RemoveVoxel(Vector3 position)
         {
-            chunkManager.TrySetVoxel(position, (VoxelTypeID)VoxelTypeManager.AIR_ID, true);
+            chunkManager.TrySetVoxel(position, (VoxelTypeID)VoxelTypeManager.AIR_ID,default, true);
         }
 
         public Vector3 CenterOfVoxelAt(Vector3 position)

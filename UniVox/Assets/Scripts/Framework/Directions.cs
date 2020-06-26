@@ -14,6 +14,16 @@ namespace UniVox.Framework
 
         public const byte NumDirections = 6;
 
+        public static readonly byte[] Array = new byte[]
+        {
+            UP,
+            DOWN,
+            NORTH,
+            SOUTH,
+            EAST,
+            WEST
+        };
+
         public static readonly Vector3[] Vectors = new Vector3[]{
         Vector3.up,
         Vector3.down,

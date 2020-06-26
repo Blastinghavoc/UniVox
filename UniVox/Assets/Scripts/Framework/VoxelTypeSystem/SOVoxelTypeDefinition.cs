@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using System.Collections;
-using Unity.Mathematics;
 
 namespace UniVox.Framework
 {
@@ -13,5 +12,6 @@ namespace UniVox.Framework
         public Material material;
         //Can the voxel type be moved through (examples where true would include liquids and decorative plants)
         public bool isPassable;
+        public SORotationConfiguration rotationConfiguration = null;
     }
 }

@@ -93,6 +93,7 @@ namespace UniVox.Framework.Jobified
         [ReadOnly] private const int numDirections = Directions.NumDirections;
 
         [ReadOnly] public NativeArray<VoxelTypeID> voxels;
+        public NativeArray<RotatedVoxelEntry> rotatedVoxels;
 
         [ReadOnly] public NeighbourData neighbourData;
 
@@ -100,8 +101,7 @@ namespace UniVox.Framework.Jobified
 
         [ReadOnly] public NativeVoxelTypeDatabase voxelTypeDatabase;
 
-        [ReadOnly] public NativeArray<int3> DirectionVectors;
-        [ReadOnly] public NativeArray<byte> DirectionOpposites;
+        [ReadOnly] public NativeDirectionHelper directionHelper;
 
         //Outputs
         public NativeList<Vector3> vertices;
@@ -123,10 +123,27 @@ namespace UniVox.Framework.Jobified
         {
             public int3 position;
             public ushort typeID;
+            public bool rotated;
+            public VoxelRotation rotation;
+        }
+
+        private struct RotatedVoxelComparer : IComparer<RotatedVoxelEntry>
+        {
+            public int Compare(RotatedVoxelEntry x, RotatedVoxelEntry y)
+            {
+                return x.flatIndex.CompareTo(y.flatIndex);
+            }
         }
 
         public void Execute()
         {
+            //Sort the rotated voxels so that they are in the order of iteration
+            if (rotatedVoxels.Length > 0)
+            {
+                rotatedVoxels.Sort(new RotatedVoxelComparer());
+            }
+            int currentRotatedIndex = 0;
+
             int currentIndex = 0;//Current index for indices list
 
             var nonCollidable = new NativeList<DoLater>(Allocator.Temp);
@@ -144,14 +161,28 @@ namespace UniVox.Framework.Jobified
 
                         if (voxelTypeID != VoxelTypeManager.AIR_ID)
                         {
+                            bool rotated = false;
+                            VoxelRotation rotation = default;
+                            if (rotatedVoxels.Length > 0 && rotatedVoxels[currentRotatedIndex].flatIndex == i)
+                            {
+                                //This voxel is rotated
+                                rotated = true;
+                                rotation = rotatedVoxels[currentRotatedIndex].rotation;
+                                AdvanceRotatedIndex(ref currentRotatedIndex);
+                            }
+
                             if (voxelTypeDatabase.voxelTypeToIsPassableMap[voxelTypeID])
                             {
                                 //Save non-collidable voxels for later, so that they appear contiguously in the mesh arrays
-                                nonCollidable.Add(new DoLater() { position = new int3(x, y, z),typeID = voxelTypeID });
+                                nonCollidable.Add(new DoLater() { position = new int3(x, y, z),
+                                    typeID = voxelTypeID,
+                                    rotated = rotated,
+                                    rotation = rotation
+                                });
                             }
                             else
                             {
-                                AddMeshDataForVoxel(voxelTypeID, new int3(x, y, z), ref currentIndex);
+                                AddMeshDataForVoxel(voxelTypeID, new int3(x, y, z), ref currentIndex,rotated,rotation);
                             }
                         }
 
@@ -171,14 +202,23 @@ namespace UniVox.Framework.Jobified
             for (int j = 0; j < nonCollidable.Length; j++)
             {
                 var item = nonCollidable[j];
-                AddMeshDataForVoxel(item.typeID, item.position, ref currentIndex);
+                AddMeshDataForVoxel(item.typeID, item.position, ref currentIndex,item.rotated,item.rotation);
             }
 
             currentRun.range.end = allTriangleIndices.Length;
             materialRuns.Add(currentRun);
         }
 
-        private void AddMeshDataForVoxel(ushort id, int3 position, ref int currentIndex)
+        private void AdvanceRotatedIndex(ref int currentRotatedIndex) 
+        {
+            var nextIndex = currentRotatedIndex + 1;
+            if (nextIndex < rotatedVoxels.Length)
+            {
+                currentRotatedIndex = nextIndex;
+            }
+        }
+
+        private void AddMeshDataForVoxel(ushort id, int3 position, ref int currentIndex,bool rotated,VoxelRotation rotation)
         {
             var meshID = meshDatabase.voxelTypeToMeshTypeMap[id];
             var faceZRange = voxelTypeDatabase.voxelTypeToZIndicesRangeMap[id];
@@ -195,15 +235,68 @@ namespace UniVox.Framework.Jobified
                 currentRun.range.start = allTriangleIndices.Length;
             }
 
-            //Add single voxel's data
-            for (int dir = 0; dir < numDirections; dir++)
+            
+            if (rotated)
             {
-                var faceIsSolid = meshDatabase.isFaceSolid[meshRange.start + dir];
-                if (IncludeFace(id,position, dir,faceIsSolid))
+                //Add single rotated voxels data
+                for (byte dir = 0; dir < numDirections; dir++)
                 {
-                    AddFace(meshID, voxelTypeDatabase.zIndicesPerFace[faceZRange.start + dir], dir, position, ref currentIndex);
+                    var rotatedDirection = directionHelper.GetDirectionAfterRotation(dir, rotation);
+                    var faceIsSolid = meshDatabase.isFaceSolid[meshRange.start + rotatedDirection];
+                    if (IncludeFace(id, position, rotatedDirection, faceIsSolid))
+                    {
+                        AddFaceRotated(meshID, voxelTypeDatabase.zIndicesPerFace[faceZRange.start + dir], dir, position, ref currentIndex,rotation);
+                    }
                 }
             }
+            else
+            {
+                //Add single voxel's data
+                for (int dir = 0; dir < numDirections; dir++)
+                {
+                    var faceIsSolid = meshDatabase.isFaceSolid[meshRange.start + dir];
+                    if (IncludeFace(id,position, dir,faceIsSolid))
+                    {
+                        AddFace(meshID, voxelTypeDatabase.zIndicesPerFace[faceZRange.start + dir], dir, position, ref currentIndex);
+                    }
+                }
+            }
+        }
+
+        private void AddFaceRotated(int meshID, float uvZ, int direction, int3 position, ref int currentIndex, VoxelRotation rotation) 
+        {
+            var meshRange = meshDatabase.meshTypeRanges[meshID];
+
+            var usedNodesSlice = meshDatabase.nodesUsedByFaces[meshRange.start + direction];
+
+            var rotationQuat = directionHelper.GetRotationQuat(rotation);
+
+            //NOTE vertex definitions start from 0,0,0 in the bottom left of the cube, so an offset is needed for rotations
+            float3 rotationOffset = new float3(.5f, .5f, .5f);
+
+            //Add all the nodes used by this face
+            for (int i = usedNodesSlice.start; i < usedNodesSlice.end; i++)
+            {
+                var node = meshDatabase.allMeshNodes[i];
+                var rotatedVert = math.mul(rotationQuat, node.vertex-rotationOffset)+rotationOffset;
+                var adjustedVert = rotatedVert + position;
+                vertices.Add(adjustedVert);
+                uvs.Add(new float3(node.uv, uvZ));
+                var adjustedNorm = math.mul(rotationQuat, node.normal);
+                normals.Add(adjustedNorm);
+            }
+
+            //Add the triangleIndices used by this face
+
+            var relativeTrianglesSlice = meshDatabase.relativeTrianglesByFaces[meshRange.start + direction];
+
+            for (int i = relativeTrianglesSlice.start; i < relativeTrianglesSlice.end; i++)
+            {
+                allTriangleIndices.Add(meshDatabase.allRelativeTriangles[i] + currentIndex);
+            }
+
+            //Update indexing
+            currentIndex += usedNodesSlice.end - usedNodesSlice.start;
         }
 
         private void AddFace(int meshID, float uvZ, int direction, int3 position, ref int currentIndex)
@@ -240,7 +333,7 @@ namespace UniVox.Framework.Jobified
             {
                 return true;
             }
-            var directionVector = DirectionVectors[directionIndex];
+            var directionVector = directionHelper.DirectionVectors[directionIndex];
             var adjacentVoxelIndex = position + directionVector;
 
             if (TryGetVoxelAt(adjacentVoxelIndex, out var adjacentID))
@@ -285,7 +378,7 @@ namespace UniVox.Framework.Jobified
             }
             var meshID = meshDatabase.voxelTypeToMeshTypeMap[voxelTypeID];
             var meshRange = meshDatabase.meshTypeRanges[meshID];
-            var faceIsSolid = meshDatabase.isFaceSolid[meshRange.start + DirectionOpposites[direction]];
+            var faceIsSolid = meshDatabase.isFaceSolid[meshRange.start + directionHelper.DirectionOpposites[direction]];
 
             //Exclude this face if adjacent face is solid
             return !faceIsSolid;

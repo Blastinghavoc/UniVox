@@ -25,8 +25,7 @@ namespace UniVox.Framework
         /// <summary>
         /// Data to support mesh jobs
         /// </summary>
-        protected NativeArray<int3> directionVectors;
-        protected NativeArray<byte> directionOpposites;
+        protected NativeDirectionHelper directionHelper;
         private bool disposed = false;
 
         public virtual void Initialise(VoxelTypeManager voxelTypeManager, IChunkManager chunkManager)
@@ -34,22 +33,14 @@ namespace UniVox.Framework
             this.voxelTypeManager = voxelTypeManager;
             this.chunkManager = chunkManager;
 
-            directionVectors = new NativeArray<int3>(Directions.NumDirections, Allocator.Persistent);
-            for (int i = 0; i < Directions.NumDirections; i++)
-            {
-                var vec = Directions.IntVectors[i];
-                directionVectors[i] = vec.ToBurstable();
-            }
-
-            directionOpposites = new NativeArray<byte>(Directions.Oposite, Allocator.Persistent);
+            directionHelper = DirectionHelperExtensions.Create();
         }
 
         public void Dispose() 
         {
             if (!disposed)
             {
-                directionVectors.SmartDispose();
-                directionOpposites.SmartDispose();
+                directionHelper.Dispose();
                 disposed = true;
             }
         }
@@ -77,6 +68,7 @@ namespace UniVox.Framework
             Profiler.EndSample();
 
             meshingWrapper.job.voxels = voxels;
+            meshingWrapper.job.rotatedVoxels = chunkData.NativeRotations();
 
             NeighbourData neighbourData = new NeighbourData();
             //Cache neighbour data if necessary
@@ -104,8 +96,7 @@ namespace UniVox.Framework
 
             meshingWrapper.job.meshDatabase = voxelTypeManager.nativeMeshDatabase;
             meshingWrapper.job.voxelTypeDatabase = voxelTypeManager.nativeVoxelTypeDatabase;
-            meshingWrapper.job.DirectionVectors = directionVectors;
-            meshingWrapper.job.DirectionOpposites = directionOpposites;
+            meshingWrapper.job.directionHelper = directionHelper;
 
             meshingWrapper.job.vertices = new NativeList<Vector3>(Allocator.Persistent);
             meshingWrapper.job.uvs = new NativeList<Vector3>(Allocator.Persistent);
@@ -169,6 +160,7 @@ namespace UniVox.Framework
                 meshingWrapper.job.materialRuns.Dispose();
 
                 meshingWrapper.job.voxels.Dispose();
+                meshingWrapper.job.rotatedVoxels.Dispose();
                 meshingWrapper.job.neighbourData.Dispose();
 
                 meshingWrapper.job.collisionMeshLengthVertices.Dispose();

@@ -24,13 +24,13 @@ namespace UniVox.Framework
         /// Store flattended indices of voxels that have a non-default rotation.
         /// Efficient only under the assumption that there are relatively few such voxels in the chunk
         /// </summary>
-        protected Dictionary<int, VoxelRotation> rotatedVoxels;
+        protected Dictionary<int, RotatedVoxelEntry> rotatedVoxels;
 
         public AbstractChunkData(Vector3Int ID, Vector3Int chunkDimensions, VoxelTypeID[] initialData = null)
         {
             ChunkID = ID;
             Dimensions = chunkDimensions;
-            rotatedVoxels = new Dictionary<int, VoxelRotation>();
+            rotatedVoxels = new Dictionary<int, RotatedVoxelEntry>();
             if (initialData != null)
             {
                 var expectedLength = chunkDimensions.x * chunkDimensions.y * chunkDimensions.z;
@@ -96,11 +96,25 @@ namespace UniVox.Framework
             return this.ToNativeBruteForce(allocator);
         }
 
-        public NativeArray<KeyValuePair<int, VoxelRotation>> NativeRotations(Allocator allocator = Allocator.Persistent) 
+        public NativeArray<RotatedVoxelEntry> NativeRotations(Allocator allocator = Allocator.Persistent) 
         {
             //This conversion from dictionary to array is only efficient under the assumption that there will be few rotated voxels per chunk
-            NativeArray<KeyValuePair<int, VoxelRotation>> rotations = new NativeArray<KeyValuePair<int, VoxelRotation>>(rotatedVoxels.ToList().ToArray(),allocator);
+            NativeArray<RotatedVoxelEntry> rotations = new NativeArray<RotatedVoxelEntry>(rotatedVoxels.Values.ToArray(),allocator);
             return rotations;
+        }
+
+        public void SetRotation(Vector3Int coords, VoxelRotation rotation)
+        {
+            var (x, y, z) = coords;
+            var flat = Utils.Helpers.MultiIndexToFlat(x, y, z, Dimensions);
+            if (rotation.isBlank)
+            {
+                rotatedVoxels.Remove(flat);
+            }
+            else
+            {
+                rotatedVoxels[flat] = new RotatedVoxelEntry() { flatIndex = flat, rotation = rotation } ;
+            }
         }
         #endregion
     }

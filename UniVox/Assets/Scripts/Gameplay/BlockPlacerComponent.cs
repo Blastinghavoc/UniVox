@@ -16,6 +16,13 @@ namespace UniVox.Gameplay
         public GameObject IndicatorPrefab;
         public SOVoxelTypeDefinition blockToPlace;
 
+        [Range(0,3)]
+        public int rotationX;
+        [Range(0, 3)]
+        public int rotationY;
+        [Range(0, 3)]
+        public int rotationZ;
+
         private VoxelWorldInterface WorldInterface;
         private GameObject Indicator;
 
@@ -69,7 +76,8 @@ namespace UniVox.Gameplay
             {
                 if (hitAnything)
                 {
-                    WorldInterface.PlaceVoxel(raycastHit.point + 0.1f * raycastHit.normal, blockToPlace);
+                    WorldInterface.PlaceVoxel(raycastHit.point + 0.1f * raycastHit.normal, blockToPlace,
+                        new VoxelRotation() { x=rotationX,y = rotationY,z=rotationZ});
                 }
             }
 

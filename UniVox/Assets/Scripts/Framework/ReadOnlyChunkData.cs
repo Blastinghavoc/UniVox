@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using Unity.Collections;
+using System.Collections.Generic;
 
 namespace UniVox.Framework
 {
@@ -20,6 +21,16 @@ namespace UniVox.Framework
         public Vector3Int Dimensions { get => realData.Dimensions; set => throw new System.NotImplementedException(); }
         public bool ModifiedSinceGeneration { get => realData.ModifiedSinceGeneration; set => throw new System.NotImplementedException(); }
         public bool FullyGenerated { get => realData.FullyGenerated; set => throw new System.NotImplementedException(); }
+
+        public NativeArray<RotatedVoxelEntry> NativeRotations(Allocator allocator = Allocator.Persistent)
+        {
+            return realData.NativeRotations(allocator);
+        }
+
+        public void SetRotation(Vector3Int coords, VoxelRotation rotation)
+        {
+            realData.SetRotation(coords, rotation);
+        }
 
         public NativeArray<VoxelTypeID> ToNative(Allocator allocator = Allocator.Persistent)
         {
