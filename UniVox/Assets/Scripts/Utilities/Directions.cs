@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-namespace UniVox.Framework
+namespace Utils
 {
     public static class Directions
     {

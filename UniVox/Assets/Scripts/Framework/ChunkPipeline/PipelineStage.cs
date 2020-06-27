@@ -12,6 +12,11 @@ namespace UniVox.Framework.ChunkPipeline
 
         public int Count { get => chunkIdsInStage.Count; }
 
+        /// <summary>
+        /// Externally assignable function to determine whether this stage should accept a given chunk id
+        /// </summary>
+        public Func<Vector3Int, bool> FreeFor;
+
         #region Lists populated after each update that may be of interest to external code
         /// <summary>
         /// Note that these are only valid after Update has been called each frame.
@@ -37,6 +42,8 @@ namespace UniVox.Framework.ChunkPipeline
             MovingOnThisUpdate = new List<Vector3Int>();
             TerminatingThisUpdate = new List<Vector3Int>();
             GoingBackwardsThisUpdate = new List<Vector3Int>();
+            //By default, a stage is free for some id if it does not already contain it
+            FreeFor = (id) => !Contains(id);
         }
 
         public PipelineStage(string name, int order, Func<Vector3Int, int, bool> nextStageCondition) : this(name, order)

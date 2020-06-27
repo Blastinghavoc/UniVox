@@ -66,7 +66,7 @@ namespace Tests
                 return new ArrayChunkData(chunkID, new Vector3Int(1, 1, 1));
             }
 
-            public AbstractPipelineJob<IChunkData> ProvideChunkDataJob(Vector3Int chunkID)
+            public AbstractPipelineJob<IChunkData> ProvideTerrainData(Vector3Int chunkID)
             {
                 return new BasicFunctionJob<IChunkData>(() => ProvideChunkData(chunkID));
             }
@@ -208,9 +208,9 @@ namespace Tests
             pipeline.Update();
 
             //Chunk gets stuck at the Data stage, as it has to wait for dependencies
-            Assert.AreEqual(pipeline.DataStage, pipeline.GetMaxStage(testChunkID));
+            Assert.AreEqual(pipeline.AllDataStage, pipeline.GetMaxStage(testChunkID));
             Assert.AreEqual(pipeline.CompleteStage, pipeline.GetTargetStage(testChunkID));
-            Assert.AreEqual(pipeline.DataStage, pipeline.GetMinStage(testChunkID));
+            Assert.AreEqual(pipeline.AllDataStage, pipeline.GetMinStage(testChunkID));
 
             //Second update allows data to be generated for neighbours
             pipeline.Update();
@@ -294,14 +294,14 @@ namespace Tests
             Assert.AreEqual(pipeline.RenderedStage, pipeline.GetMinStage(testChunkID));
 
             //Cause there to be work in progress
-            pipeline.ReenterAtStage(testChunkID, pipeline.DataStage);
+            pipeline.ReenterAtStage(testChunkID, pipeline.AllDataStage);
             //Update the target
             pipeline.SetTarget(testChunkID, pipeline.CompleteStage);
 
             //New target should be CompleteStage, min stage should be DataStage
             Assert.AreEqual(pipeline.RenderedStage, pipeline.GetMaxStage(testChunkID));
             Assert.AreEqual(pipeline.CompleteStage, pipeline.GetTargetStage(testChunkID));
-            Assert.AreEqual(pipeline.DataStage, pipeline.GetMinStage(testChunkID));
+            Assert.AreEqual(pipeline.AllDataStage, pipeline.GetMinStage(testChunkID));
 
             pipeline.Update();
 
@@ -339,15 +339,15 @@ namespace Tests
             Assert.AreEqual(pipeline.RenderedStage, pipeline.GetMinStage(testChunkID));
 
             //Set target lower than the current target, and lower than the current max stage
-            pipeline.SetTarget(testChunkID, pipeline.DataStage);
+            pipeline.SetTarget(testChunkID, pipeline.AllDataStage);
 
             //Render mesh should have been removed
             Assert.IsNull(mockComponentStorage[testChunkID].RenderMesh);
 
             //Max stage and target should have been decreased, min stage should have decreased to max
-            Assert.AreEqual(pipeline.DataStage, pipeline.GetMaxStage(testChunkID));
-            Assert.AreEqual(pipeline.DataStage, pipeline.GetTargetStage(testChunkID));
-            Assert.AreEqual(pipeline.DataStage, pipeline.GetMinStage(testChunkID));
+            Assert.AreEqual(pipeline.AllDataStage, pipeline.GetMaxStage(testChunkID));
+            Assert.AreEqual(pipeline.AllDataStage, pipeline.GetTargetStage(testChunkID));
+            Assert.AreEqual(pipeline.AllDataStage, pipeline.GetMinStage(testChunkID));
 
         }
 
@@ -367,24 +367,24 @@ namespace Tests
 
             var testChunkID = new Vector3Int(0, 0, 0);
 
-            mockCreateNewChunkWithTarget(testChunkID, pipeline.DataStage);
+            mockCreateNewChunkWithTarget(testChunkID, pipeline.AllDataStage);
 
             pipeline.Update();
 
             //Increase target
             pipeline.SetTarget(testChunkID, pipeline.CompleteStage);
 
-            Assert.AreEqual(pipeline.DataStage, pipeline.GetMaxStage(testChunkID));
+            Assert.AreEqual(pipeline.AllDataStage, pipeline.GetMaxStage(testChunkID));
             Assert.AreEqual(pipeline.CompleteStage, pipeline.GetTargetStage(testChunkID));
-            Assert.AreEqual(pipeline.DataStage, pipeline.GetMinStage(testChunkID));
+            Assert.AreEqual(pipeline.AllDataStage, pipeline.GetMinStage(testChunkID));
 
             //Set target lower than the current target, but higher than the current max stage
             pipeline.SetTarget(testChunkID, pipeline.RenderedStage);
 
             //Check only target changed
-            Assert.AreEqual(pipeline.DataStage, pipeline.GetMaxStage(testChunkID));
+            Assert.AreEqual(pipeline.AllDataStage, pipeline.GetMaxStage(testChunkID));
             Assert.AreEqual(pipeline.RenderedStage, pipeline.GetTargetStage(testChunkID));
-            Assert.AreEqual(pipeline.DataStage, pipeline.GetMinStage(testChunkID));
+            Assert.AreEqual(pipeline.AllDataStage, pipeline.GetMinStage(testChunkID));
 
             pipeline.Update();
 
@@ -498,10 +498,10 @@ namespace Tests
             pipeline.Update();
 
             //cid 0 should get to waiting for neighbours
-            AssertChunkStages(zeroId, pipeline.DataStage, pipeline.DataStage, pipeline.CompleteStage);
+            AssertChunkStages(zeroId, pipeline.AllDataStage, pipeline.AllDataStage, pipeline.CompleteStage);
 
             //The test id should have been added to the start stage as it is a neighbour of cid 0
-            AssertChunkStages(testId, 0, 0, pipeline.DataStage);
+            AssertChunkStages(testId, 0, 0, pipeline.AllDataStage);
 
             //Update the target of some of the other neighbours
             pipeline.SetTarget(new Vector3Int(0, 1, 0), pipeline.CompleteStage);
@@ -521,7 +521,7 @@ namespace Tests
             pipeline.Update();
 
             //the test id should be scheduled for mesh
-            AssertChunkStages(testId, pipeline.DataStage + 1, pipeline.DataStage + 1, pipeline.CompleteStage);
+            AssertChunkStages(testId, pipeline.AllDataStage + 1, pipeline.AllDataStage + 1, pipeline.CompleteStage);
 
             //Remove the test id
             mockRemoveChunk(testId);
@@ -532,12 +532,12 @@ namespace Tests
                   "Should throw exception when trying to get max stage of a chunk that was removed from the pipeline");
 
             //Add it back with a lower priority
-            mockCreateNewChunkWithTarget(testId, pipeline.DataStage);
+            mockCreateNewChunkWithTarget(testId, pipeline.AllDataStage);
 
             pipeline.Update();
 
             //test id should be back in the data stage
-            AssertChunkStages(testId, pipeline.DataStage, pipeline.DataStage, pipeline.DataStage);
+            AssertChunkStages(testId, pipeline.AllDataStage, pipeline.AllDataStage, pipeline.AllDataStage);
 
         }
 
@@ -563,10 +563,10 @@ namespace Tests
             pipeline.Update();
 
             //cid 0 should get to waiting for neighbours
-            AssertChunkStages(zeroId, pipeline.DataStage, pipeline.DataStage, pipeline.CompleteStage);
+            AssertChunkStages(zeroId, pipeline.AllDataStage, pipeline.AllDataStage, pipeline.CompleteStage);
 
             //The test id should have been added to the start stage as it is a neighbour of cid 0
-            AssertChunkStages(testId, 0, 0, pipeline.DataStage);
+            AssertChunkStages(testId, 0, 0, pipeline.AllDataStage);
 
             //Update the target of some of the other neighbours
             pipeline.SetTarget(new Vector3Int(0, 1, 0), pipeline.CompleteStage);
@@ -585,7 +585,7 @@ namespace Tests
             pipeline.Update();
 
             //the test id should be scheduled for mesh
-            AssertChunkStages(testId, pipeline.DataStage +1, pipeline.DataStage + 1, pipeline.CompleteStage);
+            AssertChunkStages(testId, pipeline.AllDataStage +1, pipeline.AllDataStage + 1, pipeline.CompleteStage);
 
             //Remove one of the test id's neighbours
             mockRemoveChunk(zeroId);
@@ -593,7 +593,7 @@ namespace Tests
             pipeline.Update();
 
             //test id should be back in the waiting for neighbour data stage
-            AssertChunkStages(testId, pipeline.DataStage, pipeline.DataStage, pipeline.CompleteStage);
+            AssertChunkStages(testId, pipeline.AllDataStage, pipeline.AllDataStage, pipeline.CompleteStage);
 
         }
 
@@ -620,10 +620,10 @@ namespace Tests
             pipeline.Update();
 
             //zeroId should get to waiting for neighbours
-            AssertChunkStages(zeroId, pipeline.DataStage, pipeline.DataStage, pipeline.CompleteStage);
+            AssertChunkStages(zeroId, pipeline.AllDataStage, pipeline.AllDataStage, pipeline.CompleteStage);
 
             //The test id should have been added to the start stage as it is a neighbour of cid 0
-            AssertChunkStages(testId, 0, 0, pipeline.DataStage);
+            AssertChunkStages(testId, 0, 0, pipeline.AllDataStage);
 
             //Update the target of some of the other neighbours
             pipeline.SetTarget(new Vector3Int(0, 1001, 0), pipeline.CompleteStage);
@@ -642,7 +642,7 @@ namespace Tests
             pipeline.Update();
 
             //the test id should be scheduled for mesh
-            AssertChunkStages(testId, pipeline.DataStage + 1, pipeline.DataStage + 1, pipeline.CompleteStage);
+            AssertChunkStages(testId, pipeline.AllDataStage + 1, pipeline.AllDataStage + 1, pipeline.CompleteStage);
 
             //Remove one of the test id's neighbours
             mockRemoveChunk(zeroId);
@@ -652,7 +652,7 @@ namespace Tests
             //Add loads of other chunks (with higher priority) to prevent the target getting back to the data stage
             for (int i = 0; i <= maxData; i++)
             {
-                mockCreateNewChunkWithTarget(new Vector3Int(0, 0, i), pipeline.DataStage);
+                mockCreateNewChunkWithTarget(new Vector3Int(0, 0, i), pipeline.AllDataStage);
             }
 
             //Add the test id back

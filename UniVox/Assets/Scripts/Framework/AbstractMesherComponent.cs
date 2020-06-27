@@ -7,6 +7,7 @@ using UnityEngine;
 using UnityEngine.Profiling;
 using UniVox.Framework.ChunkPipeline.VirtualJobs;
 using UniVox.Framework.Jobified;
+using Utils;
 using TypeData = UniVox.Framework.VoxelTypeManager.VoxelTypeData;
 
 namespace UniVox.Framework

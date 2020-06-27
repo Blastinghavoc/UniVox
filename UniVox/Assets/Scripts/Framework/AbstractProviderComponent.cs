@@ -35,7 +35,7 @@ namespace UniVox.Framework
             ModifiedChunkData[chunkID] = data;
         }
 
-        public AbstractPipelineJob<IChunkData> ProvideChunkDataJob(Vector3Int chunkID) 
+        public AbstractPipelineJob<IChunkData> ProvideTerrainData(Vector3Int chunkID) 
         {
             if (ModifiedChunkData.TryGetValue(chunkID, out var data))
             {

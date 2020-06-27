@@ -7,6 +7,7 @@ using UnityEngine.Assertions;
 using UnityEngine.Profiling;
 using UniVox.Framework;
 using UniVox.Framework.ChunkPipeline;
+using Utils;
 using Utils.Pooling;
 
 public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
@@ -42,16 +43,24 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
 
 
     /// <summary>
-    /// Controls how many chunks can be generated and meshed per update
+    /// Controls how many chunks can be generated per update
     /// </summary>
     [Range(1, 100)]
     [SerializeField] protected ushort MaxGeneratedPerUpdate = 1;
 
+    [SerializeField] protected bool GenerateStructures = false;
     /// <summary>
-    /// Controls how many chunks can be generated and meshed per update
+    /// Controls how many chunks can have their structures generated per update
+    /// </summary>
+    [Range(1, 100)]
+    [SerializeField] protected ushort MaxStructurePerUpdate = 1;
+
+    /// <summary>
+    /// Controls how many chunks can be meshed per update
     /// </summary>
     [Range(1, 100)]
     [SerializeField] protected ushort MaxMeshedPerUpdate = 1;
+
     #endregion
 
 
@@ -107,7 +116,9 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
             GetPriorityOfChunk,
             MaxGeneratedPerUpdate,
             MaxMeshedPerUpdate,
-            MaxMeshedPerUpdate);
+            MaxMeshedPerUpdate,
+            GenerateStructures,
+            MaxStructurePerUpdate);
 
         Player.position = new Vector3(5, 17, 5);
         Player.velocity = Vector3.zero;
@@ -198,7 +209,7 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
                     }
                     else
                     {
-                        SetTargetStageOfChunk(chunkID, pipeline.DataStage);//Request that this chunk should be just data
+                        SetTargetStageOfChunk(chunkID, pipeline.AllDataStage);//Request that this chunk should be just data
                     }
 
                 }
@@ -268,7 +279,7 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
             if (chunkID.y == MaxChunkY + 1 || chunkID.y == MinChunkY - 1)
             {
                 //Chunks 1 chunk outside the vertical range may only be data chunks.
-                targetStage = pipeline.DataStage;
+                targetStage = pipeline.AllDataStage;
             }
             else
             {
@@ -364,7 +375,7 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
                     if (pipeline.GetTargetStage(neighbourChunkID) >= pipeline.RenderedStage)
                     {
                         //The neighbour chunk will need remeshing
-                        RedoChunkFromStage(neighbourChunkID, pipeline.DataStage);
+                        RedoChunkFromStage(neighbourChunkID, pipeline.AllDataStage);
                     }
                 }
             }
@@ -373,7 +384,7 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
         if (pipeline.GetTargetStage(chunkID) >= pipeline.RenderedStage)
         {
             //The chunk that changed will need remeshing if its target stage has a mesh
-            RedoChunkFromStage(chunkID, pipeline.DataStage);
+            RedoChunkFromStage(chunkID, pipeline.AllDataStage);
         }
     }
 

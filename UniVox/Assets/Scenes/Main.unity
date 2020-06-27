@@ -304,32 +304,42 @@ PrefabInstance:
     - target: {fileID: 4363647225878257416, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
       propertyPath: Parrallel
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4444681113471702657, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
       propertyPath: MaxMeshedPerUpdate
-      value: 1
+      value: 12
       objectReference: {fileID: 0}
     - target: {fileID: 4444681113471702657, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
       propertyPath: MaxGeneratedPerUpdate
-      value: 2
+      value: 24
       objectReference: {fileID: 0}
     - target: {fileID: 4444681113471702657, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
       propertyPath: renderedChunksRadii.x
-      value: 1
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 4444681113471702657, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
       propertyPath: renderedChunksRadii.z
-      value: 1
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 4444681113471702657, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
       propertyPath: renderedChunksRadii.y
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 4444681113471702657, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: GenerateStructures
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4444681113471702657, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: MaxStructurePerUpdate
+      value: 24
       objectReference: {fileID: 0}
     - target: {fileID: 5807090801606666973, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}

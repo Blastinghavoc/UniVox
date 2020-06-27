@@ -9,8 +9,13 @@ namespace UniVox.Framework
         ///Stores modified chunk data
         void StoreModifiedChunkData(Vector3Int chunkID, IChunkData data);
 
-        ///Returns a pipeline job that provides chunk data.
-        AbstractPipelineJob<IChunkData> ProvideChunkDataJob(Vector3Int chunkID);
+        ///Returns a pipeline job that provides terrain data for a chunk.
+        ///This means everything except structures, i.e anything that can be done
+        ///without access to neighbouring chunks.
+        AbstractPipelineJob<IChunkData> ProvideTerrainData(Vector3Int chunkID);
+
+
+
         void Initialise(VoxelTypeManager voxelTypeManager, IChunkManager chunkManager);
     }
 }
