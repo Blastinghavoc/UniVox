@@ -188,16 +188,31 @@ PrefabInstance:
       objectReference: {fileID: 18352215}
     - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
       propertyPath: Parrallel
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
       propertyPath: worldSettings.MakeCaves
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
+      propertyPath: structureGenerator.logType
+      value: 
+      objectReference: {fileID: 11400000, guid: 2269b894a3c39474f93f612313029305,
+        type: 2}
+    - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
+      propertyPath: structureGenerator.leafType
+      value: 
+      objectReference: {fileID: 11400000, guid: e65f9d668c841884c8fdd21948ede172,
+        type: 2}
+    - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
+      propertyPath: structureGenerator.oceanDefinition
+      value: 
+      objectReference: {fileID: 11400000, guid: bc7732a614701f04ca9c506c02132cc4,
+        type: 2}
     - target: {fileID: 398304577423018871, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
       propertyPath: VoxelTypes.Array.size
-      value: 10
+      value: 11
       objectReference: {fileID: 0}
     - target: {fileID: 398304577423018871, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
@@ -215,7 +230,8 @@ PrefabInstance:
         type: 3}
       propertyPath: VoxelTypes.Array.data[10]
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 11400000, guid: e65f9d668c841884c8fdd21948ede172,
+        type: 2}
     - target: {fileID: 398304577439083000, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -304,17 +320,17 @@ PrefabInstance:
     - target: {fileID: 4363647225878257416, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
       propertyPath: Parrallel
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4444681113471702657, guid: 579d24a84d9385447b0eb6819a968722,
-        type: 3}
-      propertyPath: MaxMeshedPerUpdate
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4444681113471702657, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
+      propertyPath: MaxMeshedPerUpdate
+      value: 12
+      objectReference: {fileID: 0}
+    - target: {fileID: 4444681113471702657, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
       propertyPath: MaxGeneratedPerUpdate
-      value: 2
+      value: 24
       objectReference: {fileID: 0}
     - target: {fileID: 4444681113471702657, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
@@ -339,7 +355,7 @@ PrefabInstance:
     - target: {fileID: 4444681113471702657, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
       propertyPath: MaxStructurePerUpdate
-      value: 2
+      value: 24
       objectReference: {fileID: 0}
     - target: {fileID: 5807090801606666973, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}

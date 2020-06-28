@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Profiling;
 using UniVox.Framework.ChunkPipeline.VirtualJobs;
+using UniVox.Framework.Jobified;
 using UniVox.Implementations.ChunkData;
 
 namespace UniVox.Framework.ChunkPipeline
@@ -60,6 +61,9 @@ namespace UniVox.Framework.ChunkPipeline
 
             TerrainDataStage = i;
 
+            ///The function to be executed to determine whether a chunk is ready for meshing
+            Func<Vector3Int, int, bool, bool> MeshDependencyFunction = NeighboursPassedStage;
+
             if (structureGen)
             {
                 stages.Add(new PipelineStage("GotTerrainData", i++));
@@ -80,10 +84,11 @@ namespace UniVox.Framework.ChunkPipeline
                 stages.Add(scheduledForStructures);
 
                 //TODO WIP
-                var generatingStructures = new WaitForJobStage<IChunkData>("GeneratingStructures", i++,
+                var generatingStructures = new WaitForJobStage<ChunkNeighbourhood>("GeneratingStructures", i++,
                     TargetStageGreaterThanCurrent,
-                    (_) => new BasicFunctionJob<IChunkData>(() => new EmptyChunkData(Vector3Int.zero, Vector3Int.zero)),
-                    (a, b) => a += a,
+                    (id) => chunkProvider.GenerateStructuresForNeighbourhood(id,
+                        new ChunkNeighbourhood(id,(neighId)=>getChunkComponent(neighId).Data,true)),
+                    (a, b) => { return; },
                     maxStructurePerUpdate
                     );
                 //Generating structures is not free for an ID if it contains that ID or any of its neighbours (to prevent multiple data access)
@@ -91,6 +96,7 @@ namespace UniVox.Framework.ChunkPipeline
                 stages.Add(generatingStructures);
                 scheduledForStructures.UpdateMax = generatingStructures.MaxToEnter;
 
+                MeshDependencyFunction = NeighboursAndDiagonalsPassedStage;
             }
 
 
@@ -105,7 +111,7 @@ namespace UniVox.Framework.ChunkPipeline
                 AllDataStage = i;
                 stages.Add(new WaitingStage("WaitForNeighbourData", i++,
                     ShouldScheduleForNext,
-                    (cId, _) => NeighboursPassedStage(cId, AllDataStage, true)));
+                    (cId, _) => MeshDependencyFunction(cId, AllDataStage, true)));
             }
             else
             {
@@ -122,21 +128,22 @@ namespace UniVox.Framework.ChunkPipeline
             {
                 ///If mesh is dependent on neighbours, check the precondition has not changed
                 ///before a chunk is allowed to go from the ScheduledForMesh stage to GeneratingMesh
-                ScheduledForMesh.Precondition = (cId) => NeighboursPassedStage(cId, AllDataStage);
+                ScheduledForMesh.Precondition = (cId) => MeshDependencyFunction(cId, AllDataStage,false);
             }
             stages.Add(ScheduledForMesh);
 
             var GeneratingMesh = new WaitForJobStage<MeshDescriptor>("GeneratingMesh", i++,
                 TargetStageGreaterThanCurrent,
                 chunkMesher.CreateMeshJob,
-                (cId, meshDescriptor) => getChunkComponent(cId).SetRenderMesh(meshDescriptor), maxMeshPerUpdate);
+                (cId, meshDescriptor) => getChunkComponent(cId).SetRenderMesh(meshDescriptor), 
+                maxMeshPerUpdate);
             stages.Add(GeneratingMesh);
             ScheduledForMesh.UpdateMax = GeneratingMesh.MaxToEnter;
 
             //TODO remove DEBUG
             if (chunkMesher.IsMeshDependentOnNeighbourChunks)
             {
-                GeneratingMesh.PreconditionCheck = (cId) => NeighboursPassedStage(cId, AllDataStage);
+                GeneratingMesh.PreconditionCheck = (cId) => MeshDependencyFunction(cId, AllDataStage,false);
             }
 
 

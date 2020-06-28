@@ -3,6 +3,7 @@ using System.Collections;
 using UniVox.Framework;
 using UniVox.Implementations.ChunkData;
 using UniVox.Framework.ChunkPipeline.VirtualJobs;
+using UniVox.Framework.Jobified;
 
 namespace UniVox.Implementations.Providers
 {
@@ -106,6 +107,11 @@ namespace UniVox.Implementations.Providers
                 }
             }
             return ChunkData;
-        }        
+        }
+
+        public override AbstractPipelineJob<ChunkNeighbourhood> GenerateStructuresForNeighbourhood(Vector3Int centerChunkID, ChunkNeighbourhood neighbourhood)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

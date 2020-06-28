@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UniVox.Framework.ChunkPipeline.VirtualJobs;
+using UniVox.Framework.Jobified;
 
 namespace UniVox.Framework
 {
@@ -14,7 +15,14 @@ namespace UniVox.Framework
         ///without access to neighbouring chunks.
         AbstractPipelineJob<IChunkData> ProvideTerrainData(Vector3Int chunkID);
 
-
+        /// <summary>
+        /// Returns a pipeline job that provides structure data for a chunk id, and may also modifiy
+        /// the data of neighbouring chunks in doing so.
+        /// </summary>
+        /// <param name="centerChunkID"></param>
+        /// <param name="neighbourhood"></param>
+        /// <returns></returns>
+        AbstractPipelineJob<ChunkNeighbourhood> GenerateStructuresForNeighbourhood(Vector3Int centerChunkID,ChunkNeighbourhood neighbourhood);
 
         void Initialise(VoxelTypeManager voxelTypeManager, IChunkManager chunkManager,FrameworkEventManager eventManager);
     }

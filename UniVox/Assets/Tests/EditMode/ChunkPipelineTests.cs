@@ -9,6 +9,7 @@ using UnityEngine.TestTools;
 using UniVox.Framework;
 using UniVox.Framework.ChunkPipeline;
 using UniVox.Framework.ChunkPipeline.VirtualJobs;
+using UniVox.Framework.Jobified;
 using UniVox.Implementations.ChunkData;
 
 namespace Tests
@@ -56,6 +57,11 @@ namespace Tests
 
         class MockProvider : IChunkProvider
         {
+            public AbstractPipelineJob<ChunkNeighbourhood> GenerateStructuresForNeighbourhood(Vector3Int centerChunkID, ChunkNeighbourhood neighbourhood)
+            {
+                throw new NotImplementedException();
+            }
+
             public void Initialise(VoxelTypeManager voxelTypeManager, IChunkManager chunkManager, FrameworkEventManager eventManager)
             {
                 throw new NotImplementedException();
@@ -131,7 +137,7 @@ namespace Tests
         void mockCreateNewChunkWithTarget(Vector3Int id, int target) 
         {
             pipeline.AddChunk(id, target);
-            mockComponentStorage.Add(id,new MockChunkComponent() { ChunkID = id});
+            mockComponentStorage.Add(id, new MockChunkComponent() { ChunkID = id});
         }
 
         void mockRemoveChunk(Vector3Int id) 
@@ -196,7 +202,7 @@ namespace Tests
                mockGetComponent,
                mockCreateNewChunkWithTarget,
                MockGetPriorityOfChunk,
-               6,
+               20,
                1,
                1
                );

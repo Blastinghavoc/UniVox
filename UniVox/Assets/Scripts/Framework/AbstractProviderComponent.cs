@@ -5,6 +5,7 @@ using UniVox.Implementations.ChunkData;
 using UniVox.Framework.ChunkPipeline.VirtualJobs;
 using System;
 using UnityEngine.Profiling;
+using UniVox.Framework.Jobified;
 
 namespace UniVox.Framework
 {
@@ -59,5 +60,7 @@ namespace UniVox.Framework
         /// <param name="chunkDimensions"></param>
         /// <returns></returns>
         public abstract AbstractPipelineJob<IChunkData> GenerateChunkDataJob(Vector3Int chunkID, Vector3Int chunkDimensions);
+
+        public abstract AbstractPipelineJob<ChunkNeighbourhood> GenerateStructuresForNeighbourhood(Vector3Int centerChunkID, ChunkNeighbourhood neighbourhood);
     }
 }
