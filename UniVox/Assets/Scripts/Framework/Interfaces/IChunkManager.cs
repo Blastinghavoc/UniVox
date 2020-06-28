@@ -15,6 +15,9 @@ namespace UniVox.Framework
         int MaxChunkY { get; }
         int MinChunkY { get;}
 
+        //Maximum radii from the player on each axis at which chunks may be active (in the lowest pipeline stage)
+        Vector3Int MaximumActiveRadii { get; }
+
         void Initialise();
 
         bool TrySetVoxel(Vector3 worldPos, VoxelTypeID voxelTypeID,VoxelRotation voxelRotation = default, bool overrideExisting = false);
@@ -22,5 +25,7 @@ namespace UniVox.Framework
         bool TryGetVoxel(Vector3Int chunkID, Vector3Int localVoxelIndex, out VoxelTypeID voxelTypeID);
         ReadOnlyChunkData GetReadOnlyChunkData(Vector3Int chunkID);
         MeshDescriptor GetMeshDescriptor(Vector3Int chunkID);
+
+        bool InsideChunkRadius(Vector3Int id, Vector3Int radii);
     }
 }

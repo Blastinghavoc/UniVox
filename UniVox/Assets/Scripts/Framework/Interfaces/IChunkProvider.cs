@@ -16,6 +16,6 @@ namespace UniVox.Framework
 
 
 
-        void Initialise(VoxelTypeManager voxelTypeManager, IChunkManager chunkManager);
+        void Initialise(VoxelTypeManager voxelTypeManager, IChunkManager chunkManager,FrameworkEventManager eventManager);
     }
 }

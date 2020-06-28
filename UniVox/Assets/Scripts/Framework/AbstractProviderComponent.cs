@@ -23,10 +23,13 @@ namespace UniVox.Framework
         /// </summary>
         protected Dictionary<Vector3Int, IChunkData> ModifiedChunkData = new Dictionary<Vector3Int, IChunkData>();
 
-        public virtual void Initialise(VoxelTypeManager voxelTypeManager,IChunkManager chunkManager)
+        protected FrameworkEventManager eventManager;
+
+        public virtual void Initialise(VoxelTypeManager voxelTypeManager,IChunkManager chunkManager, FrameworkEventManager eventManager)
         {
             this.voxelTypeManager = voxelTypeManager;
             this.chunkManager = chunkManager;
+            this.eventManager = eventManager;
         }
 
         //Add or replace modified data for the given chunk

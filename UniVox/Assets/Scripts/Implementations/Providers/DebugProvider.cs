@@ -13,9 +13,9 @@ namespace UniVox.Implementations.Providers
         public SOVoxelTypeDefinition grassType;
         private ushort grassID;
 
-        public override void Initialise(VoxelTypeManager voxelTypeManager,IChunkManager chunkManager)
+        public override void Initialise(VoxelTypeManager voxelTypeManager,IChunkManager chunkManager, FrameworkEventManager eventManager)
         {
-            base.Initialise(voxelTypeManager,chunkManager);
+            base.Initialise(voxelTypeManager,chunkManager,eventManager);
             dirtID = voxelTypeManager.GetId(dirtType);
             grassID = voxelTypeManager.GetId(grassType);
         }

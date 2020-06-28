@@ -29,12 +29,15 @@ namespace UniVox.Framework
         protected NativeDirectionHelper directionHelper;
         private bool disposed = false;
 
-        public virtual void Initialise(VoxelTypeManager voxelTypeManager, IChunkManager chunkManager)
+        protected FrameworkEventManager eventManager;
+
+        public virtual void Initialise(VoxelTypeManager voxelTypeManager, IChunkManager chunkManager, FrameworkEventManager eventManager)
         {
             this.voxelTypeManager = voxelTypeManager;
             this.chunkManager = chunkManager;
 
             directionHelper = DirectionHelperExtensions.Create();
+            this.eventManager = eventManager;
         }
 
         public void Dispose() 

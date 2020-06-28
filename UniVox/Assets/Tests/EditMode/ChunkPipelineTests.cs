@@ -48,7 +48,7 @@ namespace Tests
                 ); 
             }
 
-            public void Initialise(VoxelTypeManager voxelTypeManager, IChunkManager chunkManager)
+            public void Initialise(VoxelTypeManager voxelTypeManager, IChunkManager chunkManager, FrameworkEventManager eventManager)
             {
                 throw new NotImplementedException();
             }
@@ -56,7 +56,7 @@ namespace Tests
 
         class MockProvider : IChunkProvider
         {
-            public void Initialise(VoxelTypeManager voxelTypeManager, IChunkManager chunkManager)
+            public void Initialise(VoxelTypeManager voxelTypeManager, IChunkManager chunkManager, FrameworkEventManager eventManager)
             {
                 throw new NotImplementedException();
             }

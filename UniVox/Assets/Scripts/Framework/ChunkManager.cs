@@ -24,6 +24,7 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
     [SerializeField] protected Vector3Int collidableChunksRadii;
     [SerializeField] protected Vector3Int renderedChunksRadii;
     protected Vector3Int dataChunksRadii;
+    public Vector3Int MaximumActiveRadii { get => dataChunksRadii; }
 
     //Should the world height be limited (like minecraft)
     [SerializeField] protected bool limitWorldHeight;
@@ -76,6 +77,8 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
 
     private ChunkPipelineManager pipeline;
 
+    private FrameworkEventManager eventManager;
+
     public virtual void Initialise()
     {
         Assert.IsTrue(renderedChunksRadii.All((a, b) => a >= b, collidableChunksRadii),
@@ -83,6 +86,8 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
 
         //Chunks can exist as just data one chunk further away than the rendered chunks
         dataChunksRadii = renderedChunksRadii + new Vector3Int(1, 1, 1);
+
+        eventManager = new FrameworkEventManager();
 
         //Enforce positioning of ChunkManager at the world origin
         transform.position = Vector3.zero;
@@ -105,8 +110,8 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
         Assert.IsNotNull(chunkProvider, "Chunk Manager must have a chunk provider component");
         Assert.IsNotNull(chunkMesher, "Chunk Manager must have a chunk mesher component");
 
-        chunkProvider.Initialise(VoxelTypeManager, this);
-        chunkMesher.Initialise(VoxelTypeManager, this);
+        chunkProvider.Initialise(VoxelTypeManager, this,eventManager);
+        chunkMesher.Initialise(VoxelTypeManager, this,eventManager);
 
         pipeline = new ChunkPipelineManager(
             chunkProvider,
@@ -259,6 +264,7 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
             //Return chunk gameobject to pool
             chunkPool.ReturnToPool(chunkComponent.gameObject);
 
+            eventManager.FireChunkDeactivated(chunkID, playerChunkID, dataChunksRadii);
         }
         else
         {
@@ -324,7 +330,7 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
     /// </summary>
     /// <param name="chunkID"></param>
     /// <returns></returns>
-    protected bool InsideChunkRadius(Vector3Int chunkID, Vector3Int Radii)
+    public bool InsideChunkRadius(Vector3Int chunkID, Vector3Int Radii)
     {
         var displacement = playerChunkID - chunkID;
         var absDisplacement = displacement.ElementWise(Mathf.Abs);
