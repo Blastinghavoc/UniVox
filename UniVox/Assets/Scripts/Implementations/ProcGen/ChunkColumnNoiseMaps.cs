@@ -14,30 +14,35 @@ namespace UniVox.Implementations.ProcGen
     {
         public int[] heightMap;
         public int[] biomeMap;
+        public float[] treeMap;
 
         [BurstCompile]
         public struct NativeChunkColumnNoiseMaps:IDisposable
         {
             public NativeArray<int> heightMap;
             public NativeArray<int> biomeMap;
+            public NativeArray<float> treeMap;
             public void Dispose() 
             {
                 heightMap.SmartDispose();
                 biomeMap.SmartDispose();
+                treeMap.SmartDispose();
             }
 
             public NativeChunkColumnNoiseMaps(int flatSize,Allocator allocator = Allocator.Persistent) 
             {
                 heightMap = new NativeArray<int>(flatSize, allocator);
                 biomeMap = new NativeArray<int>(flatSize, allocator);
+                treeMap = new NativeArray<float>(flatSize, allocator);
             }
         }
 
         public NativeChunkColumnNoiseMaps ToNative(Allocator allocator = Allocator.Persistent) 
         {
             NativeChunkColumnNoiseMaps native = new NativeChunkColumnNoiseMaps();
-            native.heightMap = new NativeArray<int>(heightMap, allocator);
-            native.biomeMap = new NativeArray<int>(biomeMap, allocator);
+            native.heightMap = heightMap.ToNative(allocator);
+            native.biomeMap = biomeMap.ToNative(allocator);
+            native.treeMap = treeMap.ToNative(allocator);     
             return native;
         }
 
@@ -45,6 +50,7 @@ namespace UniVox.Implementations.ProcGen
         {
             heightMap = maps.heightMap.ToArray();
             biomeMap = maps.biomeMap.ToArray();
+            treeMap = maps.treeMap.ToArray();
         }
 
     }

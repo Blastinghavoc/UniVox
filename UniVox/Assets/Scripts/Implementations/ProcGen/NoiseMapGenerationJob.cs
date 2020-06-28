@@ -16,6 +16,8 @@ namespace UniVox.Implementations.ProcGen
 
         [ReadOnly] public FractalNoise heightmapNoise;
         [ReadOnly] public FractalNoise moisturemapNoise;
+        [ReadOnly] public FractalNoise treemapNoise;
+        [ReadOnly] public TreeSettings treeSettings;
 
         [ReadOnly] public NativeBiomeDatabase biomeDatabase;
 
@@ -25,12 +27,29 @@ namespace UniVox.Implementations.ProcGen
         {
             heightmapNoise.Initialise();
             moisturemapNoise.Initialise();
+            treemapNoise.Initialise();
 
             int3 dimensions = worldSettings.ChunkDimensions;
 
             ComputeHeightMap(dimensions);
             ComputeBiomeMap(dimensions);
+            ComputeTreeMap(dimensions);
 
+        }
+
+        private void ComputeTreeMap(int3 dimensions) 
+        {
+            int i = 0;
+            for (int z = 0; z < dimensions.z; z++)
+            {
+                for (int x = 0; x < dimensions.x; x++,i++)
+                {
+                    var samplePoint = new float2(x + chunkPosition.x, z + chunkPosition.z)* treeSettings.TreemapScale;
+                    var sample = treemapNoise.Sample(samplePoint); 
+
+                    noiseMaps.treeMap[i] = sample;
+                }
+            }
         }
 
         private void ComputeBiomeMap(int3 dimensions)

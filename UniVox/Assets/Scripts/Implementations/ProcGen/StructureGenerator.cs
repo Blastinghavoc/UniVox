@@ -9,19 +9,21 @@ namespace UniVox.Implementations.ProcGen
     [System.Serializable]
     public class StructureGenerator 
     {
-        public SOVoxelTypeDefinition logType;
+        [SerializeField] private SOVoxelTypeDefinition logType = null;
         [NonSerialized] VoxelTypeID logId;
-        public SOVoxelTypeDefinition leafType;
+        [SerializeField] private SOVoxelTypeDefinition leafType = null;
         [NonSerialized] VoxelTypeID leafID;
 
-        public SOBiomeDefinition oceanDefinition;
+        [SerializeField] private SOBiomeDefinition oceanDefinition = null;
         [NonSerialized] int oceanId;
 
-        public void Initalise(VoxelTypeManager voxelTypeManager,BiomeDatabaseComponent biomeDatabase) 
+        [NonSerialized] private float treeThreshold;
+        public void Initalise(VoxelTypeManager voxelTypeManager,BiomeDatabaseComponent biomeDatabase,float treeThreshold) 
         {
             logId = voxelTypeManager.GetId(logType);
             leafID = voxelTypeManager.GetId(leafType);
             oceanId = biomeDatabase.GetBiomeID(oceanDefinition);
+            this.treeThreshold = treeThreshold;
         }
 
         public ChunkNeighbourhood generateTrees(Vector3 chunkPosition,Vector3Int dimensions,ChunkNeighbourhood neighbourhood,ChunkColumnNoiseMaps chunkColumnNoise) 
@@ -36,7 +38,7 @@ namespace UniVox.Implementations.ProcGen
                     if (hm >= chunkPosition.y && hm < chunkTop)
                     {
                         //Put a tree here, standing in for noise function
-                        if (chunkColumnNoise.biomeMap[mapIndex] != oceanId &&  (x+1) % (z+1) == 1)
+                        if (chunkColumnNoise.biomeMap[mapIndex] != oceanId &&  chunkColumnNoise.treeMap[mapIndex] > treeThreshold)
                         {
                             var y = (int)math.floor(hm - chunkPosition.y);
 

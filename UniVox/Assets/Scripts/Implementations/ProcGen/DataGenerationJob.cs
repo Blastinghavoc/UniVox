@@ -20,7 +20,8 @@ namespace UniVox.Implementations.ProcGen
 
         [ReadOnly] public NativeBiomeDatabase biomeDatabase;
 
-        [ReadOnly] public NativeChunkColumnNoiseMaps noiseMaps;
+        [ReadOnly] public NativeArray<int> heightMap;
+        [ReadOnly] public NativeArray<int> biomeMap;
 
         public void Execute()
         {            
@@ -38,9 +39,9 @@ namespace UniVox.Implementations.ProcGen
                 {
                     //Process one column of voxels
                     var mapIndex = MultiIndexToFlat(x, z, mapDimensions);
-                    var layers = biomeDatabase.biomeLayers[noiseMaps.biomeMap[mapIndex]];
+                    var layers = biomeDatabase.biomeLayers[biomeMap[mapIndex]];
 
-                    var height = noiseMaps.heightMap[mapIndex];
+                    var height = heightMap[mapIndex];
 
                     var currentLayerIndex = layers.start;
                     var currentLayer = biomeDatabase.allLayers[currentLayerIndex];

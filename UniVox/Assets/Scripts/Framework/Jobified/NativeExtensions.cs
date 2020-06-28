@@ -112,5 +112,12 @@ namespace UniVox.Framework.Jobified
                 arr.Dispose();
             }
         }
+
+        public static NativeArray<T> ToNative<T>(this T[] arr, Allocator allocator = Allocator.Persistent) 
+            where T: struct
+        {
+            NativeArray<T> result = new NativeArray<T>(arr, allocator);
+            return result;
+        }
     }
 }

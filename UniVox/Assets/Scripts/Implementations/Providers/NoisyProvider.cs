@@ -25,6 +25,8 @@ namespace UniVox.Implementations.Providers
         [SerializeField] private ChunkDataFactory chunkDataFactory = null;
 
         [SerializeField] private WorldSettings worldSettings = new WorldSettings();
+        [SerializeField] private TreeSettings treeSettings = new TreeSettings();
+        [SerializeField] private FractalNoise treemapNoise = new FractalNoise();
 
         [SerializeField] private FractalNoise heightmapNoise = new FractalNoise();
         [SerializeField] private FractalNoise moisturemapNoise = new FractalNoise();
@@ -68,7 +70,8 @@ namespace UniVox.Implementations.Providers
                 minY = chunkManager.MinChunkY * chunkManager.ChunkDimensions.y;
             }
 
-            worldSettings.Initialise(minY, chunkManager.ChunkDimensions.ToBurstable());
+            worldSettings.Initialise(minY, chunkManager.ChunkDimensions.ToNative());
+            treeSettings.Initialise();
 
             biomeDatabaseComponent.Initialise();
 
@@ -80,7 +83,7 @@ namespace UniVox.Implementations.Providers
             noiseMapsPending = new Dictionary<Vector2Int, KeyValuePair<JobHandle, NativeChunkColumnNoiseMaps>>();
             usingPending = new Dictionary<Vector2Int, int>();
 
-            structureGenerator.Initalise(voxelTypeManager,biomeDatabaseComponent);
+            structureGenerator.Initalise(voxelTypeManager,biomeDatabaseComponent,treeSettings.TreeThreshold);
 
             eventManager.OnChunkDeactivated += OnChunkDeactivated;
         }
@@ -143,10 +146,12 @@ namespace UniVox.Implementations.Providers
                     //Otherwise, make a job to generate the noise maps
                     var noiseGenJob = new JobWrapper<NoiseMapGenerationJob>();
                     noiseGenJob.job.worldSettings = worldSettings;
+                    noiseGenJob.job.treeSettings = treeSettings;
                     noiseGenJob.job.biomeDatabase = biomeDatabaseComponent.BiomeDatabase;
                     noiseGenJob.job.chunkPosition = chunkPosition;
                     noiseGenJob.job.heightmapNoise = heightmapNoise;
                     noiseGenJob.job.moisturemapNoise = moisturemapNoise;
+                    noiseGenJob.job.treemapNoise = treemapNoise;
                     nativeNoiseMaps = new NativeChunkColumnNoiseMaps(chunkDimensions.x * chunkDimensions.z, Allocator.Persistent);
                     noiseGenJob.job.noiseMaps = nativeNoiseMaps;
 
@@ -181,7 +186,8 @@ namespace UniVox.Implementations.Providers
             mainGenJob.job.bedrockID = bedrockID;
 
             mainGenJob.job.biomeDatabase = biomeDatabaseComponent.BiomeDatabase;
-            mainGenJob.job.noiseMaps = nativeNoiseMaps;
+            mainGenJob.job.heightMap = nativeNoiseMaps.heightMap;
+            mainGenJob.job.biomeMap = nativeNoiseMaps.biomeMap;
 
             var arrayLength = chunkDimensions.x * chunkDimensions.y * chunkDimensions.z;
 

@@ -209,6 +209,34 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: bc7732a614701f04ca9c506c02132cc4,
         type: 2}
+    - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
+      propertyPath: treeSettings.TreemapScale
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
+      propertyPath: treemapNoise.Octaves
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
+      propertyPath: treemapNoise.Persistence
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
+      propertyPath: treemapNoise.Lacunarity
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
+      propertyPath: treemapNoise.Seed
+      value: 1337
+      objectReference: {fileID: 0}
+    - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
+      propertyPath: treeSettings.TreeDensity
+      value: 0.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
+      propertyPath: treeSettings.TreeThreshold
+      value: 0.9
+      objectReference: {fileID: 0}
     - target: {fileID: 398304577423018871, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
       propertyPath: VoxelTypes.Array.size
@@ -345,7 +373,7 @@ PrefabInstance:
     - target: {fileID: 4444681113471702657, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
       propertyPath: renderedChunksRadii.y
-      value: 4
+      value: 16
       objectReference: {fileID: 0}
     - target: {fileID: 4444681113471702657, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
