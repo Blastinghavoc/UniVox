@@ -107,8 +107,10 @@ namespace UniVox.Implementations.Providers
             }
         }
 
-        public override AbstractPipelineJob<IChunkData> GenerateChunkDataJob(Vector3Int chunkID, Vector3Int chunkDimensions)
+        public override AbstractPipelineJob<IChunkData> GenerateTerrainData(Vector3Int chunkID)
         {
+            var chunkDimensions = chunkManager.ChunkDimensions;
+
             bool waitForNoiseMapGeneration = false;
             bool thisJobIsGeneratingTheNoiseMaps = false;
 

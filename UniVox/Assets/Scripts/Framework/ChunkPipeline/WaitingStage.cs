@@ -15,6 +15,10 @@ namespace UniVox.Framework.ChunkPipeline
         /// If the condition is met, the wait has ended. Otherwise the chunk neither continues nor terminates at this stage
         /// </summary>
         protected Func<Vector3Int, int, bool> WaitEndedCondition = (a, b) => true;
+        /// <summary>
+        /// Optional action to perform when the wait for an item has finished
+        /// </summary>
+        public Action<Vector3Int> OnWaitEnded = (_) => { return; };
 
         protected override void SelfUpdate()
         {
@@ -24,6 +28,7 @@ namespace UniVox.Framework.ChunkPipeline
                     //The chunk would ordinarily be able to move on, but we need to check the wait condition first
                     if (WaitEndedCondition(item, Order))
                     {
+                        OnWaitEnded(item);
                         MovingOnThisUpdate.Add(item);
                     }
                     else

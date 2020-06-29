@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Profiling;
@@ -24,7 +25,7 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
     [SerializeField] protected Vector3Int collidableChunksRadii;
     [SerializeField] protected Vector3Int renderedChunksRadii;
     protected Vector3Int dataChunksRadii;
-    public Vector3Int MaximumActiveRadii { get => dataChunksRadii; }
+    public Vector3Int MaximumActiveRadii { get; private set; }
 
     //Should the world height be limited (like minecraft)
     [SerializeField] protected bool limitWorldHeight;
@@ -86,6 +87,11 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
 
         //Chunks can exist as just data one chunk further away than the rendered chunks
         dataChunksRadii = renderedChunksRadii + new Vector3Int(1, 1, 1);
+        MaximumActiveRadii = dataChunksRadii;
+        if (GenerateStructures)
+        {
+            MaximumActiveRadii = dataChunksRadii + new Vector3Int(1, 1, 1);
+        }
 
         eventManager = new FrameworkEventManager();
 
@@ -189,18 +195,18 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
     {
         Profiler.BeginSample("UpdatePlayArea");
 
-        //Deactivate any chunks that are outside the data radius
+        //Deactivate any chunks that are outside the maximum radius
         var deactivate = loadedChunks.Select((pair) => pair.Key)
-            .Where((id) => !InsideChunkRadius(id, dataChunksRadii))
+            .Where((id) => !InsideChunkRadius(id, MaximumActiveRadii))
             .ToList();
 
         deactivate.ForEach(DeactivateChunk);
 
-        for (int x = -dataChunksRadii.x; x <= dataChunksRadii.x; x++)
+        for (int x = -MaximumActiveRadii.x; x <= MaximumActiveRadii.x; x++)
         {
-            for (int y = -dataChunksRadii.y; y <= dataChunksRadii.y; y++)
+            for (int y = -MaximumActiveRadii.y; y <= MaximumActiveRadii.y; y++)
             {
-                for (int z = -dataChunksRadii.z; z <= dataChunksRadii.z; z++)
+                for (int z = -MaximumActiveRadii.z; z <= MaximumActiveRadii.z; z++)
                 {
                     var chunkID = playerChunkID + new Vector3Int(x, y, z);
 
@@ -212,9 +218,14 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
                     {
                         SetTargetStageOfChunk(chunkID, pipeline.RenderedStage);//Request that this chunk should be rendered
                     }
-                    else
+                    else if (InsideChunkRadius(chunkID, dataChunksRadii))
                     {
                         SetTargetStageOfChunk(chunkID, pipeline.AllDataStage);//Request that this chunk should be just data
+                    }
+                    else
+                    {
+                        //Request that this chunk should be just terrain data, no structures
+                        SetTargetStageOfChunk(chunkID, pipeline.TerrainDataStage);
                     }
 
                 }
@@ -284,12 +295,19 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
         {
             if (chunkID.y == MaxChunkY + 1 || chunkID.y == MinChunkY - 1)
             {
-                //Chunks 1 chunk outside the vertical range may only be data chunks.
-                targetStage = pipeline.AllDataStage;
+                //Chunks 1 chunk outside the vertical range can only be data chunks at maximum.
+                targetStage = Mathf.Min(targetStage, pipeline.AllDataStage);
+            }
+            else if (GenerateStructures && (chunkID.y == MaxChunkY + 2 || chunkID.y == MinChunkY - 2))
+            {
+                ///Chunks 2 chunks outside the vertical range can only be terrain data chunks at maximum,
+                ///and may only exist to support structure generation
+                targetStage = Mathf.Min(targetStage, pipeline.TerrainDataStage);
             }
             else
             {
                 //Anything further outside the range is not allowed.
+                //Debug.LogWarning($"Trying to create chunk with id {chunkID} at stage {targetStage} when it is outside the Y range");
                 return;
             }
         }
@@ -304,7 +322,17 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
             //Add to set of loaded chunks
             loadedChunks[chunkID] = ChunkComponent;
 
-            pipeline.AddChunk(chunkID, targetStage);
+            if (chunkProvider.TryGetStoredDataForChunk(chunkID,out var data))
+            {
+                ChunkComponent.Data = data;
+                pipeline.AddWithData(chunkID, targetStage);
+            }
+            else
+            {
+                //Add the chunk to the pipeline for data generation
+                pipeline.Add(chunkID, targetStage);
+            }
+
             return;
 
         }

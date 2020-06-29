@@ -39,18 +39,15 @@ namespace UniVox.Framework
             ModifiedChunkData[chunkID] = data;
         }
 
-        public AbstractPipelineJob<IChunkData> ProvideTerrainData(Vector3Int chunkID) 
+        public bool TryGetStoredDataForChunk(Vector3Int chunkID, out IChunkData storedData)
         {
             if (ModifiedChunkData.TryGetValue(chunkID, out var data))
             {
-                return new BasicFunctionJob<IChunkData>(() => data);
+                storedData = data;
+                return true;
             }
-
-            Profiler.BeginSample("CreateGenerationJob");
-            var tmp = GenerateChunkDataJob(chunkID, chunkManager.ChunkDimensions);
-            Profiler.EndSample();
-
-            return tmp;
+            storedData = null;
+            return false;
         }
 
         /// <summary>
@@ -59,8 +56,10 @@ namespace UniVox.Framework
         /// <param name="chunkID"></param>
         /// <param name="chunkDimensions"></param>
         /// <returns></returns>
-        public abstract AbstractPipelineJob<IChunkData> GenerateChunkDataJob(Vector3Int chunkID, Vector3Int chunkDimensions);
+        public abstract AbstractPipelineJob<IChunkData> GenerateTerrainData(Vector3Int chunkID);
 
         public abstract AbstractPipelineJob<ChunkNeighbourhood> GenerateStructuresForNeighbourhood(Vector3Int centerChunkID, ChunkNeighbourhood neighbourhood);
+
+        
     }
 }

@@ -1,9 +1,8 @@
 ﻿using UnityEngine;
-using UniVox.Framework;
 using Unity.Collections;
 using System;
 
-namespace UniVox.Implementations.ChunkData
+namespace UniVox.Framework
 {
     /// <summary>
     /// Chunk data class that represents a completely empty chunk that can never have data,

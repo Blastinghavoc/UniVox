@@ -21,9 +21,9 @@ namespace UniVox.Implementations.Providers
             grassID = voxelTypeManager.GetId(grassType);
         }
 
-        public override AbstractPipelineJob<IChunkData> GenerateChunkDataJob(Vector3Int chunkID, Vector3Int chunkDimensions)
+        public override AbstractPipelineJob<IChunkData> GenerateTerrainData(Vector3Int chunkID)
         {
-            return new BasicFunctionJob<IChunkData>(() => FlatWorld(chunkID, chunkDimensions));
+            return new BasicFunctionJob<IChunkData>(() => FlatWorld(chunkID, chunkManager.ChunkDimensions));
         }
 
         private AbstractChunkData FlatWorld(Vector3Int chunkID, Vector3Int chunkDimensions) 

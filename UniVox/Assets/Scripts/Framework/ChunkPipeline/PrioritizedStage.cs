@@ -53,6 +53,7 @@ namespace UniVox.Framework.ChunkPipeline
                     //The chunk would ordinarily be able to move on, but we need to check the wait condition first
                     if (WaitEndedCondition(item, Order))
                     {
+                        OnWaitEnded(item);
                         //Just before the chunk would move on, re-check that the precondition still holds
                         if (Precondition(item))
                         {

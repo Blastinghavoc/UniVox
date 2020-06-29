@@ -10,10 +10,12 @@ namespace UniVox.Framework
         ///Stores modified chunk data
         void StoreModifiedChunkData(Vector3Int chunkID, IChunkData data);
 
+        bool TryGetStoredDataForChunk(Vector3Int chunkID,out IChunkData storedData);
+
         ///Returns a pipeline job that provides terrain data for a chunk.
         ///This means everything except structures, i.e anything that can be done
         ///without access to neighbouring chunks.
-        AbstractPipelineJob<IChunkData> ProvideTerrainData(Vector3Int chunkID);
+        AbstractPipelineJob<IChunkData> GenerateTerrainData(Vector3Int chunkID);
 
         /// <summary>
         /// Returns a pipeline job that provides structure data for a chunk id, and may also modifiy

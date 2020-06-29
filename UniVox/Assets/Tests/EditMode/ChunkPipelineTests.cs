@@ -62,6 +62,11 @@ namespace Tests
                 throw new NotImplementedException();
             }
 
+            public AbstractPipelineJob<IChunkData> GenerateTerrainData(Vector3Int chunkID)
+            {
+                return new BasicFunctionJob<IChunkData>(() => ProvideChunkData(chunkID));
+            }
+
             public void Initialise(VoxelTypeManager voxelTypeManager, IChunkManager chunkManager, FrameworkEventManager eventManager)
             {
                 throw new NotImplementedException();
@@ -72,12 +77,12 @@ namespace Tests
                 return new ArrayChunkData(chunkID, new Vector3Int(1, 1, 1));
             }
 
-            public AbstractPipelineJob<IChunkData> ProvideTerrainData(Vector3Int chunkID)
+            public void StoreModifiedChunkData(Vector3Int chunkID, IChunkData data)
             {
-                return new BasicFunctionJob<IChunkData>(() => ProvideChunkData(chunkID));
+                throw new NotImplementedException();
             }
 
-            public void StoreModifiedChunkData(Vector3Int chunkID, IChunkData data)
+            public bool TryGetStoredDataForChunk(Vector3Int chunkID, out IChunkData storedData)
             {
                 throw new NotImplementedException();
             }
@@ -136,7 +141,7 @@ namespace Tests
 
         void mockCreateNewChunkWithTarget(Vector3Int id, int target) 
         {
-            pipeline.AddChunk(id, target);
+            pipeline.Add(id, target);
             mockComponentStorage.Add(id, new MockChunkComponent() { ChunkID = id});
         }
 
