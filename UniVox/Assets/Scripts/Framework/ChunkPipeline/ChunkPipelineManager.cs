@@ -118,7 +118,7 @@ namespace UniVox.Framework.ChunkPipeline
             if (chunkMesher.IsMeshDependentOnNeighbourChunks)
             {
                 /// If mesh is dependent on neighbour chunks, add a waiting stage
-                /// to wait until the neighvours of a chunk have their data before
+                /// to wait until the neighbours of a chunk have their data before
                 /// moving that chunk onwards through the pipeline
                 AllDataStage = i;
                 stages.Add(new WaitingStage("WaitForNeighbourData", i++,
@@ -300,14 +300,7 @@ namespace UniVox.Framework.ChunkPipeline
             if (targetStage != AllDataStage && targetStage != RenderedStage && targetStage != CompleteStage && targetStage != TerrainDataStage)
             {
                 throw new ArgumentOutOfRangeException("Target stage was not one of the valid target stages");
-            }
-
-            if (targetStage < AllDataStage)
-            {
-                ///Do not allow a chunk to be specifically targetted at any stage lower than AllData.
-                ///They may still be created targetting a lower stage, but cannot go backwards
-                targetStage = AllDataStage;
-            }
+            }            
 
             var stageData = GetStageData(chunkId);
 
@@ -335,7 +328,20 @@ namespace UniVox.Framework.ChunkPipeline
             else if (targetStage < prevTarget)
             {
                 var prevMax = stageData.maxStage;
-                stageData.maxStage = Math.Min(targetStage, stageData.maxStage);
+
+                if (targetStage < AllDataStage && prevMax >= AllDataStage)
+                {
+                    ///Do not allow a chunk to be downgraded to a stage lower than AllData if it has
+                    ///already reached or surpassed that stage.
+                    ///They may still be created targetting a lower stage, but cannot go backwards
+                    targetStage = AllDataStage;
+                    //Recursively try to set the target again
+                    SetTarget(chunkId, targetStage);
+                    return;
+                }
+
+                var newMax = Math.Min(targetStage, stageData.maxStage);
+                stageData.maxStage = newMax;
 
                 if (stageData.maxStage < prevMax)
                 {

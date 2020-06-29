@@ -381,17 +381,17 @@ PrefabInstance:
     - target: {fileID: 4444681113471702657, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
       propertyPath: renderedChunksRadii.x
-      value: 10
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 4444681113471702657, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
       propertyPath: renderedChunksRadii.z
-      value: 10
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 4444681113471702657, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
       propertyPath: renderedChunksRadii.y
-      value: 8
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 4444681113471702657, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}

@@ -291,8 +291,10 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
     /// <param name="targetStage"></param>
     protected void SetTargetStageOfChunk(Vector3Int chunkID, int targetStage)
     {
+        bool outOfWorld = false;
         if (chunkID.y > MaxChunkY || chunkID.y < MinChunkY)
         {
+            outOfWorld = true;
             if (chunkID.y == MaxChunkY + 1 || chunkID.y == MinChunkY - 1)
             {
                 //Chunks 1 chunk outside the vertical range can only be data chunks at maximum.
@@ -322,7 +324,13 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
             //Add to set of loaded chunks
             loadedChunks[chunkID] = ChunkComponent;
 
-            if (chunkProvider.TryGetStoredDataForChunk(chunkID,out var data))
+            if (outOfWorld)
+            {
+                //Out of world chunks get initialised empty, always.
+                ChunkComponent.Data = new EmptyChunkData(chunkID, chunkDimensions);
+                pipeline.AddWithData(chunkID, targetStage);
+            }
+            else if (chunkProvider.TryGetStoredDataForChunk(chunkID,out var data))
             {
                 ChunkComponent.Data = data;
                 pipeline.AddWithData(chunkID, targetStage);
