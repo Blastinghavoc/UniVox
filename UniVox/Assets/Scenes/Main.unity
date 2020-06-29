@@ -240,7 +240,7 @@ PrefabInstance:
     - target: {fileID: 398304577423018871, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
       propertyPath: VoxelTypes.Array.size
-      value: 11
+      value: 14
       objectReference: {fileID: 0}
     - target: {fileID: 398304577423018871, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
@@ -259,6 +259,24 @@ PrefabInstance:
       propertyPath: VoxelTypes.Array.data[10]
       value: 
       objectReference: {fileID: 11400000, guid: e65f9d668c841884c8fdd21948ede172,
+        type: 2}
+    - target: {fileID: 398304577423018871, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: VoxelTypes.Array.data[11]
+      value: 
+      objectReference: {fileID: 11400000, guid: 2c2bb2ed4022e10428e552100de13718,
+        type: 2}
+    - target: {fileID: 398304577423018871, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: VoxelTypes.Array.data[12]
+      value: 
+      objectReference: {fileID: 11400000, guid: 179ba0b19a064594c945e272499717e3,
+        type: 2}
+    - target: {fileID: 398304577423018871, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: VoxelTypes.Array.data[13]
+      value: 
+      objectReference: {fileID: 11400000, guid: 5c859d982220e0e4a8222b17a36bc765,
         type: 2}
     - target: {fileID: 398304577439083000, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
@@ -373,7 +391,7 @@ PrefabInstance:
     - target: {fileID: 4444681113471702657, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
       propertyPath: renderedChunksRadii.y
-      value: 16
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 4444681113471702657, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}

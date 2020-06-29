@@ -17,4 +17,4 @@ MonoBehaviour:
     depth: 5
   - voxelType: {fileID: 11400000, guid: 0e2fe9399ec31f9429b1ef2145e8f4db, type: 2}
     depth: 8
-  fillRemainderWith: {fileID: 11400000, guid: a8aff50ee8c68ea4192732a3ece092b4, type: 2}
+  treeType: {fileID: 11400000, guid: 9a151bf698ce3904a93fcd5ed031716e, type: 2}

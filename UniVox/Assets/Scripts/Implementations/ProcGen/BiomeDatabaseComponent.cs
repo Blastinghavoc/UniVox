@@ -15,6 +15,7 @@ namespace UniVox.Implementations.ProcGen
         public NativeBiomeDatabase BiomeDatabase { get; private set; }
 
         private Dictionary<SOBiomeDefinition, int> biomeIds = new Dictionary<SOBiomeDefinition, int>();
+        private List<SOBiomeDefinition> biomeDefinitionsById = new List<SOBiomeDefinition>();
 
         private bool initialised = false;
 
@@ -24,6 +25,18 @@ namespace UniVox.Implementations.ProcGen
             {
                 var typeManager = (VoxelTypeManager)FindObjectOfType(typeof(VoxelTypeManager));
                 BiomeDatabase = ConfigToNative(config, typeManager);
+            }
+        }
+
+        public SOBiomeDefinition GetBiomeDefinition(int id) 
+        {
+            try
+            {
+                return biomeDefinitionsById[id];
+            }
+            catch (IndexOutOfRangeException e)
+            {
+                throw new ArgumentException($"No biomed definition exists for id {id}", e);
             }
         }
 
@@ -77,6 +90,7 @@ namespace UniVox.Implementations.ProcGen
                         //Create new biome data
                         id = biomeLayersList.Count;
                         biomeIds.Add(moistureEntry.biomeDefinition,id );
+                        biomeDefinitionsById.Add(moistureEntry.biomeDefinition);
 
                         Assert.IsTrue(moistureEntry.biomeDefinition.topLayers.Count > 0,$"All biome definitions must have at least one layer,{moistureEntry.biomeDefinition.name} does not");
                         StartEnd layersForThisBiome = new StartEnd() { start = allLayersList.Count };

@@ -9,10 +9,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5734e7a518664504eafc589ad33d4b6b, type: 3}
-  m_Name: Snow
+  m_Script: {fileID: 11500000, guid: 6c9568f5231ddb94e89cc2f1aa13a5a1, type: 3}
+  m_Name: Cactus
   m_EditorClassIdentifier: 
-  topLayers:
-  - voxelType: {fileID: 11400000, guid: 4312d675a9aae974ca00ae7930641832, type: 2}
-    depth: 5
-  treeType: {fileID: 11400000, guid: 0e5eec5e6382f464c8e48301f8554ba9, type: 2}
+  maxHeight: 6
+  minHeight: 1
+  minLeafClearance: 0
+  leafType: {fileID: 0}
+  logType: {fileID: 11400000, guid: 2c2bb2ed4022e10428e552100de13718, type: 2}
+  Style: 2

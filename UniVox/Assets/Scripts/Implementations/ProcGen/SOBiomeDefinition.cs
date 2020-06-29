@@ -13,6 +13,8 @@ namespace UniVox.Implementations.ProcGen
     {
         public List<VoxelRange> topLayers;
 
+        public SOTreeDefinition treeType;
+
         [System.Serializable]
         public class VoxelRange
         {

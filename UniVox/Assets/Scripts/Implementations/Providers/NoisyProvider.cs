@@ -83,7 +83,8 @@ namespace UniVox.Implementations.Providers
             noiseMapsPending = new Dictionary<Vector2Int, KeyValuePair<JobHandle, NativeChunkColumnNoiseMaps>>();
             usingPending = new Dictionary<Vector2Int, int>();
 
-            structureGenerator.Initalise(voxelTypeManager,biomeDatabaseComponent,treeSettings.TreeThreshold);
+            structureGenerator = new StructureGenerator();
+            structureGenerator.Initalise(voxelTypeManager,biomeDatabaseComponent,treeSettings.TreeThreshold,(int)treemapNoise.Seed);
 
             eventManager.OnChunkDeactivated += OnChunkDeactivated;
         }

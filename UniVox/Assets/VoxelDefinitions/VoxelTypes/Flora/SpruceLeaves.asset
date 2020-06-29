@@ -10,16 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 36add9c34f86f4e4c849947280fc7666, type: 3}
-  m_Name: Leaves
+  m_Name: SpruceLeaves
   m_EditorClassIdentifier: 
-  DisplayName: Leaves
+  DisplayName: Spruce Leaves
   FaceTextures:
-  - {fileID: 2800000, guid: 4b9c26111113d5945a6737541bb40feb, type: 3}
-  - {fileID: 2800000, guid: 4b9c26111113d5945a6737541bb40feb, type: 3}
-  - {fileID: 2800000, guid: 4b9c26111113d5945a6737541bb40feb, type: 3}
-  - {fileID: 2800000, guid: 4b9c26111113d5945a6737541bb40feb, type: 3}
-  - {fileID: 2800000, guid: 4b9c26111113d5945a6737541bb40feb, type: 3}
-  - {fileID: 2800000, guid: 4b9c26111113d5945a6737541bb40feb, type: 3}
+  - {fileID: 2800000, guid: 7ce977f79651de9439ed619ec7049fd9, type: 3}
+  - {fileID: 2800000, guid: 7ce977f79651de9439ed619ec7049fd9, type: 3}
+  - {fileID: 2800000, guid: 7ce977f79651de9439ed619ec7049fd9, type: 3}
+  - {fileID: 2800000, guid: 7ce977f79651de9439ed619ec7049fd9, type: 3}
+  - {fileID: 2800000, guid: 7ce977f79651de9439ed619ec7049fd9, type: 3}
+  - {fileID: 2800000, guid: 7ce977f79651de9439ed619ec7049fd9, type: 3}
   meshDefinition: {fileID: 11400000, guid: b2b5f745ccf79e94dbc9c6cf67ba2e37, type: 2}
   material: {fileID: 2100000, guid: b37b6f729ea188a4bb49677dc0d6b05c, type: 2}
   isPassable: 0
