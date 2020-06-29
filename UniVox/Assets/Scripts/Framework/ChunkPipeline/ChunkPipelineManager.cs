@@ -93,6 +93,10 @@ namespace UniVox.Framework.ChunkPipeline
                     (a, b) => { return; },
                     maxStructurePerUpdate
                     );
+                //TODO remove DEBUG                
+                generatingStructures.PreconditionCheck = (cId) => NeighboursAndDiagonalsPassedStage(cId, TerrainDataStage);
+                
+
                 //Generating structures is not free for an ID if it contains that ID or any of its neighbours (to prevent multiple data access)
                 generatingStructures.FreeFor = (id) => !Utils.Helpers.GetNeighboursIncludingDiagonal(id).Any((neigh)=>generatingStructures.Contains(neigh));
                 stages.Add(generatingStructures);
@@ -454,6 +458,30 @@ namespace UniVox.Framework.ChunkPipeline
             }
         }
 
+        public bool Contains(Vector3Int chunkID) 
+        {
+            var thinkWeContain = chunkStageMap.ContainsKey(chunkID);
+            var actuallyContain = false;
+            var containingName = "";
+            foreach (var stage in stages)
+            {
+                if (stage.Contains(chunkID))
+                {
+                    actuallyContain = true;
+                    containingName = stage.Name;
+                    break;
+                }
+            }
+
+            if (thinkWeContain != actuallyContain)
+            {
+                Debug.LogWarning($"Chunk stage map contains id {chunkID} = {thinkWeContain}, any of the stages contain the id = {actuallyContain}." +
+                $" Containing stage name if applicable = {containingName}");
+            }
+
+            return thinkWeContain;
+        }
+
         private bool ChunkDataReadable(ChunkStageData stageData)
         {
             return stageData.minStage >= AllDataStage;
@@ -512,7 +540,7 @@ namespace UniVox.Framework.ChunkPipeline
                 allValid = false;
             }
             else if (!(neighbourStageData.minStage >= targetStage))
-            {
+            {                
                 allValid = false;
             }
         }

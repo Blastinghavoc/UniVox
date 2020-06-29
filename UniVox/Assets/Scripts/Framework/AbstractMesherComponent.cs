@@ -83,7 +83,18 @@ namespace UniVox.Framework
                 for (int i = 0; i < Directions.NumDirections; i++)
                 {
                     var neighbourID = chunkData.ChunkID + Directions.IntVectors[i];
-                    neighbourData.Add(i, chunkManager.GetReadOnlyChunkData(neighbourID).BorderToNative(Directions.Oposite[i]));
+                    try
+                    {
+                        var neighbour = chunkManager.GetReadOnlyChunkData(neighbourID);
+                        neighbourData.Add(i, neighbour.BorderToNative(Directions.Oposite[i]));
+                    }
+                    catch (Exception e)
+                    {
+                        var (managerHad, pipelinehad) = chunkManager.ContainsChunkID(chunkID);
+                        throw new Exception($"Failed to get neighbour data for chunk {chunkID}." +
+                            $"Manager had this chunk = {managerHad}, pipeline had it = {pipelinehad}." +
+                            $"Cause: {e.Message}",e);
+                    }
                 }
             }
             else

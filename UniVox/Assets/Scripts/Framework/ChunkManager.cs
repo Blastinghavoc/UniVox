@@ -473,7 +473,8 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
             }
             return new ReadOnlyChunkData(chunkComponent.Data);
         }
-        return null;
+        throw new ArgumentException($"It is not valid to get read-only data for chunk ID {chunkID}, as it is not in the loaded chunks." +
+            $" Did the pipeline contain the chunk? {pipeline.Contains(chunkID)}");
     }
 
     public bool TrySetVoxel(Vector3 worldPos, VoxelTypeID voxelTypeID, VoxelRotation voxelRotation = default, bool overrideExisting = false)
@@ -643,6 +644,11 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
     public string GetPipelineStatus()
     {
         return pipeline.GetPipelineStatus();
+    }
+
+    public Tuple<bool, bool> ContainsChunkID(Vector3Int chunkID)
+    {
+        return new Tuple<bool, bool>(loadedChunks.ContainsKey(chunkID), pipeline.Contains(chunkID));
     }
 
     #endregion

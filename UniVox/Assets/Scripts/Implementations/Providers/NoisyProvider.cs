@@ -104,6 +104,11 @@ namespace UniVox.Implementations.Providers
             if (args.absAmountOutsideRadii.x > 0 || args.absAmountOutsideRadii.z > 0)
             {
                 noiseMaps.Remove(new Vector2Int(args.chunkID.x, args.chunkID.z));
+                var (managerHas, pipelineHas) = chunkManager.ContainsChunkID(args.chunkID);
+                //TODO remove DEBUG
+                Assert.IsTrue((!managerHas && !pipelineHas),$"When removing a noisemap, both the pipeline and the chunk" +
+                    $" manager should have removed the corresponding id {args.chunkID}." +
+                    $"Manager had it = {managerHas}, pipeline had it = {pipelineHas}");
             }
         }
 
@@ -238,7 +243,14 @@ namespace UniVox.Implementations.Providers
                     {
                         usingPending.Remove(columnId);
                         //Dispose noise maps
-                        nativeNoiseMaps.Dispose();
+                        try
+                        {
+                            nativeNoiseMaps.Dispose();
+                        }
+                        catch (Exception e)
+                        {
+                            throw new Exception($"Error trying to dispose of noise maps for column {columnId}. Count was {count}.",e);
+                        }
                     }
                 }
                 else
@@ -295,7 +307,9 @@ namespace UniVox.Implementations.Providers
             }
             else
             {
-                throw new Exception($"No noisemaps found when trying to generate structures for chunk {centerChunkID}");
+                var (managerHad, pipelinehad) = chunkManager.ContainsChunkID(centerChunkID);
+                throw new Exception($"No noisemaps found when trying to generate structures for chunk {centerChunkID}." +
+                    $" Did manager contain chunk? {managerHad}. Did pipeline contain chunk? {pipelinehad}.");
             }
 
         }
