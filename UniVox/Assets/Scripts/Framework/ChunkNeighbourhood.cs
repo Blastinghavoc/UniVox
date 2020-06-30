@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Unity.Collections;
 using UnityEngine;
 
-namespace UniVox.Framework.Jobified
+namespace UniVox.Framework
 {
     public struct NativeChunkData 
     {
@@ -12,6 +12,7 @@ namespace UniVox.Framework.Jobified
 
     }
 
+    //TODO remove if not doing job-based structure gen. Otherwise, reorder to be consistent with DiagonalDirections enum
     public struct NativeChunkNeighbourhood 
     {
         public NativeChunkData up;

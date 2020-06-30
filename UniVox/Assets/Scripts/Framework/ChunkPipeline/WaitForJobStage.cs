@@ -4,10 +4,11 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UniVox.Framework.ChunkPipeline.VirtualJobs;
+using UniVox.Framework.ChunkPipeline.WaitForNeighbours;
 
 namespace UniVox.Framework.ChunkPipeline
 {
-    public class WaitForJobStage<T> : WaitingStage, IDisposable
+    public class WaitForJobStage<T> : WaitForNeighboursStage, IDisposable
     {
         Dictionary<Vector3Int, AbstractPipelineJob<T>> jobs = new Dictionary<Vector3Int, AbstractPipelineJob<T>>();
 
@@ -53,9 +54,9 @@ namespace UniVox.Framework.ChunkPipeline
         protected override void SelfUpdate()
         {
             chunkIdsInStage.RemoveWhere((item) => {
-                if (JobDone(item, Order))//Cannot terminate or move on unfinished jobs
+                if (JobDone(item, StageID))//Cannot terminate or move on unfinished jobs
                 {
-                    if (NextStageCondition(item,Order))
+                    if (NextStageCondition(item,StageID))
                     {
                         MovingOnThisUpdate.Add(item);
                         onJobDone(item, jobs[item].Result);

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
+using UniVox.Framework.ChunkPipeline.WaitForNeighbours;
 
 namespace UniVox.Framework.ChunkPipeline
 {
@@ -11,7 +12,7 @@ namespace UniVox.Framework.ChunkPipeline
     /// A stage that limits how many can go onto the next stage per update.
     /// Optionally also allows chunks to wait for a particular condition as well.
     /// </summary>
-    public class RateLimitedStage : WaitingStage
+    public class RateLimitedStage : WaitForNeighboursStage
     {
         public int MaxPerUpdate { get; set; } = 1;
 
@@ -36,10 +37,10 @@ namespace UniVox.Framework.ChunkPipeline
              */
             foreach (var item in chunkIdsInStage)
             {
-                if (NextStageCondition(item, Order))
+                if (NextStageCondition(item, StageID))
                 {
                     //The chunk would ordinarily be able to move on, but we need to check the wait condition first
-                    if (movedOn < MaxPerUpdate &&  WaitEndedCondition(item, Order))
+                    if (movedOn < MaxPerUpdate &&  WaitEndedCondition(item, StageID))
                     {                        
                         MovingOnThisUpdate.Add(item);
                         movedOn++;
