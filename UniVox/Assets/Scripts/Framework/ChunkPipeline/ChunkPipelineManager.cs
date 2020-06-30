@@ -473,11 +473,11 @@ namespace UniVox.Framework.ChunkPipeline
                 }
             }
 
-            if (thinkWeContain != actuallyContain)
-            {
-                Debug.LogWarning($"Chunk stage map contains id {chunkID} = {thinkWeContain}, any of the stages contain the id = {actuallyContain}." +
-                $" Containing stage name if applicable = {containingName}");
-            }
+            //if (thinkWeContain != actuallyContain)
+            //{
+            //    Debug.LogWarning($"Chunk stage map contains id {chunkID} = {thinkWeContain}, any of the stages contain the id = {actuallyContain}." +
+            //    $" Containing stage name if applicable = {containingName}");
+            //}
 
             return thinkWeContain;
         }

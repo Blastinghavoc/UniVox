@@ -275,7 +275,7 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
             //Return chunk gameobject to pool
             chunkPool.ReturnToPool(chunkComponent.gameObject);
 
-            eventManager.FireChunkDeactivated(chunkID, playerChunkID, dataChunksRadii);
+            eventManager.FireChunkDeactivated(chunkID, playerChunkID, MaximumActiveRadii);
         }
         else
         {
