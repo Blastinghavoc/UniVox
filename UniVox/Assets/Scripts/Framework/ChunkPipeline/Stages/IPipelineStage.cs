@@ -20,9 +20,15 @@ namespace UniVox.Framework.ChunkPipeline
         void Add(Vector3Int incoming, ChunkStageData stageData);
 
         bool Contains(Vector3Int chunkID);
-        public bool FreeFor(Vector3Int chunkId);
+        bool FreeFor(Vector3Int chunkId);
 
         void Update();
+
+        /// <summary>
+        /// To be called once the whole pipeline is constructed so that stages can intialise any
+        /// properties that depend on other stages.
+        /// </summary>
+        void Initialise();
 
         /// <summary>
         /// To be called by client code when the output lists have been read.

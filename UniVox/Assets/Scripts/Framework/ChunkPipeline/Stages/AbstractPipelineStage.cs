@@ -1,8 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
-using static UniVox.Framework.ChunkPipeline.ChunkPipelineManager;
-using static UniVox.Framework.ChunkPipeline.IPipelineStage;
 
 namespace UniVox.Framework.ChunkPipeline
 {
@@ -10,7 +8,7 @@ namespace UniVox.Framework.ChunkPipeline
     /// Abstract implementation of interface, with some supporting methods and
     /// datastructures.
     /// </summary>
-    public abstract class AbstractPipelineStage :IPipelineStage
+    public abstract class AbstractPipelineStage : IPipelineStage
     {
         protected IChunkPipeline pipeline;
 
@@ -54,7 +52,7 @@ namespace UniVox.Framework.ChunkPipeline
 
         protected bool TerminateHereCondition(ChunkStageData stageData)
         {
-            return !pipeline.TargetStageGreaterThanCurrent(StageID,stageData);
+            return !pipeline.TargetStageGreaterThanCurrent(StageID, stageData);
         }
 
         /// <summary>
@@ -88,5 +86,9 @@ namespace UniVox.Framework.ChunkPipeline
 
         public abstract bool Contains(Vector3Int chunkID);
 
+        public virtual void Initialise()
+        {
+            //Nothing to intialise
+        }
     }
 }

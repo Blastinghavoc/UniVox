@@ -123,7 +123,6 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
             chunkProvider,
             chunkMesher,
             GetChunkComponent,
-            SetTargetStageOfChunk,
             GetPriorityOfChunk,
             MaxGeneratedPerUpdate,
             MaxMeshedPerUpdate,
@@ -220,7 +219,7 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
                     }
                     else if (InsideChunkRadius(chunkID, dataChunksRadii))
                     {
-                        SetTargetStageOfChunk(chunkID, pipeline.AllDataStage);//Request that this chunk should be just data
+                        SetTargetStageOfChunk(chunkID, pipeline.FullyGenerated);//Request that this chunk should be just data
                     }
                     else
                     {
@@ -298,7 +297,7 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
             if (chunkID.y == MaxChunkY + 1 || chunkID.y == MinChunkY - 1)
             {
                 //Chunks 1 chunk outside the vertical range can only be data chunks at maximum.
-                targetStage = Mathf.Min(targetStage, pipeline.AllDataStage);
+                targetStage = Mathf.Min(targetStage, pipeline.FullyGenerated);
             }
             else if (GenerateStructures && (chunkID.y == MaxChunkY + 2 || chunkID.y == MinChunkY - 2))
             {
@@ -417,7 +416,7 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
                     if (pipeline.GetTargetStage(neighbourChunkID) >= pipeline.RenderedStage)
                     {
                         //The neighbour chunk will need remeshing
-                        RedoChunkFromStage(neighbourChunkID, pipeline.AllDataStage);
+                        RedoChunkFromStage(neighbourChunkID, pipeline.FullyGenerated);
                     }
                 }
             }
@@ -426,7 +425,7 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
         if (pipeline.GetTargetStage(chunkID) >= pipeline.RenderedStage)
         {
             //The chunk that changed will need remeshing if its target stage has a mesh
-            RedoChunkFromStage(chunkID, pipeline.AllDataStage);
+            RedoChunkFromStage(chunkID, pipeline.FullyGenerated);
         }
     }
 

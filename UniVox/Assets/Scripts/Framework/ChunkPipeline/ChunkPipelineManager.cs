@@ -28,8 +28,10 @@ namespace UniVox.Framework.ChunkPipeline
         //Possible target stages
         //This stage indicates the chunk has all the terrain data, but no "structures" like trees
         public int TerrainDataStage { get; private set; }
-        //This stage indicates the chunk has been fully generated, including structures
-        public int AllDataStage { get; private set; }
+        //Indicates chunk has generated its own structures, but may not have received all incoming structures from neighbours
+        public int OwnStructuresStage { get; private set; }
+        //This stage indicates the chunk has been fully generated, including structures from neighbours
+        public int FullyGenerated { get; private set; }
         public int RenderedStage { get; private set; }
         public int CompleteStage { get; private set; }
 
@@ -47,10 +49,12 @@ namespace UniVox.Framework.ChunkPipeline
         public ChunkPipelineManager(IChunkProvider chunkProvider,
             IChunkMesher chunkMesher,
             Func<Vector3Int, IChunkComponent> getChunkComponent,
-            Action<Vector3Int, int> createNewChunkWithTarget,
             Func<Vector3Int, float> getPriorityOfChunk,
-            int maxDataPerUpdate, int maxMeshPerUpdate, int maxCollisionPerUpdate,
-            bool structureGen = false, int maxStructurePerUpdate = 200)
+            int maxDataPerUpdate,
+            int maxMeshPerUpdate, 
+            int maxCollisionPerUpdate, 
+            bool structureGen = false,
+            int maxStructurePerUpdate = 200)
         {
             this.getChunkComponent = getChunkComponent;
             this.chunkProvider = chunkProvider;
@@ -68,11 +72,10 @@ namespace UniVox.Framework.ChunkPipeline
             stages.Add(GeneratingData);
 
             TerrainDataStage = i;
+            OwnStructuresStage = i;
 
             if (structureGen)
             {
-                stages.Add(new PassThroughStage("GotTerrainData", i++, this));
-
                 ///Wait until all neighbours including diagonal ones have their terrain data 
                 var waitForNeighbourTerrain = new WaitForNeighboursStage(
                     "WaitForNeighbourTerrain", i++, this, true);
@@ -80,16 +83,14 @@ namespace UniVox.Framework.ChunkPipeline
 
                 var scheduledForStructures = new PrioritizedBufferStage(
                     "ScheduledForStructures", i++, this, getPriorityOfChunk);
-                ///Add a precondition that all neighbours must have passed the terrain data stage 
-                ///(re-check of the waitForNeighbour condition)
-                scheduledForStructures.ExternalPrecondition = 
-                    (cId) => AllNeighboursMinStageGreaterThan(cId, TerrainDataStage,true);
                 stages.Add(scheduledForStructures);
 
                 var generatingStructures = new GenerateStructuresStage(
                     "GeneratingStructures", i++, this, maxStructurePerUpdate);                
                 stages.Add(generatingStructures);
 
+                ///At this point the chunk has generated all of its own structures.
+                OwnStructuresStage = i;
                 var waitingForAllNeighboursToHaveStructures = new WaitForNeighboursStage(
                     "WaitForNeighbourStructures", i++, this,true);
                 waitingForAllNeighboursToHaveStructures.OnWaitEnded = (id) => {
@@ -102,7 +103,7 @@ namespace UniVox.Framework.ChunkPipeline
             }
 
 
-            AllDataStage = i;
+            FullyGenerated = i;
 
             if (chunkMesher.IsMeshDependentOnNeighbourChunks)
             {
@@ -110,7 +111,6 @@ namespace UniVox.Framework.ChunkPipeline
                 /// to wait until the neighbours of a chunk have their data before
                 /// moving that chunk onwards through the pipeline. Diagonals are included
                 /// in the neighbourhood if structureGen is on.
-                AllDataStage = i;
                 stages.Add(new WaitForNeighboursStage("GotDataWaitingForNeighbours", i++,
                     this, includeDiagonals: structureGen));
             }
@@ -123,12 +123,6 @@ namespace UniVox.Framework.ChunkPipeline
 
             var ScheduledForMesh = new PrioritizedBufferStage("ScheduledForMesh", i++,
                 this, getPriorityOfChunk);
-            if (chunkMesher.IsMeshDependentOnNeighbourChunks)
-            {
-                ///If mesh is dependent on neighbours, add a precondition to enforce this
-                ScheduledForMesh.ExternalPrecondition = (cId) => AllNeighboursMinStageGreaterThan(cId, AllDataStage,
-                    includeDiagonals: structureGen);
-            }
             stages.Add(ScheduledForMesh);
 
             var GeneratingMesh = new GenerateMeshStage("GeneratingMesh", i++,
@@ -150,6 +144,12 @@ namespace UniVox.Framework.ChunkPipeline
             //Final stage
             CompleteStage = i;
             stages.Add(new PassThroughStage("Complete", i++, this));
+
+
+            foreach (var stage in stages)
+            {
+                stage.Initialise();
+            }
         }
 
         /// <summary>
@@ -221,7 +221,7 @@ namespace UniVox.Framework.ChunkPipeline
                         ///Otherwise, the item has been removed from the pipeline and should be discarded, but
                         ///that should have happened earlier than this (it should have terminated, not gone backwards)
                         throw new Exception($"{item} terminated in an unexpected way, it was part of the GoingBackwards list " +
-                            $"when it should have been part of the terminating list");
+                            $"when it should not have been");
                     }
                 }
 
@@ -266,7 +266,7 @@ namespace UniVox.Framework.ChunkPipeline
 
             Assert.IsFalse(chunkStageMap.ContainsKey(chunkId));
 
-            var EnterAtStageId = AllDataStage;
+            var EnterAtStageId = FullyGenerated;
 
             var stageData = new ChunkStageData()
             {
@@ -290,7 +290,11 @@ namespace UniVox.Framework.ChunkPipeline
             CheckLockBeforeExternalOperation();
 
             //TODO remove DEBUG
-            if (targetStage != AllDataStage && targetStage != RenderedStage && targetStage != CompleteStage && targetStage != TerrainDataStage)
+            if (targetStage != FullyGenerated && 
+                targetStage != RenderedStage && 
+                targetStage != CompleteStage && 
+                targetStage != OwnStructuresStage &&
+                targetStage != TerrainDataStage)
             {
                 throw new ArgumentOutOfRangeException("Target stage was not one of the valid target stages");
             }            
@@ -322,12 +326,12 @@ namespace UniVox.Framework.ChunkPipeline
             {
                 var prevMax = stageData.maxStage;
 
-                if (targetStage < AllDataStage && prevMax >= AllDataStage)
+                if (targetStage < FullyGenerated && prevMax >= FullyGenerated)
                 {
-                    ///Do not allow a chunk to be downgraded to a stage lower than AllData if it has
+                    ///Do not allow a chunk to be downgraded to a stage lower than Fully Generated if it has
                     ///already reached or surpassed that stage.
                     ///They may still be created targetting a lower stage, but cannot go backwards
-                    targetStage = AllDataStage;
+                    targetStage = FullyGenerated;
                     //Recursively try to set the target again
                     SetTarget(chunkId, targetStage);
                     return;
@@ -470,29 +474,32 @@ namespace UniVox.Framework.ChunkPipeline
         {
             var thinkWeContain = chunkStageMap.ContainsKey(chunkID);
             var actuallyContain = false;
-            var containingName = "";
+            IPipelineStage containingStage = null;
             foreach (var stage in stages)
             {
                 if (stage.Contains(chunkID))
                 {
                     actuallyContain = true;
-                    containingName = stage.Name;
+                    containingStage = stage;
                     break;
                 }
             }
 
-            //if (thinkWeContain != actuallyContain)
-            //{
-            //    Debug.LogWarning($"Chunk stage map contains id {chunkID} = {thinkWeContain}, any of the stages contain the id = {actuallyContain}." +
-            //    $" Containing stage name if applicable = {containingName}");
-            //}
+            if (!thinkWeContain && actuallyContain)
+            {
+                ///Wait for job stages may still contain items when the stage map does not.
+                ///No other stage is allowed to do this though.                
+                Assert.IsTrue(containingStage is IWaitForJobStage, $"Chunk stage map contains id {chunkID} = {thinkWeContain}, any of the stages contain the id = {actuallyContain}." +
+                $" Containing stage name if applicable = {containingStage.Name}");                   
+                
+            }
 
             return thinkWeContain;
         }
 
         private bool ChunkDataReadable(ChunkStageData stageData)
         {
-            return stageData.minStage >= AllDataStage;
+            return stageData.minStage >= FullyGenerated;
         }
             
 

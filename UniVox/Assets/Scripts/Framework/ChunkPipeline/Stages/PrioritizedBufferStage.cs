@@ -4,6 +4,7 @@ using Priority_Queue;
 using System.Collections.Generic;
 using UnityEngine.Profiling;
 using UnityEngine.Assertions;
+using UniVox.Framework.ChunkPipeline.WaitForNeighbours;
 
 namespace UniVox.Framework.ChunkPipeline
 {
@@ -11,7 +12,7 @@ namespace UniVox.Framework.ChunkPipeline
     /// Stage that buffers items inside it until the next stage can accept them, dispatching them in
     /// a prioritised order.
     /// </summary>
-    public class PrioritizedBufferStage : AbstractPipelineStage
+    public class PrioritizedBufferStage : AbstractPipelineStage,IDisposable
     {
         SimplePriorityQueue<Vector3Int> queue = new SimplePriorityQueue<Vector3Int>();
 
@@ -25,13 +26,7 @@ namespace UniVox.Framework.ChunkPipeline
         /// <summary>
         /// Local list used to assist updating.
         /// </summary>
-        private List<Vector3Int> terminatingThisUpdateHelper = new List<Vector3Int>();
-
-        /// <summary>
-        /// A condition that is assumed to hold for any item in this stage.
-        /// If it is checked and found to be false, the item must go back to the previous stage.
-        /// </summary>
-        public Func<Vector3Int, bool> ExternalPrecondition = (_) => true;        
+        private List<Vector3Int> terminatingThisUpdateHelper = new List<Vector3Int>();      
 
         public PrioritizedBufferStage(string name, int order, 
             IChunkPipeline pipeline,
@@ -39,6 +34,58 @@ namespace UniVox.Framework.ChunkPipeline
             ) : base(name, order, pipeline)
         {
             getPriority = priorityFunc;
+            pipeline.OnChunkRemovedFromPipeline += WhenChunkRemovedFromPipeline;            
+        }
+
+        public override void Initialise()
+        {
+            ///Automatically detect and subscribe to preconditions
+            if (StageID > 0)
+            {
+                var previousStage = pipeline.NextStage(StageID - 1);
+                if (previousStage is WaitForNeighboursStage waitingStage)
+                {
+                    waitingStage.NotifyPreconditionFailure += OnPreconditionFailure;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Unbind events
+        /// </summary>
+        public void Dispose()
+        {
+            pipeline.OnChunkRemovedFromPipeline -= WhenChunkRemovedFromPipeline;
+            if (StageID > 0)
+            {
+                var previousStage = pipeline.NextStage(StageID - 1);
+                if (previousStage is WaitForNeighboursStage waitingStage)
+                {
+                    waitingStage.NotifyPreconditionFailure -= OnPreconditionFailure;
+                }
+            }
+        }
+
+        /// <summary>
+        /// When the precondition for a chunk to be in this stage fails,
+        /// if the chunk is in this stage, send it back.
+        /// </summary>
+        /// <param name="chunkId"></param>
+        private void OnPreconditionFailure(Vector3Int chunkId) 
+        {
+            if (queue.TryRemove(chunkId))
+            {
+                GoingBackwardsThisUpdate.Add(chunkId);
+            }
+        }
+
+        /// <summary>
+        /// Try to remove the chunk id from this stage when a chunk is removed from the pipeline
+        /// </summary>
+        /// <param name="chunkId"></param>
+        private void WhenChunkRemovedFromPipeline(Vector3Int chunkId)
+        {
+            queue.TryRemove(chunkId);
         }
 
         /// <summary>
@@ -56,14 +103,7 @@ namespace UniVox.Framework.ChunkPipeline
                 ///id should terminate here.
                 terminatingThisUpdateHelper.Add(chunkId);
                 return false;
-            }
-            else if (!ExternalPrecondition(chunkId))
-            {
-                ///The external precondion is assumed to be true on entry, if found to be false the 
-                ///chunk must go backwards in the pipline.
-                GoingBackwardsThisUpdate.Add(chunkId);
-                return false;
-            }
+            }            
             return true;
         }
 
@@ -142,6 +182,6 @@ namespace UniVox.Framework.ChunkPipeline
         public override bool Contains(Vector3Int chunkID)
         {
             return queue.Contains(chunkID);
-        }
+        }        
     }
 }

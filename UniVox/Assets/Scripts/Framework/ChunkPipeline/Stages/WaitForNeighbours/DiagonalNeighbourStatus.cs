@@ -29,7 +29,7 @@ namespace UniVox.Framework.ChunkPipeline.WaitForNeighbours
             StringBuilder builder = new StringBuilder();
             for (int i = 0; i < DiagonalDirectionExtensions.numDirections; i++)
             {
-                var dir = (Direction)i;
+                var dir = (DiagonalDirection)i;
                 builder.Append($"{dir}:{bitmask >> i & 1}");
             }
             return builder.ToString();

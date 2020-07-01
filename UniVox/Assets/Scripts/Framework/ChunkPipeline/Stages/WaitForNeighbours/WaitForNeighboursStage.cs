@@ -6,6 +6,8 @@ using Utils;
 
 namespace UniVox.Framework.ChunkPipeline.WaitForNeighbours
 {
+    public delegate void PreconditionFailureHandler(Vector3Int chunkId);
+
     /// <summary>
     /// Stage in which chunks wait for their neighbours to be in this stage or greater before
     /// continuing. Supports both definitions of neighbours; included or excluding diagonals
@@ -18,6 +20,12 @@ namespace UniVox.Framework.ChunkPipeline.WaitForNeighbours
         public override int Count => neighbourStatuses.Count;
         //No entry limit
         public override int EntryLimit => int.MaxValue;
+
+        /// <summary>
+        /// Event that can be subscribed to by subsequent stages that rely on this stage as a
+        /// precondition. This allows them to be notified if the precondition changes.
+        /// </summary>
+        public event PreconditionFailureHandler NotifyPreconditionFailure = delegate { };
 
         /// <summary>
         /// Optional action to perform when the wait for an item has finished
@@ -62,7 +70,7 @@ namespace UniVox.Framework.ChunkPipeline.WaitForNeighbours
                 return;//Will already be dealt with by the Add method
             }
 
-            if (StageID > prevStageId)
+            if (addedAtStage > prevStageId)
             {
                 UpdateStatusOfNeighbours(chunkId, true);
             }
@@ -99,7 +107,7 @@ namespace UniVox.Framework.ChunkPipeline.WaitForNeighbours
 
             if (!TerminateHereCondition(stageData))
             {
-                
+                //Add the incoming chunk if it isn't terminating here
                 if (!neighbourStatuses.ContainsKey(incoming))
                 {
                     //Add if not already present
@@ -107,16 +115,16 @@ namespace UniVox.Framework.ChunkPipeline.WaitForNeighbours
                     neighbourStatuses.Add(incoming, incomingStatus);
 
                     CheckIfWaitOver(incoming, incomingStatus); 
-                }
+                }                
+            }
 
-                if (stageData.minStage > prevStageId)
-                {
-                    ///If the minimum stage of the incoming chunk is greater than the previous stage,
-                    ///update the statuses of the neighbours.
-                    ///Otherwise, there is another instance of the incoming chunk ID earlier in the pipeline
-                    ///that must be waited for instead.
-                    UpdateStatusOfNeighbours(incoming, true);
-                }
+            if (stageData.minStage > prevStageId)
+            {
+                ///If the minimum stage of the incoming chunk is greater than the previous stage,
+                ///update the statuses of the neighbours.
+                ///Otherwise, there is another instance of the incoming chunk ID earlier in the pipeline
+                ///that must be waited for instead.
+                UpdateStatusOfNeighbours(incoming, true);
             }
         }
         
@@ -130,14 +138,16 @@ namespace UniVox.Framework.ChunkPipeline.WaitForNeighbours
                     var neighbourId = chunkId + DiagonalDirectionExtensions.Vectors[i];
                     if (neighbourStatuses.TryGetValue(neighbourId, out var neighbourStatus))
                     {
+                        var directionFromNeighboursPerspective = (int)DiagonalDirectionExtensions.Opposite[i];
                         if (operationIsAdd)
                         {
-                            neighbourStatus.AddNeighbour(i);
+                            neighbourStatus.AddNeighbour(directionFromNeighboursPerspective);
                             CheckIfWaitOver(neighbourId, neighbourStatus);
                         }
                         else
                         {
-                            neighbourStatus.RemoveNeighbour(i);
+                            neighbourStatus.RemoveNeighbour(directionFromNeighboursPerspective);
+                            NotifyPreconditionFailure(neighbourId);
                         }
                     }
                 }
@@ -149,14 +159,16 @@ namespace UniVox.Framework.ChunkPipeline.WaitForNeighbours
                     var neighbourId = chunkId + DirectionExtensions.Vectors[i];
                     if (neighbourStatuses.TryGetValue(neighbourId, out var neighbourStatus))
                     {
+                        var directionFromNeighboursPerspective = (int)DirectionExtensions.Opposite[i];
                         if (operationIsAdd)
                         {
-                            neighbourStatus.AddNeighbour(i);
+                            neighbourStatus.AddNeighbour(directionFromNeighboursPerspective);
                             CheckIfWaitOver(neighbourId, neighbourStatus);
                         }
                         else
                         {
-                            neighbourStatus.RemoveNeighbour(i);
+                            neighbourStatus.RemoveNeighbour(directionFromNeighboursPerspective);
+                            NotifyPreconditionFailure(neighbourId);
                         }
                     }
                 }
@@ -251,16 +263,6 @@ namespace UniVox.Framework.ChunkPipeline.WaitForNeighbours
                 return false;
             }
             return true;
-        }
-
-        /// <summary>
-        /// Terminate if the target stage is not greater than the current stage.
-        /// </summary>
-        /// <param name="chunkId"></param>
-        /// <returns></returns>
-        protected override bool TerminateHereCondition(Vector3Int chunkId)
-        {
-            return !pipeline.TargetStageGreaterThanCurrent(chunkId, StageID);
         }
 
         

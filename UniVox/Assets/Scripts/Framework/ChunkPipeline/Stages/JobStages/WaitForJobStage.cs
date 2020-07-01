@@ -8,7 +8,7 @@ using UniVox.Framework.ChunkPipeline.WaitForNeighbours;
 
 namespace UniVox.Framework.ChunkPipeline
 {
-    public abstract class WaitForJobStage<T> : AbstractPipelineStage, IDisposable
+    public abstract class WaitForJobStage<T> : AbstractPipelineStage, IDisposable,IWaitForJobStage
     {
         Dictionary<Vector3Int, AbstractPipelineJob<T>> jobs = new Dictionary<Vector3Int, AbstractPipelineJob<T>>();
 
@@ -21,8 +21,7 @@ namespace UniVox.Framework.ChunkPipeline
         public override int EntryLimit => MaxInStage - Count;
 
         public WaitForJobStage(string name, int order, IChunkPipeline pipeline, 
-            int maxInStage
-            ) : base(name, order,pipeline)
+            int maxInStage) : base(name, order,pipeline)
         {
             MaxInStage = maxInStage;
         }
@@ -43,7 +42,9 @@ namespace UniVox.Framework.ChunkPipeline
                     if (CheckAndResolvePreconditionsBeforeExit(chunkId))
                     {
                         MovingOnThisUpdate.Add(chunkId);
-                        OnJobDone(chunkId, job.Result); 
+                        OnJobDone(chunkId, job.Result);
+                        //Remove this id from the stage, as it's moving on
+                        removalHelper.Add(chunkId);
                     }
                 }
             }
@@ -111,5 +112,10 @@ namespace UniVox.Framework.ChunkPipeline
         {
             return jobs.ContainsKey(chunkID);
         }
+    }
+
+    public interface IWaitForJobStage 
+    { 
+    
     }
 }

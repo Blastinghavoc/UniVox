@@ -77,6 +77,16 @@ namespace Utils
         Vector3Int.right,
         Vector3Int.left,
         };
+
+        public static readonly Direction[] Opposite = new Direction[]
+        {
+            Direction.down,
+            Direction.up,
+            Direction.south,
+            Direction.north,
+            Direction.west,
+            Direction.east,
+        };
     }
 
     /// <summary>
