@@ -42,18 +42,6 @@ namespace UniVox.Framework.ChunkPipeline
         }
 
         /// <summary>
-        /// As this stage supports waiting, the termination condition is just to do with the
-        /// target stage of the chunkId.
-        /// </summary>
-        /// <param name="chunkId"></param>
-        /// <param name="currentStageId"></param>
-        /// <returns></returns>
-        protected override bool TerminateHereCondition(Vector3Int chunkId)
-        {
-            return !pipeline.TargetStageGreaterThanCurrent(chunkId, StageID);
-        }
-
-        /// <summary>
         /// Checks the preconditions assumed for the chunkId before it can exit the stage.
         /// Also handles resolution of these precondtions.
         /// </summary>
@@ -134,12 +122,19 @@ namespace UniVox.Framework.ChunkPipeline
             terminatingThisUpdateHelper.Clear();
         }
 
-        public override void Add(Vector3Int incoming)
+        public override void Add(Vector3Int incoming,ChunkStageData stageData)
         {
-            if (!TerminateHereCondition(incoming))
+            if (!TerminateHereCondition(stageData))
             {
-                Assert.IsTrue(!queue.Contains(incoming), $"Queue already contained {incoming} in stage {Name}");
-                queue.Enqueue(incoming, getPriority(incoming));
+                if (queue.Contains(incoming))//Update priority if item existed
+                {
+                    queue.UpdatePriority(incoming, getPriority(incoming));
+                }
+                else
+                {//Add to queue otherwise
+                    queue.Enqueue(incoming, getPriority(incoming));
+                }
+
             }
             //incoming terminates here and so does not need to be added to the queue
         }

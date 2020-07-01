@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
+using static UniVox.Framework.ChunkPipeline.ChunkPipelineManager;
 using static UniVox.Framework.ChunkPipeline.IPipelineStage;
 
 namespace UniVox.Framework.ChunkPipeline
@@ -40,13 +41,21 @@ namespace UniVox.Framework.ChunkPipeline
         }
 
         /// <summary>
-        /// Condition under which a chunkId should terminate at this stage
-        /// rather than passing through.
+        /// The condition under which a chunkId should terminate at this stage.
+        /// This only occurs if this stage is at least the target stage for that chunkId.
+        /// (Note that it could be greater if the target stage changed)
         /// </summary>
         /// <param name="chunkId"></param>
-        /// <param name="currentStageId"></param>
         /// <returns></returns>
-        protected abstract bool TerminateHereCondition(Vector3Int chunkId);
+        protected bool TerminateHereCondition(Vector3Int chunkId)
+        {
+            return !pipeline.TargetStageGreaterThanCurrent(chunkId, StageID);
+        }
+
+        protected bool TerminateHereCondition(ChunkStageData stageData)
+        {
+            return !pipeline.TargetStageGreaterThanCurrent(StageID,stageData);
+        }
 
         /// <summary>
         /// Clear the output lists in preparation for next update
@@ -75,19 +84,7 @@ namespace UniVox.Framework.ChunkPipeline
             return !Contains(chunkId);
         }
 
-        /// <summary>
-        /// Utility to add multiple elements
-        /// </summary>
-        /// <param name="incoming"></param>
-        public void AddAll(List<Vector3Int> incoming)
-        {
-            foreach (var item in incoming)
-            {
-                Add(item);
-            }
-        }
-
-        public abstract void Add(Vector3Int incoming);
+        public abstract void Add(Vector3Int incoming, ChunkStageData stageData);
 
         public abstract bool Contains(Vector3Int chunkID);
 

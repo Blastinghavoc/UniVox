@@ -17,8 +17,7 @@ namespace UniVox.Framework.ChunkPipeline
         List<Vector3Int> GoingBackwardsThisUpdate { get; }
         List<Vector3Int> MovingOnThisUpdate { get; }
 
-        void Add(Vector3Int incoming);
-        void AddAll(List<Vector3Int> incoming);
+        void Add(Vector3Int incoming, ChunkStageData stageData);
 
         bool Contains(Vector3Int chunkID);
         public bool FreeFor(Vector3Int chunkId);

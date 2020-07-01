@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using static UniVox.Framework.ChunkPipeline.ChunkPipelineManager;
 using static UniVox.Framework.ChunkPipeline.IPipelineStage;
 
 namespace UniVox.Framework.ChunkPipeline
@@ -21,34 +22,18 @@ namespace UniVox.Framework.ChunkPipeline
         /// </summary>
         public override int EntryLimit { get => int.MaxValue; }        
 
-        /// <summary>
-        /// Condition under which a chunkId should terminate at this stage
-        /// rather than passing through.
-        /// For the passthrough stage, an id terminates if its target stage is not after this one,
-        /// or the next stage cannot accept it. (Note that the passthrough stage has no facility for
-        /// waiting until the next stage can accept it)
-        /// </summary>
-        /// <param name="chunkId"></param>
-        /// <param name="currentStageId"></param>
-        /// <returns></returns>
-        protected override bool TerminateHereCondition(Vector3Int chunkId) 
-        {
-            return !pipeline.TargetStageGreaterThanCurrent(chunkId, StageID) ||
-                !pipeline.NextStageFreeForChunk(chunkId,StageID);
-        }
-
         public PassThroughStage(string name, int stageId,IChunkPipeline pipeline):base(name,stageId,pipeline)
         {
-        }            
+        }
 
         /// <summary>
         /// In a passthrough stage, the incoming chunk either moves on
         /// to the next stage, or immediately terminates here.
         /// </summary>
         /// <param name="incoming"></param>
-        public override void Add(Vector3Int incoming)
+        public override void Add(Vector3Int incoming, ChunkStageData stageData)
         {
-            if (!TerminateHereCondition(incoming))
+            if (!TerminateHereCondition(stageData))
             {
                 MovingOnThisUpdate.Add(incoming);
             }

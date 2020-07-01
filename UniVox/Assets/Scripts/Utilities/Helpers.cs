@@ -97,7 +97,7 @@ namespace Utils
 
         public static IEnumerable<Vector3Int> GetNeighboursDirectOnly(Vector3Int chunkID)
         {
-            foreach (var dir in Directions.IntVectors)
+            foreach (var dir in DirectionExtensions.Vectors)
             {
                 var neighbourID = chunkID + dir;
                 yield return neighbourID;
@@ -106,22 +106,10 @@ namespace Utils
 
         public static IEnumerable<Vector3Int> GetNeighboursIncludingDiagonal(Vector3Int chunkID)
         {
-            for (int i = -1; i <= 1; i++)
+            foreach (var dir in DiagonalDirectionExtensions.Vectors)
             {
-                for (int j = -1; j <= 1; j++)
-                {
-                    for (int k = -1; k <= 1; k++)
-                    {
-                        if (i == 0 && j == 0 && k == 0)
-                        {
-                            //Skip self
-                            continue;
-                        }
-
-                        var id = chunkID + new Vector3Int(i, j, k);
-                        yield return id;
-                    }
-                }
+                var neighbourID = chunkID + dir;
+                yield return neighbourID;
             }
         }
     }

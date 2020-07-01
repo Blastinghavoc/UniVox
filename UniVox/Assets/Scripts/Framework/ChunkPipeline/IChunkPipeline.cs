@@ -12,11 +12,19 @@ namespace UniVox.Framework.ChunkPipeline
         event ChunkAddedHandler OnChunkAddedToPipeline;
         event ChunkMinStageDecreasedHandler OnChunkMinStageDecreased;
 
+        IChunkProvider chunkProvider { get; }
+        Func<Vector3Int, IChunkComponent> getChunkComponent { get; }
+        bool StructureGen { get; }
+        IChunkMesher chunkMesher { get; }
+
         bool NextStageFreeForChunk(Vector3Int chunkID, int currentStage);
 
         bool TargetStageGreaterThanCurrent(Vector3Int chunkID, int currentStage);
+        bool TargetStageGreaterThanCurrent(int currentStage, ChunkStageData stageData);
 
         IPipelineStage NextStage(int currentStage);
-        bool ChunkPassedStage(Vector3Int id, int stageId);
+        bool ChunkMinStageGreaterThan(Vector3Int id, int stageId);
+
+
     }
 }
