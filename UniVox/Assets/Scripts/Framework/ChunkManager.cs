@@ -64,6 +64,9 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
     [Range(1, 100)]
     [SerializeField] protected ushort MaxMeshedPerUpdate = 1;
 
+    //TODO remove DEBUG
+    [SerializeField] protected bool DebugPipeline = false;
+
     #endregion
 
 
@@ -152,6 +155,14 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
             UpdatePlayerArea();
         }
 
+        //TODO remove DEBUG
+        pipeline.DebugMode = DebugPipeline;
+        if (DebugPipeline)
+        {
+            //Activates the pipeline debug for one frame only.
+            DebugPipeline = false;
+        }
+
         pipeline.Update();
 
         if (!loadedChunks.TryGetValue(playerChunkID, out var chunkComponent) ||
@@ -198,11 +209,13 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
         Profiler.BeginSample("UpdatePlayArea");
 
         //Deactivate any chunks that are outside the maximum radius
+        Profiler.BeginSample("DetectAndDeactivateChunks");
         var deactivate = loadedChunks.Select((pair) => pair.Key)
             .Where((id) => !InsideChunkRadius(id, MaximumActiveRadii))
             .ToList();
 
         deactivate.ForEach(DeactivateChunk);
+        Profiler.EndSample();
 
         for (int x = -MaximumActiveRadii.x; x <= MaximumActiveRadii.x; x++)
         {
@@ -298,6 +311,7 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
     /// <param name="targetStage"></param>
     protected void SetTargetStageOfChunk(Vector3Int chunkID, int targetStage)
     {
+        Profiler.BeginSample("SetTargetStageOfChunk");
         bool outOfWorld = false;
         if (chunkID.y > MaxChunkY || chunkID.y < MinChunkY)
         {
@@ -315,6 +329,7 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
             else
             {
                 ///Chunks further outside the vertical range may not exist
+                Profiler.EndSample();
                 return;
             }
         }
@@ -322,6 +337,8 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
 
         if (!loadedChunks.TryGetValue(chunkID, out var ChunkComponent))
         {
+            Profiler.BeginSample("CreatingChunkComponent");
+
             //Get a new Chunk GameObject to house the generated Chunk data.
             var ChunkObject = chunkPool.Next(transform);
             ChunkComponent = ChunkObject.GetComponent<ChunkComponent>();
@@ -347,12 +364,13 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
                 pipeline.Add(chunkID, targetStage);
             }
 
+            Profiler.EndSample();
+            Profiler.EndSample();
             return;
-
         }
 
         pipeline.SetTarget(chunkID, targetStage);
-
+        Profiler.EndSample();
     }
 
     /// <summary>

@@ -3,14 +3,15 @@ using UnityEngine;
 
 namespace UniVox.Framework.ChunkPipeline
 {
-    public delegate void ChunkRemovedHandler(Vector3Int chunkId);
-    public delegate void ChunkAddedHandler(Vector3Int chunkId,int addedAtStage);
-    public delegate void ChunkMinStageDecreasedHandler(Vector3Int chunkId,int newMinStage);
     public interface IChunkPipeline 
     {
-        event ChunkRemovedHandler OnChunkRemovedFromPipeline;
-        event ChunkAddedHandler OnChunkAddedToPipeline;
-        event ChunkMinStageDecreasedHandler OnChunkMinStageDecreased;
+        event Action<Vector3Int> OnChunkRemovedFromPipeline;
+        //args: id, added at stage
+        event Action<Vector3Int,int> OnChunkAddedToPipeline;
+        //args: id, new min stage
+        event Action<Vector3Int, int> OnChunkMinStageDecreased;
+        //args: id, new target stage
+        event Action<Vector3Int, int> OnChunkTargetStageDecreased;
 
         IChunkProvider chunkProvider { get; }
         Func<Vector3Int, IChunkComponent> getChunkComponent { get; }

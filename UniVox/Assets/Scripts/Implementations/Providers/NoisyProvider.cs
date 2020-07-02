@@ -1,22 +1,19 @@
-﻿using UnityEngine;
-using System.Collections;
-using UniVox.Framework;
-using UniVox.Implementations.ChunkData;
-using Utils.Noise;
-using System;
-using Unity.Mathematics;
+﻿using System;
+using System.Collections.Generic;
 using Unity.Collections;
+using Unity.Jobs;
+using Unity.Mathematics;
+using UnityEngine;
+using UnityEngine.Assertions;
+using UnityEngine.Profiling;
+using UniVox.Framework;
 using UniVox.Framework.ChunkPipeline.VirtualJobs;
 using UniVox.Framework.Jobified;
-using UnityEngine.Profiling;
+using UniVox.Implementations.ChunkData;
 using UniVox.Implementations.ProcGen;
-using UnityEngine.Assertions;
-using System.Net.NetworkInformation;
-using System.Collections.Generic;
+using Utils.Noise;
 using static UniVox.Framework.FrameworkEventManager;
 using static UniVox.Implementations.ProcGen.ChunkColumnNoiseMaps;
-using Unity.Jobs;
-using System.Threading;
 
 namespace UniVox.Implementations.Providers
 {
@@ -84,7 +81,7 @@ namespace UniVox.Implementations.Providers
             usingPending = new Dictionary<Vector2Int, int>();
 
             structureGenerator = new StructureGenerator();
-            structureGenerator.Initalise(voxelTypeManager,biomeDatabaseComponent,treeSettings.TreeThreshold,(int)treemapNoise.Seed);
+            structureGenerator.Initalise(voxelTypeManager, biomeDatabaseComponent, treeSettings.TreeThreshold, (int)treemapNoise.Seed);
 
             eventManager.OnChunkDeactivated += OnChunkDeactivated;
         }
@@ -106,7 +103,7 @@ namespace UniVox.Implementations.Providers
                 noiseMaps.Remove(new Vector2Int(args.chunkID.x, args.chunkID.z));
                 var (managerHas, pipelineHas) = chunkManager.ContainsChunkID(args.chunkID);
                 //TODO remove DEBUG
-                Assert.IsTrue((!managerHas && !pipelineHas),$"When removing a noisemap, both the pipeline and the chunk" +
+                Assert.IsTrue((!managerHas && !pipelineHas), $"When removing a noisemap, both the pipeline and the chunk" +
                     $" manager should have removed the corresponding id {args.chunkID}." +
                     $"Manager had it = {managerHas}, pipeline had it = {pipelineHas}");
             }
@@ -249,7 +246,7 @@ namespace UniVox.Implementations.Providers
                         }
                         catch (Exception e)
                         {
-                            throw new Exception($"Error trying to dispose of noise maps for column {columnId}. Count was {count}.",e);
+                            throw new Exception($"Error trying to dispose of noise maps for column {columnId}. Count was {count}.", e);
                         }
                     }
                 }
@@ -296,12 +293,12 @@ namespace UniVox.Implementations.Providers
         {
             Assert.IsTrue(neighbourhood.HasDiagonals);
 
-            if (noiseMaps.TryGetValue(new Vector2Int(centerChunkID.x,centerChunkID.z),out var chunkColumnNoise))
+            if (noiseMaps.TryGetValue(new Vector2Int(centerChunkID.x, centerChunkID.z), out var chunkColumnNoise))
             {
-                return new BasicFunctionJob<ChunkNeighbourhood>(() => 
+                return new BasicFunctionJob<ChunkNeighbourhood>(() =>
                     {
-                        return structureGenerator.generateTrees(chunkManager.ChunkToWorldPosition(centerChunkID),chunkManager.ChunkDimensions,neighbourhood,chunkColumnNoise);
-                    }  
+                        return structureGenerator.generateTrees(chunkManager.ChunkToWorldPosition(centerChunkID), chunkManager.ChunkDimensions, neighbourhood, chunkColumnNoise);
+                    }
                 );
 
             }

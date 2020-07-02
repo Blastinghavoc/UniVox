@@ -21,9 +21,13 @@ namespace UniVox.Framework.ChunkPipeline
 
         public Func<Vector3Int, IChunkComponent> getChunkComponent { get; private set; }
 
-        public event ChunkRemovedHandler OnChunkRemovedFromPipeline = delegate { };
-        public event ChunkAddedHandler OnChunkAddedToPipeline = delegate { };
-        public event ChunkMinStageDecreasedHandler OnChunkMinStageDecreased = delegate { };
+        public event Action<Vector3Int> OnChunkRemovedFromPipeline = delegate { };
+        //args: id, added at stage
+        public event Action<Vector3Int, int> OnChunkAddedToPipeline = delegate { };
+        //args: id, new min stage
+        public event Action<Vector3Int, int> OnChunkMinStageDecreased = delegate { };
+        //args: id, new target stage
+        public event Action<Vector3Int, int> OnChunkTargetStageDecreased = delegate { };
 
         //Possible target stages
         //This stage indicates the chunk has all the terrain data, but no "structures" like trees
@@ -34,6 +38,9 @@ namespace UniVox.Framework.ChunkPipeline
         public int FullyGeneratedStage { get; private set; }
         public int RenderedStage { get; private set; }
         public int CompleteStage { get; private set; }
+
+        //TODO remove DEBUG
+        public bool DebugMode = false;
 
         public IChunkProvider chunkProvider { get; private set; }
         public IChunkMesher chunkMesher{ get; private set; }
@@ -173,6 +180,8 @@ namespace UniVox.Framework.ChunkPipeline
                     var nextStageIndex = stageIndex + 1;
                     var nextStage = stages[nextStageIndex];
 
+                    Profiler.BeginSample("MovingInto"+nextStage.Name);
+
                     foreach (var item in movingOn)
                     {
                         if (chunkStageMap.TryGetValue(item, out var stageData))
@@ -189,6 +198,8 @@ namespace UniVox.Framework.ChunkPipeline
                             throw new Exception("Tried to move a chunk id that does not exist to the next pipeline stage");
                         }
                     }
+
+                    Profiler.EndSample();
                 }
 
                 var goingBackwards = stage.GoingBackwardsThisUpdate;
@@ -229,6 +240,15 @@ namespace UniVox.Framework.ChunkPipeline
             }
             updateLock = false;
             Profiler.EndSample();
+
+            if (DebugMode)
+            {
+                foreach (var item in chunkStageMap)
+                {
+                    var Component = getChunkComponent(item.Key);
+                    Component.SetPipelineStagesDebug(item.Value);
+                }
+            }
 
         }
 
@@ -371,6 +391,9 @@ namespace UniVox.Framework.ChunkPipeline
                     */
                 }
 
+                Profiler.BeginSample("ChunkTargetDecreasedEvent");
+                OnChunkTargetStageDecreased(chunkId, stageData.targetStage);
+                Profiler.EndSample();
             }            
 
         }        

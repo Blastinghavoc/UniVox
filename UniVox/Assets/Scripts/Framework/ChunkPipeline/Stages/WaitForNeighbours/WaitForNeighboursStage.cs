@@ -49,6 +49,7 @@ namespace UniVox.Framework.ChunkPipeline.WaitForNeighbours
             pipeline.OnChunkAddedToPipeline += WhenChunkAddedToPipeline;
             pipeline.OnChunkRemovedFromPipeline += WhenChunkRemovedFromPipeline;
             pipeline.OnChunkMinStageDecreased += WhenChunkMinStageDecreased;
+            pipeline.OnChunkTargetStageDecreased += WhenChunkTargetStageDecreased;
         }
 
         public void Dispose()
@@ -56,6 +57,21 @@ namespace UniVox.Framework.ChunkPipeline.WaitForNeighbours
             pipeline.OnChunkAddedToPipeline -= WhenChunkAddedToPipeline;
             pipeline.OnChunkRemovedFromPipeline -= WhenChunkRemovedFromPipeline;
             pipeline.OnChunkMinStageDecreased -= WhenChunkMinStageDecreased;
+            pipeline.OnChunkTargetStageDecreased -= WhenChunkTargetStageDecreased;
+        }
+
+        /// <summary>
+        /// When the target stage of a chunk decreased, if it should now terminate
+        /// here, stop tracking it.
+        /// </summary>
+        /// <param name="chunkId"></param>
+        /// <param name="newTarget"></param>
+        private void WhenChunkTargetStageDecreased(Vector3Int chunkId, int newTarget) 
+        {
+            if (TerminateHereCondition(newTarget))
+            {
+                neighbourStatuses.Remove(chunkId);
+            }
         }
 
         /// <summary>

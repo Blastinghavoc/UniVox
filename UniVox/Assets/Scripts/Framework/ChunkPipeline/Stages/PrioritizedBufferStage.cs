@@ -152,7 +152,9 @@ namespace UniVox.Framework.ChunkPipeline
                 queue.Remove(item);
             }
 
-            //Items in the going backwards list have already been removed from the queue
+            ///Items in the going backwards list have already been removed from the queue,
+            ///but we need to make sure they should really be going backwards, not just terminating
+            GoingBackwardsThisUpdate.RemoveAll((id) => TerminateHereCondition(id));
 
             //Clear the terminating helper list
             terminatingThisUpdateHelper.Clear();

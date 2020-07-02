@@ -8,6 +8,7 @@ using UniVox.Framework;
 using UniVox.Framework.ChunkPipeline;
 using UniVox.Framework.ChunkPipeline.VirtualJobs;
 using UniVox.Implementations.ChunkData;
+using Utils;
 
 namespace Tests
 {
@@ -120,6 +121,12 @@ namespace Tests
                 CollisionMesh = mesh;
             }
 
+            //TODO remove DEBUG
+            public void SetPipelineStagesDebug(ChunkStageData chunkStageData)
+            {
+                throw new NotImplementedException();
+            }
+
             public void SetRenderMesh(MeshDescriptor meshDesc)
             {
                 RenderMesh = meshDesc.mesh;
@@ -184,7 +191,7 @@ namespace Tests
                 );
         }
 
-        private void AddOrUpdateTarget(Vector3Int chunkId, int targetStage,bool increaseOnly=false)
+        private void AddOrUpdateTarget(Vector3Int chunkId, int targetStage, bool increaseOnly = false)
         {
             if (mockComponentStorage.ContainsKey(chunkId))
             {
@@ -196,7 +203,7 @@ namespace Tests
                         pipeline.SetTarget(chunkId, targetStage);
                     }
                 }
-                else 
+                else
                 {
                     pipeline.SetTarget(chunkId, targetStage);
                 }
@@ -263,7 +270,7 @@ namespace Tests
                         if (radiusTest(offset, fullyGeneratedRadius))
                         {
                             //This chunk should be fully generated including structures
-                            AddOrUpdateTarget(id, pipeline.FullyGeneratedStage,true);
+                            AddOrUpdateTarget(id, pipeline.FullyGeneratedStage, true);
                             //Debug.Log($"Set {id} target to FullyGenerated");
                         }
                         else if (radiusTest(offset, structureRadius))
@@ -714,6 +721,67 @@ namespace Tests
             //test id should be in the start stage, with its min and max correct
             AssertChunkStages(testId, 0, 0, pipeline.CompleteStage);
 
+        }
+
+        [Test]
+        public void TargetSetToMaxWhileWaiting()
+        {
+            MakePipeline(1, 1, 1);
+
+            var testId = new Vector3Int(0, 0, 0);
+            mockAddNewChunkWithTarget(testId, pipeline.CompleteStage);
+
+            pipeline.Update();
+
+            //Ends up waiting for neighbours.
+            AssertChunkStages(testId, pipeline.FullyGeneratedStage, pipeline.FullyGeneratedStage, pipeline.CompleteStage);
+
+            //Set target to the stage the chunk is in
+            pipeline.SetTarget(testId, pipeline.FullyGeneratedStage);
+
+            pipeline.Update();
+
+            AssertChunkStages(testId, pipeline.FullyGeneratedStage);
+            //The waiting stage should no longe be tracking the id
+            var stage = pipeline.GetStage(pipeline.FullyGeneratedStage);
+            Assert.AreEqual(0, stage.Count, "Waiting stage still tracking id whose target is that stage");
+        }
+
+        /// <summary>
+        /// Tests that when an item is removed from the pipeline while in a
+        /// prioritized buffer stage immediately after one of its neighbours
+        /// was also removed, the item should not be in the going backwards list,
+        /// it should terminate.
+        /// This is in response to a bug found on day 32.
+        /// </summary>
+        [Test]
+        public void RemovedWhileScheduledAfterPreconditionFailed()
+        {
+            MakePipeline(200, 1, 1);
+
+            var testId = new Vector3Int(2, 0, 0);
+            var higherPri = new Vector3Int(0, 0, 0);
+
+            mockAddNewChunkWithTarget(testId, pipeline.RenderedStage);
+            AddAllDependenciesNecessaryForChunkToGetToStage(testId, pipeline.RenderedStage);
+            mockAddNewChunkWithTarget(higherPri, pipeline.RenderedStage);
+            AddAllDependenciesNecessaryForChunkToGetToStage(higherPri, pipeline.RenderedStage);
+
+            pipeline.Update();
+
+            AssertChunkStages(higherPri, pipeline.RenderedStage);
+            var scheduledForMeshStage = pipeline.FullyGeneratedStage + 1;
+            //Test id is now scheduled for mesh
+            AssertChunkStages(testId, scheduledForMeshStage, scheduledForMeshStage, pipeline.RenderedStage);
+
+            //Remove the neighbour of the test id
+            pipeline.RemoveChunk(testId + DirectionExtensions.Vectors[(int)Direction.up]);
+            //Remove the test id itself
+            pipeline.RemoveChunk(testId);
+
+            ///This would throw an exception if the testId did not terminate correctly (i.e, if it was in the 
+            ///going backwards list instead of simply terminatin)
+            pipeline.Update();
         }
 
         /// <summary>

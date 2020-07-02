@@ -1,5 +1,6 @@
 ﻿namespace UniVox.Framework.ChunkPipeline
 {
+    [System.Serializable]
     public class ChunkStageData
     {
         public int maxStage = 0;
