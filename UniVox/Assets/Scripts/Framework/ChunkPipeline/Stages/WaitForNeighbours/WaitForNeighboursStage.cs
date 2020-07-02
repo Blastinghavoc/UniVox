@@ -146,9 +146,12 @@ namespace UniVox.Framework.ChunkPipeline.WaitForNeighbours
                         }
                         else
                         {
-                            neighbourStatus.RemoveNeighbour(directionFromNeighboursPerspective);
-                            NotifyPreconditionFailure(neighbourId);
+                            neighbourStatus.RemoveNeighbour(directionFromNeighboursPerspective);                            
                         }
+                    }
+                    if (!operationIsAdd)
+                    {
+                        NotifyPreconditionFailure(neighbourId);
                     }
                 }
             }
@@ -168,8 +171,11 @@ namespace UniVox.Framework.ChunkPipeline.WaitForNeighbours
                         else
                         {
                             neighbourStatus.RemoveNeighbour(directionFromNeighboursPerspective);
-                            NotifyPreconditionFailure(neighbourId);
                         }
+                    }
+                    if (!operationIsAdd)
+                    {
+                        NotifyPreconditionFailure(neighbourId);
                     }
                 }
             }

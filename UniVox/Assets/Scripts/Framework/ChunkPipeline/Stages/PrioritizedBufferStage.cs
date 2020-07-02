@@ -42,7 +42,7 @@ namespace UniVox.Framework.ChunkPipeline
             ///Automatically detect and subscribe to preconditions
             if (StageID > 0)
             {
-                var previousStage = pipeline.NextStage(StageID - 1);
+                var previousStage = pipeline.GetStage(StageID - 1);
                 if (previousStage is WaitForNeighboursStage waitingStage)
                 {
                     waitingStage.NotifyPreconditionFailure += OnPreconditionFailure;
@@ -58,7 +58,7 @@ namespace UniVox.Framework.ChunkPipeline
             pipeline.OnChunkRemovedFromPipeline -= WhenChunkRemovedFromPipeline;
             if (StageID > 0)
             {
-                var previousStage = pipeline.NextStage(StageID - 1);
+                var previousStage = pipeline.GetStage(StageID - 1);
                 if (previousStage is WaitForNeighboursStage waitingStage)
                 {
                     waitingStage.NotifyPreconditionFailure -= OnPreconditionFailure;
@@ -111,7 +111,8 @@ namespace UniVox.Framework.ChunkPipeline
         {
             base.Update();
 
-            int maxToMoveOn = pipeline.NextStage(StageID).EntryLimit;
+            //Get next stage's entry limit
+            int maxToMoveOn = pipeline.GetStage(StageID+1).EntryLimit;
 
             int movedOn = 0;
 
@@ -151,12 +152,7 @@ namespace UniVox.Framework.ChunkPipeline
                 queue.Remove(item);
             }
 
-            //Remove items from the queue when the go backwards
-            foreach (var item in GoingBackwardsThisUpdate)
-            {
-                queue.Remove(item);
-            }
-
+            //Items in the going backwards list have already been removed from the queue
 
             //Clear the terminating helper list
             terminatingThisUpdateHelper.Clear();

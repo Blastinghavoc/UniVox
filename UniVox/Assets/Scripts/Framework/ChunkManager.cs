@@ -24,7 +24,7 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
 
     [SerializeField] protected Vector3Int collidableChunksRadii;
     [SerializeField] protected Vector3Int renderedChunksRadii;
-    protected Vector3Int dataChunksRadii;
+    protected Vector3Int fullyGeneratedRadii;
     protected Vector3Int structureChunksRadii;
     public Vector3Int MaximumActiveRadii { get; private set; }
 
@@ -87,11 +87,11 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
             "The rendering radii must be at least as large as the collidable radii");
 
         //Chunks can exist as just data one chunk further away than the rendered chunks
-        dataChunksRadii = renderedChunksRadii + new Vector3Int(1, 1, 1);
-        MaximumActiveRadii = dataChunksRadii;
+        fullyGeneratedRadii = renderedChunksRadii + new Vector3Int(1, 1, 1);
+        MaximumActiveRadii = fullyGeneratedRadii;
         if (GenerateStructures)
         {
-            structureChunksRadii = dataChunksRadii + new Vector3Int(1, 1, 1);
+            structureChunksRadii = fullyGeneratedRadii + new Vector3Int(1, 1, 1);
             //Extra radius for just terrain data.
             MaximumActiveRadii = structureChunksRadii + new Vector3Int(1, 1, 1);
         }
@@ -220,7 +220,7 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
                     {
                         SetTargetStageOfChunk(chunkID, pipeline.RenderedStage);//Request that this chunk should be rendered
                     }
-                    else if (InsideChunkRadius(chunkID, dataChunksRadii))
+                    else if (InsideChunkRadius(chunkID, fullyGeneratedRadii))
                     {
                         //This chunk should be fully generated including structures
                         SetTargetStageOfChunk(chunkID, pipeline.FullyGeneratedStage);
@@ -622,11 +622,11 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
 
     public bool AllChunksInTargetState()
     {
-        for (int x = -dataChunksRadii.x; x <= dataChunksRadii.x; x++)
+        for (int x = -fullyGeneratedRadii.x; x <= fullyGeneratedRadii.x; x++)
         {
-            for (int y = -dataChunksRadii.y; y <= dataChunksRadii.y; y++)
+            for (int y = -fullyGeneratedRadii.y; y <= fullyGeneratedRadii.y; y++)
             {
-                for (int z = -dataChunksRadii.z; z <= dataChunksRadii.z; z++)
+                for (int z = -fullyGeneratedRadii.z; z <= fullyGeneratedRadii.z; z++)
                 {
                     var chunkID = playerChunkID + new Vector3Int(x, y, z);
 

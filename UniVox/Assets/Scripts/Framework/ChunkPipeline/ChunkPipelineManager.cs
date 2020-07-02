@@ -38,7 +38,7 @@ namespace UniVox.Framework.ChunkPipeline
         public IChunkProvider chunkProvider { get; private set; }
         public IChunkMesher chunkMesher{ get; private set; }
 
-        public bool StructureGen { get; private set; }
+        public bool GenerateStructures { get; private set; }
 
         /// <summary>
         /// Used to detect whether the pipeline is currently updating, and
@@ -59,7 +59,7 @@ namespace UniVox.Framework.ChunkPipeline
             this.getChunkComponent = getChunkComponent;
             this.chunkProvider = chunkProvider;
             this.chunkMesher = chunkMesher;
-            this.StructureGen = structureGen;
+            this.GenerateStructures = structureGen;
 
             int i = 0;
 
@@ -307,23 +307,27 @@ namespace UniVox.Framework.ChunkPipeline
             {
                 //If targets equal, no work to be done
                 return;
-            }
+            }                        
 
             //Upgrade
             if (targetStage > prevTarget)
             {
-                if (stageData.WorkInProgress)
+                if (stageData.WorkInProgress)//Have to check work in progress against the old target
                 {
                     //The existing work will reach the new target
+                    //Set new target stage
+                    stageData.targetStage = targetStage;
                 }
                 else
                 {
+                    //Set new target stage
+                    stageData.targetStage = targetStage;
                     //Must restart work from previous max
                     ReenterAtStage(chunkId, stageData.maxStage, stageData);
                 }
             }
             else if (targetStage < prevTarget)
-            {
+            {            
                 var prevMax = stageData.maxStage;
 
                 if (targetStage < FullyGeneratedStage && prevMax >= FullyGeneratedStage)
@@ -336,6 +340,9 @@ namespace UniVox.Framework.ChunkPipeline
                     SetTarget(chunkId, targetStage);
                     return;
                 }
+
+                //Set new target stage
+                stageData.targetStage = targetStage;
 
                 var newMax = Math.Min(targetStage, stageData.maxStage);
                 stageData.maxStage = newMax;
@@ -364,9 +371,7 @@ namespace UniVox.Framework.ChunkPipeline
                     */
                 }
 
-            }
-
-            stageData.targetStage = targetStage;
+            }            
 
         }        
 
@@ -623,9 +628,9 @@ namespace UniVox.Framework.ChunkPipeline
             return sb.ToString();
         }
 
-        public IPipelineStage NextStage(int currentStage)
+        public IPipelineStage GetStage(int stageIndex)
         {
-            return stages[currentStage + 1];            
+            return stages[stageIndex];            
         }
 
     }

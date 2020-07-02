@@ -1,15 +1,12 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using NUnit.Framework.Internal;
+using System;
+using System.Collections.Generic;
 using UnityEditor.SceneManagement;
 using UnityEngine;
-using UnityEngine.TestTools;
 using UniVox.Framework;
 using UniVox.Framework.ChunkPipeline;
 using UniVox.Framework.ChunkPipeline.VirtualJobs;
-using UniVox.Framework.Jobified;
 using UniVox.Implementations.ChunkData;
 
 namespace Tests
@@ -22,7 +19,7 @@ namespace Tests
 
             Func<Vector3Int, MockChunkComponent> mockGetComponent;
 
-            public MockMesher(Func<Vector3Int,MockChunkComponent> mockGetComponent) 
+            public MockMesher(Func<Vector3Int, MockChunkComponent> mockGetComponent)
             {
                 this.mockGetComponent = mockGetComponent;
             }
@@ -34,11 +31,12 @@ namespace Tests
 
             public AbstractPipelineJob<MeshDescriptor> CreateMeshJob(Vector3Int chunkID)
             {
-                return new BasicFunctionJob<MeshDescriptor>(() => 
-                new MeshDescriptor() {                
-                    mesh= CreateMesh(mockGetComponent(chunkID).Data)
+                return new BasicFunctionJob<MeshDescriptor>(() =>
+                new MeshDescriptor()
+                {
+                    mesh = CreateMesh(mockGetComponent(chunkID).Data)
                 }
-                
+
                 );
             }
 
@@ -46,7 +44,7 @@ namespace Tests
             {
                 return new BasicFunctionJob<Mesh>(() =>
                 CreateMesh(mockGetComponent(chunkID).Data)
-                ); 
+                );
             }
 
             public void Initialise(VoxelTypeManager voxelTypeManager, IChunkManager chunkManager, FrameworkEventManager eventManager)
@@ -124,7 +122,7 @@ namespace Tests
 
             public void SetRenderMesh(MeshDescriptor meshDesc)
             {
-                RenderMesh = meshDesc.mesh;                
+                RenderMesh = meshDesc.mesh;
             }
         }
 
@@ -134,18 +132,18 @@ namespace Tests
 
         Dictionary<Vector3Int, MockChunkComponent> mockComponentStorage;
 
-        MockChunkComponent mockGetComponent(Vector3Int id) 
+        MockChunkComponent mockGetComponent(Vector3Int id)
         {
             return mockComponentStorage[id];
         }
 
-        void mockAddNewChunkWithTarget(Vector3Int id, int target) 
+        void mockAddNewChunkWithTarget(Vector3Int id, int target)
         {
-            mockComponentStorage.Add(id, new MockChunkComponent() { ChunkID = id});
+            mockComponentStorage.Add(id, new MockChunkComponent() { ChunkID = id });
             pipeline.Add(id, target);
         }
 
-        void mockRemoveChunk(Vector3Int id) 
+        void mockRemoveChunk(Vector3Int id)
         {
             pipeline.RemoveChunk(id);
             mockComponentStorage.Remove(id);
@@ -171,7 +169,7 @@ namespace Tests
             mockPlayChunkID = Vector3Int.zero;
         }
 
-        private void MakePipeline(int numData, int numMesh, int numCollision, bool makeStructures = false, int numStructures = 200) 
+        private void MakePipeline(int numData, int numMesh, int numCollision, bool makeStructures = false, int numStructures = 200)
         {
             pipeline = new ChunkPipelineManager(
                 mockProvider,
@@ -184,13 +182,24 @@ namespace Tests
                 makeStructures,
                 numStructures
                 );
-        }        
+        }
 
-        private void AddOrUpdateTarget(Vector3Int chunkId, int targetStage) 
+        private void AddOrUpdateTarget(Vector3Int chunkId, int targetStage,bool increaseOnly=false)
         {
             if (mockComponentStorage.ContainsKey(chunkId))
             {
-                pipeline.SetTarget(chunkId, targetStage);
+                if (increaseOnly)
+                {
+                    if (pipeline.GetTargetStage(chunkId) < targetStage)
+                    {
+                        //Only set target if it would be an increase
+                        pipeline.SetTarget(chunkId, targetStage);
+                    }
+                }
+                else 
+                {
+                    pipeline.SetTarget(chunkId, targetStage);
+                }
             }
             else
             {
@@ -198,25 +207,34 @@ namespace Tests
             }
         }
 
-        private void AddAllDependenciesNecessaryForChunkToGetToStage(Vector3Int chunkId, int targetStage) 
+        private void AddAllDependenciesNecessaryForChunkToGetToStage(Vector3Int chunkId, int targetStage)
         {
+
             int terrainRadius = 0;
-            int allDataRadius = 0;
-            bool includeDiagonals = pipeline.StructureGen;
+            int structureRadius = 0;
+            int fullyGeneratedRadius = 0;
+            bool includeDiagonals = pipeline.GenerateStructures;
+
             if (targetStage > pipeline.TerrainDataStage)
             {
                 terrainRadius++;
             }
+            if (targetStage > pipeline.OwnStructuresStage && pipeline.GenerateStructures)
+            {
+                terrainRadius++;
+                structureRadius++;
+            }
             if (targetStage > pipeline.FullyGeneratedStage)
             {
-                if (pipeline.StructureGen)
+                if (pipeline.GenerateStructures)
                 {
-                    terrainRadius++;   
+                    terrainRadius++;
+                    structureRadius++;
                 }
-                allDataRadius++;
+                fullyGeneratedRadius++;
             }
 
-            Func<Vector3Int, int,bool> radiusTest = (offset,radius)=> offset.All((v) => Math.Abs(v) <= radius);
+            Func<Vector3Int, int, bool> radiusTest = (offset, radius) => offset.All((v) => Math.Abs(v) <= radius);
 
             if (!includeDiagonals)
             {
@@ -234,31 +252,38 @@ namespace Tests
                 {
                     for (int x = -terrainRadius; x <= terrainRadius; x++)
                     {
-                        var offset = new Vector3Int(x, y, z);                       
+                        var offset = new Vector3Int(x, y, z);
 
-                        if (offset.All((v)=>v==0))
+                        if (offset.All((v) => v == 0))
                         {
                             continue;//skip center chunk
                         }
 
                         var id = chunkId + offset;
-                        if (radiusTest(offset,allDataRadius))
+                        if (radiusTest(offset, fullyGeneratedRadius))
                         {
-                            AddOrUpdateTarget(id, pipeline.FullyGeneratedStage);
-                            Debug.Log($"Set {id} target to AllData");
+                            //This chunk should be fully generated including structures
+                            AddOrUpdateTarget(id, pipeline.FullyGeneratedStage,true);
+                            //Debug.Log($"Set {id} target to FullyGenerated");
                         }
-                        else if (radiusTest(offset,terrainRadius))
+                        else if (radiusTest(offset, structureRadius))
                         {
-                            AddOrUpdateTarget(id, pipeline.TerrainDataStage);
-                            Debug.Log($"Set {id} target to TerrainData");
+                            AddOrUpdateTarget(id, pipeline.OwnStructuresStage, true);
+                            //Debug.Log($"Set {id} target to OwnStructures");
+                        }
+                        else if (radiusTest(offset, terrainRadius))
+                        {
+                            //Request that this chunk should be just terrain data, no structures
+                            AddOrUpdateTarget(id, pipeline.TerrainDataStage, true);
+                            //Debug.Log($"Set {id} target to TerrainData");
                         }
                     }
                 }
             }
         }
 
-        [Test] 
-        public void CompletePassNoChunkDependenciesNoStructures() 
+        [Test]
+        public void CompletePassNoChunkDependenciesNoStructures()
         {
             mockMesher.IsMeshDependentOnNeighbourChunks = false;
             MakePipeline(6, 1, 1);
@@ -270,13 +295,11 @@ namespace Tests
             pipeline.Update();
 
             //Chunk passes the whole way through
-            Assert.AreEqual(pipeline.CompleteStage,pipeline.GetMaxStage(testChunkID));
-            Assert.AreEqual(pipeline.CompleteStage,pipeline.GetTargetStage(testChunkID));
-            Assert.AreEqual(pipeline.CompleteStage,pipeline.GetMinStage(testChunkID));
+            AssertChunkStages(testChunkID, pipeline.CompleteStage);
         }
 
         [Test]
-        public void CompletePassNoStructures() 
+        public void CompletePassNoStructures()
         {
             MakePipeline(20, 1, 1);
 
@@ -302,7 +325,7 @@ namespace Tests
         [Test]
         public void CompletePass()
         {
-            MakePipeline(1000, 1, 1,true);
+            MakePipeline(1000, 1, 1, true);
 
             var testChunkID = new Vector3Int(0, 0, 0);
 
@@ -324,13 +347,14 @@ namespace Tests
         }
 
         [Test]
-        public void SetTargetHigherThanCurrentNoWIP() 
+        public void SetTargetHigherThanCurrentNoWIP()
         {
-            MakePipeline(6, 1, 1);
+            MakePipeline(1000, 1, 1);
 
             var testChunkID = new Vector3Int(0, 0, 0);
 
             mockAddNewChunkWithTarget(testChunkID, pipeline.RenderedStage);
+            AddAllDependenciesNecessaryForChunkToGetToStage(testChunkID, pipeline.RenderedStage);
 
             pipeline.Update();
 
@@ -339,93 +363,65 @@ namespace Tests
 
             pipeline.Update();
             //Further updates do not take the chunk higher than its target stage
-            Assert.AreEqual(pipeline.RenderedStage, pipeline.GetMaxStage(testChunkID));
-            Assert.AreEqual(pipeline.RenderedStage, pipeline.GetTargetStage(testChunkID));
-            Assert.AreEqual(pipeline.RenderedStage, pipeline.GetMinStage(testChunkID));
+            AssertChunkStages(testChunkID, pipeline.RenderedStage);
 
             //Update the target
             pipeline.SetTarget(testChunkID, pipeline.CompleteStage);
 
             //New target should be CompleteStage, other values should be unmodified
-            Assert.AreEqual(pipeline.RenderedStage, pipeline.GetMaxStage(testChunkID));
-            Assert.AreEqual(pipeline.CompleteStage, pipeline.GetTargetStage(testChunkID));
-            Assert.AreEqual(pipeline.RenderedStage, pipeline.GetMinStage(testChunkID));
+            AssertChunkStages(testChunkID, pipeline.RenderedStage, pipeline.RenderedStage, pipeline.CompleteStage);
 
             pipeline.Update();
 
             //Chunk should have reached completion
-            Assert.AreEqual(pipeline.CompleteStage, pipeline.GetMaxStage(testChunkID));
-            Assert.AreEqual(pipeline.CompleteStage, pipeline.GetTargetStage(testChunkID));
-            Assert.AreEqual(pipeline.CompleteStage, pipeline.GetMinStage(testChunkID));
+            AssertChunkStages(testChunkID, pipeline.CompleteStage);
         }
 
         [Test]
-        public void SetTargetHigherThanCurrentWithWIP() 
+        public void SetTargetHigherThanCurrentWithWIP()
         {
-            pipeline = new ChunkPipelineManager(
-               mockProvider,
-                mockMesher,
-                mockGetComponent,
-                MockGetPriorityOfChunk,
-                6,
-                1,
-                1
-               );
+            MakePipeline(1000, 1, 1);
 
             var testChunkID = new Vector3Int(0, 0, 0);
 
             mockAddNewChunkWithTarget(testChunkID, pipeline.RenderedStage);
+            AddAllDependenciesNecessaryForChunkToGetToStage(testChunkID, pipeline.RenderedStage);
 
             pipeline.Update();
 
             //Chunk ends up in rendered stage
-            Assert.AreEqual(pipeline.RenderedStage, pipeline.GetMaxStage(testChunkID));
-            Assert.AreEqual(pipeline.RenderedStage, pipeline.GetTargetStage(testChunkID));
-            Assert.AreEqual(pipeline.RenderedStage, pipeline.GetMinStage(testChunkID));
+            AssertChunkStages(testChunkID, pipeline.RenderedStage);
 
             //Cause there to be work in progress
             pipeline.ReenterAtStage(testChunkID, pipeline.FullyGeneratedStage);
             //Update the target
             pipeline.SetTarget(testChunkID, pipeline.CompleteStage);
 
-            //New target should be CompleteStage, min stage should be DataStage
-            Assert.AreEqual(pipeline.RenderedStage, pipeline.GetMaxStage(testChunkID));
-            Assert.AreEqual(pipeline.CompleteStage, pipeline.GetTargetStage(testChunkID));
-            Assert.AreEqual(pipeline.FullyGeneratedStage, pipeline.GetMinStage(testChunkID));
+            //New target should be CompleteStage, min stage should be FullyGenerated
+            AssertChunkStages(testChunkID, pipeline.FullyGeneratedStage, pipeline.RenderedStage, pipeline.CompleteStage);
 
             pipeline.Update();
 
             //Chunk should have reached completion, as the work-in-progress continues to the new target
-            Assert.AreEqual(pipeline.CompleteStage, pipeline.GetMaxStage(testChunkID));
-            Assert.AreEqual(pipeline.CompleteStage, pipeline.GetTargetStage(testChunkID));
-            Assert.AreEqual(pipeline.CompleteStage, pipeline.GetMinStage(testChunkID));
+            AssertChunkStages(testChunkID, pipeline.CompleteStage);
         }
 
         [Test]
-        public void SetTargetLowerThanCurrentAndMax() 
+        public void SetTargetLowerThanCurrentAndMax()
         {
-            pipeline = new ChunkPipelineManager(
-              mockProvider,
-                mockMesher,
-                mockGetComponent,
-                MockGetPriorityOfChunk,
-                6,
-                1,
-                1
-              );
+            MakePipeline(1000, 1, 1);
 
             var testChunkID = new Vector3Int(0, 0, 0);
 
             mockAddNewChunkWithTarget(testChunkID, pipeline.RenderedStage);
+            AddAllDependenciesNecessaryForChunkToGetToStage(testChunkID, pipeline.RenderedStage);
 
             pipeline.Update();
 
             //Increase target
             pipeline.SetTarget(testChunkID, pipeline.CompleteStage);
 
-            Assert.AreEqual(pipeline.RenderedStage, pipeline.GetMaxStage(testChunkID));
-            Assert.AreEqual(pipeline.CompleteStage, pipeline.GetTargetStage(testChunkID));
-            Assert.AreEqual(pipeline.RenderedStage, pipeline.GetMinStage(testChunkID));
+            AssertChunkStages(testChunkID, pipeline.RenderedStage, pipeline.RenderedStage, pipeline.CompleteStage);
 
             //Set target lower than the current target, and lower than the current max stage
             pipeline.SetTarget(testChunkID, pipeline.FullyGeneratedStage);
@@ -434,71 +430,51 @@ namespace Tests
             Assert.IsNull(mockComponentStorage[testChunkID].RenderMesh);
 
             //Max stage and target should have been decreased, min stage should have decreased to max
-            Assert.AreEqual(pipeline.FullyGeneratedStage, pipeline.GetMaxStage(testChunkID));
-            Assert.AreEqual(pipeline.FullyGeneratedStage, pipeline.GetTargetStage(testChunkID));
-            Assert.AreEqual(pipeline.FullyGeneratedStage, pipeline.GetMinStage(testChunkID));
-
+            AssertChunkStages(testChunkID, pipeline.FullyGeneratedStage);
         }
 
         [Test]
-        public void SetTargetLowerThanCurrentGreaterThanMax() 
+        public void SetTargetLowerThanCurrentGreaterThanMax()
         {
-            pipeline = new ChunkPipelineManager(
-              mockProvider,
-                mockMesher,
-                mockGetComponent,
-                MockGetPriorityOfChunk,
-                6,
-                1,
-                1
-              );
+            MakePipeline(1000, 1, 1);
 
             var testChunkID = new Vector3Int(0, 0, 0);
 
             mockAddNewChunkWithTarget(testChunkID, pipeline.FullyGeneratedStage);
+            AddAllDependenciesNecessaryForChunkToGetToStage(testChunkID, pipeline.FullyGeneratedStage);
 
             pipeline.Update();
 
             //Increase target
             pipeline.SetTarget(testChunkID, pipeline.CompleteStage);
 
-            Assert.AreEqual(pipeline.FullyGeneratedStage, pipeline.GetMaxStage(testChunkID));
-            Assert.AreEqual(pipeline.CompleteStage, pipeline.GetTargetStage(testChunkID));
-            Assert.AreEqual(pipeline.FullyGeneratedStage, pipeline.GetMinStage(testChunkID));
+            AssertChunkStages(testChunkID, pipeline.FullyGeneratedStage, pipeline.FullyGeneratedStage, pipeline.CompleteStage);
 
             //Set target lower than the current target, but higher than the current max stage
             pipeline.SetTarget(testChunkID, pipeline.RenderedStage);
+            AddAllDependenciesNecessaryForChunkToGetToStage(testChunkID, pipeline.RenderedStage);
 
             //Check only target changed
-            Assert.AreEqual(pipeline.FullyGeneratedStage, pipeline.GetMaxStage(testChunkID));
-            Assert.AreEqual(pipeline.RenderedStage, pipeline.GetTargetStage(testChunkID));
-            Assert.AreEqual(pipeline.FullyGeneratedStage, pipeline.GetMinStage(testChunkID));
+            AssertChunkStages(testChunkID, pipeline.FullyGeneratedStage, pipeline.FullyGeneratedStage, pipeline.RenderedStage);
 
             pipeline.Update();
 
             //After update, the chunk should have reached the new target stage
-            Assert.AreEqual(pipeline.RenderedStage, pipeline.GetMaxStage(testChunkID));
-            Assert.AreEqual(pipeline.RenderedStage, pipeline.GetTargetStage(testChunkID));
-            Assert.AreEqual(pipeline.RenderedStage, pipeline.GetMinStage(testChunkID));
+            AssertChunkStages(testChunkID, pipeline.RenderedStage);
 
         }
 
         [Test]
-        public void PriorityCorrectOrderTest() 
+        public void PriorityCorrectOrderTest()
         {
-            pipeline = new ChunkPipelineManager(
-              mockProvider,
-                mockMesher,
-                mockGetComponent,
-                MockGetPriorityOfChunk,
-                1,
-                1,
-                1
-              );
+            //No dependencies for easy order testing
+            mockMesher.IsMeshDependentOnNeighbourChunks = false;
+            //Only allow 1 chunk to move at a time
+            MakePipeline(1, 1, 1);
 
-            var first = new Vector3Int(0, 0, 0);            
-            var second = new Vector3Int(0, 1, 0);            
-            var third = new Vector3Int(10, 0, 0);            
+            var first = new Vector3Int(0, 0, 0);
+            var second = new Vector3Int(0, 1, 0);
+            var third = new Vector3Int(10, 0, 0);
 
             //Adding chunks in reverse order that I expect them to come out
             mockAddNewChunkWithTarget(third, pipeline.CompleteStage);
@@ -521,18 +497,12 @@ namespace Tests
             AssertChunkStages(third, pipeline.CompleteStage, pipeline.CompleteStage, pipeline.CompleteStage);
         }
 
-       [Test]
-        public void ChunkRemovedWhileScheduledForData() 
+        [Test]
+        public void ChunkRemovedWhileScheduledForData()
         {
-            pipeline = new ChunkPipelineManager(
-              mockProvider,
-                mockMesher,
-                mockGetComponent,
-                MockGetPriorityOfChunk,
-                1,
-                1,
-                1
-              );
+            //No dependencies for easy testing
+            mockMesher.IsMeshDependentOnNeighbourChunks = false;
+            MakePipeline(1, 1, 1);
 
             var testId = new Vector3Int(10, 0, 0);
             mockAddNewChunkWithTarget(new Vector3Int(0, 0, 0), pipeline.CompleteStage);
@@ -566,15 +536,7 @@ namespace Tests
         public void ChunkRemovedWhileScheduledForMeshWithDependencies()
         {
             mockMesher.IsMeshDependentOnNeighbourChunks = true;
-            pipeline = new ChunkPipelineManager(
-              mockProvider,
-                mockMesher,
-                mockGetComponent,
-                MockGetPriorityOfChunk,
-                100,
-                1,
-                1
-              );
+            MakePipeline(20, 1, 1);
 
             var zeroId = new Vector3Int(0, 0, 0);
             var testId = new Vector3Int(1, 0, 0);
@@ -584,15 +546,20 @@ namespace Tests
 
             //cid 0 should get to waiting for neighbours
             AssertChunkStages(zeroId, pipeline.FullyGeneratedStage, pipeline.FullyGeneratedStage, pipeline.CompleteStage);
+            AddAllDependenciesNecessaryForChunkToGetToStage(zeroId, pipeline.CompleteStage);
 
             //The test id should have been added to the start stage as it is a neighbour of cid 0
             AssertChunkStages(testId, 0, 0, pipeline.FullyGeneratedStage);
 
             //Update the target of some of the other neighbours
             pipeline.SetTarget(new Vector3Int(0, 1, 0), pipeline.CompleteStage);
+            AddAllDependenciesNecessaryForChunkToGetToStage(new Vector3Int(0, 1, 0), pipeline.CompleteStage);
             pipeline.SetTarget(new Vector3Int(0, 0, 1), pipeline.CompleteStage);
+            AddAllDependenciesNecessaryForChunkToGetToStage(new Vector3Int(0, 0, 1), pipeline.CompleteStage);
             pipeline.SetTarget(new Vector3Int(0, 0, -1), pipeline.CompleteStage);
+            AddAllDependenciesNecessaryForChunkToGetToStage(new Vector3Int(0, 0, -1), pipeline.CompleteStage);
             pipeline.SetTarget(new Vector3Int(0, -1, 0), pipeline.CompleteStage);
+            AddAllDependenciesNecessaryForChunkToGetToStage(new Vector3Int(0, -1, 0), pipeline.CompleteStage);
 
             pipeline.Update();
 
@@ -601,6 +568,8 @@ namespace Tests
 
             //Update the target of the test id
             pipeline.SetTarget(testId, pipeline.CompleteStage);
+            //Add dependencies
+            AddAllDependenciesNecessaryForChunkToGetToStage(testId, pipeline.CompleteStage);
 
             pipeline.Update();
             pipeline.Update();
@@ -630,15 +599,7 @@ namespace Tests
         public void OneOfNeighboursRemovedWhileScheduledForMesh()
         {
             mockMesher.IsMeshDependentOnNeighbourChunks = true;
-            pipeline = new ChunkPipelineManager(
-              mockProvider,
-                mockMesher,
-                mockGetComponent,
-                MockGetPriorityOfChunk,
-                100,
-                1,
-                1
-              );
+            MakePipeline(20, 1, 1);
 
             var zeroId = new Vector3Int(0, 0, 0);
             var testId = new Vector3Int(1, 0, 0);
@@ -648,14 +609,20 @@ namespace Tests
 
             //cid 0 should get to waiting for neighbours
             AssertChunkStages(zeroId, pipeline.FullyGeneratedStage, pipeline.FullyGeneratedStage, pipeline.CompleteStage);
+            AddAllDependenciesNecessaryForChunkToGetToStage(zeroId, pipeline.CompleteStage);
 
             //The test id should have been added to the start stage as it is a neighbour of cid 0
             AssertChunkStages(testId, 0, 0, pipeline.FullyGeneratedStage);
 
             //Update the target of some of the other neighbours
             pipeline.SetTarget(new Vector3Int(0, 1, 0), pipeline.CompleteStage);
+            AddAllDependenciesNecessaryForChunkToGetToStage(new Vector3Int(0, 1, 0), pipeline.CompleteStage);
             pipeline.SetTarget(new Vector3Int(0, 0, 1), pipeline.CompleteStage);
-
+            AddAllDependenciesNecessaryForChunkToGetToStage(new Vector3Int(0, 0, 1), pipeline.CompleteStage);
+            pipeline.SetTarget(new Vector3Int(0, 0, -1), pipeline.CompleteStage);
+            AddAllDependenciesNecessaryForChunkToGetToStage(new Vector3Int(0, 0, -1), pipeline.CompleteStage);
+            pipeline.SetTarget(new Vector3Int(0, -1, 0), pipeline.CompleteStage);
+            AddAllDependenciesNecessaryForChunkToGetToStage(new Vector3Int(0, -1, 0), pipeline.CompleteStage);
 
             pipeline.Update();
 
@@ -664,12 +631,14 @@ namespace Tests
 
             //Update the target of the test id
             pipeline.SetTarget(testId, pipeline.CompleteStage);
+            //Add dependencies
+            AddAllDependenciesNecessaryForChunkToGetToStage(testId, pipeline.CompleteStage);
 
             pipeline.Update();
             pipeline.Update();
 
             //the test id should be scheduled for mesh
-            AssertChunkStages(testId, pipeline.FullyGeneratedStage +1, pipeline.FullyGeneratedStage + 1, pipeline.CompleteStage);
+            AssertChunkStages(testId, pipeline.FullyGeneratedStage + 1, pipeline.FullyGeneratedStage + 1, pipeline.CompleteStage);
 
             //Remove one of the test id's neighbours
             mockRemoveChunk(zeroId);
@@ -684,17 +653,9 @@ namespace Tests
         [Test]
         public void NeighbourAndSelfRemovedWhileScheduledForMesh()
         {
-            mockMesher.IsMeshDependentOnNeighbourChunks = true;
             int maxData = 100;
-            pipeline = new ChunkPipelineManager(
-              mockProvider,
-                mockMesher,
-                mockGetComponent,
-                MockGetPriorityOfChunk,
-                maxData,
-                1,
-                1
-              );
+            mockMesher.IsMeshDependentOnNeighbourChunks = true;
+            MakePipeline(maxData, 1, 1);
 
             var zeroId = new Vector3Int(0, 1000, 0);
             var testId = new Vector3Int(1, 1000, 0);
@@ -704,14 +665,16 @@ namespace Tests
 
             //zeroId should get to waiting for neighbours
             AssertChunkStages(zeroId, pipeline.FullyGeneratedStage, pipeline.FullyGeneratedStage, pipeline.CompleteStage);
+            AddAllDependenciesNecessaryForChunkToGetToStage(zeroId, pipeline.CompleteStage);
 
             //The test id should have been added to the start stage as it is a neighbour of cid 0
             AssertChunkStages(testId, 0, 0, pipeline.FullyGeneratedStage);
 
             //Update the target of some of the other neighbours
             pipeline.SetTarget(new Vector3Int(0, 1001, 0), pipeline.CompleteStage);
+            AddAllDependenciesNecessaryForChunkToGetToStage(new Vector3Int(0, 1001, 0), pipeline.CompleteStage);
             pipeline.SetTarget(new Vector3Int(0, 1000, 1), pipeline.CompleteStage);
-
+            AddAllDependenciesNecessaryForChunkToGetToStage(new Vector3Int(0, 1000, 1), pipeline.CompleteStage);
 
             pipeline.Update();
 
@@ -720,6 +683,8 @@ namespace Tests
 
             //Update the target of the test id
             pipeline.SetTarget(testId, pipeline.CompleteStage);
+            //Add dependencies
+            AddAllDependenciesNecessaryForChunkToGetToStage(testId, pipeline.CompleteStage);
 
             pipeline.Update();
             pipeline.Update();
@@ -739,7 +704,7 @@ namespace Tests
             }
 
             //Add the test id back
-            mockAddNewChunkWithTarget(testId,pipeline.CompleteStage);
+            mockAddNewChunkWithTarget(testId, pipeline.CompleteStage);
 
             //Min and max should now be 0 as the id has been removed and re-added
             AssertChunkStages(testId, 0, 0, pipeline.CompleteStage);
@@ -758,11 +723,11 @@ namespace Tests
         /// <param name="min"></param>
         /// <param name="max"></param>
         /// <param name="target"></param>
-        private void AssertChunkStages(Vector3Int id,int min,int max,int target) 
+        private void AssertChunkStages(Vector3Int id, int min, int max, int target)
         {
-            Assert.AreEqual(min, pipeline.GetMinStage(id),"Min stage not as expected");
-            Assert.AreEqual(max, pipeline.GetMaxStage(id),"Max stage not as expected");
-            Assert.AreEqual(target, pipeline.GetTargetStage(id),"Target stage not as expected");
+            Assert.AreEqual(min, pipeline.GetMinStage(id), "Min stage not as expected");
+            Assert.AreEqual(max, pipeline.GetMaxStage(id), "Max stage not as expected");
+            Assert.AreEqual(target, pipeline.GetTargetStage(id), "Target stage not as expected");
         }
 
         /// <summary>

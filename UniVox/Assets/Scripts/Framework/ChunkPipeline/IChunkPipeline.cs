@@ -14,7 +14,7 @@ namespace UniVox.Framework.ChunkPipeline
 
         IChunkProvider chunkProvider { get; }
         Func<Vector3Int, IChunkComponent> getChunkComponent { get; }
-        bool StructureGen { get; }
+        bool GenerateStructures { get; }
         IChunkMesher chunkMesher { get; }
 
         bool NextStageFreeForChunk(Vector3Int chunkID, int currentStage);
@@ -22,7 +22,7 @@ namespace UniVox.Framework.ChunkPipeline
         bool TargetStageGreaterThanCurrent(Vector3Int chunkID, int currentStage);
         bool TargetStageGreaterThanCurrent(int currentStage, ChunkStageData stageData);
 
-        IPipelineStage NextStage(int currentStage);
+        IPipelineStage GetStage(int stageIndex);
         bool ChunkMinStageGreaterThan(Vector3Int id, int stageId);
 
 
