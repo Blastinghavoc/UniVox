@@ -126,43 +126,49 @@ namespace UniVox.Implementations.ProcGen
         private void MakeSpruce(ChunkNeighbourhood neighbourhood, int x, int y, int z, NativeTreeDefinition treeDef)
         {
             int numLeavesOnTop = 2;
-            int minCanopyHeight = numLeavesOnTop + 2;
             var height = random.NextInt(treeDef.minHeight, treeDef.maxHeight);
-            var leafStart = random.NextInt(treeDef.minLeafClearance, height - minCanopyHeight);
-            var leafWidth = height / 2;
+            var leafStart = treeDef.minLeafClearance;
+            var leafRadius = height / 4;
+
+            var toggle = true;
+
             for (int i = 0; i < height - numLeavesOnTop; i++, y++)
             {
                 neighbourhood[x, y, z] = treeDef.logID;
 
                 if (i > leafStart)
                 {
-                    for (int j = -leafWidth; j <= leafWidth; j++)
+                    if (toggle)
                     {
-                        for (int k = -leafWidth; k <= leafWidth; k++)
+                        foreach (var item in Utils.Helpers.ManhattanCircle(new Vector3Int(x, y, z), leafRadius))
                         {
-                            if (j == 0 && k == 0)
-                            {
-                                continue;
-                            }
-
-                            neighbourhood.SetIfUnoccupied(x + j, y, z + k, treeDef.leafID);
+                            neighbourhood.SetIfUnoccupied(item.x, item.y, item.z, treeDef.leafID);
                         }
+                        //for (int j = -leafWidth; j <= leafWidth; j++)
+                        //{
+                        //    for (int k = -leafWidth; k <= leafWidth; k++)
+                        //    {
+                        //        if (j == 0 && k == 0)
+                        //        {
+                        //            continue;
+                        //        }
+
+                        //    }
+                        //}
                     }
-                    leafWidth = math.max(leafWidth - 1, 1);
+                    toggle = !toggle;
+                    leafRadius = math.max(leafRadius - 1, 1);
                 }
             }
 
             //Top Leaves
             for (int i = 0; i < numLeavesOnTop; i++, y++)
             {
-
-                for (int j = -leafWidth; j <= leafWidth; j++)
-                {
-                    for (int k = -leafWidth; k <= leafWidth; k++)
-                    {
-                        neighbourhood.SetIfUnoccupied(x + j, y, z + k, treeDef.leafID);
-                    }
-                }
+                neighbourhood.SetIfUnoccupied(x, y, z, treeDef.leafID);
+                //neighbourhood.SetIfUnoccupied(x + 1, y, z, treeDef.leafID);
+                //neighbourhood.SetIfUnoccupied(x, y, z+1, treeDef.leafID);
+                //neighbourhood.SetIfUnoccupied(x-1, y, z, treeDef.leafID);
+                //neighbourhood.SetIfUnoccupied(x, y, z-1, treeDef.leafID);
             }
         }
 

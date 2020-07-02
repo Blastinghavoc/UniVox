@@ -112,5 +112,53 @@ namespace Utils
                 yield return neighbourID;
             }
         }
+
+        /// <summary>
+        /// X-Z manhattan distance "circle"
+        /// </summary>
+        /// <param name="center"></param>
+        /// <param name="radius"></param>
+        /// <returns></returns>
+        public static IEnumerable<Vector3Int> ManhattanCircle(Vector3Int center, int radius)
+        {
+            var xEnd = center.x + radius;
+            var zEnd = center.z + radius;
+            for (int x = center.x; x <= xEnd; x++)
+            {                
+                for (int z = center.z; z <= zEnd - x; z++)
+                {
+                    //by symmetry, we have the points in all 4 2d quadrants
+                    yield return new Vector3Int(x, center.y, z);
+                    yield return new Vector3Int(x, center.y, -z);
+                    yield return new Vector3Int(-x, center.y, z);
+                    yield return new Vector3Int(-x, center.y, -z);
+                }                
+            }
+        }
+
+        public static IEnumerable<Vector3Int> ManhattanSphere(Vector3Int center,int radius) 
+        {
+            var xEnd = center.x + radius;
+            var yEnd = center.y + radius;
+            var zEnd = center.z + radius;
+            for (int x = center.x; x <= xEnd; x++)
+            {
+                for (int y = center.y; y <= yEnd - x; y++)
+                {                   
+                    for (int z = center.z; z <= zEnd - (x+y); z++)
+                    {
+                        //by symmetry, we have the points in all 8 3d octants
+                        yield return new Vector3Int(x,y,z);
+                        yield return new Vector3Int(x,y,-z);
+                        yield return new Vector3Int(x,-y,z);
+                        yield return new Vector3Int(x,-y,-z);
+                        yield return new Vector3Int(-x,y,z);
+                        yield return new Vector3Int(-x,y,-z);
+                        yield return new Vector3Int(-x,-y,z);
+                        yield return new Vector3Int(-x,-y,-z);
+                    }                    
+                }
+            }
+        }
     }
 }
