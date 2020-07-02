@@ -128,7 +128,7 @@ namespace UniVox.Implementations.ProcGen
             int numLeavesOnTop = 2;
             var height = random.NextInt(treeDef.minHeight, treeDef.maxHeight);
             var leafStart = treeDef.minLeafClearance;
-            var leafRadius = height / 4;
+            var leafRadius = height / 3;
 
             var toggle = true;
 
@@ -144,20 +144,9 @@ namespace UniVox.Implementations.ProcGen
                         {
                             neighbourhood.SetIfUnoccupied(item.x, item.y, item.z, treeDef.leafID);
                         }
-                        //for (int j = -leafWidth; j <= leafWidth; j++)
-                        //{
-                        //    for (int k = -leafWidth; k <= leafWidth; k++)
-                        //    {
-                        //        if (j == 0 && k == 0)
-                        //        {
-                        //            continue;
-                        //        }
-
-                        //    }
-                        //}
+                        leafRadius = math.max(leafRadius - 1, 1);
                     }
                     toggle = !toggle;
-                    leafRadius = math.max(leafRadius - 1, 1);
                 }
             }
 
