@@ -25,6 +25,7 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
     [SerializeField] protected Vector3Int collidableChunksRadii;
     [SerializeField] protected Vector3Int renderedChunksRadii;
     protected Vector3Int dataChunksRadii;
+    protected Vector3Int structureChunksRadii;
     public Vector3Int MaximumActiveRadii { get; private set; }
 
     //Should the world height be limited (like minecraft)
@@ -90,7 +91,9 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
         MaximumActiveRadii = dataChunksRadii;
         if (GenerateStructures)
         {
-            MaximumActiveRadii = dataChunksRadii + new Vector3Int(1, 1, 1);
+            structureChunksRadii = dataChunksRadii + new Vector3Int(1, 1, 1);
+            //Extra radius for just terrain data.
+            MaximumActiveRadii = structureChunksRadii + new Vector3Int(1, 1, 1);
         }
 
         eventManager = new FrameworkEventManager();
@@ -219,7 +222,12 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
                     }
                     else if (InsideChunkRadius(chunkID, dataChunksRadii))
                     {
-                        SetTargetStageOfChunk(chunkID, pipeline.FullyGenerated);//Request that this chunk should be just data
+                        //This chunk should be fully generated including structures
+                        SetTargetStageOfChunk(chunkID, pipeline.FullyGeneratedStage);
+                    }
+                    else if(InsideChunkRadius(chunkID,structureChunksRadii))
+                    {
+                        SetTargetStageOfChunk(chunkID, pipeline.OwnStructuresStage);
                     }
                     else
                     {
@@ -294,21 +302,19 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
         if (chunkID.y > MaxChunkY || chunkID.y < MinChunkY)
         {
             outOfWorld = true;
-            if (chunkID.y == MaxChunkY + 1 || chunkID.y == MinChunkY - 1)
+            var absDistanceOutisedWorld = (chunkID.y > MaxChunkY) ? chunkID.y - MaxChunkY : MinChunkY - chunkID.y;
+
+            Assert.IsTrue(absDistanceOutisedWorld > 0);
+
+            if (absDistanceOutisedWorld == 1)
             {
-                //Chunks 1 chunk outside the vertical range can only be data chunks at maximum.
-                targetStage = Mathf.Min(targetStage, pipeline.FullyGenerated);
-            }
-            else if (GenerateStructures && (chunkID.y == MaxChunkY + 2 || chunkID.y == MinChunkY - 2))
-            {
-                ///Chunks 2 chunks outside the vertical range can only be terrain data chunks at maximum,
-                ///and may only exist to support structure generation
-                targetStage = Mathf.Min(targetStage, pipeline.TerrainDataStage);
+                ///Chunks 1 chunk outside the vertical range can only be data chunks at maximum,
+                ///and will be forcibly created at this stage without the usual neighbour constraints
+                targetStage = Mathf.Min(targetStage, pipeline.FullyGeneratedStage);
             }
             else
             {
-                //Anything further outside the range is not allowed.
-                //Debug.LogWarning($"Trying to create chunk with id {chunkID} at stage {targetStage} when it is outside the Y range");
+                ///Chunks further outside the vertical range may not exist
                 return;
             }
         }
@@ -331,12 +337,13 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
             }
             else if (chunkProvider.TryGetStoredDataForChunk(chunkID,out var data))
             {
+                //Chunks with saved data bypass the generation process.
                 ChunkComponent.Data = data;
                 pipeline.AddWithData(chunkID, targetStage);
             }
             else
             {
-                //Add the chunk to the pipeline for data generation
+                //Add the new chunk to the pipeline for data generation
                 pipeline.Add(chunkID, targetStage);
             }
 
@@ -416,7 +423,7 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
                     if (pipeline.GetTargetStage(neighbourChunkID) >= pipeline.RenderedStage)
                     {
                         //The neighbour chunk will need remeshing
-                        RedoChunkFromStage(neighbourChunkID, pipeline.FullyGenerated);
+                        RedoChunkFromStage(neighbourChunkID, pipeline.FullyGeneratedStage);
                     }
                 }
             }
@@ -425,7 +432,7 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
         if (pipeline.GetTargetStage(chunkID) >= pipeline.RenderedStage)
         {
             //The chunk that changed will need remeshing if its target stage has a mesh
-            RedoChunkFromStage(chunkID, pipeline.FullyGenerated);
+            RedoChunkFromStage(chunkID, pipeline.FullyGeneratedStage);
         }
     }
 

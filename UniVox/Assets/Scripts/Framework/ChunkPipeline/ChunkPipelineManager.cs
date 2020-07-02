@@ -31,7 +31,7 @@ namespace UniVox.Framework.ChunkPipeline
         //Indicates chunk has generated its own structures, but may not have received all incoming structures from neighbours
         public int OwnStructuresStage { get; private set; }
         //This stage indicates the chunk has been fully generated, including structures from neighbours
-        public int FullyGenerated { get; private set; }
+        public int FullyGeneratedStage { get; private set; }
         public int RenderedStage { get; private set; }
         public int CompleteStage { get; private set; }
 
@@ -103,7 +103,7 @@ namespace UniVox.Framework.ChunkPipeline
             }
 
 
-            FullyGenerated = i;
+            FullyGeneratedStage = i;
 
             if (chunkMesher.IsMeshDependentOnNeighbourChunks)
             {
@@ -266,7 +266,7 @@ namespace UniVox.Framework.ChunkPipeline
 
             Assert.IsFalse(chunkStageMap.ContainsKey(chunkId));
 
-            var EnterAtStageId = FullyGenerated;
+            var EnterAtStageId = FullyGeneratedStage;
 
             var stageData = new ChunkStageData()
             {
@@ -290,7 +290,7 @@ namespace UniVox.Framework.ChunkPipeline
             CheckLockBeforeExternalOperation();
 
             //TODO remove DEBUG
-            if (targetStage != FullyGenerated && 
+            if (targetStage != FullyGeneratedStage && 
                 targetStage != RenderedStage && 
                 targetStage != CompleteStage && 
                 targetStage != OwnStructuresStage &&
@@ -326,12 +326,12 @@ namespace UniVox.Framework.ChunkPipeline
             {
                 var prevMax = stageData.maxStage;
 
-                if (targetStage < FullyGenerated && prevMax >= FullyGenerated)
+                if (targetStage < FullyGeneratedStage && prevMax >= FullyGeneratedStage)
                 {
                     ///Do not allow a chunk to be downgraded to a stage lower than Fully Generated if it has
                     ///already reached or surpassed that stage.
                     ///They may still be created targetting a lower stage, but cannot go backwards
-                    targetStage = FullyGenerated;
+                    targetStage = FullyGeneratedStage;
                     //Recursively try to set the target again
                     SetTarget(chunkId, targetStage);
                     return;
@@ -499,7 +499,7 @@ namespace UniVox.Framework.ChunkPipeline
 
         private bool ChunkDataReadable(ChunkStageData stageData)
         {
-            return stageData.minStage >= FullyGenerated;
+            return stageData.minStage >= FullyGeneratedStage;
         }
             
 
