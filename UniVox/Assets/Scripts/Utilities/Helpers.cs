@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Unity.Burst;
 using Unity.Mathematics;
 using UnityEngine;
@@ -91,6 +92,25 @@ namespace Utils
                 }
             }
             return result;
+        }
+
+
+        public static IEnumerable<Vector3Int> GetNeighboursDirectOnly(Vector3Int chunkID)
+        {
+            foreach (var dir in DirectionExtensions.Vectors)
+            {
+                var neighbourID = chunkID + dir;
+                yield return neighbourID;
+            }
+        }
+
+        public static IEnumerable<Vector3Int> GetNeighboursIncludingDiagonal(Vector3Int chunkID)
+        {
+            foreach (var dir in DiagonalDirectionExtensions.Vectors)
+            {
+                var neighbourID = chunkID + dir;
+                yield return neighbourID;
+            }
         }
     }
 }

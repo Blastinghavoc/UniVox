@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using System;
 using static UniVox.Framework.VoxelTypeManager;
+using Utils;
 
 namespace UniVox.Framework.Jobified
 {
@@ -265,10 +266,8 @@ namespace UniVox.Framework.Jobified
                         return east;
                     case Directions.WEST:
                         return west;
-                    default:
-                        //NOTE can't throw an exception inside burst code
-                        Debug.LogError($"direction {i} was not recognised");
-                        return up;
+                    default:                        
+                        throw new Exception($"direction {i} was not recognised");
                 }
             }
         }

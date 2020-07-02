@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 36add9c34f86f4e4c849947280fc7666, type: 3}
+  m_Name: SpruceLog
+  m_EditorClassIdentifier: 
+  DisplayName: Spruce Log
+  FaceTextures:
+  - {fileID: 2800000, guid: 50d2dee81bc2fd34d90358c33a1c4aa6, type: 3}
+  - {fileID: 2800000, guid: 50d2dee81bc2fd34d90358c33a1c4aa6, type: 3}
+  - {fileID: 2800000, guid: 8c891cc74734e7147a6bb05ae5bf8623, type: 3}
+  - {fileID: 2800000, guid: 8c891cc74734e7147a6bb05ae5bf8623, type: 3}
+  - {fileID: 2800000, guid: 8c891cc74734e7147a6bb05ae5bf8623, type: 3}
+  - {fileID: 2800000, guid: 8c891cc74734e7147a6bb05ae5bf8623, type: 3}
+  meshDefinition: {fileID: 11400000, guid: ceb9d116af1d072479bb06beaf15efac, type: 2}
+  material: {fileID: 2100000, guid: e2ba7f0aeb4429d458c55c71042259b6, type: 2}
+  isPassable: 0
+  rotationConfiguration: {fileID: 11400000, guid: 018807804b156fa4fa332c909c217b4c,
+    type: 2}

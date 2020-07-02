@@ -2,11 +2,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Profiling;
 using UniVox.Framework;
 using UniVox.Framework.ChunkPipeline;
+using Utils;
 using Utils.Pooling;
 
 public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
@@ -22,7 +24,9 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
 
     [SerializeField] protected Vector3Int collidableChunksRadii;
     [SerializeField] protected Vector3Int renderedChunksRadii;
-    protected Vector3Int dataChunksRadii;
+    protected Vector3Int fullyGeneratedRadii;
+    protected Vector3Int structureChunksRadii;
+    public Vector3Int MaximumActiveRadii { get; private set; }
 
     //Should the world height be limited (like minecraft)
     [SerializeField] protected bool limitWorldHeight;
@@ -42,16 +46,27 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
 
 
     /// <summary>
-    /// Controls how many chunks can be generated and meshed per update
+    /// Controls how many chunks can be generated per update
     /// </summary>
     [Range(1, 100)]
     [SerializeField] protected ushort MaxGeneratedPerUpdate = 1;
 
+    [SerializeField] protected bool GenerateStructures = false;
     /// <summary>
-    /// Controls how many chunks can be generated and meshed per update
+    /// Controls how many chunks can have their structures generated per update
+    /// </summary>
+    [Range(1, 100)]
+    [SerializeField] protected ushort MaxStructurePerUpdate = 1;
+
+    /// <summary>
+    /// Controls how many chunks can be meshed per update
     /// </summary>
     [Range(1, 100)]
     [SerializeField] protected ushort MaxMeshedPerUpdate = 1;
+
+    //TODO remove DEBUG
+    [SerializeField] protected bool DebugPipeline = false;
+
     #endregion
 
 
@@ -67,13 +82,24 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
 
     private ChunkPipelineManager pipeline;
 
+    private FrameworkEventManager eventManager;
+
     public virtual void Initialise()
     {
         Assert.IsTrue(renderedChunksRadii.All((a, b) => a >= b, collidableChunksRadii),
             "The rendering radii must be at least as large as the collidable radii");
 
         //Chunks can exist as just data one chunk further away than the rendered chunks
-        dataChunksRadii = renderedChunksRadii + new Vector3Int(1, 1, 1);
+        fullyGeneratedRadii = renderedChunksRadii + new Vector3Int(1, 1, 1);
+        MaximumActiveRadii = fullyGeneratedRadii;
+        if (GenerateStructures)
+        {
+            structureChunksRadii = fullyGeneratedRadii + new Vector3Int(1, 1, 1);
+            //Extra radius for just terrain data.
+            MaximumActiveRadii = structureChunksRadii + new Vector3Int(1, 1, 1);
+        }
+
+        eventManager = new FrameworkEventManager();
 
         //Enforce positioning of ChunkManager at the world origin
         transform.position = Vector3.zero;
@@ -96,18 +122,19 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
         Assert.IsNotNull(chunkProvider, "Chunk Manager must have a chunk provider component");
         Assert.IsNotNull(chunkMesher, "Chunk Manager must have a chunk mesher component");
 
-        chunkProvider.Initialise(VoxelTypeManager, this);
-        chunkMesher.Initialise(VoxelTypeManager, this);
+        chunkProvider.Initialise(VoxelTypeManager, this,eventManager);
+        chunkMesher.Initialise(VoxelTypeManager, this,eventManager);
 
         pipeline = new ChunkPipelineManager(
             chunkProvider,
             chunkMesher,
             GetChunkComponent,
-            SetTargetStageOfChunk,
             GetPriorityOfChunk,
             MaxGeneratedPerUpdate,
             MaxMeshedPerUpdate,
-            MaxMeshedPerUpdate);
+            MaxMeshedPerUpdate,
+            GenerateStructures,
+            MaxStructurePerUpdate);
 
         Player.position = new Vector3(5, 17, 5);
         Player.velocity = Vector3.zero;
@@ -126,6 +153,14 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
         if (playerChunkID != prevPlayerChunkID)
         {
             UpdatePlayerArea();
+        }
+
+        //TODO remove DEBUG
+        pipeline.DebugMode = DebugPipeline;
+        if (DebugPipeline)
+        {
+            //Activates the pipeline debug for one frame only.
+            DebugPipeline = false;
         }
 
         pipeline.Update();
@@ -173,18 +208,20 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
     {
         Profiler.BeginSample("UpdatePlayArea");
 
-        //Deactivate any chunks that are outside the data radius
+        //Deactivate any chunks that are outside the maximum radius
+        Profiler.BeginSample("DetectAndDeactivateChunks");
         var deactivate = loadedChunks.Select((pair) => pair.Key)
-            .Where((id) => !InsideChunkRadius(id, dataChunksRadii))
+            .Where((id) => !InsideChunkRadius(id, MaximumActiveRadii))
             .ToList();
 
         deactivate.ForEach(DeactivateChunk);
+        Profiler.EndSample();
 
-        for (int x = -dataChunksRadii.x; x <= dataChunksRadii.x; x++)
+        for (int x = -MaximumActiveRadii.x; x <= MaximumActiveRadii.x; x++)
         {
-            for (int y = -dataChunksRadii.y; y <= dataChunksRadii.y; y++)
+            for (int y = -MaximumActiveRadii.y; y <= MaximumActiveRadii.y; y++)
             {
-                for (int z = -dataChunksRadii.z; z <= dataChunksRadii.z; z++)
+                for (int z = -MaximumActiveRadii.z; z <= MaximumActiveRadii.z; z++)
                 {
                     var chunkID = playerChunkID + new Vector3Int(x, y, z);
 
@@ -196,9 +233,19 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
                     {
                         SetTargetStageOfChunk(chunkID, pipeline.RenderedStage);//Request that this chunk should be rendered
                     }
+                    else if (InsideChunkRadius(chunkID, fullyGeneratedRadii))
+                    {
+                        //This chunk should be fully generated including structures
+                        SetTargetStageOfChunk(chunkID, pipeline.FullyGeneratedStage);
+                    }
+                    else if(InsideChunkRadius(chunkID,structureChunksRadii))
+                    {
+                        SetTargetStageOfChunk(chunkID, pipeline.OwnStructuresStage);
+                    }
                     else
                     {
-                        SetTargetStageOfChunk(chunkID, pipeline.DataStage);//Request that this chunk should be just data
+                        //Request that this chunk should be just terrain data, no structures
+                        SetTargetStageOfChunk(chunkID, pipeline.TerrainDataStage);
                     }
 
                 }
@@ -248,6 +295,7 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
             //Return chunk gameobject to pool
             chunkPool.ReturnToPool(chunkComponent.gameObject);
 
+            eventManager.FireChunkDeactivated(chunkID, playerChunkID, MaximumActiveRadii);
         }
         else
         {
@@ -263,16 +311,25 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
     /// <param name="targetStage"></param>
     protected void SetTargetStageOfChunk(Vector3Int chunkID, int targetStage)
     {
+        Profiler.BeginSample("SetTargetStageOfChunk");
+        bool outOfWorld = false;
         if (chunkID.y > MaxChunkY || chunkID.y < MinChunkY)
         {
-            if (chunkID.y == MaxChunkY + 1 || chunkID.y == MinChunkY - 1)
+            outOfWorld = true;
+            var absDistanceOutisedWorld = (chunkID.y > MaxChunkY) ? chunkID.y - MaxChunkY : MinChunkY - chunkID.y;
+
+            Assert.IsTrue(absDistanceOutisedWorld > 0);
+
+            if (absDistanceOutisedWorld == 1)
             {
-                //Chunks 1 chunk outside the vertical range may only be data chunks.
-                targetStage = pipeline.DataStage;
+                ///Chunks 1 chunk outside the vertical range can only be data chunks at maximum,
+                ///and will be forcibly created at this stage without the usual neighbour constraints
+                targetStage = Mathf.Min(targetStage, pipeline.FullyGeneratedStage);
             }
             else
             {
-                //Anything further outside the range is not allowed.
+                ///Chunks further outside the vertical range may not exist
+                Profiler.EndSample();
                 return;
             }
         }
@@ -280,6 +337,8 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
 
         if (!loadedChunks.TryGetValue(chunkID, out var ChunkComponent))
         {
+            Profiler.BeginSample("CreatingChunkComponent");
+
             //Get a new Chunk GameObject to house the generated Chunk data.
             var ChunkObject = chunkPool.Next(transform);
             ChunkComponent = ChunkObject.GetComponent<ChunkComponent>();
@@ -287,13 +346,31 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
             //Add to set of loaded chunks
             loadedChunks[chunkID] = ChunkComponent;
 
-            pipeline.AddChunk(chunkID, targetStage);
-            return;
+            if (outOfWorld)
+            {
+                //Out of world chunks get initialised empty, always.
+                ChunkComponent.Data = new EmptyChunkData(chunkID, chunkDimensions);
+                pipeline.AddWithData(chunkID, targetStage);
+            }
+            else if (chunkProvider.TryGetStoredDataForChunk(chunkID,out var data))
+            {
+                //Chunks with saved data bypass the generation process.
+                ChunkComponent.Data = data;
+                pipeline.AddWithData(chunkID, targetStage);
+            }
+            else
+            {
+                //Add the new chunk to the pipeline for data generation
+                pipeline.Add(chunkID, targetStage);
+            }
 
+            Profiler.EndSample();
+            Profiler.EndSample();
+            return;
         }
 
         pipeline.SetTarget(chunkID, targetStage);
-
+        Profiler.EndSample();
     }
 
     /// <summary>
@@ -313,7 +390,7 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
     /// </summary>
     /// <param name="chunkID"></param>
     /// <returns></returns>
-    protected bool InsideChunkRadius(Vector3Int chunkID, Vector3Int Radii)
+    public bool InsideChunkRadius(Vector3Int chunkID, Vector3Int Radii)
     {
         var displacement = playerChunkID - chunkID;
         var absDisplacement = displacement.ElementWise(Mathf.Abs);
@@ -364,7 +441,7 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
                     if (pipeline.GetTargetStage(neighbourChunkID) >= pipeline.RenderedStage)
                     {
                         //The neighbour chunk will need remeshing
-                        RedoChunkFromStage(neighbourChunkID, pipeline.DataStage);
+                        RedoChunkFromStage(neighbourChunkID, pipeline.FullyGeneratedStage);
                     }
                 }
             }
@@ -373,7 +450,7 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
         if (pipeline.GetTargetStage(chunkID) >= pipeline.RenderedStage)
         {
             //The chunk that changed will need remeshing if its target stage has a mesh
-            RedoChunkFromStage(chunkID, pipeline.DataStage);
+            RedoChunkFromStage(chunkID, pipeline.FullyGeneratedStage);
         }
     }
 
@@ -420,7 +497,8 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
             }
             return new ReadOnlyChunkData(chunkComponent.Data);
         }
-        return null;
+        throw new ArgumentException($"It is not valid to get read-only data for chunk ID {chunkID}, as it is not in the loaded chunks." +
+            $" Did the pipeline contain the chunk? {pipeline.Contains(chunkID)}");
     }
 
     public bool TrySetVoxel(Vector3 worldPos, VoxelTypeID voxelTypeID, VoxelRotation voxelRotation = default, bool overrideExisting = false)
@@ -562,11 +640,11 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
 
     public bool AllChunksInTargetState()
     {
-        for (int x = -dataChunksRadii.x; x <= dataChunksRadii.x; x++)
+        for (int x = -fullyGeneratedRadii.x; x <= fullyGeneratedRadii.x; x++)
         {
-            for (int y = -dataChunksRadii.y; y <= dataChunksRadii.y; y++)
+            for (int y = -fullyGeneratedRadii.y; y <= fullyGeneratedRadii.y; y++)
             {
-                for (int z = -dataChunksRadii.z; z <= dataChunksRadii.z; z++)
+                for (int z = -fullyGeneratedRadii.z; z <= fullyGeneratedRadii.z; z++)
                 {
                     var chunkID = playerChunkID + new Vector3Int(x, y, z);
 
@@ -590,6 +668,11 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
     public string GetPipelineStatus()
     {
         return pipeline.GetPipelineStatus();
+    }
+
+    public Tuple<bool, bool> ContainsChunkID(Vector3Int chunkID)
+    {
+        return new Tuple<bool, bool>(loadedChunks.ContainsKey(chunkID), pipeline.Contains(chunkID));
     }
 
     #endregion

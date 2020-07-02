@@ -3,6 +3,7 @@ using System.Collections;
 using UniVox.Framework;
 using UniVox.Implementations.ChunkData;
 using UniVox.Framework.ChunkPipeline.VirtualJobs;
+using UniVox.Framework.Jobified;
 
 namespace UniVox.Implementations.Providers
 {
@@ -13,16 +14,16 @@ namespace UniVox.Implementations.Providers
         public SOVoxelTypeDefinition grassType;
         private ushort grassID;
 
-        public override void Initialise(VoxelTypeManager voxelTypeManager,IChunkManager chunkManager)
+        public override void Initialise(VoxelTypeManager voxelTypeManager,IChunkManager chunkManager, FrameworkEventManager eventManager)
         {
-            base.Initialise(voxelTypeManager,chunkManager);
+            base.Initialise(voxelTypeManager,chunkManager,eventManager);
             dirtID = voxelTypeManager.GetId(dirtType);
             grassID = voxelTypeManager.GetId(grassType);
         }
 
-        public override AbstractPipelineJob<IChunkData> GenerateChunkDataJob(Vector3Int chunkID, Vector3Int chunkDimensions)
+        public override AbstractPipelineJob<IChunkData> GenerateTerrainData(Vector3Int chunkID)
         {
-            return new BasicFunctionJob<IChunkData>(() => FlatWorld(chunkID, chunkDimensions));
+            return new BasicFunctionJob<IChunkData>(() => FlatWorld(chunkID, chunkManager.ChunkDimensions));
         }
 
         private AbstractChunkData FlatWorld(Vector3Int chunkID, Vector3Int chunkDimensions) 
@@ -106,6 +107,11 @@ namespace UniVox.Implementations.Providers
                 }
             }
             return ChunkData;
-        }        
+        }
+
+        public override AbstractPipelineJob<ChunkNeighbourhood> GenerateStructuresForNeighbourhood(Vector3Int centerChunkID, ChunkNeighbourhood neighbourhood)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

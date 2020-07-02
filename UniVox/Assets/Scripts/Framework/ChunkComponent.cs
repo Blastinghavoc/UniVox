@@ -2,6 +2,7 @@
 using System.Collections;
 using System;
 using System.Collections.Generic;
+using UniVox.Framework.ChunkPipeline;
 
 namespace UniVox.Framework
 {
@@ -66,6 +67,17 @@ namespace UniVox.Framework
             meshCollider.sharedMesh = null;
         }
 
+        //TODO remove DEBUG
+        public ChunkStageData stageData;
+        public void SetPipelineStagesDebug(ChunkStageData chunkStageData)
+        {
+            stageData = new ChunkStageData()
+            {
+                maxStage = chunkStageData.maxStage,
+                minStage = chunkStageData.minStage,
+                targetStage = chunkStageData.targetStage
+            };
+        }
     }
 
     public class MeshDescriptor 

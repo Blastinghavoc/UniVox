@@ -4,6 +4,7 @@ using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 using UniVox.Framework.Jobified;
+using Utils;
 
 namespace UniVox.Framework
 {
@@ -55,7 +56,7 @@ namespace UniVox.Framework
             for (int i = 0; i < Directions.NumDirections; i++)
             {
                 var vec = Directions.IntVectors[i];
-                native.DirectionVectors[i] = vec.ToBurstable();
+                native.DirectionVectors[i] = vec.ToNative();
             }
 
             native.DirectionOpposites = new NativeArray<byte>(Directions.Oposite, Allocator.Persistent);

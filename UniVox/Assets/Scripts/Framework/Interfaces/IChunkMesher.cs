@@ -10,6 +10,6 @@ namespace UniVox.Framework
 
         AbstractPipelineJob<MeshDescriptor> CreateMeshJob(Vector3Int chunkID);
         AbstractPipelineJob<Mesh> ApplyCollisionMeshJob(Vector3Int chunkID);
-        void Initialise(VoxelTypeManager voxelTypeManager, IChunkManager chunkManager);
+        void Initialise(VoxelTypeManager voxelTypeManager, IChunkManager chunkManager, FrameworkEventManager eventManager);
     }
 }
