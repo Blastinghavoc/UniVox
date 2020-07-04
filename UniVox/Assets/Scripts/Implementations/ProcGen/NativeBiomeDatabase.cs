@@ -1,5 +1,6 @@
 ﻿using Unity.Burst;
 using Unity.Collections;
+using UniVox.Framework;
 using UniVox.Framework.Jobified;
 
 namespace UniVox.Implementations.ProcGen
@@ -11,7 +12,7 @@ namespace UniVox.Implementations.ProcGen
         /// What to fill remaining space with after all layers in a biome
         /// have been done. (probably always going to be stone)
         /// </summary>
-        public ushort defaultVoxelId;
+        public VoxelTypeID defaultVoxelType;
 
         /// <summary>
         /// Layers used in every biome

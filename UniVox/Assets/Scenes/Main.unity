@@ -121,47 +121,9 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!114 &18352215 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 18352215, guid: 579d24a84d9385447b0eb6819a968722,
-    type: 3}
-  m_PrefabInstance: {fileID: 398304578466534659}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2f568bfa1bc8a12488d51c12fe1ef120, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!1 &667016176 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 398304578991225289, guid: 579d24a84d9385447b0eb6819a968722,
-    type: 3}
-  m_PrefabInstance: {fileID: 398304578466534659}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &667016182
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 667016176}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ad2216f06b681b44ead0bf48d897c21a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  underwaterOverlay: {fileID: 1183609387}
-  waterType: {fileID: 11400000, guid: 29a81a7c3885cee43ad6f88a9ba44766, type: 2}
 --- !u!108 &705507994 stripped
 Light:
   m_CorrespondingSourceObject: {fileID: 398304578835441561, guid: 579d24a84d9385447b0eb6819a968722,
-    type: 3}
-  m_PrefabInstance: {fileID: 398304578466534659}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &1183609387 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 5807090801606666973, guid: 579d24a84d9385447b0eb6819a968722,
     type: 3}
   m_PrefabInstance: {fileID: 398304578466534659}
   m_PrefabAsset: {fileID: 0}
@@ -173,111 +135,9 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
-      propertyPath: oceanBiome
-      value: 
-      objectReference: {fileID: 11400000, guid: bc7732a614701f04ca9c506c02132cc4,
-        type: 2}
-    - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
-      propertyPath: waterType
-      value: 
-      objectReference: {fileID: 11400000, guid: 29a81a7c3885cee43ad6f88a9ba44766,
-        type: 2}
-    - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
-      propertyPath: biomeDatabaseComponent
-      value: 
-      objectReference: {fileID: 18352215}
-    - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
       propertyPath: Parrallel
       value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
-      propertyPath: worldSettings.MakeCaves
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
-      propertyPath: structureGenerator.logType
-      value: 
-      objectReference: {fileID: 11400000, guid: 2269b894a3c39474f93f612313029305,
-        type: 2}
-    - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
-      propertyPath: structureGenerator.leafType
-      value: 
-      objectReference: {fileID: 11400000, guid: e65f9d668c841884c8fdd21948ede172,
-        type: 2}
-    - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
-      propertyPath: structureGenerator.oceanDefinition
-      value: 
-      objectReference: {fileID: 11400000, guid: bc7732a614701f04ca9c506c02132cc4,
-        type: 2}
-    - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
-      propertyPath: treeSettings.TreemapScale
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
-      propertyPath: treemapNoise.Octaves
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
-      propertyPath: treemapNoise.Persistence
-      value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
-      propertyPath: treemapNoise.Lacunarity
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
-      propertyPath: treemapNoise.Seed
-      value: 1337
-      objectReference: {fileID: 0}
-    - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
-      propertyPath: treeSettings.TreeDensity
-      value: 0.3
-      objectReference: {fileID: 0}
-    - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
-      propertyPath: treeSettings.TreeThreshold
-      value: 0.9
-      objectReference: {fileID: 0}
-    - target: {fileID: 398304577423018871, guid: 579d24a84d9385447b0eb6819a968722,
-        type: 3}
-      propertyPath: VoxelTypes.Array.size
-      value: 14
-      objectReference: {fileID: 0}
-    - target: {fileID: 398304577423018871, guid: 579d24a84d9385447b0eb6819a968722,
-        type: 3}
-      propertyPath: VoxelTypes.Array.data[8]
-      value: 
-      objectReference: {fileID: 11400000, guid: 87614466a334d894aa80e5f6226a40ad,
-        type: 2}
-    - target: {fileID: 398304577423018871, guid: 579d24a84d9385447b0eb6819a968722,
-        type: 3}
-      propertyPath: VoxelTypes.Array.data[9]
-      value: 
-      objectReference: {fileID: 11400000, guid: 2269b894a3c39474f93f612313029305,
-        type: 2}
-    - target: {fileID: 398304577423018871, guid: 579d24a84d9385447b0eb6819a968722,
-        type: 3}
-      propertyPath: VoxelTypes.Array.data[10]
-      value: 
-      objectReference: {fileID: 11400000, guid: e65f9d668c841884c8fdd21948ede172,
-        type: 2}
-    - target: {fileID: 398304577423018871, guid: 579d24a84d9385447b0eb6819a968722,
-        type: 3}
-      propertyPath: VoxelTypes.Array.data[11]
-      value: 
-      objectReference: {fileID: 11400000, guid: 2c2bb2ed4022e10428e552100de13718,
-        type: 2}
-    - target: {fileID: 398304577423018871, guid: 579d24a84d9385447b0eb6819a968722,
-        type: 3}
-      propertyPath: VoxelTypes.Array.data[12]
-      value: 
-      objectReference: {fileID: 11400000, guid: 179ba0b19a064594c945e272499717e3,
-        type: 2}
-    - target: {fileID: 398304577423018871, guid: 579d24a84d9385447b0eb6819a968722,
-        type: 3}
-      propertyPath: VoxelTypes.Array.data[13]
-      value: 
-      objectReference: {fileID: 11400000, guid: 5c859d982220e0e4a8222b17a36bc765,
-        type: 2}
     - target: {fileID: 398304577439083000, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -338,31 +198,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: GameSceneObjects
       objectReference: {fileID: 0}
-    - target: {fileID: 398304578996345519, guid: 579d24a84d9385447b0eb6819a968722,
-        type: 3}
-      propertyPath: m_IsKinematic
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3150308927941961353, guid: 579d24a84d9385447b0eb6819a968722,
-        type: 3}
-      propertyPath: m_Color.r
-      value: 0.08235294
-      objectReference: {fileID: 0}
-    - target: {fileID: 3150308927941961353, guid: 579d24a84d9385447b0eb6819a968722,
-        type: 3}
-      propertyPath: m_Color.g
-      value: 0.4901961
-      objectReference: {fileID: 0}
-    - target: {fileID: 3150308927941961353, guid: 579d24a84d9385447b0eb6819a968722,
-        type: 3}
-      propertyPath: m_Color.b
-      value: 0.8313726
-      objectReference: {fileID: 0}
-    - target: {fileID: 3150308927941961353, guid: 579d24a84d9385447b0eb6819a968722,
-        type: 3}
-      propertyPath: m_Color.a
-      value: 0.49411765
-      objectReference: {fileID: 0}
     - target: {fileID: 4363647225878257416, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
       propertyPath: Parrallel
@@ -370,79 +205,134 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4444681113471702657, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
-      propertyPath: MaxMeshedPerUpdate
-      value: 24
-      objectReference: {fileID: 0}
-    - target: {fileID: 4444681113471702657, guid: 579d24a84d9385447b0eb6819a968722,
-        type: 3}
       propertyPath: MaxGeneratedPerUpdate
       value: 24
-      objectReference: {fileID: 0}
-    - target: {fileID: 4444681113471702657, guid: 579d24a84d9385447b0eb6819a968722,
-        type: 3}
-      propertyPath: renderedChunksRadii.x
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 4444681113471702657, guid: 579d24a84d9385447b0eb6819a968722,
-        type: 3}
-      propertyPath: renderedChunksRadii.z
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 4444681113471702657, guid: 579d24a84d9385447b0eb6819a968722,
-        type: 3}
-      propertyPath: renderedChunksRadii.y
-      value: 8
-      objectReference: {fileID: 0}
-    - target: {fileID: 4444681113471702657, guid: 579d24a84d9385447b0eb6819a968722,
-        type: 3}
-      propertyPath: GenerateStructures
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4444681113471702657, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
       propertyPath: MaxStructurePerUpdate
       value: 24
       objectReference: {fileID: 0}
-    - target: {fileID: 5807090801606666973, guid: 579d24a84d9385447b0eb6819a968722,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5880167504519198129, guid: 579d24a84d9385447b0eb6819a968722,
-        type: 3}
-      propertyPath: MaxGeneratedPerUpdate
-      value: 24
-      objectReference: {fileID: 0}
-    - target: {fileID: 5880167504519198129, guid: 579d24a84d9385447b0eb6819a968722,
+    - target: {fileID: 4444681113471702657, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
       propertyPath: MaxMeshedPerUpdate
-      value: 12
+      value: 24
       objectReference: {fileID: 0}
-    - target: {fileID: 5880167504519198129, guid: 579d24a84d9385447b0eb6819a968722,
+    - target: {fileID: 7007812261542179066, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
-      propertyPath: renderedChunksRadii.x
-      value: 10
+      propertyPath: ores.Array.data[0].settings.threshold
+      value: 0.177
       objectReference: {fileID: 0}
-    - target: {fileID: 5880167504519198129, guid: 579d24a84d9385447b0eb6819a968722,
+    - target: {fileID: 7007812261542179066, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
-      propertyPath: renderedChunksRadii.z
-      value: 10
+      propertyPath: ores.Array.data[0].settings.frequency
+      value: 5
       objectReference: {fileID: 0}
-    - target: {fileID: 5880167504519198129, guid: 579d24a84d9385447b0eb6819a968722,
+    - target: {fileID: 7007812261542179066, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
-      propertyPath: renderedChunksRadii.y
-      value: 16
+      propertyPath: ores.Array.data[2].settings.threshold
+      value: 0.071
       objectReference: {fileID: 0}
-    - target: {fileID: 6215028733184748506, guid: 579d24a84d9385447b0eb6819a968722,
+    - target: {fileID: 7007812261542179066, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
-      propertyPath: blockToPlace
+      propertyPath: ores.Array.data[1].settings.threshold
+      value: 0.099
+      objectReference: {fileID: 0}
+    - target: {fileID: 7007812261542179066, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: ores.Array.data[3].settings.threshold
+      value: 0.041
+      objectReference: {fileID: 0}
+    - target: {fileID: 7007812261542179066, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: ores.Array.data[3].settings.depthMax
+      value: 256
+      objectReference: {fileID: 0}
+    - target: {fileID: 7007812261542179066, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: ores.Array.data[2].settings.depthMax
+      value: 256
+      objectReference: {fileID: 0}
+    - target: {fileID: 7007812261542179066, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: ores.Array.data[0].settings.depthMax
+      value: 64
+      objectReference: {fileID: 0}
+    - target: {fileID: 7007812261542179066, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: ores.Array.data[1].settings.depthMax
+      value: 96
+      objectReference: {fileID: 0}
+    - target: {fileID: 7007812261542179066, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: ores.Array.data[2].settings.depthMin
+      value: 64
+      objectReference: {fileID: 0}
+    - target: {fileID: 7007812261542179066, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: ores.Array.data[3].settings.depthMin
+      value: 96
+      objectReference: {fileID: 0}
+    - target: {fileID: 7007812261542179066, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: ores.Array.data[1].settings.frequency
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7007812261542179066, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: ores.Array.data[2].settings.frequency
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7007812261542179066, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: ores.Array.data[3].settings.frequency
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7007812261542179066, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: ores.Array.data[0].settings.rarity
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7007812261542179066, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: ores.Array.data[1].settings.rarity
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7007812261542179066, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: ores.Array.data[2].settings.rarity
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7007812261542179066, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: ores.Array.data[3].settings.rarity
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7007812261542179066, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: ores.Array.data[0].settings.noiseScale
+      value: 25
+      objectReference: {fileID: 0}
+    - target: {fileID: 7007812261542179066, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: ores.Array.data[1].settings.noiseScale
+      value: 25
+      objectReference: {fileID: 0}
+    - target: {fileID: 7007812261542179066, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: ores.Array.data[2].settings.noiseScale
+      value: 25
+      objectReference: {fileID: 0}
+    - target: {fileID: 7007812261542179066, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: ores.Array.data[3].settings.noiseScale
+      value: 25
+      objectReference: {fileID: 0}
+    - target: {fileID: 8628052440443065350, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: config
       value: 
-      objectReference: {fileID: 11400000, guid: 2269b894a3c39474f93f612313029305,
+      objectReference: {fileID: 11400000, guid: 69c27e57ecc1a744c9f5c0aa59170259,
         type: 2}
-    - target: {fileID: 6215028733184748506, guid: 579d24a84d9385447b0eb6819a968722,
-        type: 3}
-      propertyPath: rotationX
-      value: 0
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 579d24a84d9385447b0eb6819a968722, type: 3}

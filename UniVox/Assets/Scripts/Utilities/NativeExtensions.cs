@@ -2,13 +2,14 @@
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
-using Utils;
+using UniVox.Framework;
+using UniVox.Framework.Jobified;
 
-namespace UniVox.Framework.Jobified
+namespace Utils
 {
     public static class NativeExtensions
     {
-        public static NativeArray<VoxelTypeID> ToNativeBruteForce(this IChunkData chunkData,Allocator allocator = Allocator.Persistent)
+        public static NativeArray<VoxelTypeID> ToNativeBruteForce(this IChunkData chunkData, Allocator allocator = Allocator.Persistent)
         {
             //Copy chunk data to native array
             NativeArray<VoxelTypeID> voxels = new NativeArray<VoxelTypeID>(chunkData.Dimensions.x * chunkData.Dimensions.y * chunkData.Dimensions.z, allocator);
@@ -51,19 +52,19 @@ namespace UniVox.Framework.Jobified
                     yRange.start = yRange.end - 1;
                     break;
                 case Directions.DOWN:
-                    yRange.end = yRange.start +1;
+                    yRange.end = yRange.start + 1;
                     break;
                 case Directions.NORTH:
                     zRange.start = zRange.end - 1;
                     break;
                 case Directions.SOUTH:
-                    zRange.end = zRange.start +1;
+                    zRange.end = zRange.start + 1;
                     break;
                 case Directions.EAST:
                     xRange.start = xRange.end - 1;
                     break;
                 case Directions.WEST:
-                    xRange.end = xRange.start+1;
+                    xRange.end = xRange.start + 1;
                     break;
                 default:
                     throw new ArgumentException($"direction {Direction} was not recognised");
@@ -113,8 +114,8 @@ namespace UniVox.Framework.Jobified
             }
         }
 
-        public static NativeArray<T> ToNative<T>(this T[] arr, Allocator allocator = Allocator.Persistent) 
-            where T: struct
+        public static NativeArray<T> ToNative<T>(this T[] arr, Allocator allocator = Allocator.Persistent)
+            where T : struct
         {
             NativeArray<T> result = new NativeArray<T>(arr, allocator);
             return result;

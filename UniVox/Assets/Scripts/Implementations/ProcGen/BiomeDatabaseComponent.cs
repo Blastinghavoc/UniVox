@@ -6,10 +6,11 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using UniVox.Framework;
 using UniVox.Framework.Jobified;
+using Utils;
 
 namespace UniVox.Implementations.ProcGen
 {
-    public class BiomeDatabaseComponent: MonoBehaviour
+    public class BiomeDatabaseComponent: MonoBehaviour,IDisposable
     {
         public SOBiomeConfiguration config;
         public NativeBiomeDatabase BiomeDatabase { get; private set; }
@@ -18,6 +19,7 @@ namespace UniVox.Implementations.ProcGen
         private List<SOBiomeDefinition> biomeDefinitionsById = new List<SOBiomeDefinition>();
 
         private bool initialised = false;
+        private bool disposed = false;
 
         public void Initialise() 
         {
@@ -117,7 +119,15 @@ namespace UniVox.Implementations.ProcGen
             }
 
             NativeBiomeDatabase biomeDatabase = new NativeBiomeDatabase();
-            biomeDatabase.defaultVoxelId = typeManager.GetId(config.defaultVoxelType);
+
+            VoxelTypeID defaultVoxelType = new VoxelTypeID(VoxelTypeManager.AIR_ID);
+            if (config.defaultVoxelType != null)
+            {
+                defaultVoxelType = typeManager.GetId(config.defaultVoxelType);
+            }
+
+            biomeDatabase.defaultVoxelType = defaultVoxelType;
+
             biomeDatabase.allLayers = new NativeArray<NativeVoxelRange>(allLayersList.ToArray(), Allocator.Persistent);
             biomeDatabase.biomeLayers = new NativeArray<StartEnd>(biomeLayersList.ToArray(), Allocator.Persistent);
             biomeDatabase.allMoistureDefs = new NativeArray<NativeBiomeMoistureDefinition>(allMoistureDefsList.ToArray(), Allocator.Persistent);
@@ -126,13 +136,18 @@ namespace UniVox.Implementations.ProcGen
             return biomeDatabase;
         }
 
-        private void OnDestroy()
+        public void Dispose()
         {
-            //Dispose of biome database
-            BiomeDatabase.allLayers.SmartDispose();
-            BiomeDatabase.biomeLayers.SmartDispose();
-            BiomeDatabase.allMoistureDefs.SmartDispose();
-            BiomeDatabase.allElevationZones.SmartDispose();
+            if (!disposed)
+            {
+                //Dispose of biome database
+                BiomeDatabase.allLayers.SmartDispose();
+                BiomeDatabase.biomeLayers.SmartDispose();
+                BiomeDatabase.allMoistureDefs.SmartDispose();
+                BiomeDatabase.allElevationZones.SmartDispose();
+
+                disposed = true;
+            }
         }
     }
 }

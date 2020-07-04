@@ -42,6 +42,8 @@ namespace UniVox.Implementations.Providers
 
         [SerializeField] private StructureGenerator structureGenerator = null;
 
+        [SerializeField] private OreGenerationSettingsComponent oreSettings = null;
+
 
         private Dictionary<Vector2Int, ChunkColumnNoiseMaps> noiseMaps;
         //Noise maps currently being generated
@@ -83,12 +85,16 @@ namespace UniVox.Implementations.Providers
             structureGenerator = new StructureGenerator();
             structureGenerator.Initalise(voxelTypeManager, biomeDatabaseComponent, treeSettings.TreeThreshold, (int)treemapNoise.Seed);
 
+            oreSettings.Initialise(voxelTypeManager);
+
             eventManager.OnChunkDeactivated += OnChunkDeactivated;
         }
 
         public void Dispose()
         {
             eventManager.OnChunkDeactivated -= OnChunkDeactivated;
+            oreSettings.Dispose();
+            biomeDatabaseComponent.Dispose();
         }
 
         /// <summary>
@@ -198,6 +204,16 @@ namespace UniVox.Implementations.Providers
 
             mainGenJob.job.chunkData = new NativeArray<VoxelTypeID>(arrayLength, Allocator.Persistent);
 
+            //Setup ore generation job
+            var oreGenJob = new JobWrapper<OreGenJob>();
+            oreGenJob.job.seed = (uint)heightmapNoise.Seed;
+            oreGenJob.job.chunkData = mainGenJob.job.chunkData;
+            oreGenJob.job.chunkPosition = mainGenJob.job.chunkPosition;
+            oreGenJob.job.dimensions = worldSettings.ChunkDimensions;
+            oreGenJob.job.heightMap = nativeNoiseMaps.heightMap;
+            oreGenJob.job.stoneId = biomeDatabaseComponent.BiomeDatabase.defaultVoxelType;
+            oreGenJob.job.oreSettings = oreSettings.Native;
+
             //Setup ocean generation job
             var oceanGenJob = new JobWrapper<OceanGenJob>();
             oceanGenJob.job.config = oceanGenConfig;
@@ -226,7 +242,7 @@ namespace UniVox.Implementations.Providers
                 var ChunkData = chunkDataFactory.Create(chunkID, chunkDimensions, oceanGenJob.job.chunkData.ToArray());
 
                 //Dispose of native arrays
-                oceanGenJob.job.chunkData.Dispose();
+                oreGenJob.job.chunkData.Dispose();
 
                 //Handle reference counting on noise maps
                 if (usingPending.TryGetValue(columnId, out var count))
@@ -267,25 +283,27 @@ namespace UniVox.Implementations.Providers
                 return new BasicFunctionJob<IChunkData>(() =>
                 {
                     mainGenJob.Run();
+                    oreGenJob.Run();
                     oceanGenJob.Run();
                     return cleanup();
                 });
             }
 
-            JobHandle finalHandle;
+            JobHandle mainGenHandle;
 
             if (waitForNoiseMapGeneration)
             {
-                var mainHandle = mainGenJob.Schedule(noiseGenHandle);
-                finalHandle = oceanGenJob.Schedule(mainHandle);
+                mainGenHandle = mainGenJob.Schedule(noiseGenHandle);
             }
             else
             {
-                var mainHandle = mainGenJob.Schedule();
-                finalHandle = oceanGenJob.Schedule(mainHandle);
+                mainGenHandle = mainGenJob.Schedule();
             }
+ 
+            var oreHandle = oreGenJob.Schedule(mainGenHandle);
+            var oceanHandle = oceanGenJob.Schedule(oreHandle);
 
-
+            JobHandle finalHandle = oceanHandle;
             return new PipelineUnityJob<IChunkData>(finalHandle, cleanup);
         }
 

@@ -1,49 +1,5 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &18352213
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 18352214}
-  - component: {fileID: 18352215}
-  m_Layer: 0
-  m_Name: BiomeDatabase
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &18352214
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 18352213}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 398304577439083000}
-  m_RootOrder: 6
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &18352215
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 18352213}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2f568bfa1bc8a12488d51c12fe1ef120, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  config: {fileID: 11400000, guid: 69c27e57ecc1a744c9f5c0aa59170259, type: 2}
 --- !u!1 &394457015
 GameObject:
   m_ObjectHideFlags: 0
@@ -313,6 +269,16 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 4312d675a9aae974ca00ae7930641832, type: 2}
   - {fileID: 11400000, guid: a8aff50ee8c68ea4192732a3ece092b4, type: 2}
   - {fileID: 11400000, guid: 29a81a7c3885cee43ad6f88a9ba44766, type: 2}
+  - {fileID: 11400000, guid: 87614466a334d894aa80e5f6226a40ad, type: 2}
+  - {fileID: 11400000, guid: 2269b894a3c39474f93f612313029305, type: 2}
+  - {fileID: 11400000, guid: e65f9d668c841884c8fdd21948ede172, type: 2}
+  - {fileID: 11400000, guid: 2c2bb2ed4022e10428e552100de13718, type: 2}
+  - {fileID: 11400000, guid: 179ba0b19a064594c945e272499717e3, type: 2}
+  - {fileID: 11400000, guid: 5c859d982220e0e4a8222b17a36bc765, type: 2}
+  - {fileID: 11400000, guid: db418c079ab87fd4abbc1d1bae58d86c, type: 2}
+  - {fileID: 11400000, guid: f5e7b8b5b373a1244bc6ffe29912bf49, type: 2}
+  - {fileID: 11400000, guid: 43b906b3da8fa8742b6f311be930b118, type: 2}
+  - {fileID: 11400000, guid: c551685b681742544b92b9d38936d244, type: 2}
 --- !u!1 &398304577439083001
 GameObject:
   m_ObjectHideFlags: 0
@@ -346,7 +312,6 @@ Transform:
   - {fileID: 398304577012212022}
   - {fileID: 398304578363753883}
   - {fileID: 398304577423018870}
-  - {fileID: 18352214}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -361,6 +326,8 @@ GameObject:
   - component: {fileID: 398304577544639592}
   - component: {fileID: 398304577544639599}
   - component: {fileID: 2136692060081238610}
+  - component: {fileID: 8628052440443065350}
+  - component: {fileID: 7007812261542179066}
   m_Layer: 0
   m_Name: VoxelWorlds
   m_TagString: Untagged
@@ -410,6 +377,57 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   TestMode: 0
+--- !u!114 &8628052440443065350
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 398304577544639593}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f568bfa1bc8a12488d51c12fe1ef120, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  config: {fileID: 11400000, guid: 69c27e57ecc1a744c9f5c0aa59170259, type: 2}
+--- !u!114 &7007812261542179066
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 398304577544639593}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9ca4a9b85fe6784180a29c51529bd05, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stone: {fileID: 11400000, guid: a8aff50ee8c68ea4192732a3ece092b4, type: 2}
+  ores:
+  - voxelType: {fileID: 11400000, guid: db418c079ab87fd4abbc1d1bae58d86c, type: 2}
+    settings:
+      depthMin: 0
+      depthMax: 128
+      frequency: 1
+      threshold: 0
+  - voxelType: {fileID: 11400000, guid: c551685b681742544b92b9d38936d244, type: 2}
+    settings:
+      depthMin: 0
+      depthMax: 128
+      frequency: 1
+      threshold: 0
+  - voxelType: {fileID: 11400000, guid: 43b906b3da8fa8742b6f311be930b118, type: 2}
+    settings:
+      depthMin: 0
+      depthMax: 128
+      frequency: 1
+      threshold: 0
+  - voxelType: {fileID: 11400000, guid: f5e7b8b5b373a1244bc6ffe29912bf49, type: 2}
+    settings:
+      depthMin: 0
+      depthMax: 128
+      frequency: 1
+      threshold: 0
 --- !u!1 &398304578363753878
 GameObject:
   m_ObjectHideFlags: 0
@@ -642,6 +660,20 @@ Light:
   m_UseBoundingSphereOverride: 0
   m_ShadowRadius: 0
   m_ShadowAngle: 0
+--- !u!114 &667016182
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 398304578991225289}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad2216f06b681b44ead0bf48d897c21a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  underwaterOverlay: {fileID: 5807090801606666973}
+  waterType: {fileID: 11400000, guid: 29a81a7c3885cee43ad6f88a9ba44766, type: 2}
 --- !u!1 &5807090801606666973
 GameObject:
   m_ObjectHideFlags: 0
@@ -659,7 +691,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &5780663343133236018
 RectTransform:
   m_ObjectHideFlags: 0
@@ -700,7 +732,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.08223567, g: 0.4895272, b: 0.8301887, a: 1}
+  m_Color: {r: 0.08235294, g: 0.4901961, b: 0.8313726, a: 0.49411765}
   m_RaycastTarget: 0
   m_Maskable: 0
   m_OnCullStateChanged:
@@ -738,9 +770,17 @@ MonoBehaviour:
     HeightmapExponentPositive: 1.5
     HeightmapExponentNegative: 5
     HeightmapYOffset: 0
-    MakeCaves: 0
+    MakeCaves: 1
     CaveThreshold: 0.35
     CaveScale: 100
+  treeSettings:
+    TreemapScale: 1
+    TreeThreshold: 0.9
+  treemapNoise:
+    Octaves: 1
+    Persistence: 0.5
+    Lacunarity: 2
+    Seed: 1337
   heightmapNoise:
     Octaves: 3
     Persistence: 0.5
@@ -752,9 +792,10 @@ MonoBehaviour:
     Lacunarity: 2
     Seed: 1337
   bedrockType: {fileID: 11400000, guid: 3b5947e841c3a4845b8c9cbf0efbbebc, type: 2}
-  waterType: {fileID: 0}
-  oceanBiome: {fileID: 0}
-  biomeDatabaseComponent: {fileID: 0}
+  waterType: {fileID: 11400000, guid: 29a81a7c3885cee43ad6f88a9ba44766, type: 2}
+  oceanBiome: {fileID: 11400000, guid: bc7732a614701f04ca9c506c02132cc4, type: 2}
+  biomeDatabaseComponent: {fileID: 8628052440443065350}
+  oreSettings: {fileID: 7007812261542179066}
 --- !u!1001 &398304576905699205
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -767,6 +808,31 @@ PrefabInstance:
       propertyPath: Player
       value: 
       objectReference: {fileID: 398304578996345519}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: renderedChunksRadii.y
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: MaxGeneratedPerUpdate
+      value: 24
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: GenerateStructures
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: MaxStructurePerUpdate
+      value: 24
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: MaxMeshedPerUpdate
+      value: 24
+      objectReference: {fileID: 0}
     - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: VoxelTypeManager
@@ -1079,17 +1145,29 @@ PrefabInstance:
       propertyPath: m_IsKinematic
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8166611295910324536, guid: e4924b752413e2444932f1f7c0e99bbc,
+        type: 3}
+      propertyPath: blockToPlace
+      value: 
+      objectReference: {fileID: 11400000, guid: 2269b894a3c39474f93f612313029305,
+        type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e4924b752413e2444932f1f7c0e99bbc, type: 3}
---- !u!4 &398304578990859757 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 2491222762481690383, guid: e4924b752413e2444932f1f7c0e99bbc,
+--- !u!1 &398304578991225289 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2491222762481335083, guid: e4924b752413e2444932f1f7c0e99bbc,
     type: 3}
   m_PrefabInstance: {fileID: 2816322069694759650}
   m_PrefabAsset: {fileID: 0}
 --- !u!54 &398304578996345519 stripped
 Rigidbody:
   m_CorrespondingSourceObject: {fileID: 2491222762484586573, guid: e4924b752413e2444932f1f7c0e99bbc,
+    type: 3}
+  m_PrefabInstance: {fileID: 2816322069694759650}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &398304578990859757 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2491222762481690383, guid: e4924b752413e2444932f1f7c0e99bbc,
     type: 3}
   m_PrefabInstance: {fileID: 2816322069694759650}
   m_PrefabAsset: {fileID: 0}

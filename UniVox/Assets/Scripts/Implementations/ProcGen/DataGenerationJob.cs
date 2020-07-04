@@ -1,17 +1,16 @@
-﻿using UniVox.Framework;
-using static Utils.Helpers;
+﻿using Unity.Burst;
+using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
-using Unity.Collections;
-using Unity.Burst;
-using static UniVox.Implementations.ProcGen.ChunkColumnNoiseMaps;
+using UniVox.Framework;
+using static Utils.Helpers;
 
 namespace UniVox.Implementations.ProcGen
 {
     [BurstCompile]
     public struct DataGenerationJob : IJob
     {
-        [ReadOnly] public WorldSettings worldSettings;        
+        [ReadOnly] public WorldSettings worldSettings;
         [ReadOnly] public ushort bedrockID;
         [ReadOnly] public float3 chunkPosition;
 
@@ -24,8 +23,8 @@ namespace UniVox.Implementations.ProcGen
         [ReadOnly] public NativeArray<int> biomeMap;
 
         public void Execute()
-        {            
-            int3 dimensions = worldSettings.ChunkDimensions;            
+        {
+            int3 dimensions = worldSettings.ChunkDimensions;
 
             var mapDimensions = new int2(dimensions.x, dimensions.z);
 
@@ -71,7 +70,7 @@ namespace UniVox.Implementations.ProcGen
                             if (currentLayerIndex == layers.end)
                             {
                                 //If out of layers, switch to default voxel type
-                                layerVoxel = biomeDatabase.defaultVoxelId;
+                                layerVoxel = biomeDatabase.defaultVoxelType;
                                 stillHaveLayers = false;
                                 break;
                             }
@@ -111,7 +110,7 @@ namespace UniVox.Implementations.ProcGen
                     }
                 }
             }
-        }       
+        }
 
     }
 }

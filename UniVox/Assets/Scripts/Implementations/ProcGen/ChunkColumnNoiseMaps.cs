@@ -2,7 +2,7 @@
 using System.Runtime.CompilerServices;
 using Unity.Burst;
 using Unity.Collections;
-using UniVox.Framework.Jobified;
+using Utils;
 
 namespace UniVox.Implementations.ProcGen
 {
