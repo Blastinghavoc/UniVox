@@ -218,6 +218,16 @@ PrefabInstance:
       propertyPath: MaxMeshedPerUpdate
       value: 24
       objectReference: {fileID: 0}
+    - target: {fileID: 4444681113471702657, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: renderedChunksRadii.x
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 4444681113471702657, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: renderedChunksRadii.z
+      value: 10
+      objectReference: {fileID: 0}
     - target: {fileID: 7007812261542179066, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
       propertyPath: ores.Array.data[0].settings.threshold
