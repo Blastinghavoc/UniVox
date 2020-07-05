@@ -12,7 +12,8 @@ namespace UniVox.Implementations.ChunkData
         public enum ChunkDataType 
         { 
             FlatArray,
-            MultiArray
+            MultiArray,
+            SVO
         }
 
         public ChunkDataType typeToCreate;
@@ -25,6 +26,8 @@ namespace UniVox.Implementations.ChunkData
                     return new FlatArrayChunkData(chunkID, chunkDimensions, initialData);
                 case ChunkDataType.MultiArray:
                     return new ArrayChunkData(chunkID, chunkDimensions, initialData);
+                case ChunkDataType.SVO:
+                    return new SVOChunkData(chunkID, chunkDimensions, initialData);
                 default:
                     throw new System.Exception($"No definition exists for chunk data type {typeToCreate}");
             }

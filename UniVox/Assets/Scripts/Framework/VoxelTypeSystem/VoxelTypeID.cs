@@ -16,6 +16,11 @@ namespace UniVox.Framework
 
         public static implicit operator ushort(VoxelTypeID id) => id.value;
         public static explicit operator VoxelTypeID(ushort val) => new VoxelTypeID(val);
+
+        public override string ToString()
+        {
+            return value.ToString();
+        }
     }
 
 }
