@@ -54,7 +54,7 @@ namespace UniVox.Framework
             Dispose();
         }
 
-        public AbstractPipelineJob<MeshDescriptor> CreateMeshJob(Vector3Int chunkID)
+        public virtual AbstractPipelineJob<MeshDescriptor> CreateMeshJob(Vector3Int chunkID)
         {
             Profiler.BeginSample("CreateMeshJob");
 

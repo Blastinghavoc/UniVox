@@ -111,7 +111,7 @@ namespace UniVox.Implementations.Providers
 
         public override AbstractPipelineJob<ChunkNeighbourhood> GenerateStructuresForNeighbourhood(Vector3Int centerChunkID, ChunkNeighbourhood neighbourhood)
         {
-            throw new System.NotImplementedException();
+            return new BasicFunctionJob<ChunkNeighbourhood>(()=>neighbourhood);
         }
     }
 }
