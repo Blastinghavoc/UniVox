@@ -161,5 +161,65 @@ namespace Tests
                 Assert.AreEqual(testId, value,$"Array index {item} was not correctly translated");
             }
         }
+
+        [Test]
+        public void FromArrayAndBack() 
+        {
+            int3 dimensions = new int3(16);
+            SVO svo;
+            var testId = new VoxelTypeID(5);
+
+            var sourceArray = new VoxelTypeID[dimensions.x * dimensions.y * dimensions.z];
+
+            Vector3Int[] testPositions = new Vector3Int[] {
+                new Vector3Int(1,2,3),
+                new Vector3Int(4,5,6),
+                new Vector3Int(7,8,9),
+                new Vector3Int(10,11,12),
+                new Vector3Int(0,0,0),
+                new Vector3Int(15,15,15),
+            };
+
+            //Initialise source array
+            foreach (var item in testPositions)
+            {
+                sourceArray[Utils.Helpers.MultiIndexToFlat(item.x, item.y, item.z, dimensions)] = testId;
+            }
+
+            svo = new SVO(dimensions.ToBasic(), sourceArray);
+
+            var resultArray = svo.ToArray();
+
+            for (int i = 0; i < sourceArray.Length; i++)
+            {
+                Utils.Helpers.FlatIndexToMulti(i, dimensions, out var x, out var y, out var z);
+                Assert.AreEqual(sourceArray[i], resultArray[i],$"Result array did not match source for coordinates {x},{y},{z}");
+            }
+        }
+
+        [Test]
+        public void FromArrayEmpty() 
+        {
+            int3 dimensions = new int3(16);
+            var sourceArray = new VoxelTypeID[dimensions.x * dimensions.y * dimensions.z];
+            SVO svo = new SVO(dimensions.ToBasic(), sourceArray);
+            Assert.IsTrue(svo.IsEmpty, $"Octree not empty after initialisation from empty array");
+        }
+
+        [Test]
+        public void FromArrayFull()
+        {
+            int3 dimensions = new int3(16);
+            var sourceArray = new VoxelTypeID[dimensions.x * dimensions.y * dimensions.z];
+            var testId = new VoxelTypeID(5);
+
+            for (int i = 0; i < sourceArray.Length; i++)
+            {
+                sourceArray[i] = testId;
+            }
+
+            SVO svo = new SVO(dimensions.ToBasic(), sourceArray);
+            Assert.IsFalse(svo.IsEmpty, $"Octree empty after initialisation from full array");
+        }
     }
 }

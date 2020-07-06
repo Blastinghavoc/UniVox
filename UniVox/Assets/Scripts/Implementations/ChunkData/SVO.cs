@@ -126,21 +126,24 @@ namespace UniVox.Implementations.ChunkData
         {
             Profiler.BeginSample("SVO FromArray");
             //Initialise octree with data by brute force
-            int flat = 0;
-            for (int z = 0; z < dimensions.z; z++)
-            {
-                for (int y = 0; y < dimensions.y; y++)
-                {
-                    for (int x = 0; x < dimensions.x; x++, flat++)
-                    {
-                        var id = initialData[flat];
-                        if (id != VoxelTypeManager.AIR_ID)
-                        {
-                            Set(x, y, z, id);
-                        }
-                    }
-                }
-            }
+            //int flat = 0;
+            //for (int z = 0; z < dimensions.z; z++)
+            //{
+            //    for (int y = 0; y < dimensions.y; y++)
+            //    {
+            //        for (int x = 0; x < dimensions.x; x++, flat++)
+            //        {
+            //            var id = initialData[flat];
+            //            if (id != VoxelTypeManager.AIR_ID)
+            //            {
+            //                Set(x, y, z, id);
+            //            }
+            //        }
+            //    }
+            //}
+
+            //This is about 4x faster than brute force in preliminary testing
+            FromArray(initialData);
             Profiler.EndSample();
         }
 
@@ -150,11 +153,56 @@ namespace UniVox.Implementations.ChunkData
         /// </summary>
         /// <param name="array"></param>
         private void FromArray(VoxelTypeID[] array) 
-        { 
-            //TODO WIP
-            ///Recurse down each potential path until reaching a leaf,
-            ///then add any voxels for that leaf, otherwise, prune the leaf.
-            ///When backtracking, prune any subtrees that are empty.
+        {            
+            int dxdy = dimensions.x * dimensions.y;
+            FromArrayProcessChildIsEmpty(root, Vector3Int.zero, dimensions, array, dxdy);
+        }
+
+        /// <summary>
+        /// Recursive implementation for FromArray
+        /// </summary>
+        /// <param name="node"></param>
+        /// <param name="offset"></param>
+        /// <param name="nodeDimensions"></param>
+        /// <param name="array"></param>
+        /// <param name="dxdy"></param>
+        /// <returns></returns>
+        private bool FromArrayProcessChildIsEmpty(INode node, Vector3Int offset, Vector3Int nodeDimensions,VoxelTypeID[] array,int dxdy) 
+        {
+            bool empty = true;
+            var childDimensions = nodeDimensions / 2;
+            if (node.Capacity > 8)
+            {
+                for (int i = 0; i < 8; i++)
+                {
+                    var child = node.MakeChild(i);
+                    var childOffset = getLocalCoords(i) * childDimensions;
+                    if (FromArrayProcessChildIsEmpty(child, offset + childOffset, childDimensions,array,dxdy))
+                    {
+                        node.RemoveChild(i);
+                    }
+                    else
+                    {
+                        empty = false;
+                    }
+                }
+            }
+            else
+            {
+                var leaf = (LeafNode)node;
+                for (int i = 0; i < 8; i++)
+                {
+                    var leafOffset = getLocalCoords(i) + offset;
+                    var flat = Utils.Helpers.MultiIndexToFlat(leafOffset.x, leafOffset.y, leafOffset.z, dimensions.x, dxdy);
+                    var voxel = array[flat];
+                    if (voxel != VoxelTypeManager.AIR_ID)
+                    {
+                        leaf.children[i] = voxel;
+                        empty = false;
+                    }
+                }
+            }
+            return empty;
         }
 
         /// <summary>
