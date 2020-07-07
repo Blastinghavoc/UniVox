@@ -9,82 +9,6 @@ using Utils;
 
 namespace UniVox.Framework.Jobified
 {
-    ///Used for run-length encoding the material runs in the triangle indices
-    ///for a meshing job
-    public struct MaterialRun
-    {
-        public ushort materialID;
-        public StartEnd range;
-    }
-
-    [BurstCompile]
-    public struct SortIndicesByMaterial : IJob
-    {
-        [ReadOnly] public NativeArray<int> allTriangleIndices;
-        public NativeArray<MaterialRun> materialRuns;
-        public NativeList<MaterialRun> packedRuns;
-        public NativeList<int> packedIndices;
-
-        //Single element array
-        [ReadOnly] public NativeArray<int> collisionMeshMaterialRunLength;
-
-        private struct RunComparer : IComparer<MaterialRun>
-        {
-            public int Compare(MaterialRun x, MaterialRun y)
-            {
-                return x.materialID.CompareTo(y.materialID);
-            }
-        }
-
-        public void Execute()
-        {
-            var comparer = new RunComparer();
-            //Sort the runs by material ID
-            //materialRuns.Sort(comparer);
-
-            var collidableRunLength = collisionMeshMaterialRunLength[0];
-
-            var collidableRuns = materialRuns.GetSubArray(0, collidableRunLength);
-            collidableRuns.Sort(comparer);
-            
-            var nonCollidableRuns = materialRuns.GetSubArray(collidableRunLength, materialRuns.Length - collidableRunLength);
-            nonCollidableRuns.Sort(comparer);
-
-
-            //Resize packedIndices list to required capacity
-            packedIndices.Capacity = allTriangleIndices.Length;            
-
-            //Apply the ordering of the runs to the triangle indices
-            MaterialRun currentPackedRun = new MaterialRun();
-            currentPackedRun.materialID = materialRuns[0].materialID;
-            currentPackedRun.range.start = 0;
-            for (int i = 0; i < materialRuns.Length; i++)
-            {
-                var run = materialRuns[i];
-
-                if (run.materialID != currentPackedRun.materialID)
-                {
-                    currentPackedRun.range.end = packedIndices.Length;
-                    if (currentPackedRun.range.Length > 0)
-                    {
-                        packedRuns.Add(currentPackedRun);
-                    }
-                    currentPackedRun.materialID = run.materialID;
-                    currentPackedRun.range.start = packedIndices.Length;
-                }
-
-                //Copy ranges into the packedIndices array in order by material
-                var allSlice = allTriangleIndices.GetSubArray(run.range.start, run.range.Length);
-                packedIndices.AddRange(allSlice);
-            }
-
-            currentPackedRun.range.end = packedIndices.Length;
-            if (currentPackedRun.range.Length > 0)
-            {
-                packedRuns.Add(currentPackedRun);
-            }
-        }
-    }
 
     [BurstCompile]
     public struct MeshingJob : IJob
@@ -445,6 +369,24 @@ namespace UniVox.Framework.Jobified
             //if (direction.z != 0)
             return new int2(fullCoords.x, fullCoords.y);
 
+        }
+    }
+
+    [BurstCompile]
+    public struct MaterialRunTracker 
+    {
+        MaterialRun currentRun;
+
+        public NativeList<MaterialRun> materialRuns;
+        public void Update(ushort materialID) 
+        {
+            if (materialID != currentRun.materialID)
+            {
+                currentRun.range.end = allTriangleIndices.Length;
+                materialRuns.Add(currentRun);
+                currentRun.materialID = materialID;
+                currentRun.range.start = allTriangleIndices.Length;
+            }
         }
     }
 }

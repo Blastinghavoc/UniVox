@@ -60,6 +60,15 @@ namespace UniVox.Implementations.Providers
             return ChunkData;
         }
 
+        private AbstractChunkData SingleBlock(Vector3Int chunkID, Vector3Int chunkDimensions) 
+        {
+            var ChunkData = new ArrayChunkData(chunkID, chunkDimensions);
+
+            ChunkData[0, 0, 0] = new VoxelTypeID(grassID);
+
+            return ChunkData;
+        }
+
         private AbstractChunkData HalfHeight(Vector3Int chunkID, Vector3Int chunkDimensions)
         {
             var ChunkData = new ArrayChunkData(chunkID, chunkDimensions);

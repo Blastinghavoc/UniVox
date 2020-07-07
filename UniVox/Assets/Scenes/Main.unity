@@ -417,17 +417,17 @@ PrefabInstance:
     - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: chunkDimensions.x
-      value: 4
+      value: 16
       objectReference: {fileID: 0}
     - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: chunkDimensions.y
-      value: 4
+      value: 16
       objectReference: {fileID: 0}
     - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: chunkDimensions.z
-      value: 4
+      value: 16
       objectReference: {fileID: 0}
     - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
@@ -556,6 +556,12 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 6061144537135917626, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: grassType
+      value: 
+      objectReference: {fileID: 11400000, guid: da8f3cdeb3374df40a2e8e80b40a9e01,
+        type: 2}
     m_RemovedComponents:
     - {fileID: 4110033766405619853, guid: 37b9cc2f16198bf4c84ddc72031aedb3, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 37b9cc2f16198bf4c84ddc72031aedb3, type: 3}
@@ -805,6 +811,17 @@ PrefabInstance:
       propertyPath: Parrallel
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 398304577423018871, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: VoxelTypes.Array.size
+      value: 19
+      objectReference: {fileID: 0}
+    - target: {fileID: 398304577423018871, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: VoxelTypes.Array.data[18]
+      value: 
+      objectReference: {fileID: 11400000, guid: 18d977694b9dda94bb69bbc52cbdfd0f,
+        type: 2}
     - target: {fileID: 398304577439083000, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -865,6 +882,41 @@ PrefabInstance:
       propertyPath: m_Name
       value: GameSceneObjects
       objectReference: {fileID: 0}
+    - target: {fileID: 398304577765385446, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 398304578990859757, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 398304578990859757, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 398304578990859757, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 398304578990859757, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 398304578996345519, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: m_IsKinematic
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3231851409899628765, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4363647225878257416, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
       propertyPath: Parrallel
@@ -895,11 +947,47 @@ PrefabInstance:
       propertyPath: renderedChunksRadii.z
       value: 10
       objectReference: {fileID: 0}
+    - target: {fileID: 4678667611123125231, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: MaxGeneratedPerUpdate
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 4678667611123125231, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: MaxStructurePerUpdate
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 4678667611123125231, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: MaxMeshedPerUpdate
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 4678667611123125231, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: renderedChunksRadii.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4678667611123125231, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: renderedChunksRadii.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4678667611123125231, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: renderedChunksRadii.z
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5880167504519198131, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6215028733184748506, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: blockToPlace
+      value: 
+      objectReference: {fileID: 11400000, guid: 18d977694b9dda94bb69bbc52cbdfd0f,
+        type: 2}
     - target: {fileID: 7007812261542179066, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
       propertyPath: ores.Array.data[0].settings.threshold
@@ -1009,6 +1097,36 @@ PrefabInstance:
         type: 3}
       propertyPath: ores.Array.data[3].settings.noiseScale
       value: 25
+      objectReference: {fileID: 0}
+    - target: {fileID: 7616483327761516500, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: renderedChunksRadii.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7616483327761516500, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: renderedChunksRadii.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7616483327761516500, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: renderedChunksRadii.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7616483327761516500, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: MaxGeneratedPerUpdate
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 7616483327761516500, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: MaxStructurePerUpdate
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 7616483327761516500, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: MaxMeshedPerUpdate
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 8628052440443065350, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
