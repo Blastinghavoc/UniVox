@@ -45,7 +45,7 @@ namespace UniVox.Framework
         }
     }
 
-    public static class DirectionHelperExtensions 
+    public static class NativeDirectionHelperExtensions 
     {
         public static NativeDirectionHelper Create() 
         {

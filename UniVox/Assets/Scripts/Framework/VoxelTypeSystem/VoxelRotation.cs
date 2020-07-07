@@ -8,7 +8,7 @@ namespace UniVox.Framework
     /// 4 angles of rotation about the Y and X planes, or 16 total rotations.
     /// </summary>
     [BurstCompile]
-    public struct VoxelRotation 
+    public struct VoxelRotation: IEquatable<VoxelRotation> 
     {
         //first 6 bits encode values 00xxyyzz
         private byte val;
@@ -23,7 +23,11 @@ namespace UniVox.Framework
         public int z { get => val & 0x3; set => val = (byte)((val & 0x3C) | value); }
 
         public bool isBlank { get => (val & 0x3F) == 0; }
-            
+
+        public bool Equals(VoxelRotation other)
+        {
+            return (val & 0x3F) == (other.val & 0x3F);
+        }
     }
     
 

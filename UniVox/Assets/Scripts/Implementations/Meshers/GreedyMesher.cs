@@ -17,7 +17,12 @@ namespace UniVox.Implementations.Meshers
             var chunkData = chunkManager.GetReadOnlyChunkData(chunkID);
             //TODO WIP testing
             return new BasicFunctionJob<MeshDescriptor>(() => {
-                var mesh = GreedyMeshingAlgorithm.ReduceMesh(chunkData, chunkManager.ChunkDimensions);
+                var meshDatabase = voxelTypeManager.nativeMeshDatabase;
+                var voxelTypeDatabase = voxelTypeManager.nativeVoxelTypeDatabase;
+
+                var mesh = GreedyMeshingAlgorithm.ReduceMesh(chunkData, chunkManager.ChunkDimensions,
+                        meshDatabase,voxelTypeDatabase,directionHelper
+                    );
                 MeshDescriptor descriptor = new MeshDescriptor()
                 {
                     mesh = mesh,

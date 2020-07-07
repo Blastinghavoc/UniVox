@@ -36,7 +36,7 @@ namespace UniVox.Framework
             this.voxelTypeManager = voxelTypeManager;
             this.chunkManager = chunkManager;
 
-            directionHelper = DirectionHelperExtensions.Create();
+            directionHelper = NativeDirectionHelperExtensions.Create();
             this.eventManager = eventManager;
         }
 

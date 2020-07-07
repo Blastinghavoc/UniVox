@@ -127,7 +127,7 @@ namespace Tests
         [Test]
         public void VertexTransformation() 
         {
-            var directionHelper = DirectionHelperExtensions.Create();
+            var directionHelper = NativeDirectionHelperExtensions.Create();
 
             //Should rotate 90 degrees about the x axis
             var quat = directionHelper.GetRotationQuat(new VoxelRotation() { x = 1 });
