@@ -81,6 +81,41 @@ namespace Tests
             Assert.IsTrue(svo.IsEmpty, "SVO not empty after having item removed from it");
         }
 
+        /// <summary>
+        /// Test added in response to bug where leaf could prune the whole tree.
+        /// </summary>
+        [Test]
+        public void RemoveLastVoxelInLeafDoesntPruneTooMuch() 
+        {
+            SVO svo = new SVO(new Vector3Int(16, 16, 16));
+            var testId = new VoxelTypeID(5);
+            var Air = new VoxelTypeID();
+            //Add a complete leaf
+            svo.Set(0, 0, 0, testId);
+            svo.Set(0, 0, 1, testId);
+            svo.Set(0, 1, 0, testId);
+            svo.Set(0, 1, 1, testId);
+            svo.Set(1, 0, 0, testId);
+            svo.Set(1, 0, 1, testId);
+            svo.Set(1, 1, 0, testId);
+            svo.Set(1, 1, 1, testId);
+
+            //Add another node somewhere else
+            svo.Set(1, 2, 1, testId);
+
+            //remove all the nodes in the complete leaf
+            svo.Set(0, 0, 0, Air);
+            svo.Set(0, 0, 1, Air);
+            svo.Set(0, 1, 0, Air);
+            svo.Set(0, 1, 1, Air);
+            svo.Set(1, 0, 0, Air);
+            svo.Set(1, 0, 1, Air);
+            svo.Set(1, 1, 0, Air);
+            svo.Set(1, 1, 1, Air);
+
+            Assert.IsFalse(svo.IsEmpty, $"Octree pruned more than it should have");
+        }
+
         [Test]
         public void SetMany() 
         {

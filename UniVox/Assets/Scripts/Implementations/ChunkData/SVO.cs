@@ -12,9 +12,8 @@ namespace UniVox.Implementations.ChunkData
     {
         public interface INode
         {
-            uint Capacity { get; }
             INode GetChild(int index);
-            INode MakeChild(int index);
+            INode MakeChild(int index,bool isLeaf);
             void RemoveChild(int index);
 
             bool IsEmpty { get; }
@@ -24,8 +23,6 @@ namespace UniVox.Implementations.ChunkData
         {
             public VoxelTypeID[] children = new VoxelTypeID[8];
 
-            public uint Capacity { get; } = 8;
-
             public bool IsEmpty => !children.Any((id) => id != VoxelTypeManager.AIR_ID);
 
             public INode GetChild(int index)
@@ -33,7 +30,7 @@ namespace UniVox.Implementations.ChunkData
                 return null;
             }
 
-            public INode MakeChild(int index)
+            public INode MakeChild(int index,bool isLeaf)
             {
                 throw new NotImplementedException();
             }
@@ -55,13 +52,6 @@ namespace UniVox.Implementations.ChunkData
         {
             public INode[] children = new INode[8];
 
-            public Node(uint capacity)
-            {
-                Capacity = capacity;
-            }
-
-            public uint Capacity { get; private set; }
-
             public bool IsEmpty => !children.Any((child) => child != null);
 
             public INode GetChild(int index)
@@ -69,17 +59,16 @@ namespace UniVox.Implementations.ChunkData
                 return children[index];
             }
 
-            public INode MakeChild(int index)
+            public INode MakeChild(int index,bool isLeaf)
             {
-                var newCapacity = Capacity / 8;
                 INode child;
-                if (newCapacity > 8)
+                if (isLeaf)
                 {
-                    child = new Node(newCapacity);
+                    child = new LeafNode();
                 }
                 else
                 {
-                    child = new LeafNode();
+                    child = new Node();
                 }
                 children[index] = child;
                 return child;
@@ -93,6 +82,7 @@ namespace UniVox.Implementations.ChunkData
 
         private INode root;
         private Vector3Int dimensions;
+        private readonly Vector3Int dimensionsOfLeafNodes = new Vector3Int(2,2,2);
         public bool IsEmpty { get => root.IsEmpty; }
 
         public SVO(Vector3Int dimensions)
@@ -114,7 +104,7 @@ namespace UniVox.Implementations.ChunkData
 
             if (capacity > 8)
             {
-                root = new Node(capacity);
+                root = new Node();
             }
             else
             {
@@ -171,11 +161,12 @@ namespace UniVox.Implementations.ChunkData
         {
             bool empty = true;
             var childDimensions = nodeDimensions / 2;
-            if (node.Capacity > 8)
+            if (!(node is LeafNode leaf))
             {
+                bool childIsLeaf = childDimensions.x == dimensionsOfLeafNodes.x;
                 for (int i = 0; i < 8; i++)
                 {
-                    var child = node.MakeChild(i);
+                    var child = node.MakeChild(i, childIsLeaf);
                     var childOffset = getLocalCoords(i) * childDimensions;
                     if (FromArrayProcessChildIsEmpty(child, offset + childOffset, childDimensions,array,dxdy))
                     {
@@ -189,7 +180,6 @@ namespace UniVox.Implementations.ChunkData
             }
             else
             {
-                var leaf = (LeafNode)node;
                 for (int i = 0; i < 8; i++)
                 {
                     var leafOffset = getLocalCoords(i) + offset;
@@ -236,7 +226,7 @@ namespace UniVox.Implementations.ChunkData
                 var currentDimensions = dimensionsStack.Pop();
                 var childDimensions = currentDimensions / 2;
 
-                if (current.Capacity > 8)
+                if (!(current is LeafNode leaf))
                 {
                     //Not a leaf
 
@@ -257,7 +247,6 @@ namespace UniVox.Implementations.ChunkData
                 else 
                 {
                     //Leaf
-                    var leaf = (LeafNode)current;
                     for (int i = 0; i < 8; i++)
                     {
                         var childOffset = getLocalCoords(i) + offset;
@@ -303,7 +292,8 @@ namespace UniVox.Implementations.ChunkData
             Stack<INode> path = new Stack<INode>();
             Stack<int> indices = new Stack<int>();
             int index;
-            while (current.Capacity > 8)
+            LeafNode leaf;
+            while ((leaf = current as LeafNode) == null)//While the current node is not a leaf node
             {
                 index = getIndexAndAdjustNodeLocalCoords(ref nodeLocal, childDimensions);
 
@@ -320,8 +310,7 @@ namespace UniVox.Implementations.ChunkData
                 childDimensions = childDimensions / 2;
             }
 
-            index = getIndexAndAdjustNodeLocalCoords(ref nodeLocal, childDimensions);
-            var leaf = (LeafNode)current;
+            index = getIndexAndAdjustNodeLocalCoords(ref nodeLocal, childDimensions);            
             leaf.RemoveChild(index);
 
             //Prune any empty nodes
@@ -333,6 +322,7 @@ namespace UniVox.Implementations.ChunkData
                     var parent = path.Pop();
                     index = indices.Pop();
                     parent.RemoveChild(index);
+                    current = parent;
                 }
                 else
                 {
@@ -361,14 +351,16 @@ namespace UniVox.Implementations.ChunkData
             Vector3Int childDimensions = dimensions / 2;
             Vector3Int nodeLocal = new Vector3Int(x, y, z);
             int index;
-            while (current.Capacity > 8)
+            LeafNode leaf;
+            while ((leaf = current as LeafNode) == null)//While the current node is not a leaf node
             {
                 index = getIndexAndAdjustNodeLocalCoords(ref nodeLocal, childDimensions);
 
                 var child = current.GetChild(index);
                 if (child == null)
                 {
-                    child = current.MakeChild(index);
+                    bool childIsLeaf = childDimensions.x == dimensionsOfLeafNodes.x;
+                    child = current.MakeChild(index,childIsLeaf);
                 }
                 current = child;
 
@@ -376,7 +368,6 @@ namespace UniVox.Implementations.ChunkData
             }
 
             index = getIndexAndAdjustNodeLocalCoords(ref nodeLocal, childDimensions);
-            var leaf = (LeafNode)current;
             leaf.children[index] = id;
 
             Profiler.EndSample();
@@ -397,7 +388,8 @@ namespace UniVox.Implementations.ChunkData
             Vector3Int childDimensions = dimensions / 2;
             Vector3Int nodeLocal = new Vector3Int(x, y, z);
             int index;
-            while (current.Capacity > 8)
+            LeafNode leaf;
+            while ((leaf = current as LeafNode) == null)//While the current node is not a leaf node
             {
                 index = getIndexAndAdjustNodeLocalCoords(ref nodeLocal, childDimensions);
 
@@ -413,8 +405,6 @@ namespace UniVox.Implementations.ChunkData
             }
 
             index = getIndexAndAdjustNodeLocalCoords(ref nodeLocal, childDimensions);
-
-            var leaf = (LeafNode)current;
 
             Profiler.EndSample();
             return leaf.children[index];
