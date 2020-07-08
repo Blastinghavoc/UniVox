@@ -59,6 +59,7 @@ namespace UniVox.Implementations.Meshers
             nullFace = default;
             dxdy = data.dimensions.x * data.dimensions.y;
             runTracker = new MaterialRunTracker();
+            NativeList<Dolater> nonCollidable = new NativeList<Dolater>(Allocator.Temp);
 
             int size = data.dimensions.x;
 
@@ -94,8 +95,6 @@ namespace UniVox.Implementations.Meshers
                 //Masks in the positive and negative directions
                 NativeArray<FaceDescriptor> maskPositive = new NativeArray<FaceDescriptor>((size + 1) * (size + 1), Allocator.Temp);
                 NativeArray<FaceDescriptor> maskNegative = new NativeArray<FaceDescriptor>((size + 1) * (size + 1), Allocator.Temp);
-                //FaceDescriptor[] maskPositive = new FaceDescriptor[(size + 1) * (size + 1)];
-                //FaceDescriptor[] maskNegative = new FaceDescriptor[(size + 1) * (size + 1)];
 
                 axisVector[axis] = 1;
 
@@ -201,17 +200,6 @@ namespace UniVox.Implementations.Meshers
 
                                 if (!currentMaskValue.Equals(nullFace))
                                 {
-                                    // Add quad if mask value not null
-                                    var meshID = data.meshDatabase.voxelTypeToMeshTypeMap[currentMaskValue.typeId];
-                                    var meshRange = data.meshDatabase.meshTypeRanges[meshID];
-                                    var usedNodesSlice = data.meshDatabase.nodesUsedByFaces[meshRange.start + (int)currentMaskValue.originalFaceDirection];
-                                    var uvStart = data.voxelTypeDatabase.voxelTypeToZIndicesRangeMap[currentMaskValue.typeId].start;
-                                    var uvZ = data.voxelTypeDatabase.zIndicesPerFace[uvStart + (int)currentMaskValue.originalFaceDirection];
-
-                                    var materialId = data.meshDatabase.voxelTypeToMaterialIDMap[currentMaskValue.typeId];
-                                    //Update material runs
-                                    runTracker.Update(materialId, data.materialRuns, data.allTriangleIndices);
-
                                     workingCoordinates[secondaryAxis] = i;
                                     workingCoordinates[tertiaryAxis] = j;
                                     int3 du = new int3();
@@ -220,37 +208,15 @@ namespace UniVox.Implementations.Meshers
                                     du[secondaryAxis] = width;
                                     dv[tertiaryAxis] = height;
 
-                                    float3 bl = workingCoordinates;
-                                    float3 tr = workingCoordinates + du + dv;
-                                    float3 br = workingCoordinates + du;
-                                    float3 tl = workingCoordinates + dv;
-
-                                    Node nodebl = data.meshDatabase.allMeshNodes[usedNodesSlice.start];
-                                    Node nodetr = data.meshDatabase.allMeshNodes[usedNodesSlice.start + 1];
-                                    Node nodebr = data.meshDatabase.allMeshNodes[usedNodesSlice.start + 2];
-                                    Node nodetl = data.meshDatabase.allMeshNodes[usedNodesSlice.start + 3];
-                                    ///NOTE for negative faces, the UVs are already flipped in the face definition
-                                    ///Therefore, flip just the vertices when necessary
-                                    if (flip)
+                                    if (data.voxelTypeDatabase.voxelTypeToIsPassableMap[currentMaskValue.typeId])
                                     {
-                                        Swap(ref bl, ref br);
-                                        Swap(ref tr, ref tl);
+                                        nonCollidable.Add(new Dolater(currentMaskValue, workingCoordinates, du, dv, width, height, flip));
+                                    }
+                                    else
+                                    {
+                                        ProcessSection(currentMaskValue, workingCoordinates, du, dv, width, height, flip);
                                     }
 
-                                    nodebl.vertex = bl;
-                                    nodetr.vertex = tr;
-                                    nodebr.vertex = br;
-                                    nodetl.vertex = tl;
-
-                                    int2 uvScale = new int2(width, height);
-
-                                    //Scale the UVs
-                                    //nodebl.uv *= uvScale;//Don't need to scale the bottom left, as its UV should be 0,0
-                                    nodetr.uv *= uvScale;
-                                    nodebr.uv *= uvScale;
-                                    nodetl.uv *= uvScale;
-
-                                    AddFace(nodebl, nodetr, nodebr, nodetl, uvZ);
                                 }
 
                                 /// Zero-out mask for this section
@@ -273,7 +239,17 @@ namespace UniVox.Implementations.Meshers
 
             //Record length of collidable mesh section
             data.collisionSubmesh.Record(data.vertices.Length, data.allTriangleIndices.Length, data.materialRuns.Length);
-            //Ensure the run tracker ends
+            //End collidable run
+            runTracker.EndRun(data.materialRuns, data.allTriangleIndices);
+
+            //Process non collidable sections
+            for (int j = 0; j < nonCollidable.Length; j++)
+            {
+                var item = nonCollidable[j];
+                ProcessSection(item.currentMaskValue, item.workingCoordinates, item.du, item.dv, item.width, item.height, item.flip);
+            }
+
+            //End non collidable run
             runTracker.EndRun(data.materialRuns, data.allTriangleIndices);
         }
 
@@ -287,7 +263,96 @@ namespace UniVox.Implementations.Meshers
             return IJobExtensions.Schedule(this, dependsOn);
         }
 
-        private void AddFace(Node v0, Node v1, Node v2, Node v3, float uvZ)
+        /// <summary>
+        /// Holds the parameters for a call to ProcessSection
+        /// to execute it later on.
+        /// </summary>
+        private struct Dolater 
+        {
+            public FaceDescriptor currentMaskValue;
+            public int3 workingCoordinates;
+            public int3 du;
+            public int3 dv;
+            public int width;
+            public int height;
+            public bool flip;
+
+            public Dolater(FaceDescriptor currentMaskValue, int3 workingCoordinates, int3 du, int3 dv, int width, int height, bool flip)
+            {
+                this.currentMaskValue = currentMaskValue;
+                this.workingCoordinates = workingCoordinates;
+                this.du = du;
+                this.dv = dv;
+                this.width = width;
+                this.height = height;
+                this.flip = flip;
+            }
+        }
+
+        /// <summary>
+        /// Compute the properties of the quad with given parameters,
+        /// and add it to the mesh.
+        /// </summary>
+        /// <param name="currentMaskValue"></param>
+        /// <param name="workingCoordinates"></param>
+        /// <param name="du"></param>
+        /// <param name="dv"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <param name="flip"></param>
+        private void ProcessSection(FaceDescriptor currentMaskValue,
+            int3 workingCoordinates,
+            int3 du,
+            int3 dv,
+            int width,
+            int height,
+            bool flip) 
+        {
+            // Add quad if mask value not null
+            var meshID = data.meshDatabase.voxelTypeToMeshTypeMap[currentMaskValue.typeId];
+            var meshRange = data.meshDatabase.meshTypeRanges[meshID];
+            var usedNodesSlice = data.meshDatabase.nodesUsedByFaces[meshRange.start + (int)currentMaskValue.originalFaceDirection];
+            var uvStart = data.voxelTypeDatabase.voxelTypeToZIndicesRangeMap[currentMaskValue.typeId].start;
+            var uvZ = data.voxelTypeDatabase.zIndicesPerFace[uvStart + (int)currentMaskValue.originalFaceDirection];
+
+            var materialId = data.meshDatabase.voxelTypeToMaterialIDMap[currentMaskValue.typeId];
+            //Update material runs
+            runTracker.Update(materialId, data.materialRuns, data.allTriangleIndices);            
+
+            float3 bl = workingCoordinates;
+            float3 tr = workingCoordinates + du + dv;
+            float3 br = workingCoordinates + du;
+            float3 tl = workingCoordinates + dv;
+
+            Node nodebl = data.meshDatabase.allMeshNodes[usedNodesSlice.start];
+            Node nodetr = data.meshDatabase.allMeshNodes[usedNodesSlice.start + 1];
+            Node nodebr = data.meshDatabase.allMeshNodes[usedNodesSlice.start + 2];
+            Node nodetl = data.meshDatabase.allMeshNodes[usedNodesSlice.start + 3];
+            ///NOTE for negative faces, the UVs are already flipped in the face definition
+            ///Therefore, flip just the vertices when necessary
+            if (flip)
+            {
+                Swap(ref bl, ref br);
+                Swap(ref tr, ref tl);
+            }
+
+            nodebl.vertex = bl;
+            nodetr.vertex = tr;
+            nodebr.vertex = br;
+            nodetl.vertex = tl;
+
+            int2 uvScale = new int2(width, height);
+
+            //Scale the UVs
+            //nodebl.uv *= uvScale;//Don't need to scale the bottom left, as its UV should be 0,0
+            nodetr.uv *= uvScale;
+            nodebr.uv *= uvScale;
+            nodetl.uv *= uvScale;
+
+            AddQuad(nodebl, nodetr, nodebr, nodetl, uvZ);
+        }
+
+        private void AddQuad(Node v0, Node v1, Node v2, Node v3, float uvZ)
         {
             int index = data.vertices.Length;
 
