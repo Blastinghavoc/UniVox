@@ -53,8 +53,6 @@ namespace UniVox.Framework.Jobified
             }
             int currentRotatedIndex = 0;
 
-            int currentIndex = 0;//Current index for indices list
-
             var nonCollidable = new NativeList<DoLater>(Allocator.Temp);
 
             runTracker = new MaterialRunTracker();
@@ -91,7 +89,7 @@ namespace UniVox.Framework.Jobified
                             }
                             else
                             {
-                                AddMeshDataForVoxel(voxelTypeID, new int3(x, y, z), ref currentIndex,rotated,rotation);
+                                AddMeshDataForVoxel(voxelTypeID, new int3(x, y, z), rotated,rotation);
                             }
                         }
 
@@ -108,7 +106,7 @@ namespace UniVox.Framework.Jobified
             for (int j = 0; j < nonCollidable.Length; j++)
             {
                 var item = nonCollidable[j];
-                AddMeshDataForVoxel(item.typeID, item.position, ref currentIndex,item.rotated,item.rotation);
+                AddMeshDataForVoxel(item.typeID, item.position, item.rotated,item.rotation);
             }
 
             runTracker.EndRun(data.materialRuns, data.allTriangleIndices);
@@ -123,7 +121,7 @@ namespace UniVox.Framework.Jobified
             }
         }
 
-        private void AddMeshDataForVoxel(ushort id, int3 position, ref int currentIndex,bool rotated,VoxelRotation rotation)
+        private void AddMeshDataForVoxel(ushort id, int3 position, bool rotated,VoxelRotation rotation)
         {
             var meshID = data.meshDatabase.voxelTypeToMeshTypeMap[id];
             var faceZRange = data.voxelTypeDatabase.voxelTypeToZIndicesRangeMap[id];
@@ -144,7 +142,7 @@ namespace UniVox.Framework.Jobified
                     var faceIsSolid = data.meshDatabase.isFaceSolid[meshRange.start + rotatedDirection];
                     if (IncludeFace(id, position, rotatedDirection, faceIsSolid))
                     {
-                        AddFaceRotated(meshID, data.voxelTypeDatabase.zIndicesPerFace[faceZRange.start + dir], dir, position, ref currentIndex,rotation);
+                        AddFaceRotated(meshID, data.voxelTypeDatabase.zIndicesPerFace[faceZRange.start + dir], dir, position, rotation);
                     }
                 }
             }
@@ -156,17 +154,19 @@ namespace UniVox.Framework.Jobified
                     var faceIsSolid = data.meshDatabase.isFaceSolid[meshRange.start + dir];
                     if (IncludeFace(id,position, dir,faceIsSolid))
                     {
-                        AddFace(meshID, data.voxelTypeDatabase.zIndicesPerFace[faceZRange.start + dir], dir, position, ref currentIndex);
+                        AddFace(meshID, data.voxelTypeDatabase.zIndicesPerFace[faceZRange.start + dir], dir, position);
                     }
                 }
             }
         }
 
-        private void AddFaceRotated(int meshID, float uvZ, int direction, int3 position, ref int currentIndex, VoxelRotation rotation) 
+        private void AddFaceRotated(int meshID, float uvZ, int direction, int3 position, VoxelRotation rotation) 
         {
             var meshRange = data.meshDatabase.meshTypeRanges[meshID];
 
             var usedNodesSlice = data.meshDatabase.nodesUsedByFaces[meshRange.start + direction];
+
+            var currentIndex = data.vertices.Length;
 
             var rotationQuat = directionHelper.GetRotationQuat(rotation);
 
@@ -189,20 +189,20 @@ namespace UniVox.Framework.Jobified
 
             var relativeTrianglesSlice = data.meshDatabase.relativeTrianglesByFaces[meshRange.start + direction];
 
+
             for (int i = relativeTrianglesSlice.start; i < relativeTrianglesSlice.end; i++)
             {
                 data.allTriangleIndices.Add(data.meshDatabase.allRelativeTriangles[i] + currentIndex);
             }
-
-            //Update indexing
-            currentIndex += usedNodesSlice.end - usedNodesSlice.start;
         }
 
-        private void AddFace(int meshID, float uvZ, int direction, int3 position, ref int currentIndex)
+        private void AddFace(int meshID, float uvZ, int direction, int3 position)
         {
             var meshRange = data.meshDatabase.meshTypeRanges[meshID];
 
             var usedNodesSlice = data.meshDatabase.nodesUsedByFaces[meshRange.start + direction];
+
+            var currentIndex = data.vertices.Length;
 
             //Add all the nodes used by this face
             for (int i = usedNodesSlice.start; i < usedNodesSlice.end; i++)
@@ -222,8 +222,14 @@ namespace UniVox.Framework.Jobified
                 data.allTriangleIndices.Add(data.meshDatabase.allRelativeTriangles[i] + currentIndex);
             }
 
-            //Update indexing
-            currentIndex += usedNodesSlice.end - usedNodesSlice.start;
+            if (data.meshDatabase.meshIdToIncludeBackfacesMap[meshID])
+            {
+                //Generate backface by adding the triangle indices again in reverse
+                for (int i = relativeTrianglesSlice.end-1; i >= relativeTrianglesSlice.start; i--)
+                {
+                    data.allTriangleIndices.Add(data.meshDatabase.allRelativeTriangles[i] + currentIndex);
+                }                
+            }
         }
 
         private bool IncludeFace(ushort voxelID,int3 position, int directionIndex,bool faceIsSolid)

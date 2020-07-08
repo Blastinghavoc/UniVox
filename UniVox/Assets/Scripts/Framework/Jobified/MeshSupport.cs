@@ -14,7 +14,7 @@ namespace UniVox.Framework.Jobified
     /// <summary>
     /// flattened and indexed collections of mesh definitions for use by meshing jobs
     /// </summary>
-    public struct NativeMeshDatabase 
+    public struct NativeMeshDatabase: IDisposable
     {
         /// <summary>
         /// All nodes used in all the different mesh types
@@ -60,7 +60,26 @@ namespace UniVox.Framework.Jobified
         /// <summary>
         /// Array mapping voxel types (index) to material ID
         /// </summary>
-        [ReadOnly] public NativeArray<ushort> voxelTypeToMaterialIDMap;        
+        [ReadOnly] public NativeArray<ushort> voxelTypeToMaterialIDMap;
+
+        /// <summary>
+        /// Array mapping mesh id (index) to a bool indicating whether or not to 
+        /// include backfaces.
+        /// </summary>
+        [ReadOnly] public NativeArray<bool> meshIdToIncludeBackfacesMap;
+
+        public void Dispose()
+        {
+            allMeshNodes.SmartDispose();
+            nodesUsedByFaces.SmartDispose();
+            allRelativeTriangles.SmartDispose();
+            relativeTrianglesByFaces.SmartDispose();
+            isFaceSolid.SmartDispose();
+            meshTypeRanges.SmartDispose();
+            voxelTypeToMeshTypeMap.SmartDispose();
+            voxelTypeToMaterialIDMap.SmartDispose();
+            meshIdToIncludeBackfacesMap.SmartDispose();
+        }
     }
 
     public static class NativeMeshDatabaseExtensions
@@ -80,11 +99,13 @@ namespace UniVox.Framework.Jobified
             List<int> voxelTypeToMeshTypeMapList = new List<int>();
             List<ushort> voxelTypeToMaterialIDMapList = new List<ushort>();
 
+            List<bool> meshIdToIncludeBackfacesMapList = new List<bool>();
+
             Dictionary<SOMeshDefinition, int> uniqueMeshIDs = new Dictionary<SOMeshDefinition, int>();
 
             //AIR
             voxelTypeToMeshTypeMapList.Add(0);
-            voxelTypeToMaterialIDMapList.Add(0);
+            voxelTypeToMaterialIDMapList.Add(0);            
 
             for (ushort voxelId = 1; voxelId < typeData.Count; voxelId++)
             {
@@ -98,12 +119,13 @@ namespace UniVox.Framework.Jobified
                     meshID = meshTypeRangesList.Count;
                     uniqueMeshIDs.Add(SODef, meshID);
                     StartEnd meshTypeRange = new StartEnd();
-                    meshTypeRange.start = nodesUsedByFacesList.Count;
+                    meshTypeRange.start = nodesUsedByFacesList.Count;                    
 
                     Flatten(SODef, allMeshNodesList, nodesUsedByFacesList, allRelativeTrianglesList, relativeTrianglesByFacesList, isFaceSolidList);
 
                     meshTypeRange.end = nodesUsedByFacesList.Count;
                     meshTypeRangesList.Add(meshTypeRange);
+                    meshIdToIncludeBackfacesMapList.Add(SODef.includeBackfaces);
                 }
                 voxelTypeToMeshTypeMapList.Add(meshID);
                 voxelTypeToMaterialIDMapList.Add(item.materialID);
@@ -118,6 +140,7 @@ namespace UniVox.Framework.Jobified
             nativeMeshDatabase.meshTypeRanges = new NativeArray<StartEnd>(meshTypeRangesList.ToArray(), Allocator.Persistent);
             nativeMeshDatabase.voxelTypeToMeshTypeMap = new NativeArray<int>(voxelTypeToMeshTypeMapList.ToArray(), Allocator.Persistent);
             nativeMeshDatabase.voxelTypeToMaterialIDMap = new NativeArray<ushort>(voxelTypeToMaterialIDMapList.ToArray(), Allocator.Persistent);
+            nativeMeshDatabase.meshIdToIncludeBackfacesMap = meshIdToIncludeBackfacesMapList.ToArray().ToNative(Allocator.Persistent);
 
             return nativeMeshDatabase;
         }
@@ -174,19 +197,7 @@ namespace UniVox.Framework.Jobified
 
                 relativeTrianglesByFacesList.Add(trianglesIndexers);
             }
-        }
-
-        public static void Dispose(ref this NativeMeshDatabase database) 
-        {
-            database.allMeshNodes.SmartDispose();
-            database.nodesUsedByFaces.SmartDispose();
-            database.allRelativeTriangles.SmartDispose();
-            database.relativeTrianglesByFaces.SmartDispose();
-            database.isFaceSolid.SmartDispose();
-            database.meshTypeRanges.SmartDispose();
-            database.voxelTypeToMeshTypeMap.SmartDispose();
-            database.voxelTypeToMaterialIDMap.SmartDispose();
-        }
+        }        
     }
 
     public struct NativeVoxelTypeDatabase 

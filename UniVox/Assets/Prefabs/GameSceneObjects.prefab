@@ -402,31 +402,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f9ca4a9b85fe6784180a29c51529bd05, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  stone: {fileID: 11400000, guid: a8aff50ee8c68ea4192732a3ece092b4, type: 2}
   ores:
   - voxelType: {fileID: 11400000, guid: db418c079ab87fd4abbc1d1bae58d86c, type: 2}
     settings:
       depthMin: 0
       depthMax: 128
-      frequency: 1
+      noiseScale: 0
       threshold: 0
   - voxelType: {fileID: 11400000, guid: c551685b681742544b92b9d38936d244, type: 2}
     settings:
       depthMin: 0
       depthMax: 128
-      frequency: 1
+      noiseScale: 0
       threshold: 0
   - voxelType: {fileID: 11400000, guid: 43b906b3da8fa8742b6f311be930b118, type: 2}
     settings:
       depthMin: 0
       depthMax: 128
-      frequency: 1
+      noiseScale: 0
       threshold: 0
   - voxelType: {fileID: 11400000, guid: f5e7b8b5b373a1244bc6ffe29912bf49, type: 2}
     settings:
       depthMin: 0
       depthMax: 128
-      frequency: 1
+      noiseScale: 0
       threshold: 0
 --- !u!1 &398304578363753878
 GameObject:
@@ -1053,7 +1052,7 @@ PrefabInstance:
     - target: {fileID: 2981057896917559131, guid: 55373a8976e0c014e90e0bb7e64d046a,
         type: 3}
       propertyPath: m_Name
-      value: NaiveDebugWorld
+      value: NaiveDebug
       objectReference: {fileID: 0}
     - target: {fileID: 2981057896917559131, guid: 55373a8976e0c014e90e0bb7e64d046a,
         type: 3}
@@ -1251,7 +1250,7 @@ PrefabInstance:
     - target: {fileID: 6061144537135917622, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: m_Name
-      value: CullingDebugWorld
+      value: CullingDebug
       objectReference: {fileID: 0}
     - target: {fileID: 6061144537135917622, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}

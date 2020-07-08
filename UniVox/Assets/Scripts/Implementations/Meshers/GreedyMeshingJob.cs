@@ -3,7 +3,6 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
-using UnityEngine;
 using UniVox.Framework;
 using UniVox.Framework.Jobified;
 using Utils;
@@ -34,7 +33,7 @@ namespace UniVox.Implementations.Meshers
     // THE SOFTWARE.
     [BurstCompile]
     public struct GreedyMeshingJob : IMeshingJob
-    {        
+    {
         public MeshJobData data { get; set; }
 
         //Private temporaries
@@ -133,9 +132,11 @@ namespace UniVox.Implementations.Meshers
                         {
 
                             //Face in the positive axis direction
-                            FaceDescriptor positiveFace = (workingCoordinates[axis] >= 0) ? maskData(workingCoordinates, positiveAxisDirection) : nullFace;
+                            FaceDescriptor positiveFace = (workingCoordinates[axis] >= 0) ? maskData(workingCoordinates, positiveAxisDirection) 
+                                : GetFaceInNeighbour(workingCoordinates,negativeAxisDirection,positiveAxisDirection,axis);
                             //Face in the negative axis direction
-                            FaceDescriptor negativeFace = (workingCoordinates[axis] < size - 1) ? maskData(workingCoordinates + axisVector, negativeAxisDirection) : nullFace;
+                            FaceDescriptor negativeFace = (workingCoordinates[axis] < size - 1) ? maskData(workingCoordinates + axisVector, negativeAxisDirection) 
+                                : GetFaceInNeighbour(workingCoordinates,positiveAxisDirection,negativeAxisDirection,axis);
 
                             if (IncludeFace(positiveFace, negativeFace))
                             {
@@ -267,7 +268,7 @@ namespace UniVox.Implementations.Meshers
         /// Holds the parameters for a call to ProcessSection
         /// to execute it later on.
         /// </summary>
-        private struct Dolater 
+        private struct Dolater
         {
             public FaceDescriptor currentMaskValue;
             public int3 workingCoordinates;
@@ -306,18 +307,18 @@ namespace UniVox.Implementations.Meshers
             int3 dv,
             int width,
             int height,
-            bool flip) 
+            bool flip)
         {
             // Add quad if mask value not null
             var meshID = data.meshDatabase.voxelTypeToMeshTypeMap[currentMaskValue.typeId];
             var meshRange = data.meshDatabase.meshTypeRanges[meshID];
-            var usedNodesSlice = data.meshDatabase.nodesUsedByFaces[meshRange.start + (int)currentMaskValue.originalFaceDirection];
+            var usedNodesSlice = data.meshDatabase.nodesUsedByFaces[meshRange.start + (int)currentMaskValue.faceDirection];
             var uvStart = data.voxelTypeDatabase.voxelTypeToZIndicesRangeMap[currentMaskValue.typeId].start;
-            var uvZ = data.voxelTypeDatabase.zIndicesPerFace[uvStart + (int)currentMaskValue.originalFaceDirection];
+            var uvZ = data.voxelTypeDatabase.zIndicesPerFace[uvStart + (int)currentMaskValue.faceDirection];
 
             var materialId = data.meshDatabase.voxelTypeToMaterialIDMap[currentMaskValue.typeId];
             //Update material runs
-            runTracker.Update(materialId, data.materialRuns, data.allTriangleIndices);            
+            runTracker.Update(materialId, data.materialRuns, data.allTriangleIndices);
 
             float3 bl = workingCoordinates;
             float3 tr = workingCoordinates + du + dv;
@@ -349,10 +350,12 @@ namespace UniVox.Implementations.Meshers
             nodebr.uv *= uvScale;
             nodetl.uv *= uvScale;
 
-            AddQuad(nodebl, nodetr, nodebr, nodetl, uvZ);
+            bool makeBackface = data.meshDatabase.meshIdToIncludeBackfacesMap[meshID];
+
+            AddQuad(nodebl, nodetr, nodebr, nodetl, uvZ,makeBackface);
         }
 
-        private void AddQuad(Node v0, Node v1, Node v2, Node v3, float uvZ)
+        private void AddQuad(Node v0, Node v1, Node v2, Node v3, float uvZ,bool makeBackface = false)
         {
             int index = data.vertices.Length;
 
@@ -378,16 +381,82 @@ namespace UniVox.Implementations.Meshers
             data.allTriangleIndices.Add(index + 3);
             data.allTriangleIndices.Add(index + 1);
 
+            if (makeBackface)
+            {
+                data.allTriangleIndices.Add(index + 1);//6
+                data.allTriangleIndices.Add(index + 3);//5
+                data.allTriangleIndices.Add(index);//4
+                data.allTriangleIndices.Add(index + 2);//3
+                data.allTriangleIndices.Add(index + 1);//2
+                data.allTriangleIndices.Add(index);//1
+            }
+
+        }
+
+        private FaceDescriptor GetFaceInNeighbour(int3 position, Direction neighbourDirection,Direction faceDirection, int primaryAxis)
+        {
+            var localIndexOfAdjacentVoxelInNeighbour = IndicesInNeighbour(primaryAxis, position);
+
+            var neighbourChunkData = data.neighbourData[(int)neighbourDirection];
+
+            var neighbourDimensions = IndicesInNeighbour(primaryAxis, data.dimensions);
+
+            var flattenedIndex = MultiIndexToFlat(localIndexOfAdjacentVoxelInNeighbour.x, localIndexOfAdjacentVoxelInNeighbour.y, neighbourDimensions);
+
+            var id = neighbourChunkData[flattenedIndex];
+
+            return makeFaceDescriptor(id, faceDirection);
+        }
+
+        /// <summary>
+        /// Project fullCoords to 2D in the relevant primary axis
+        /// </summary>
+        private int2 IndicesInNeighbour(int primaryAxis, int3 fullCoords)
+        {
+            switch (primaryAxis)
+            {
+                case 0:
+                    return new int2(fullCoords.y, fullCoords.z);
+                case 1:
+                    return new int2(fullCoords.x, fullCoords.z);
+                case 2:
+                    return new int2(fullCoords.x, fullCoords.y);
+                default:
+                    throw new Exception("Invalid axis given");
+            }
+
         }
 
         private bool IncludeFace(FaceDescriptor thisFace, FaceDescriptor oppositeFace)
         {
-            return thisFace.typeId != oppositeFace.typeId;
+            if (thisFace.typeId == oppositeFace.typeId)
+            {
+                return false;//Dont include faces between voxels of the same type
+            }
+
+            if (oppositeFace.typeId == VoxelTypeManager.AIR_ID)
+            {
+                //Include the face if the opposite voxel is air
+                return true;
+            }
+
+            var meshID = data.meshDatabase.voxelTypeToMeshTypeMap[oppositeFace.typeId];
+            var meshRange = data.meshDatabase.meshTypeRanges[meshID];
+            var faceIsSolid = data.meshDatabase.isFaceSolid[meshRange.start + (int)oppositeFace.faceDirection];
+
+            //Exclude this face if opposite face is solid
+            return !faceIsSolid;
+
         }
 
         private FaceDescriptor maskData(int3 position, Direction direction)
         {
-            var typeId = data.voxels[MultiIndexToFlat(position.x,position.y,position.z, data.dimensions.x,dxdy)];
+            var typeId = data.voxels[MultiIndexToFlat(position.x, position.y, position.z, data.dimensions.x, dxdy)];
+            return makeFaceDescriptor(typeId, direction);
+        }
+
+        private FaceDescriptor makeFaceDescriptor(VoxelTypeID typeId, Direction direction)
+        {
             if (typeId == VoxelTypeManager.AIR_ID)
             {
                 return nullFace;
@@ -396,7 +465,7 @@ namespace UniVox.Implementations.Meshers
             FaceDescriptor faceDescriptor = new FaceDescriptor()
             {
                 typeId = typeId,
-                originalFaceDirection = direction,//TODO account for rotation
+                faceDirection = direction,//TODO account for rotation
             };
             return faceDescriptor;
         }
@@ -404,13 +473,13 @@ namespace UniVox.Implementations.Meshers
         private struct FaceDescriptor : IEquatable<FaceDescriptor>
         {
             public VoxelTypeID typeId;
-            public Direction originalFaceDirection;
+            public Direction faceDirection;
             public VoxelRotation rotation;
 
             public bool Equals(FaceDescriptor other)
             {
                 return typeId == other.typeId &&
-                    originalFaceDirection == other.originalFaceDirection &&
+                    faceDirection == other.faceDirection &&
                     rotation.Equals(other.rotation);
             }
         }
