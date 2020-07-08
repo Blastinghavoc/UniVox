@@ -1,4 +1,5 @@
 ﻿using System;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
@@ -31,40 +32,24 @@ namespace UniVox.Implementations.Meshers
     // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
     // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
     // THE SOFTWARE.
-    public struct GreedyMeshingJob : IJob
-    {
-        [ReadOnly] public int3 dimensions;
-
-        [ReadOnly] public NativeArray<VoxelTypeID> voxels;
-        public NativeArray<RotatedVoxelEntry> rotatedVoxels;
-
-        [ReadOnly] public NeighbourData neighbourData;
-
-        [ReadOnly] public NativeMeshDatabase meshDatabase;
-
-        [ReadOnly] public NativeVoxelTypeDatabase voxelTypeDatabase;
-
-        //Outputs
-        public NativeList<Vector3> vertices;
-        public NativeList<Vector3> uvs;
-        public NativeList<Vector3> normals;
-        public NativeList<int> elements;
-
-        public NativeList<MaterialRun> materialRuns;
-
-        //Single element lists to be passed as deffered to later jobs
-        public NativeList<int> collisionMeshLengthVertices;
-        public NativeList<int> collisionMeshLengthTriangleIndices;
-        public NativeList<int> collisionMeshMaterialRunLength;
+    [BurstCompile]
+    public struct GreedyMeshingJob : IMeshingJob
+    {        
+        public MeshJobData data { get; set; }
 
         //Private temporaries
-        private MaterialRun currentRun;
+        private MaterialRunTracker runTracker;
         private FaceDescriptor nullFace;//The empty face
         private int dxdy;
 
+        public void Dispose()
+        {
+            data.Dispose();
+        }
+
         public void Execute()
         {
-            if (dimensions.x != dimensions.y || dimensions.y != dimensions.z)
+            if (data.dimensions.x != data.dimensions.y || data.dimensions.y != data.dimensions.z)
             {
                 throw new ArgumentException($"Greedy meshing does not support non-cubic chunk dimensions. " +
                     $"x,y,z of chunk dimensions must be identical to use greedy meshing.");
@@ -72,10 +57,10 @@ namespace UniVox.Implementations.Meshers
 
             //initialise temporaries
             nullFace = default;
-            dxdy = dimensions.x * dimensions.y;
-            currentRun = new MaterialRun();
+            dxdy = data.dimensions.x * data.dimensions.y;
+            runTracker = new MaterialRunTracker();
 
-            int size = dimensions.x;
+            int size = data.dimensions.x;
 
             //Sweep over 3-axes
             for (int axis = 0; axis < 3; axis++)
@@ -107,8 +92,10 @@ namespace UniVox.Implementations.Meshers
                 int3 axisVector = new int3();
 
                 //Masks in the positive and negative directions
-                FaceDescriptor[] maskPositive = new FaceDescriptor[(size + 1) * (size + 1)];
-                FaceDescriptor[] maskNegative = new FaceDescriptor[(size + 1) * (size + 1)];
+                NativeArray<FaceDescriptor> maskPositive = new NativeArray<FaceDescriptor>((size + 1) * (size + 1), Allocator.Temp);
+                NativeArray<FaceDescriptor> maskNegative = new NativeArray<FaceDescriptor>((size + 1) * (size + 1), Allocator.Temp);
+                //FaceDescriptor[] maskPositive = new FaceDescriptor[(size + 1) * (size + 1)];
+                //FaceDescriptor[] maskNegative = new FaceDescriptor[(size + 1) * (size + 1)];
 
                 axisVector[axis] = 1;
 
@@ -215,11 +202,15 @@ namespace UniVox.Implementations.Meshers
                                 if (!currentMaskValue.Equals(nullFace))
                                 {
                                     // Add quad if mask value not null
-                                    var meshID = meshDatabase.voxelTypeToMeshTypeMap[currentMaskValue.typeId];
-                                    var meshRange = meshDatabase.meshTypeRanges[meshID];
-                                    var usedNodesSlice = meshDatabase.nodesUsedByFaces[meshRange.start + (int)currentMaskValue.originalFaceDirection];
-                                    var uvStart = voxelTypeDatabase.voxelTypeToZIndicesRangeMap[currentMaskValue.typeId].start;
-                                    var uvZ = voxelTypeDatabase.zIndicesPerFace[uvStart + (int)currentMaskValue.originalFaceDirection];
+                                    var meshID = data.meshDatabase.voxelTypeToMeshTypeMap[currentMaskValue.typeId];
+                                    var meshRange = data.meshDatabase.meshTypeRanges[meshID];
+                                    var usedNodesSlice = data.meshDatabase.nodesUsedByFaces[meshRange.start + (int)currentMaskValue.originalFaceDirection];
+                                    var uvStart = data.voxelTypeDatabase.voxelTypeToZIndicesRangeMap[currentMaskValue.typeId].start;
+                                    var uvZ = data.voxelTypeDatabase.zIndicesPerFace[uvStart + (int)currentMaskValue.originalFaceDirection];
+
+                                    var materialId = data.meshDatabase.voxelTypeToMaterialIDMap[currentMaskValue.typeId];
+                                    //Update material runs
+                                    runTracker.Update(materialId, data.materialRuns, data.allTriangleIndices);
 
                                     workingCoordinates[secondaryAxis] = i;
                                     workingCoordinates[tertiaryAxis] = j;
@@ -234,10 +225,10 @@ namespace UniVox.Implementations.Meshers
                                     float3 br = workingCoordinates + du;
                                     float3 tl = workingCoordinates + dv;
 
-                                    Node nodebl = meshDatabase.allMeshNodes[usedNodesSlice.start];
-                                    Node nodetr = meshDatabase.allMeshNodes[usedNodesSlice.start + 1];
-                                    Node nodebr = meshDatabase.allMeshNodes[usedNodesSlice.start + 2];
-                                    Node nodetl = meshDatabase.allMeshNodes[usedNodesSlice.start + 3];
+                                    Node nodebl = data.meshDatabase.allMeshNodes[usedNodesSlice.start];
+                                    Node nodetr = data.meshDatabase.allMeshNodes[usedNodesSlice.start + 1];
+                                    Node nodebr = data.meshDatabase.allMeshNodes[usedNodesSlice.start + 2];
+                                    Node nodetl = data.meshDatabase.allMeshNodes[usedNodesSlice.start + 3];
                                     ///NOTE for negative faces, the UVs are already flipped in the face definition
                                     ///Therefore, flip just the vertices when necessary
                                     if (flip)
@@ -279,33 +270,48 @@ namespace UniVox.Implementations.Meshers
                     }
                 }
             }
+
+            //Record length of collidable mesh section
+            data.collisionSubmesh.Record(data.vertices.Length, data.allTriangleIndices.Length, data.materialRuns.Length);
+            //Ensure the run tracker ends
+            runTracker.EndRun(data.materialRuns, data.allTriangleIndices);
+        }
+
+        public void Run()
+        {
+            IJobExtensions.Run(this);
+        }
+
+        public JobHandle Schedule(JobHandle dependsOn = default)
+        {
+            return IJobExtensions.Schedule(this, dependsOn);
         }
 
         private void AddFace(Node v0, Node v1, Node v2, Node v3, float uvZ)
         {
-            int index = vertices.Length;
+            int index = data.vertices.Length;
 
-            vertices.Add(v0.vertex);
-            vertices.Add(v1.vertex);
-            vertices.Add(v2.vertex);
-            vertices.Add(v3.vertex);
+            data.vertices.Add(v0.vertex);
+            data.vertices.Add(v1.vertex);
+            data.vertices.Add(v2.vertex);
+            data.vertices.Add(v3.vertex);
 
-            uvs.Add(new float3(v0.uv, uvZ));
-            uvs.Add(new float3(v1.uv, uvZ));
-            uvs.Add(new float3(v2.uv, uvZ));
-            uvs.Add(new float3(v3.uv, uvZ));
+            data.uvs.Add(new float3(v0.uv, uvZ));
+            data.uvs.Add(new float3(v1.uv, uvZ));
+            data.uvs.Add(new float3(v2.uv, uvZ));
+            data.uvs.Add(new float3(v3.uv, uvZ));
 
-            normals.Add(v0.normal);
-            normals.Add(v1.normal);
-            normals.Add(v2.normal);
-            normals.Add(v3.normal);
+            data.normals.Add(v0.normal);
+            data.normals.Add(v1.normal);
+            data.normals.Add(v2.normal);
+            data.normals.Add(v3.normal);
 
-            elements.Add(index);
-            elements.Add(index + 1);
-            elements.Add(index + 2);
-            elements.Add(index);
-            elements.Add(index + 3);
-            elements.Add(index + 1);
+            data.allTriangleIndices.Add(index);
+            data.allTriangleIndices.Add(index + 1);
+            data.allTriangleIndices.Add(index + 2);
+            data.allTriangleIndices.Add(index);
+            data.allTriangleIndices.Add(index + 3);
+            data.allTriangleIndices.Add(index + 1);
 
         }
 
@@ -316,7 +322,7 @@ namespace UniVox.Implementations.Meshers
 
         private FaceDescriptor maskData(int3 position, Direction direction)
         {
-            var typeId = voxels[MultiIndexToFlat(position.x,position.y,position.z,dimensions.x,dxdy)];
+            var typeId = data.voxels[MultiIndexToFlat(position.x,position.y,position.z, data.dimensions.x,dxdy)];
             if (typeId == VoxelTypeManager.AIR_ID)
             {
                 return nullFace;

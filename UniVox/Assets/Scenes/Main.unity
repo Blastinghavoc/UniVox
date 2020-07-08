@@ -139,7 +139,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ab5b525b6386c143a010fbc46fd0390, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Parrallel: 0
+  Parrallel: 1
 --- !u!1001 &638888333
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -554,7 +554,7 @@ PrefabInstance:
     - target: {fileID: 6061144537135917622, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6061144537135917626, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
@@ -600,7 +600,7 @@ PrefabInstance:
     - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: MaxMeshedPerUpdate
-      value: 2
+      value: 24
       objectReference: {fileID: 0}
     - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
@@ -727,7 +727,7 @@ PrefabInstance:
     - target: {fileID: 6061144537135917622, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 6061144537135917626, guid: 37b9cc2f16198bf4c84ddc72031aedb3, type: 3}
@@ -751,7 +751,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ab5b525b6386c143a010fbc46fd0390, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Parrallel: 0
+  Parrallel: 1
 --- !u!114 &1141379472
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -809,7 +809,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
       propertyPath: Parrallel
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 398304577423018871, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
@@ -920,7 +920,7 @@ PrefabInstance:
     - target: {fileID: 4363647225878257416, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
       propertyPath: Parrallel
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4444681113471702657, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}

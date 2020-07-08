@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Unity.Jobs;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Profiling;
@@ -239,6 +240,12 @@ namespace UniVox.Framework.ChunkPipeline
                 stage.ClearLists();
             }
             updateLock = false;
+            Profiler.EndSample();
+
+            Profiler.BeginSample("DispatchJobs");
+            ///Ensure that all jobs batched during the pipeline update
+            ///get scheduled
+            JobHandle.ScheduleBatchedJobs();
             Profiler.EndSample();
 
             if (DebugMode)

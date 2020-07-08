@@ -1,5 +1,6 @@
 ﻿using System;
 using Unity.Collections;
+using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Profiling;
@@ -51,15 +52,11 @@ namespace UniVox.Framework
             Dispose();
         }
 
-        public virtual AbstractPipelineJob<MeshDescriptor> CreateMeshJob(Vector3Int chunkID)
+        public AbstractPipelineJob<MeshDescriptor> CreateMeshJob(Vector3Int chunkID)
         {
             Profiler.BeginSample("CreateMeshJob");
 
-            var meshingWrapper = new JobWrapper<MeshingJob>();
-            meshingWrapper.job = new MeshingJob();
-            meshingWrapper.job.cullfaces = IsMeshDependentOnNeighbourChunks;
             var chunkDimensions = chunkManager.ChunkDimensions;
-            meshingWrapper.job.dimensions = new int3(chunkDimensions.x, chunkDimensions.y, chunkDimensions.z);
 
             var chunkData = chunkManager.GetReadOnlyChunkData(chunkID);
 
@@ -68,8 +65,6 @@ namespace UniVox.Framework
             NativeArray<VoxelTypeID> voxels = chunkData.ToNative();
             Profiler.EndSample();
 
-            meshingWrapper.job.voxels = voxels;
-            meshingWrapper.job.rotatedVoxels = chunkData.NativeRotations();
 
             NeighbourData neighbourData = new NeighbourData();
             //Cache neighbour data if necessary
@@ -104,29 +99,24 @@ namespace UniVox.Framework
             }
             Profiler.EndSample();
 
-            meshingWrapper.job.neighbourData = neighbourData;
-
-            meshingWrapper.job.meshDatabase = voxelTypeManager.nativeMeshDatabase;
-            meshingWrapper.job.voxelTypeDatabase = voxelTypeManager.nativeVoxelTypeDatabase;
-            meshingWrapper.job.directionHelper = directionHelper;
-
-            meshingWrapper.job.vertices = new NativeList<Vector3>(Allocator.Persistent);
-            meshingWrapper.job.uvs = new NativeList<Vector3>(Allocator.Persistent);
-            meshingWrapper.job.normals = new NativeList<Vector3>(Allocator.Persistent);
-            meshingWrapper.job.allTriangleIndices = new NativeList<int>(Allocator.Persistent);
-            meshingWrapper.job.materialRuns = new NativeList<MaterialRun>(Allocator.Persistent);
-
-            meshingWrapper.job.collisionMeshLengthVertices = new NativeList<int>(Allocator.Persistent);
-            meshingWrapper.job.collisionMeshLengthTriangleIndices = new NativeList<int>(Allocator.Persistent);
-            meshingWrapper.job.collisionMeshMaterialRunLength = new NativeList<int>(Allocator.Persistent);
+            
+            var meshingJob = createMeshingJob(new MeshJobData(chunkDimensions.ToNative(),
+                voxels,
+                chunkData.NativeRotations(),
+                neighbourData,
+                voxelTypeManager.nativeMeshDatabase,
+                voxelTypeManager.nativeVoxelTypeDatabase,
+                Allocator.Persistent
+                ));           
+            
 
             var indexingWrapper = new JobWrapper<SortIndicesByMaterialJob>();
             //AsDeferredJobArray takes the length etc at the time of execution, rather than now.
-            indexingWrapper.job.allTriangleIndices = meshingWrapper.job.allTriangleIndices.AsDeferredJobArray();
-            indexingWrapper.job.materialRuns = meshingWrapper.job.materialRuns.AsDeferredJobArray();
+            indexingWrapper.job.allTriangleIndices = meshingJob.data.allTriangleIndices.AsDeferredJobArray();
+            indexingWrapper.job.materialRuns = meshingJob.data.materialRuns.AsDeferredJobArray();
             indexingWrapper.job.packedRuns = new NativeList<MaterialRun>(Allocator.Persistent);
             indexingWrapper.job.packedIndices = new NativeList<int>(Allocator.Persistent);
-            indexingWrapper.job.collisionMeshMaterialRunLength = meshingWrapper.job.collisionMeshMaterialRunLength.AsDeferredJobArray();
+            indexingWrapper.job.collisionMeshMaterialRunLength = meshingJob.data.collisionSubmesh.collisionMeshMaterialRunLength;
 
 
             Func<MeshDescriptor> cleanup = () =>
@@ -134,15 +124,15 @@ namespace UniVox.Framework
                 Profiler.BeginSample("MeshJobCleanup");
                 Mesh mesh = new Mesh();
 
-                if (meshingWrapper.job.vertices.Length >= ushort.MaxValue)
+                if (meshingJob.data.vertices.Length >= ushort.MaxValue)
                 {
                     //Cope with bigger meshes
                     mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
                 }
 
-                mesh.vertices = meshingWrapper.job.vertices.ToArray();
-                mesh.SetUVs(0, meshingWrapper.job.uvs.ToArray());
-                mesh.normals = meshingWrapper.job.normals.ToArray();
+                mesh.vertices = meshingJob.data.vertices.ToArray();
+                mesh.SetUVs(0, meshingJob.data.uvs.ToArray());
+                mesh.normals = meshingJob.data.normals.ToArray();
 
                 mesh.subMeshCount = indexingWrapper.job.packedRuns.Length;
 
@@ -158,24 +148,11 @@ namespace UniVox.Framework
                 }
 
                 meshDescriptor.mesh = mesh;
-                meshDescriptor.collidableLengthVertices = meshingWrapper.job.collisionMeshLengthVertices[0];
-                meshDescriptor.collidableLengthIndices = meshingWrapper.job.collisionMeshLengthTriangleIndices[0];
+                meshDescriptor.collidableLengthVertices = meshingJob.data.collisionSubmesh.collisionMeshLengthVertices[0];
+                meshDescriptor.collidableLengthIndices = meshingJob.data.collisionSubmesh.collisionMeshLengthTriangleIndices[0];
 
                 //Disposal
-                meshingWrapper.job.vertices.Dispose();
-                meshingWrapper.job.uvs.Dispose();
-                meshingWrapper.job.normals.Dispose();
-                meshingWrapper.job.allTriangleIndices.Dispose();
-                meshingWrapper.job.materialRuns.Dispose();
-
-                meshingWrapper.job.voxels.Dispose();
-                meshingWrapper.job.rotatedVoxels.Dispose();
-                meshingWrapper.job.neighbourData.Dispose();
-
-                meshingWrapper.job.collisionMeshLengthVertices.Dispose();
-                meshingWrapper.job.collisionMeshLengthTriangleIndices.Dispose();
-                meshingWrapper.job.collisionMeshMaterialRunLength.Dispose();
-
+                meshingJob.Dispose();
 
                 //Dispose of packed containers
                 indexingWrapper.job.packedIndices.Dispose();
@@ -194,17 +171,26 @@ namespace UniVox.Framework
             {
                 return new BasicFunctionJob<MeshDescriptor>(() =>
                 {
-                    meshingWrapper.Run();
+                    meshingJob.Run();
                     indexingWrapper.Run();
                     return cleanup();
                 });
             }
 
-            var meshingHandle = meshingWrapper.Schedule();
+            var meshingHandle = meshingJob.Schedule();
             var handle = indexingWrapper.Schedule(meshingHandle);
 
             return new PipelineUnityJob<MeshDescriptor>(handle, cleanup);
 
+        }
+
+        protected virtual IMeshingJob createMeshingJob(MeshJobData data) 
+        {
+            var job = new MeshingJob();
+            job.data = data;
+            job.cullfaces = IsMeshDependentOnNeighbourChunks;
+            job.directionHelper = directionHelper;
+            return job;
         }
 
         public AbstractPipelineJob<Mesh> ApplyCollisionMeshJob(Vector3Int chunkID)

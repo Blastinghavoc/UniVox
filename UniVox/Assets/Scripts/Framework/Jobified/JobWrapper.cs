@@ -12,6 +12,15 @@ namespace UniVox.Framework.Jobified
     {
         public JobType job;
 
+        public JobWrapper()
+        {
+        }
+
+        public JobWrapper(JobType job)
+        {
+            this.job = job;
+        }
+
         public void Run() 
         {
             job.Run();
