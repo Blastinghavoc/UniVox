@@ -36,7 +36,10 @@ namespace UniVox.Implementations.Meshers
     {
         public MeshJobData data { get; set; }
 
-        //Private temporaries
+        public NativeHashMap<int, VoxelRotation> rotatedVoxelsMap;
+        public NativeDirectionRotator directionRotator;
+
+        //Private locals
         private MaterialRunTracker runTracker;
         private FaceDescriptor nullFace;//The empty face
         private int dxdy;
@@ -44,6 +47,7 @@ namespace UniVox.Implementations.Meshers
         public void Dispose()
         {
             data.Dispose();
+            rotatedVoxelsMap.Dispose();
         }
 
         public void Execute()
@@ -54,20 +58,27 @@ namespace UniVox.Implementations.Meshers
                     $"x,y,z of chunk dimensions must be identical to use greedy meshing.");
             }
 
-            //initialise temporaries
+            //initialise locals
             nullFace = default;
             dxdy = data.dimensions.x * data.dimensions.y;
             runTracker = new MaterialRunTracker();
             NativeList<Dolater> nonCollidable = new NativeList<Dolater>(Allocator.Temp);
 
+            //Initialise rotated voxels map from list
+            for (int i = 0; i < data.rotatedVoxels.Length; i++)
+            {
+                var item = data.rotatedVoxels[i];
+                rotatedVoxelsMap.Add(item.flatIndex, item.rotation);
+            }
+
             int size = data.dimensions.x;
 
             //Sweep over 3-axes
-            for (int axis = 0; axis < 3; axis++)
+            for (byte axis = 0; axis < 3; axis++)
             {
                 //Secondary axis is used for width, tertiary axis is used for height
-                int secondaryAxis;
-                int tertiaryAxis;
+                byte secondaryAxis;
+                byte tertiaryAxis;
 
                 switch (axis)
                 {
@@ -163,6 +174,8 @@ namespace UniVox.Implementations.Meshers
                         ///The X and Y axes need to flip quads for negative faces, 
                         ///the z axis needs to flip quads for positive faces
                         bool flip = (axis != 2) ? !isPositive : isPositive;
+                        //Normals must be flipped for negative faces
+                        bool flipNormals = !isPositive;
 
                         // Generate mesh for current mask using lexicographic ordering
                         maskIndex = 0;
@@ -202,20 +215,17 @@ namespace UniVox.Implementations.Meshers
                                 if (!currentMaskValue.Equals(nullFace))
                                 {
                                     workingCoordinates[secondaryAxis] = i;
-                                    workingCoordinates[tertiaryAxis] = j;
-                                    int3 du = new int3();
-                                    int3 dv = new int3();
-
-                                    du[secondaryAxis] = width;
-                                    dv[tertiaryAxis] = height;
+                                    workingCoordinates[tertiaryAxis] = j;                                    
 
                                     if (data.voxelTypeDatabase.voxelTypeToIsPassableMap[currentMaskValue.typeId])
                                     {
-                                        nonCollidable.Add(new Dolater(currentMaskValue, workingCoordinates, du, dv, width, height, flip));
+                                        nonCollidable.Add(new Dolater(currentMaskValue,workingCoordinates,
+                                            axis, secondaryAxis, tertiaryAxis, width, height, flip,flipNormals));
                                     }
                                     else
                                     {
-                                        ProcessSection(currentMaskValue, workingCoordinates, du, dv, width, height, flip);
+                                        ProcessSection(currentMaskValue, workingCoordinates,
+                                            axis, secondaryAxis,tertiaryAxis, width, height, flip,flipNormals);
                                     }
 
                                 }
@@ -247,7 +257,8 @@ namespace UniVox.Implementations.Meshers
             for (int j = 0; j < nonCollidable.Length; j++)
             {
                 var item = nonCollidable[j];
-                ProcessSection(item.currentMaskValue, item.workingCoordinates, item.du, item.dv, item.width, item.height, item.flip);
+                ProcessSection(item.currentMaskValue, item.workingCoordinates,
+                    item.primaryAxis, item.secondaryAxis, item.tertiaryAxis, item.width, item.height, item.flip,item.flipNormals);
             }
 
             //End non collidable run
@@ -272,21 +283,33 @@ namespace UniVox.Implementations.Meshers
         {
             public FaceDescriptor currentMaskValue;
             public int3 workingCoordinates;
-            public int3 du;
-            public int3 dv;
+            public byte primaryAxis;
+            public byte secondaryAxis;
+            public byte tertiaryAxis;
             public int width;
             public int height;
             public bool flip;
+            public bool flipNormals;
 
-            public Dolater(FaceDescriptor currentMaskValue, int3 workingCoordinates, int3 du, int3 dv, int width, int height, bool flip)
+            public Dolater(FaceDescriptor currentMaskValue, 
+                int3 workingCoordinates,
+                byte primaryAxis,
+                byte secondaryAxis,
+                byte tertiaryAxis,
+                int width,
+                int height,
+                bool flip,
+                bool flipNormals)
             {
                 this.currentMaskValue = currentMaskValue;
                 this.workingCoordinates = workingCoordinates;
-                this.du = du;
-                this.dv = dv;
+                this.primaryAxis = primaryAxis;
+                this.secondaryAxis = secondaryAxis;
+                this.tertiaryAxis = tertiaryAxis;
                 this.width = width;
                 this.height = height;
                 this.flip = flip;
+                this.flipNormals = flipNormals;
             }
         }
 
@@ -303,11 +326,13 @@ namespace UniVox.Implementations.Meshers
         /// <param name="flip"></param>
         private void ProcessSection(FaceDescriptor currentMaskValue,
             int3 workingCoordinates,
-            int3 du,
-            int3 dv,
+            byte primaryAxis,
+            byte secondaryAxis,
+            byte tertiaryAxis,
             int width,
             int height,
-            bool flip)
+            bool flip,
+            bool flipNormals)
         {
             // Add quad if mask value not null
             var meshID = data.meshDatabase.voxelTypeToMeshTypeMap[currentMaskValue.typeId];
@@ -320,6 +345,12 @@ namespace UniVox.Implementations.Meshers
             //Update material runs
             runTracker.Update(materialId, data.materialRuns, data.allTriangleIndices);
 
+            int3 du = new int3();
+            int3 dv = new int3();
+
+            du[secondaryAxis] = width;
+            dv[tertiaryAxis] = height;
+
             float3 bl = workingCoordinates;
             float3 tr = workingCoordinates + du + dv;
             float3 br = workingCoordinates + du;
@@ -329,13 +360,26 @@ namespace UniVox.Implementations.Meshers
             Node nodetr = data.meshDatabase.allMeshNodes[usedNodesSlice.start + 1];
             Node nodebr = data.meshDatabase.allMeshNodes[usedNodesSlice.start + 2];
             Node nodetl = data.meshDatabase.allMeshNodes[usedNodesSlice.start + 3];
+
+            int3 normal = new int3();
+            normal[primaryAxis] = 1;
+
             ///NOTE for negative faces, the UVs are already flipped in the face definition
-            ///Therefore, flip just the vertices when necessary
+            ///Therefore, flip just the vertices and normals when necessary
             if (flip)
             {
                 Swap(ref bl, ref br);
                 Swap(ref tr, ref tl);
             }
+            if (flipNormals)
+            {
+                normal *= -1;
+            }
+
+            nodebl.normal = normal;
+            nodetr.normal = normal;
+            nodebr.normal = normal;
+            nodetl.normal = normal;
 
             nodebl.vertex = bl;
             nodetr.vertex = tr;
@@ -405,6 +449,7 @@ namespace UniVox.Implementations.Meshers
 
             var id = neighbourChunkData[flattenedIndex];
 
+            //NOTE currently the rotation data is not fetched for neighbours, so this can't be incorporated.
             return makeFaceDescriptor(id, faceDirection);
         }
 
@@ -451,21 +496,34 @@ namespace UniVox.Implementations.Meshers
 
         private FaceDescriptor maskData(int3 position, Direction direction)
         {
-            var typeId = data.voxels[MultiIndexToFlat(position.x, position.y, position.z, data.dimensions.x, dxdy)];
+            var flatIndex = MultiIndexToFlat(position.x, position.y, position.z, data.dimensions.x, dxdy);
+            var typeId = data.voxels[flatIndex];
+            if (rotatedVoxelsMap.TryGetValue(flatIndex,out var rotation))
+            {
+                return makeFaceDescriptor(typeId, direction, rotation);
+            }
             return makeFaceDescriptor(typeId, direction);
         }
 
-        private FaceDescriptor makeFaceDescriptor(VoxelTypeID typeId, Direction direction)
+        private FaceDescriptor makeFaceDescriptor(VoxelTypeID typeId, Direction originalDirection,VoxelRotation rotation = default)
         {
             if (typeId == VoxelTypeManager.AIR_ID)
             {
                 return nullFace;
             }
 
+            var faceDirection = originalDirection;
+
+            if (!rotation.isBlank)
+            {
+                faceDirection = (Direction)directionRotator.GetDirectionAfterRotation((byte)originalDirection, rotation);
+            }
+
             FaceDescriptor faceDescriptor = new FaceDescriptor()
             {
                 typeId = typeId,
-                faceDirection = direction,//TODO account for rotation
+                faceDirection = faceDirection,
+                rotation = rotation,
             };
             return faceDescriptor;
         }
@@ -473,6 +531,7 @@ namespace UniVox.Implementations.Meshers
         private struct FaceDescriptor : IEquatable<FaceDescriptor>
         {
             public VoxelTypeID typeId;
+            //The direction of the face, accounting for any rotation
             public Direction faceDirection;
             public VoxelRotation rotation;
 

@@ -24,7 +24,7 @@ namespace UniVox.Framework
         /// <summary>
         /// Data to support mesh jobs
         /// </summary>
-        protected NativeDirectionHelper directionHelper;
+        protected NativeDirectionRotator directionRotator;
         private bool disposed = false;
 
         protected FrameworkEventManager eventManager;
@@ -34,7 +34,7 @@ namespace UniVox.Framework
             this.voxelTypeManager = voxelTypeManager;
             this.chunkManager = chunkManager;
 
-            directionHelper = NativeDirectionHelperExtensions.Create();
+            directionRotator = DirectionRotatorExtensions.Create();
             this.eventManager = eventManager;
         }
 
@@ -42,7 +42,7 @@ namespace UniVox.Framework
         {
             if (!disposed)
             {
-                directionHelper.Dispose();
+                directionRotator.Dispose();
                 disposed = true;
             }
         }
@@ -189,7 +189,7 @@ namespace UniVox.Framework
             var job = new MeshingJob();
             job.data = data;
             job.cullfaces = IsMeshDependentOnNeighbourChunks;
-            job.directionHelper = directionHelper;
+            job.directionHelper = directionRotator;
             return job;
         }
 

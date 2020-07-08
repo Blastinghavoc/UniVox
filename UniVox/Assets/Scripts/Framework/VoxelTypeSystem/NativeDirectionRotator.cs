@@ -8,7 +8,7 @@ using Utils;
 namespace UniVox.Framework
 {
     [BurstCompile]
-    public struct NativeDirectionHelper 
+    public struct NativeDirectionRotator 
     {
         [ReadOnly] public NativeArray<int3> DirectionVectors;
         [ReadOnly] public NativeArray<byte> DirectionOpposites;
@@ -45,11 +45,11 @@ namespace UniVox.Framework
         }
     }
 
-    public static class NativeDirectionHelperExtensions 
+    public static class DirectionRotatorExtensions 
     {
-        public static NativeDirectionHelper Create() 
+        public static NativeDirectionRotator Create() 
         {
-            NativeDirectionHelper native = new NativeDirectionHelper();
+            NativeDirectionRotator native = new NativeDirectionRotator();
 
             native.DirectionVectors = new NativeArray<int3>(Directions.NumDirections, Allocator.Persistent);
             for (int i = 0; i < Directions.NumDirections; i++)
@@ -86,7 +86,7 @@ namespace UniVox.Framework
             return native;
         }
 
-        public static void Dispose(this NativeDirectionHelper native) 
+        public static void Dispose(this NativeDirectionRotator native) 
         {
             native.XRotationMatix.SmartDispose();
             native.YRotationMatix.SmartDispose();

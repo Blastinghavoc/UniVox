@@ -21,6 +21,8 @@ namespace UniVox.Implementations.Meshers
         {
             var job = new GreedyMeshingJob();
             job.data = data;
+            job.rotatedVoxelsMap = new NativeHashMap<int, VoxelRotation>(job.data.rotatedVoxels.Length, Allocator.Persistent);
+            job.directionRotator = directionRotator;
             return job;
         }        
     }

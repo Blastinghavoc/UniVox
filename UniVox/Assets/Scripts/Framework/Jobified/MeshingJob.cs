@@ -15,7 +15,7 @@ namespace UniVox.Framework.Jobified
     {
         [ReadOnly] public bool cullfaces;       
         [ReadOnly] private const int numDirections = Directions.NumDirections;
-        [ReadOnly] public NativeDirectionHelper directionHelper;
+        [ReadOnly] public NativeDirectionRotator directionHelper;
 
         public MeshJobData data { get; set; }
 
