@@ -341,5 +341,11 @@ namespace UniVox.Framework.Jobified
         public int end;//Exclusive
 
         public int Length { get => end - start; }
+
+        public StartEnd(int start, int end) 
+        {
+            this.start = start;
+            this.end = end;
+        }
     }
 }

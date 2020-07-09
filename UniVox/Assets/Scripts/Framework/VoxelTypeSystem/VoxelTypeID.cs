@@ -1,11 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
 using Unity.Burst;
+using System;
 
 namespace UniVox.Framework
 {
     [BurstCompile]
-    public struct VoxelTypeID
+    public struct VoxelTypeID: IEquatable<VoxelTypeID>
     {
         private ushort value;
 
@@ -20,6 +21,11 @@ namespace UniVox.Framework
         public override string ToString()
         {
             return value.ToString();
+        }
+
+        public bool Equals(VoxelTypeID other)
+        {
+            return value.Equals(other.value);
         }
     }
 

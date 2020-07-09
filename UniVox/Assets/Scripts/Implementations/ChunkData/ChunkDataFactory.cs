@@ -13,7 +13,8 @@ namespace UniVox.Implementations.ChunkData
         { 
             FlatArray,
             MultiArray,
-            SVO
+            SVO,
+            RLE
         }
 
         public ChunkDataType typeToCreate;
@@ -28,6 +29,8 @@ namespace UniVox.Implementations.ChunkData
                     return new ArrayChunkData(chunkID, chunkDimensions, initialData);
                 case ChunkDataType.SVO:
                     return new SVOChunkData(chunkID, chunkDimensions, initialData);
+                case ChunkDataType.RLE:
+                    return new RLEChunkData(chunkID, chunkDimensions, initialData);
                 default:
                     throw new System.Exception($"No definition exists for chunk data type {typeToCreate}");
             }
