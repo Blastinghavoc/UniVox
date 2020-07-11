@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
-using System.Collections;
-using Utils;
+using UniVox.Framework.Common;
 
 namespace UniVox.Framework
 {
@@ -8,7 +7,7 @@ namespace UniVox.Framework
     public class SOVoxelTypeDefinition : ScriptableObject
     {
         public string DisplayName;
-        public Texture2D[] FaceTextures = new Texture2D[Directions.NumDirections];
+        public Texture2D[] FaceTextures = new Texture2D[DirectionExtensions.numDirections];
         public SOMeshDefinition meshDefinition;
         public Material material;
         //Can the voxel type be moved through (examples where true would include liquids and decorative plants)

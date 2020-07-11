@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Unity.Collections;
 using UnityEngine;
-using Utils;
 using UniVox.Framework.Common;
 
 namespace UniVox.Framework
@@ -99,36 +98,36 @@ namespace UniVox.Framework
         /// </summary>
         /// <typeparam name="V"></typeparam>
         /// <param name="chunkData"></param>
-        /// <param name="Direction"></param>
+        /// <param name="dir"></param>
         /// <returns></returns>
-        public NativeArray<VoxelTypeID> BorderToNative(int Direction)
+        public NativeArray<VoxelTypeID> BorderToNative(Direction dir)
         {
             StartEndRange xRange = new StartEndRange() { start = 0, end = Dimensions.x };
             StartEndRange yRange = new StartEndRange() { start = 0, end = Dimensions.y };
             StartEndRange zRange = new StartEndRange() { start = 0, end = Dimensions.z };
 
-            switch (Direction)
+            switch (dir)
             {
-                case Directions.UP:
+                case Direction.up:
                     yRange.start = yRange.end - 1;
                     break;
-                case Directions.DOWN:
+                case Direction.down:
                     yRange.end = yRange.start + 1;
                     break;
-                case Directions.NORTH:
+                case Direction.north:
                     zRange.start = zRange.end - 1;
                     break;
-                case Directions.SOUTH:
+                case Direction.south:
                     zRange.end = zRange.start + 1;
                     break;
-                case Directions.EAST:
+                case Direction.east:
                     xRange.start = xRange.end - 1;
                     break;
-                case Directions.WEST:
+                case Direction.west:
                     xRange.end = xRange.start + 1;
                     break;
                 default:
-                    throw new ArgumentException($"direction {Direction} was not recognised");
+                    throw new ArgumentException($"direction {dir} was not recognised");
             }
 
             NativeArray<VoxelTypeID> voxelData = new NativeArray<VoxelTypeID>(xRange.Length * yRange.Length * zRange.Length, Allocator.Persistent);

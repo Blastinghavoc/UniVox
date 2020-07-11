@@ -4,8 +4,8 @@ using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UniVox.Framework;
+using UniVox.Framework.Common;
 using UniVox.Framework.Jobified;
-using Utils;
 using static Utils.Helpers;
 
 namespace UniVox.Implementations.Meshers
@@ -143,11 +143,11 @@ namespace UniVox.Implementations.Meshers
                         {
 
                             //Face in the positive axis direction
-                            FaceDescriptor positiveFace = (workingCoordinates[axis] >= 0) ? maskData(workingCoordinates, positiveAxisDirection) 
-                                : GetFaceInNeighbour(workingCoordinates,negativeAxisDirection,positiveAxisDirection,axis);
+                            FaceDescriptor positiveFace = (workingCoordinates[axis] >= 0) ? maskData(workingCoordinates, positiveAxisDirection)
+                                : GetFaceInNeighbour(workingCoordinates, negativeAxisDirection, positiveAxisDirection, axis);
                             //Face in the negative axis direction
-                            FaceDescriptor negativeFace = (workingCoordinates[axis] < size - 1) ? maskData(workingCoordinates + axisVector, negativeAxisDirection) 
-                                : GetFaceInNeighbour(workingCoordinates,positiveAxisDirection,negativeAxisDirection,axis);
+                            FaceDescriptor negativeFace = (workingCoordinates[axis] < size - 1) ? maskData(workingCoordinates + axisVector, negativeAxisDirection)
+                                : GetFaceInNeighbour(workingCoordinates, positiveAxisDirection, negativeAxisDirection, axis);
 
                             if (IncludeFace(positiveFace, negativeFace))
                             {
@@ -215,17 +215,17 @@ namespace UniVox.Implementations.Meshers
                                 if (!currentMaskValue.Equals(nullFace))
                                 {
                                     workingCoordinates[secondaryAxis] = i;
-                                    workingCoordinates[tertiaryAxis] = j;                                    
+                                    workingCoordinates[tertiaryAxis] = j;
 
                                     if (data.voxelTypeDatabase.voxelTypeToIsPassableMap[currentMaskValue.typeId])
                                     {
-                                        nonCollidable.Add(new Dolater(currentMaskValue,workingCoordinates,
-                                            axis, secondaryAxis, tertiaryAxis, width, height, flip,flipNormals));
+                                        nonCollidable.Add(new Dolater(currentMaskValue, workingCoordinates,
+                                            axis, secondaryAxis, tertiaryAxis, width, height, flip, flipNormals));
                                     }
                                     else
                                     {
                                         ProcessSection(currentMaskValue, workingCoordinates,
-                                            axis, secondaryAxis,tertiaryAxis, width, height, flip,flipNormals);
+                                            axis, secondaryAxis, tertiaryAxis, width, height, flip, flipNormals);
                                     }
 
                                 }
@@ -258,7 +258,7 @@ namespace UniVox.Implementations.Meshers
             {
                 var item = nonCollidable[j];
                 ProcessSection(item.currentMaskValue, item.workingCoordinates,
-                    item.primaryAxis, item.secondaryAxis, item.tertiaryAxis, item.width, item.height, item.flip,item.flipNormals);
+                    item.primaryAxis, item.secondaryAxis, item.tertiaryAxis, item.width, item.height, item.flip, item.flipNormals);
             }
 
             //End non collidable run
@@ -291,7 +291,7 @@ namespace UniVox.Implementations.Meshers
             public bool flip;
             public bool flipNormals;
 
-            public Dolater(FaceDescriptor currentMaskValue, 
+            public Dolater(FaceDescriptor currentMaskValue,
                 int3 workingCoordinates,
                 byte primaryAxis,
                 byte secondaryAxis,
@@ -396,10 +396,10 @@ namespace UniVox.Implementations.Meshers
 
             bool makeBackface = data.meshDatabase.meshIdToIncludeBackfacesMap[meshID];
 
-            AddQuad(nodebl, nodetr, nodebr, nodetl, uvZ,makeBackface);
+            AddQuad(nodebl, nodetr, nodebr, nodetl, uvZ, makeBackface);
         }
 
-        private void AddQuad(Node v0, Node v1, Node v2, Node v3, float uvZ,bool makeBackface = false)
+        private void AddQuad(Node v0, Node v1, Node v2, Node v3, float uvZ, bool makeBackface = false)
         {
             int index = data.vertices.Length;
 
@@ -437,7 +437,7 @@ namespace UniVox.Implementations.Meshers
 
         }
 
-        private FaceDescriptor GetFaceInNeighbour(int3 position, Direction neighbourDirection,Direction faceDirection, int primaryAxis)
+        private FaceDescriptor GetFaceInNeighbour(int3 position, Direction neighbourDirection, Direction faceDirection, int primaryAxis)
         {
             var localIndexOfAdjacentVoxelInNeighbour = IndicesInNeighbour(primaryAxis, position);
 
@@ -498,14 +498,14 @@ namespace UniVox.Implementations.Meshers
         {
             var flatIndex = MultiIndexToFlat(position.x, position.y, position.z, data.dimensions.x, dxdy);
             var typeId = data.voxels[flatIndex];
-            if (rotatedVoxelsMap.TryGetValue(flatIndex,out var rotation))
+            if (rotatedVoxelsMap.TryGetValue(flatIndex, out var rotation))
             {
                 return makeFaceDescriptor(typeId, direction, rotation);
             }
             return makeFaceDescriptor(typeId, direction);
         }
 
-        private FaceDescriptor makeFaceDescriptor(VoxelTypeID typeId, Direction originalDirection,VoxelRotation rotation = default)
+        private FaceDescriptor makeFaceDescriptor(VoxelTypeID typeId, Direction originalDirection, VoxelRotation rotation = default)
         {
             if (typeId == VoxelTypeManager.AIR_ID)
             {
@@ -516,7 +516,7 @@ namespace UniVox.Implementations.Meshers
 
             if (!rotation.isBlank)
             {
-                faceDirection = (Direction)directionRotator.GetDirectionAfterRotation((byte)originalDirection, rotation);
+                faceDirection = directionRotator.GetDirectionAfterRotation(originalDirection, rotation);
             }
 
             FaceDescriptor faceDescriptor = new FaceDescriptor()

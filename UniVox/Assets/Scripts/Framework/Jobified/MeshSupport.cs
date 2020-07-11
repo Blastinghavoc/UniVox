@@ -261,25 +261,25 @@ namespace UniVox.Framework.Jobified
         [ReadOnly] public NativeArray<VoxelTypeID> east;
         [ReadOnly] public NativeArray<VoxelTypeID> west;
 
-        public NativeArray<VoxelTypeID> this[int i] 
+        public NativeArray<VoxelTypeID> this[int dir] 
         {
             get {
-                switch (i)
+                switch ((Direction)dir)
                 {
-                    case Directions.UP:
+                    case Direction.up:
                         return up;
-                    case Directions.DOWN:
+                    case Direction.down:
                         return down;
-                    case Directions.NORTH:
+                    case Direction.north:
                         return north;
-                    case Directions.SOUTH:
+                    case Direction.south:
                         return south;
-                    case Directions.EAST:
+                    case Direction.east:
                         return east;
-                    case Directions.WEST:
+                    case Direction.west:
                         return west;
                     default:                        
-                        throw new Exception($"direction {i} was not recognised");
+                        throw new Exception($"direction {dir} was not recognised");
                 }
             }
         }
@@ -297,26 +297,26 @@ namespace UniVox.Framework.Jobified
             neighbourData.west.SmartDispose();
         }
 
-        public static void Add(ref this NeighbourData container, int direction, NativeArray<VoxelTypeID> data)
+        public static void Add(ref this NeighbourData container, Direction direction, NativeArray<VoxelTypeID> data)
         {
             switch (direction)
             {
-                case Directions.UP:
+                case Direction.up:
                     container.up = data;
                     break;
-                case Directions.DOWN:
+                case Direction.down:
                     container.down = data;
                     break;
-                case Directions.NORTH:
+                case Direction.north:
                     container.north = data;
                     break;
-                case Directions.SOUTH:
+                case Direction.south:
                     container.south = data;
                     break;
-                case Directions.EAST:
+                case Direction.east:
                     container.east = data;
                     break;
-                case Directions.WEST:
+                case Direction.west:
                     container.west = data;
                     break;
                 default:

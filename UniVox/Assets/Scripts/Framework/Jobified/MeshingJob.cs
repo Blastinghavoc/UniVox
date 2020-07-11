@@ -5,6 +5,7 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
+using UniVox.Framework.Common;
 using Utils;
 
 namespace UniVox.Framework.Jobified
@@ -14,7 +15,7 @@ namespace UniVox.Framework.Jobified
     public struct MeshingJob : IMeshingJob
     {
         [ReadOnly] public bool cullfaces;       
-        [ReadOnly] private const int numDirections = Directions.NumDirections;
+        [ReadOnly] private const int numDirections = DirectionExtensions.numDirections;
         [ReadOnly] public NativeDirectionRotator directionHelper;
 
         public MeshJobData data { get; set; }
@@ -138,7 +139,7 @@ namespace UniVox.Framework.Jobified
                 //Add single rotated voxels data
                 for (byte dir = 0; dir < numDirections; dir++)
                 {
-                    var rotatedDirection = directionHelper.GetDirectionAfterRotation(dir, rotation);
+                    var rotatedDirection = (byte)directionHelper.GetDirectionAfterRotation((Direction)dir, rotation);
                     var faceIsSolid = data.meshDatabase.isFaceSolid[meshRange.start + rotatedDirection];
                     if (IncludeFace(id, position, rotatedDirection, faceIsSolid))
                     {
@@ -283,7 +284,7 @@ namespace UniVox.Framework.Jobified
             }
             var meshID = data.meshDatabase.voxelTypeToMeshTypeMap[voxelTypeID];
             var meshRange = data.meshDatabase.meshTypeRanges[meshID];
-            var faceIsSolid = data.meshDatabase.isFaceSolid[meshRange.start + directionHelper.DirectionOpposites[direction]];
+            var faceIsSolid = data.meshDatabase.isFaceSolid[meshRange.start + (byte)directionHelper.DirectionOpposites[direction]];
 
             //Exclude this face if adjacent face is solid
             return !faceIsSolid;

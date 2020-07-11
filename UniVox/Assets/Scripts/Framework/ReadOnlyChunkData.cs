@@ -1,5 +1,6 @@
 ﻿using Unity.Collections;
 using UnityEngine;
+using UniVox.Framework.Common;
 
 namespace UniVox.Framework
 {
@@ -20,9 +21,9 @@ namespace UniVox.Framework
         public bool ModifiedSinceGeneration { get => realData.ModifiedSinceGeneration; set => throw new System.NotImplementedException(); }
         public bool FullyGenerated { get => realData.FullyGenerated; set => throw new System.NotImplementedException(); }
 
-        public NativeArray<VoxelTypeID> BorderToNative(int Direction)
+        public NativeArray<VoxelTypeID> BorderToNative(Direction dir)
         {
-            return realData.BorderToNative(Direction);
+            return realData.BorderToNative(dir);
         }
 
         public NativeArray<RotatedVoxelEntry> NativeRotations(Allocator allocator = Allocator.Persistent)

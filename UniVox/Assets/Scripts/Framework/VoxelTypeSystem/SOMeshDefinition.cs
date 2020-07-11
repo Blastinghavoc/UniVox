@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
-using System.Collections;
-using Utils;
+using UniVox.Framework.Common;
 
 namespace UniVox.Framework
 {
@@ -15,6 +14,6 @@ namespace UniVox.Framework
         //All Normals in the mesh
         public Vector3[] AllNormals;
         //Definitions for each face
-        public VoxelFaceDefinition[] Faces = new VoxelFaceDefinition[Directions.NumDirections];
+        public VoxelFaceDefinition[] Faces = new VoxelFaceDefinition[DirectionExtensions.numDirections];
     }
 }

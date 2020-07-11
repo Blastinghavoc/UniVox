@@ -7,8 +7,8 @@ using UnityEngine;
 using UniVox.Framework;
 using UniVox.Framework.ChunkPipeline;
 using UniVox.Framework.ChunkPipeline.VirtualJobs;
+using UniVox.Framework.Common;
 using UniVox.Implementations.ChunkData;
-using Utils;
 
 namespace Tests
 {

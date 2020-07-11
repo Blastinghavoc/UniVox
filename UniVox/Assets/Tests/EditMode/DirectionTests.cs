@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
 using UniVox.Framework;
-using Utils;
+using UniVox.Framework.Common;
 
 namespace Tests
 {

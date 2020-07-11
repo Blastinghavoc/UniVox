@@ -3,6 +3,7 @@ using System.Collections;
 using System;
 using Unity.Collections;
 using System.Collections.Generic;
+using UniVox.Framework.Common;
 
 namespace UniVox.Framework
 {
@@ -39,6 +40,6 @@ namespace UniVox.Framework
         /// </summary>
         /// <param name="Direction"></param>
         /// <returns></returns>
-        NativeArray<VoxelTypeID> BorderToNative(int Direction);
+        NativeArray<VoxelTypeID> BorderToNative(Direction dir);
     }
 }

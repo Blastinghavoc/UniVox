@@ -8,7 +8,7 @@ using UnityEngine.Assertions;
 using UnityEngine.Profiling;
 using UniVox.Framework;
 using UniVox.Framework.ChunkPipeline;
-using Utils;
+using UniVox.Framework.Common;
 using Utils.Pooling;
 
 public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
@@ -471,9 +471,9 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
             return borderDirections;
         }
 
-        for (int i = 0; i < Directions.NumDirections; i++)
+        for (int i = 0; i < DirectionExtensions.numDirections; i++)
         {
-            var dir = Directions.IntVectors[i];
+            var dir = DirectionExtensions.Vectors[i];
             var adjacentIndex = localVoxelIndex + dir;
             if (adjacentIndex.Any((a, b) => a < 0 || a >= b, ChunkDimensions))
             {

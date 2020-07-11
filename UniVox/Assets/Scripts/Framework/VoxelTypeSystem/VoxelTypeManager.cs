@@ -7,6 +7,7 @@ using Unity.Collections;
 using UniVox.Framework.Jobified;
 using System.Data;
 using Utils;
+using UniVox.Framework.Common;
 
 namespace UniVox.Framework
 {
@@ -59,7 +60,7 @@ namespace UniVox.Framework
             ushort currentID = AIR_ID + 1;
             foreach (var item in VoxelTypes)
             {
-                Assert.AreEqual(Directions.NumDirections, item.FaceTextures.Length, $"Voxel type {item.name} does not define a texture for each face");
+                Assert.AreEqual(DirectionExtensions.numDirections, item.FaceTextures.Length, $"Voxel type {item.name} does not define a texture for each face");
 
                 DefinitionToIDMap.Add(item, (VoxelTypeID)currentID);
 
@@ -90,12 +91,12 @@ namespace UniVox.Framework
 
                 foreach (var item in types)
                 {
-                    Assert.AreEqual(Directions.NumDirections, item.FaceTextures.Length, $"Voxel type {item.name} does not define a texture for each face");
+                    Assert.AreEqual(DirectionExtensions.numDirections, item.FaceTextures.Length, $"Voxel type {item.name} does not define a texture for each face");
 
-                    float[] FaceZIndices = new float[Directions.NumDirections];
+                    float[] FaceZIndices = new float[DirectionExtensions.numDirections];
 
                     //Determine Z indices for each face
-                    for (int i = 0; i < Directions.NumDirections; i++)
+                    for (int i = 0; i < DirectionExtensions.numDirections; i++)
                     {
                         var tex = item.FaceTextures[i];
                         if (uniqueTextures.TryGetValue(tex, out var ZIndex))

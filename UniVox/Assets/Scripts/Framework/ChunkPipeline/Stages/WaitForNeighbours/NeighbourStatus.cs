@@ -1,5 +1,5 @@
 ﻿using System.Text;
-using Utils;
+using UniVox.Framework.Common;
 
 namespace UniVox.Framework.ChunkPipeline.WaitForNeighbours
 {

@@ -3,6 +3,7 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
+using UniVox.Framework.Common;
 using Utils;
 
 namespace UniVox.Framework
@@ -11,29 +12,29 @@ namespace UniVox.Framework
     public struct NativeDirectionRotator 
     {
         [ReadOnly] public NativeArray<int3> DirectionVectors;
-        [ReadOnly] public NativeArray<byte> DirectionOpposites;
+        [ReadOnly] public NativeArray<Direction> DirectionOpposites;
 
-        [ReadOnly] public NativeArray<byte> XRotationMatix;
-        [ReadOnly] public NativeArray<byte> YRotationMatix;
-        [ReadOnly] public NativeArray<byte> ZRotationMatix;
+        [ReadOnly] public NativeArray<Direction> XRotationMatix;
+        [ReadOnly] public NativeArray<Direction> YRotationMatix;
+        [ReadOnly] public NativeArray<Direction> ZRotationMatix;
 
         private const float PI_2 = math.PI / 2;
 
-        public byte GetDirectionAfterRotation(byte dir, VoxelRotation rot) 
+        public Direction GetDirectionAfterRotation(Direction dir, VoxelRotation rot) 
         {
             for (int i = 0; i < rot.y; i++)
             {
-                dir = YRotationMatix[dir];
+                dir = YRotationMatix[(byte)dir];
             }
 
             for (int i = 0; i < rot.x; i++)
             {
-                dir = XRotationMatix[dir];
+                dir = XRotationMatix[(byte)dir];
             }
 
             for (int i = 0; i < rot.z; i++)
             {
-                dir = ZRotationMatix[dir];
+                dir = ZRotationMatix[(byte)dir];
             }
 
             return dir;
@@ -51,37 +52,37 @@ namespace UniVox.Framework
         {
             NativeDirectionRotator native = new NativeDirectionRotator();
 
-            native.DirectionVectors = new NativeArray<int3>(Directions.NumDirections, Allocator.Persistent);
-            for (int i = 0; i < Directions.NumDirections; i++)
+            native.DirectionVectors = new NativeArray<int3>(DirectionExtensions.numDirections, Allocator.Persistent);
+            for (int i = 0; i < DirectionExtensions.numDirections; i++)
             {
-                var vec = Directions.IntVectors[i];
+                var vec = DirectionExtensions.Vectors[i];
                 native.DirectionVectors[i] = vec.ToNative();
             }
 
-            native.DirectionOpposites = new NativeArray<byte>(Directions.Oposite, Allocator.Persistent);
+            native.DirectionOpposites = DirectionExtensions.Opposite.ToNative(Allocator.Persistent);
 
-            var xArr = new byte[Directions.Array.Length];
-            var yArr = new byte[Directions.Array.Length];
-            var zArr = new byte[Directions.Array.Length];
+            var xArr = new Direction[DirectionExtensions.numDirections];
+            var yArr = new Direction[DirectionExtensions.numDirections];
+            var zArr = new Direction[DirectionExtensions.numDirections];
 
             for (int i = 0; i < xArr.Length; i++)
             {
-                xArr[i] = CardinalRotateX((byte)i);
+                xArr[i] = CardinalRotateX((Direction)i);
             }
 
             for (int i = 0; i < yArr.Length; i++)
             {
-                yArr[i] = CardinalRotateY((byte)i);
+                yArr[i] = CardinalRotateY((Direction)i);
             }
 
             for (int i = 0; i < zArr.Length; i++)
             {
-                zArr[i] = CardinalRotateZ((byte)i);
+                zArr[i] = CardinalRotateZ((Direction)i);
             }
 
-            native.XRotationMatix = new NativeArray<byte>(xArr, Allocator.Persistent);
-            native.YRotationMatix = new NativeArray<byte>(yArr, Allocator.Persistent);
-            native.ZRotationMatix = new NativeArray<byte>(zArr, Allocator.Persistent);
+            native.XRotationMatix = xArr.ToNative(Allocator.Persistent);
+            native.YRotationMatix =yArr.ToNative(Allocator.Persistent);
+            native.ZRotationMatix = zArr.ToNative(Allocator.Persistent);
 
             return native;
         }
@@ -100,23 +101,23 @@ namespace UniVox.Framework
         /// </summary>
         /// <param name="original"></param>
         /// <returns></returns>
-        private static byte CardinalRotateY(byte original)
+        private static Direction CardinalRotateY(Direction original)
         {
-            if (original == Directions.UP || original == Directions.DOWN)
+            if (original == Direction.up || original == Direction.down)
             {
                 return original;
             }
 
             switch (original)
             {
-                case Directions.EAST:
-                    return Directions.SOUTH;
-                case Directions.SOUTH:
-                    return Directions.WEST;
-                case Directions.WEST:
-                    return Directions.NORTH;
-                case Directions.NORTH:
-                    return Directions.EAST;
+                case Direction.east:
+                    return Direction.south;
+                case Direction.south:
+                    return Direction.west;
+                case Direction.west:
+                    return Direction.north;
+                case Direction.north:
+                    return Direction.east;
                 default:
                     break;
             }
@@ -128,23 +129,23 @@ namespace UniVox.Framework
         /// </summary>
         /// <param name="original"></param>
         /// <returns></returns>
-        private static byte CardinalRotateX(byte original)
+        private static Direction CardinalRotateX(Direction original)
         {
-            if (original == Directions.EAST || original == Directions.WEST)
+            if (original == Direction.east || original == Direction.west)
             {
                 return original;
             }
 
             switch (original)
             {
-                case Directions.NORTH:
-                    return Directions.DOWN;
-                case Directions.DOWN:
-                    return Directions.SOUTH;
-                case Directions.SOUTH:
-                    return Directions.UP;
-                case Directions.UP:
-                    return Directions.NORTH;
+                case Direction.north:
+                    return Direction.down;
+                case Direction.down:
+                    return Direction.south;
+                case Direction.south:
+                    return Direction.up;
+                case Direction.up:
+                    return Direction.north;
                 default:
                     break;
             }
@@ -156,23 +157,23 @@ namespace UniVox.Framework
         /// </summary>
         /// <param name="original"></param>
         /// <returns></returns>
-        private static byte CardinalRotateZ(byte original)
+        private static Direction CardinalRotateZ(Direction original)
         {
-            if (original == Directions.NORTH || original == Directions.SOUTH)
+            if (original == Direction.north || original == Direction.south)
             {
                 return original;
             }
 
             switch (original)
             {
-                case Directions.EAST:
-                    return Directions.UP;
-                case Directions.DOWN:
-                    return Directions.EAST;
-                case Directions.WEST:
-                    return Directions.DOWN;
-                case Directions.UP:
-                    return Directions.WEST;
+                case Direction.east:
+                    return Direction.up;
+                case Direction.down:
+                    return Direction.east;
+                case Direction.west:
+                    return Direction.down;
+                case Direction.up:
+                    return Direction.west;
                 default:
                     break;
             }

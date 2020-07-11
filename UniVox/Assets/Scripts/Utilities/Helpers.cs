@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Unity.Burst;
 using Unity.Mathematics;
 using UnityEngine;
+using UniVox.Framework.Common;
 
 namespace Utils
 {

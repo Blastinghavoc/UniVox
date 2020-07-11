@@ -5,7 +5,7 @@ using Unity.Mathematics;
 using UnityEngine;
 using UniVox.Framework;
 using UniVox.Framework.ChunkPipeline.WaitForNeighbours;
-using Utils;
+using UniVox.Framework.Common;
 
 namespace Tests
 {

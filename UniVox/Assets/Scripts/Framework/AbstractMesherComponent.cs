@@ -5,6 +5,7 @@ using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Profiling;
 using UniVox.Framework.ChunkPipeline.VirtualJobs;
+using UniVox.Framework.Common;
 using UniVox.Framework.Jobified;
 using Utils;
 
@@ -72,13 +73,13 @@ namespace UniVox.Framework
             Profiler.BeginSample("CacheNeighbourData");
             if (IsMeshDependentOnNeighbourChunks)
             {
-                for (int i = 0; i < Directions.NumDirections; i++)
+                for (int i = 0; i < DirectionExtensions.numDirections; i++)
                 {
-                    var neighbourID = chunkData.ChunkID + Directions.IntVectors[i];
+                    var neighbourID = chunkData.ChunkID + DirectionExtensions.Vectors[i];
                     try
                     {
                         var neighbour = chunkManager.GetReadOnlyChunkData(neighbourID);
-                        neighbourData.Add(i, neighbour.BorderToNative(Directions.Oposite[i]));
+                        neighbourData.Add((Direction)i, neighbour.BorderToNative(DirectionExtensions.Opposite[i]));
                     }
                     catch (Exception e)
                     {
@@ -92,9 +93,9 @@ namespace UniVox.Framework
             else
             {
                 //Initialise neighbour data with small blank arrays if not needed
-                for (int i = 0; i < Directions.NumDirections; i++)
+                for (int i = 0; i < DirectionExtensions.numDirections; i++)
                 {
-                    neighbourData.Add(i, new NativeArray<VoxelTypeID>(1, Allocator.Persistent));
+                    neighbourData.Add((Direction)i, new NativeArray<VoxelTypeID>(1, Allocator.Persistent));
                 }
             }
             Profiler.EndSample();

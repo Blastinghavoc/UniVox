@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
-using Utils;
+using UniVox.Framework.Common;
 
 namespace UniVox.Framework.ChunkPipeline.WaitForNeighbours
 {

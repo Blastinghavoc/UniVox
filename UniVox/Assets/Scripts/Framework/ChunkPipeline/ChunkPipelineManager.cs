@@ -8,9 +8,9 @@ using UnityEngine.Assertions;
 using UnityEngine.Profiling;
 using UniVox.Framework.ChunkPipeline.VirtualJobs;
 using UniVox.Framework.ChunkPipeline.WaitForNeighbours;
+using UniVox.Framework.Common;
 using UniVox.Framework.Jobified;
 using UniVox.Implementations.ChunkData;
-using Utils;
 
 namespace UniVox.Framework.ChunkPipeline
 {
