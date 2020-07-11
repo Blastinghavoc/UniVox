@@ -1,39 +1,53 @@
 FrameTimeMillis,MemoryUsageBytes,Technique
-54.9404,0,NaiveDebug
-54.157,689864,NaiveDebug
-62.4508,321440,NaiveDebug
-57.6876,323624,NaiveDebug
-53.146,324152,NaiveDebug
-55.3251,324632,NaiveDebug
-54.6478,325112,NaiveDebug
-53.7178,324072,NaiveDebug
-55.1942,323528,NaiveDebug
-56.9484,324008,NaiveDebug
-6.0662,0,CullingDebug
-7.0966,832142,CullingDebug
-6.8181,62864,CullingDebug
-7.3451,62496,CullingDebug
-6.2314,62976,CullingDebug
-5.8019,63456,CullingDebug
-6.3439,65008,CullingDebug
-6.2788,65488,CullingDebug
-6.5322,65968,CullingDebug
-5.4413,66432,CullingDebug
-5.8219,66912,CullingDebug
-6.5187,67392,CullingDebug
-6.3287,67888,CullingDebug
-6.8111,905154,CullingDebug
-6.6275,0,CullingProcedural
-6.6193,277876,CullingProcedural
-6.4824,105928,CullingProcedural
-8.6885,105480,CullingProcedural
-6.2008,105960,CullingProcedural
-6.356,107184,CullingProcedural
-6.5147,107664,CullingProcedural
-5.4535,108144,CullingProcedural
-6.238,110376,CullingProcedural
-6.391,110856,CullingProcedural
-5.8965,111336,CullingProcedural
-7.2108,111816,CullingProcedural
-7.8354,112296,CullingProcedural
-6.5214,401650,CullingProcedural
+55.5434,0,NaiveDebug
+54.7117,447152,NaiveDebug
+54.4181,321416,NaiveDebug
+56.4624,323632,NaiveDebug
+55.2707,324160,NaiveDebug
+54.6265,324640,NaiveDebug
+55.0457,325120,NaiveDebug
+55.212,324072,NaiveDebug
+54.6503,323512,NaiveDebug
+59.4923,323992,NaiveDebug
+6.0865,0,CullingDebug
+6.931,623942,CullingDebug
+8.0889,62832,CullingDebug
+7.898201,61840,CullingDebug
+6.4398,62320,CullingDebug
+6.3737,63448,CullingDebug
+7.8189,63928,CullingDebug
+7.1224,64408,CullingDebug
+5.4863,65952,CullingDebug
+7.2242,66432,CullingDebug
+5.8623,66912,CullingDebug
+5.8409,67376,CullingDebug
+6.3672,67856,CullingDebug
+5.0702,695866,CullingDebug
+6.1143,0,CullingProcedural
+6.7575,81074,CullingProcedural
+5.9975,105928,CullingProcedural
+7.5666,106224,CullingProcedural
+6.2848,106704,CullingProcedural
+6.1972,107184,CullingProcedural
+6.5107,107664,CullingProcedural
+6.0873,109896,CullingProcedural
+6.4705,110376,CullingProcedural
+6.1774,110856,CullingProcedural
+6.1981,111336,CullingProcedural
+7.2188,111816,CullingProcedural
+5.8474,112296,CullingProcedural
+6.269,190272,CullingProcedural
+7.0491,0,CullingProcedural Lazy
+6.1549,593974,CullingProcedural Lazy
+6.4765,105960,CullingProcedural Lazy
+7.3961,105496,CullingProcedural Lazy
+6.2191,106712,CullingProcedural Lazy
+7.2325,107192,CullingProcedural Lazy
+6.4581,107672,CullingProcedural Lazy
+5.9928,109904,CullingProcedural Lazy
+7.0513,110384,CullingProcedural Lazy
+6.0983,110864,CullingProcedural Lazy
+6.7063,111344,CullingProcedural Lazy
+6.5037,111824,CullingProcedural Lazy
+5.8831,112304,CullingProcedural Lazy
+7.2416,708940,CullingProcedural Lazy

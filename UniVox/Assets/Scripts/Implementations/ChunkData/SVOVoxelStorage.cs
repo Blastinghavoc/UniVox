@@ -85,6 +85,12 @@ namespace UniVox.Implementations.ChunkData
         private readonly Vector3Int dimensionsOfLeafNodes = new Vector3Int(2,2,2);
         public bool IsEmpty { get => root.IsEmpty; }
 
+        //Empty constructor requiring use of the Initialise functions to do anything useful
+        public SVOVoxelStorage() 
+        { 
+        
+        }
+
         public SVOVoxelStorage(Vector3Int dimensions)
         {
             InitialiseEmpty(dimensions);

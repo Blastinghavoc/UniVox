@@ -3,79 +3,100 @@
 
 Test FirstNFrames_R0:
 
-With chunk manager NaiveDebug took 8.750649 seconds
-Memory usage baseline: 161927694
+With chunk manager NaiveDebug took 6.685345 seconds
+Memory usage baseline: 169916195
 Recorded 100 frames
-Peak memory usage of 973101984
+Peak memory usage of 12128712
 
-With chunk manager CullingDebug took 1.60614 seconds
-Memory usage baseline: 1133061718
+With chunk manager CullingDebug took 1.446174 seconds
+Memory usage baseline: 170912262
 Recorded 100 frames
-Peak memory usage of 10400626
+Peak memory usage of 10652544
 
-With chunk manager CullingProcedural took 1.72555 seconds
-Memory usage baseline: 168430718
+With chunk manager CullingProcedural took 2.558655 seconds
+Memory usage baseline: 173284286
 Recorded 100 frames
-Peak memory usage of 12977176
+Peak memory usage of 13692668
 
-Finished after total time of 18.62437
+With chunk manager CullingProcedural Lazy took 1.414 seconds
+Memory usage baseline: 168968894
+Recorded 100 frames
+Peak memory usage of 13078311
+
+Finished after total time of 25.88859
 
 
 
 Test PlaceDelete1Block_R0:
 
-With chunk manager NaiveDebug took 14.9761 seconds
-Memory usage baseline: 2761987550
+With chunk manager NaiveDebug took 14.86802 seconds
+Memory usage baseline: 2772186550
 Grace period 10 frames
 Num Blocks: 1
 Break time millis: 0
 Place time millis: 0
-Peak memory: 689864
+Peak memory: 447152
 
-With chunk manager CullingDebug took 4.621754 seconds
-Memory usage baseline: 2769161550
+With chunk manager CullingDebug took 4.648289 seconds
+Memory usage baseline: 2779374094
 Grace period 10 frames
 Num Blocks: 1
-Break time millis: 13.91602
-Place time millis: 14.67133
-Peak memory: 905154
+Break time millis: 15.01846
+Place time millis: 12.55417
+Peak memory: 695866
 
-With chunk manager CullingProcedural took 6.361958 seconds
-Memory usage baseline: 219386494
+With chunk manager CullingProcedural took 6.18531 seconds
+Memory usage baseline: 229642046
 Grace period 10 frames
 Num Blocks: 1
-Break time millis: 13.10349
-Place time millis: 12.42447
-Peak memory: 401650
+Break time millis: 12.75635
+Place time millis: 13.53073
+Peak memory: 190272
 
-Finished after total time of 32.69062
+With chunk manager CullingProcedural Lazy took 6.179859 seconds
+Memory usage baseline: 254754334
+Grace period 10 frames
+Num Blocks: 1
+Break time millis: 12.63428
+Place time millis: 14.1983
+Peak memory: 708940
+
+Finished after total time of 40.75183
 
 
 
 Test PlaceDeleteManyBlocks_R0:
 
-With chunk manager NaiveDebug took 15.84349 seconds
-Memory usage baseline: 2795468790
+With chunk manager NaiveDebug took 14.81536 seconds
+Memory usage baseline: 2809684526
 Grace period 10 frames
 Num Blocks: 27000
 Break time millis: 0
 Place time millis: 0
-Peak memory: 8808320
+Peak memory: 8348408
 
-With chunk manager CullingDebug took 5.048355 seconds
-Memory usage baseline: 2765326782
+With chunk manager CullingDebug took 4.9907 seconds
+Memory usage baseline: 2779493294
 Grace period 10 frames
 Num Blocks: 27000
-Break time millis: 181.0837
-Place time millis: 192.009
-Peak memory: 1870666
+Break time millis: 175.148
+Place time millis: 211.6165
+Peak memory: 2178714
 
-With chunk manager CullingProcedural took 6.823822 seconds
-Memory usage baseline: 220851622
+With chunk manager CullingProcedural took 6.892387 seconds
+Memory usage baseline: 234939070
 Grace period 10 frames
 Num Blocks: 27000
-Break time millis: 331.1691
-Place time millis: 338.5696
-Peak memory: 1665436
+Break time millis: 322.525
+Place time millis: 336.525
+Peak memory: 1963261
 
-Finished after total time of 34.67607
+With chunk manager CullingProcedural Lazy took 6.979759 seconds
+Memory usage baseline: 260032622
+Grace period 10 frames
+Num Blocks: 27000
+Break time millis: 318.4967
+Place time millis: 404.7623
+Peak memory: 1545928
+
+Finished after total time of 42.7387

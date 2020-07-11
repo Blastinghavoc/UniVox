@@ -18,18 +18,35 @@ namespace UniVox.Implementations.ChunkData
         }
 
         public ChunkDataType typeToCreate;
+        public bool lazy = false;
 
         public IChunkData Create(Vector3Int chunkID,Vector3Int chunkDimensions , VoxelTypeID[] initialData = null) 
         {
             switch (typeToCreate)
             {
                 case ChunkDataType.FlatArray:
+                    if (lazy)
+                    {
+                        return new LazyChunkData<FlatArrayVoxelStorage>(chunkID, chunkDimensions, initialData);
+                    }
                     return new FlatArrayChunkData(chunkID, chunkDimensions, initialData);
                 case ChunkDataType.MultiArray:
+                    if (lazy)
+                    {
+                        return new LazyChunkData<MultiDimensionalArrayVoxelStorage>(chunkID, chunkDimensions, initialData);
+                    }
                     return new ArrayChunkData(chunkID, chunkDimensions, initialData);
                 case ChunkDataType.SVO:
+                    if (lazy)
+                    {
+                        return new LazyChunkData<SVOVoxelStorage>(chunkID, chunkDimensions, initialData);
+                    }
                     return new SVOChunkData(chunkID, chunkDimensions, initialData);
                 case ChunkDataType.RLE:
+                    if (lazy)
+                    {
+                        return new LazyChunkData<RLEVoxelStorage>(chunkID, chunkDimensions, initialData);
+                    }
                     return new RLEChunkData(chunkID, chunkDimensions, initialData);
                 default:
                     throw new System.Exception($"No definition exists for chunk data type {typeToCreate}");

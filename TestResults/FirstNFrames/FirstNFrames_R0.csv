@@ -1,301 +1,401 @@
 FrameTimeMillis,MemoryUsageBytes,Technique
-20,5608336,NaiveDebug
-2962.403,6316319,NaiveDebug
-170.2099,6796374,NaiveDebug
-664.8979,6876256,NaiveDebug
-63.7174,8447957,NaiveDebug
-95.5551,26888624,NaiveDebug
-64.4923,31154624,NaiveDebug
-70.3841,51213112,NaiveDebug
-50.0577,49348272,NaiveDebug
-133.3478,50469051,NaiveDebug
-25.8659,73221728,NaiveDebug
-48.7566,88574309,NaiveDebug
-32.4867,94048576,NaiveDebug
-103.0554,104935391,NaiveDebug
-31.6882,101676456,NaiveDebug
-48.2892,102117704,NaiveDebug
-13.2112,104166275,NaiveDebug
-40.8589,130300608,NaiveDebug
-93.8181,137655523,NaiveDebug
-27.1919,159126864,NaiveDebug
-45.3343,173664216,NaiveDebug
-100.3034,181302471,NaiveDebug
-24.933,198077664,NaiveDebug
-80.3699,205959144,NaiveDebug
-31.3662,201983392,NaiveDebug
-26.0795,203327712,NaiveDebug
-24.0735,210450376,NaiveDebug
-24.7196,218441966,NaiveDebug
-25.5098,219347728,NaiveDebug
-67.6923,219731288,NaiveDebug
-20.1007,231765120,NaiveDebug
-13.517,252863264,NaiveDebug
-46.2583,259729928,NaiveDebug
-112.2179,260156818,NaiveDebug
-27.7435,286933288,NaiveDebug
-33.9011,294709536,NaiveDebug
-95.9667,295177056,NaiveDebug
-29.8221,321492640,NaiveDebug
-33.4432,335968368,NaiveDebug
-34.1052,356978648,NaiveDebug
-83.4826,351272856,NaiveDebug
-49.4555,351757398,NaiveDebug
-31.3346,378548872,NaiveDebug
-81.1008,388816088,NaiveDebug
-48.2173,391215224,NaiveDebug
-22.4684,390736264,NaiveDebug
-19.4231,390670672,NaiveDebug
-8.2425,390760024,NaiveDebug
-11.7707,390686272,NaiveDebug
-8.9106,391244340,NaiveDebug
-17.694,401583548,NaiveDebug
-14.0966,411295200,NaiveDebug
-79.82491,424742134,NaiveDebug
-27.4635,447462112,NaiveDebug
-67.8998,475338776,NaiveDebug
-103.1264,493825552,NaiveDebug
-106.5788,507450776,NaiveDebug
-32.054,536015080,NaiveDebug
-46.174,535635528,NaiveDebug
-136.2305,536353844,NaiveDebug
-26.239,563074728,NaiveDebug
-75.5648,570318560,NaiveDebug
-55.561,571267504,NaiveDebug
-30.2175,596857280,NaiveDebug
-78.453,600806288,NaiveDebug
-48.239,601593116,NaiveDebug
-28.6463,620766544,NaiveDebug
-33.728,627228184,NaiveDebug
-84.9349,628102646,NaiveDebug
-30.587,646700240,NaiveDebug
-30.9492,649749620,NaiveDebug
-23.6292,648875504,NaiveDebug
-20.9115,648818880,NaiveDebug
-12.6648,650048594,NaiveDebug
-15.2256,656714834,NaiveDebug
-22.5958,679589944,NaiveDebug
-92.4347,692478600,NaiveDebug
-41.5376,709354712,NaiveDebug
-93.1107,723574088,NaiveDebug
-58.1534,732167378,NaiveDebug
-31.844,768429288,NaiveDebug
-84.14989,772018616,NaiveDebug
-130.8729,773126324,NaiveDebug
-37.1121,809842392,NaiveDebug
-47.6446,825676840,NaiveDebug
-123.7714,849604144,NaiveDebug
-115.3176,859674368,NaiveDebug
-53.5071,866984832,NaiveDebug
-37.3366,880990272,NaiveDebug
-100.6294,896131764,NaiveDebug
-31.7119,898342632,NaiveDebug
-41.1206,907069330,NaiveDebug
-30.11,919661096,NaiveDebug
-86.78,929989546,NaiveDebug
-30.8908,937021344,NaiveDebug
-36.5572,943147856,NaiveDebug
-25.9578,964930392,NaiveDebug
-88.6267,971171368,NaiveDebug
-37.4734,972056978,NaiveDebug
-22.0592,973101984,NaiveDebug
-5.8868,6004288,CullingDebug
-191.4694,5598320,CullingDebug
-28.6476,5701880,CullingDebug
-15.1056,5763768,CullingDebug
-8.2285,5835128,CullingDebug
-13.4712,6010340,CullingDebug
-10.3287,5929976,CullingDebug
-10.8481,6059032,CullingDebug
-10.89,6116744,CullingDebug
-13.0216,6338248,CullingDebug
-11.0553,6477666,CullingDebug
-12.4013,6193608,CullingDebug
-17.2041,6299768,CullingDebug
-22.1752,6452024,CullingDebug
-17.9797,6470432,CullingDebug
-17.1631,6474032,CullingDebug
-20.6279,6512800,CullingDebug
-19.2419,6862864,CullingDebug
-20.716,7060922,CullingDebug
-21.5191,6706960,CullingDebug
-18.0024,6737600,CullingDebug
-16.4086,6761256,CullingDebug
-16.4642,6818176,CullingDebug
-25.0037,7411124,CullingDebug
-23.5002,7049728,CullingDebug
-10.3291,7053632,CullingDebug
-16.5328,7656804,CullingDebug
-16.668,7150792,CullingDebug
-11.0262,7787000,CullingDebug
-17.3424,7219192,CullingDebug
-25.7775,7870548,CullingDebug
-20.5117,7387032,CullingDebug
-9.7931,8053328,CullingDebug
-20.47,7403784,CullingDebug
-10.0807,8093868,CullingDebug
-18.4789,7419384,CullingDebug
-9.4814,8134152,CullingDebug
-17.6084,7475928,CullingDebug
-8.6955,8261052,CullingDebug
-18.8367,7655944,CullingDebug
-14.8855,8460672,CullingDebug
-23.623,7771512,CullingDebug
-12.0852,8581812,CullingDebug
-17.5015,7869752,CullingDebug
-11.4432,8704272,CullingDebug
-16.008,7967368,CullingDebug
-11.1256,8852244,CullingDebug
-18.4466,8189048,CullingDebug
-8.801001,9039016,CullingDebug
-18.8382,8190808,CullingDebug
-10.5561,9099676,CullingDebug
-18.3419,8288680,CullingDebug
-10.738,9202416,CullingDebug
-16.3073,8386952,CullingDebug
-9.8894,9325284,CullingDebug
-14.8019,8484968,CullingDebug
-9.865,9448080,CullingDebug
-19.1336,8542040,CullingDebug
-8.8563,9529956,CullingDebug
-15.9973,8557832,CullingDebug
-8.5134,9590624,CullingDebug
-15.1946,8614632,CullingDebug
-9.2086,9696732,CullingDebug
-15.3877,8794808,CullingDebug
-9.0135,9897304,CullingDebug
-15.0665,8892136,CullingDebug
-9.6004,9980324,CullingDebug
-17.0062,8909304,CullingDebug
-9.6132,10020704,CullingDebug
-15.2369,8965944,CullingDebug
-8.1478,10102124,CullingDebug
-14.5853,8981320,CullingDebug
-9.7231,10162792,CullingDebug
-14.5274,9148744,CullingDebug
-9.482,10376756,CullingDebug
-15.2714,9330136,CullingDebug
-9.2591,9533694,CullingDebug
-15.3563,9427944,CullingDebug
-10.3744,9615466,CullingDebug
-15.0456,9443960,CullingDebug
-8.8193,9655846,CullingDebug
-14.9597,9459560,CullingDebug
-10.0996,9716498,CullingDebug
-15.8268,9515992,CullingDebug
-8.262,9778014,CullingDebug
-15.458,9532168,CullingDebug
-8.1497,9829658,CullingDebug
-17.3413,9630024,CullingDebug
-10.4533,9986278,CullingDebug
-16.3441,9768688,CullingDebug
-9.7918,10104498,CullingDebug
-15.8169,9784288,CullingDebug
-9.3573,10144854,CullingDebug
-16.1608,9799664,CullingDebug
-9.1172,10225458,CullingDebug
-16.3234,9896944,CullingDebug
-8.8305,10318614,CullingDebug
-15.1862,9954176,CullingDebug
-9.3017,10400626,CullingDebug
-16.4946,10052288,CullingDebug
-4.8525,12400400,CullingProcedural
-412.682,12270573,CullingProcedural
-165.4011,12249045,CullingProcedural
-25.5075,12314238,CullingProcedural
-39.0334,12356209,CullingProcedural
-8.8745,12356689,CullingProcedural
-8.493999,12357169,CullingProcedural
-8.4132,12344073,CullingProcedural
-40.5356,12344489,CullingProcedural
-9.7081,12344969,CullingProcedural
-9.3332,12716550,CullingProcedural
-69.6857,12352769,CullingProcedural
-10.0337,12353249,CullingProcedural
-8.7542,12353729,CullingProcedural
-9.1658,12354209,CullingProcedural
-51.4896,12354785,CullingProcedural
-22.3961,12355265,CullingProcedural
-11.5724,12355649,CullingProcedural
-8.2417,12356129,CullingProcedural
-9.0483,12285809,CullingProcedural
-8.250299,12172279,CullingProcedural
-9.8422,12337278,CullingProcedural
-10.0614,12196453,CullingProcedural
-10.3999,12390018,CullingProcedural
-9.7585,12213769,CullingProcedural
-15.708,12506555,CullingProcedural
-13.0141,12249863,CullingProcedural
-10.4998,12532725,CullingProcedural
-10.16,11626016,CullingProcedural
-6.8841,12623043,CullingProcedural
-10.456,11626976,CullingProcedural
-10.3852,12671678,CullingProcedural
-9.1648,11627840,CullingProcedural
-8.718901,12718859,CullingProcedural
-12.7549,11628800,CullingProcedural
-8.754399,12697126,CullingProcedural
-13.9991,12520046,CullingProcedural
-8.7957,12774995,CullingProcedural
-8.5361,11642256,CullingProcedural
-9.281699,12784048,CullingProcedural
-13.0975,12646959,CullingProcedural
-9.5082,12888312,CullingProcedural
-8.552299,12672552,CullingProcedural
-8.0613,12977176,CullingProcedural
-10.7696,11633696,CullingProcedural
-8.4403,11992050,CullingProcedural
-12.4923,11634560,CullingProcedural
-7.049,12039183,CullingProcedural
-10.7586,11635520,CullingProcedural
-7.7859,12085661,CullingProcedural
-9.8117,11671760,CullingProcedural
-9.430901,12067655,CullingProcedural
-9.9397,11660736,CullingProcedural
-7.6359,12061848,CullingProcedural
-14.5915,12010783,CullingProcedural
-9.2614,12112110,CullingProcedural
-8.595201,11674784,CullingProcedural
-8.8318,12195008,CullingProcedural
-8.7668,12046287,CullingProcedural
-8.9099,12315345,CullingProcedural
-9.018001,11653088,CullingProcedural
-10.7481,12391923,CullingProcedural
-9.9845,11654000,CullingProcedural
-8.097199,12439104,CullingProcedural
-9.723201,11654960,CullingProcedural
-8.359,12486381,CullingProcedural
-9.4921,11655696,CullingProcedural
-8.291901,12520875,CullingProcedural
-11.7385,11656816,CullingProcedural
-9.3534,12560034,CullingProcedural
-8.9763,12401350,CullingProcedural
-10.8665,12516912,CullingProcedural
-8.6255,11717696,CullingProcedural
-8.7005,12558223,CullingProcedural
-8.890201,12508195,CullingProcedural
-10.2747,12645727,CullingProcedural
-10.1772,11707760,CullingProcedural
-9.4498,12710416,CullingProcedural
-9.6718,11708768,CullingProcedural
-8.7661,12715076,CullingProcedural
-10.3939,11721536,CullingProcedural
-10.0247,12771213,CullingProcedural
-9.385401,12712669,CullingProcedural
-8.4552,12867009,CullingProcedural
-8.4736,12754223,CullingProcedural
-8.8089,11812112,CullingProcedural
-10.7531,11837259,CullingProcedural
-9.6352,11850598,CullingProcedural
-9.5867,11924573,CullingProcedural
-9.9582,11725760,CullingProcedural
-12.1408,11977596,CullingProcedural
-10.4544,11667920,CullingProcedural
-10.0815,12126210,CullingProcedural
-8.8429,11943750,CullingProcedural
-10.2326,12110072,CullingProcedural
-11.1032,11995560,CullingProcedural
-9.1791,12149323,CullingProcedural
-9.9249,11670736,CullingProcedural
-12.7121,12270344,CullingProcedural
-9.724199,11671856,CullingProcedural
+20,5632760,NaiveDebug
+3113.424,4728819,NaiveDebug
+180.7972,5027486,NaiveDebug
+1190.337,6334203,NaiveDebug
+312.247,6592043,NaiveDebug
+108.5667,6550087,NaiveDebug
+15.0159,6560333,NaiveDebug
+11.3358,6564467,NaiveDebug
+11.9558,6575609,NaiveDebug
+53.0293,6616249,NaiveDebug
+28.9432,6769057,NaiveDebug
+21.214,6813383,NaiveDebug
+11.7873,6836903,NaiveDebug
+9.392599,6912647,NaiveDebug
+9.1934,6950759,NaiveDebug
+9.4434,6951239,NaiveDebug
+11.0557,6976839,NaiveDebug
+26.2393,7052743,NaiveDebug
+12.6745,7056559,NaiveDebug
+15.5321,7013359,NaiveDebug
+9.8722,7030735,NaiveDebug
+11.6204,7256911,NaiveDebug
+10.125,7257391,NaiveDebug
+10.3137,7257871,NaiveDebug
+11.2706,7258351,NaiveDebug
+8.5421,7275727,NaiveDebug
+57.7492,7460623,NaiveDebug
+12.2581,7494895,NaiveDebug
+12.3011,7495375,NaiveDebug
+11.0703,7495855,NaiveDebug
+11.4167,7646767,NaiveDebug
+10.9466,7647247,NaiveDebug
+11.7549,7647727,NaiveDebug
+11.8134,7648207,NaiveDebug
+10.4092,7983535,NaiveDebug
+35.7806,7983951,NaiveDebug
+15.4578,7984591,NaiveDebug
+10.8569,8376255,NaiveDebug
+32.0847,8316215,NaiveDebug
+12.6357,8331581,NaiveDebug
+10.8188,8370085,NaiveDebug
+30.1167,8379285,NaiveDebug
+12.3241,8379765,NaiveDebug
+27.9562,8448149,NaiveDebug
+13.0978,8523893,NaiveDebug
+12.2949,8523941,NaiveDebug
+28.0982,8608805,NaiveDebug
+11.1042,8609285,NaiveDebug
+10.7449,8609765,NaiveDebug
+26.8469,8609677,NaiveDebug
+11.6388,8610157,NaiveDebug
+14.1879,8761325,NaiveDebug
+27.9036,8761965,NaiveDebug
+10.3927,8762445,NaiveDebug
+11.658,8762925,NaiveDebug
+25.7675,8763309,NaiveDebug
+11.8157,8763789,NaiveDebug
+9.485101,8798061,NaiveDebug
+27.117,8798317,NaiveDebug
+11.189,8798957,NaiveDebug
+11.9352,9371285,NaiveDebug
+29.5355,9387595,NaiveDebug
+13.4972,9391339,NaiveDebug
+29.5701,9456507,NaiveDebug
+11.2755,9459291,NaiveDebug
+38.5711,10501659,NaiveDebug
+47.8846,10613667,NaiveDebug
+45.2822,10615659,NaiveDebug
+14.3775,10618059,NaiveDebug
+15.0021,10620203,NaiveDebug
+27.7873,10773131,NaiveDebug
+10.3035,10774763,NaiveDebug
+10.6219,10777291,NaiveDebug
+26.1766,10779691,NaiveDebug
+13.3676,10782091,NaiveDebug
+12.2029,10919659,NaiveDebug
+30.5686,10955851,NaiveDebug
+18.1817,10958251,NaiveDebug
+10.9801,10960651,NaiveDebug
+41.0543,11067403,NaiveDebug
+14.3632,11102001,NaiveDebug
+28.1945,11141273,NaiveDebug
+10.5935,11141753,NaiveDebug
+11.0675,11142233,NaiveDebug
+29.2857,11152457,NaiveDebug
+10.7174,11154345,NaiveDebug
+10.8625,11230601,NaiveDebug
+29.5035,11233385,NaiveDebug
+13.6376,11251609,NaiveDebug
+15.3187,11252601,NaiveDebug
+27.356,11255385,NaiveDebug
+11.0035,11256377,NaiveDebug
+9.6834,11409025,NaiveDebug
+29.0718,11410913,NaiveDebug
+12.0726,11412801,NaiveDebug
+36.3521,11414817,NaiveDebug
+29.8975,11450497,NaiveDebug
+18.0947,11452385,NaiveDebug
+28.5008,11454273,NaiveDebug
+17.3399,12128712,NaiveDebug
+5.8337,6028624,CullingDebug
+196.347,5622576,CullingDebug
+29.6818,5726384,CullingDebug
+15.4109,5788288,CullingDebug
+8.6476,5859584,CullingDebug
+12.7261,6242856,CullingDebug
+8.8909,6337728,CullingDebug
+10.6049,6083712,CullingDebug
+11.5921,6070056,CullingDebug
+13.4713,6499644,CullingDebug
+10.5611,6647430,CullingDebug
+13.045,6231400,CullingDebug
+12.1721,6797394,CullingDebug
+11.8459,6521000,CullingDebug
+11.7918,6469432,CullingDebug
+13.9288,6526568,CullingDebug
+11.1042,6591952,CullingDebug
+11.4328,6533896,CullingDebug
+12.2948,7230430,CullingDebug
+16.2748,6719880,CullingDebug
+9.9802,6744528,CullingDebug
+13.7822,6767640,CullingDebug
+10.3834,7505610,CullingDebug
+13.356,6891824,CullingDebug
+9.1249,7774494,CullingDebug
+14.0031,7062112,CullingDebug
+10.3389,7065928,CullingDebug
+15.8256,7867398,CullingDebug
+14.6691,7081528,CullingDebug
+8.163,7969314,CullingDebug
+15.6067,7219320,CullingDebug
+9.3988,8070974,CullingDebug
+14.3855,7317176,CullingDebug
+7.990901,8234010,CullingDebug
+14.8907,7415032,CullingDebug
+8.9882,8316454,CullingDebug
+14.7674,7442768,CullingDebug
+22.4476,8386970,CullingDebug
+16.1636,7650816,CullingDebug
+12.327,8637246,CullingDebug
+19.7832,7725576,CullingDebug
+9.4515,8741530,CullingDebug
+15.0758,7864472,CullingDebug
+9.0701,8864206,CullingDebug
+15.5539,7921288,CullingDebug
+10.2146,8966290,CullingDebug
+14.7456,8142120,CullingDebug
+8.4368,9203254,CullingDebug
+14.5534,8185888,CullingDebug
+11.4142,9270010,CullingDebug
+14.6521,8242528,CullingDebug
+10.6644,9362270,CullingDebug
+15.8249,8299400,CullingDebug
+7.9654,9443682,CullingDebug
+13.7303,8397256,CullingDebug
+8.0307,9566318,CullingDebug
+15.7662,8495136,CullingDebug
+9.7036,9669146,CullingDebug
+14.0978,8552512,CullingDebug
+8.993,8748008,CullingDebug
+14.8842,8609168,CullingDebug
+9.8263,8804708,CullingDebug
+14.5171,8748320,CullingDebug
+9.793699,8979128,CullingDebug
+15.7028,8845792,CullingDebug
+9.313499,9070124,CullingDebug
+15.5874,8902768,CullingDebug
+10.3687,9172232,CullingDebug
+16.7761,9000464,CullingDebug
+9.0104,9274612,CullingDebug
+14.7196,9098480,CullingDebug
+8.271199,9396992,CullingDebug
+14.0626,9155120,CullingDebug
+8.8855,9489524,CullingDebug
+13.8018,9293872,CullingDebug
+9.1759,9665176,CullingDebug
+17.8954,9392336,CullingDebug
+11.2163,9776732,CullingDebug
+15.8544,9449552,CullingDebug
+10.4556,9848848,CullingDebug
+14.5245,9507872,CullingDebug
+8.361,9930188,CullingDebug
+16.1195,9523376,CullingDebug
+9.5083,9970576,CullingDebug
+14.5618,9538976,CullingDebug
+8.611899,10022052,CullingDebug
+14.7339,9636448,CullingDebug
+10.4279,10153712,CullingDebug
+16.6207,9693272,CullingDebug
+9.9185,10215380,CullingDebug
+16.6223,9709448,CullingDebug
+8.3508,10255760,CullingDebug
+14.0536,9766008,CullingDebug
+9.321,10359724,CullingDebug
+14.5816,9863704,CullingDebug
+8.477901,10482200,CullingDebug
+15.2689,9920344,CullingDebug
+8.816899,10558548,CullingDebug
+15.8245,9977192,CullingDebug
+9.8486,10652544,CullingDebug
+5.9558,12449456,CullingProcedural
+405.0731,12504287,CullingProcedural
+154.1177,12403655,CullingProcedural
+367.1374,12481011,CullingProcedural
+63.6848,13563510,CullingProcedural
+27.9538,12575923,CullingProcedural
+24.622,12535963,CullingProcedural
+10.1243,12606834,CullingProcedural
+9.766999,12620910,CullingProcedural
+9.1997,12621550,CullingProcedural
+34.5745,12539774,CullingProcedural
+9.053801,12633257,CullingProcedural
+9.755799,12633737,CullingProcedural
+41.9086,12610553,CullingProcedural
+9.5977,12640399,CullingProcedural
+9.0946,12640879,CullingProcedural
+15.5346,12641135,CullingProcedural
+30.7098,12562591,CullingProcedural
+10.8676,13049065,CullingProcedural
+28.4545,13609675,CullingProcedural
+41.7748,12615691,CullingProcedural
+10.505,12671930,CullingProcedural
+9.0223,12672186,CullingProcedural
+9.441999,12672666,CullingProcedural
+29.2201,12673466,CullingProcedural
+9.2599,12673946,CullingProcedural
+9.1349,12674426,CullingProcedural
+24.264,12674810,CullingProcedural
+10.1014,12675290,CullingProcedural
+10.917,12675770,CullingProcedural
+8.6614,12676250,CullingProcedural
+26.2258,12676506,CullingProcedural
+32.7559,12641818,CullingProcedural
+8.8366,12684621,CullingProcedural
+55.4349,12685005,CullingProcedural
+33.8648,12685485,CullingProcedural
+13.8692,12685741,CullingProcedural
+12.2648,12686221,CullingProcedural
+13.3666,12651581,CullingProcedural
+8.7848,12692849,CullingProcedural
+9.117701,12693489,CullingProcedural
+8.3305,12693969,CullingProcedural
+27.0893,12694353,CullingProcedural
+8.7388,12694833,CullingProcedural
+8.7317,12671745,CullingProcedural
+10.6428,12700216,CullingProcedural
+24.1955,12700696,CullingProcedural
+9.3871,12700952,CullingProcedural
+9.3868,12701432,CullingProcedural
+8.224,12702072,CullingProcedural
+23.9215,12702712,CullingProcedural
+9.1894,12776070,CullingProcedural
+12.1808,12703672,CullingProcedural
+8.307199,12704152,CullingProcedural
+24.6725,12692776,CullingProcedural
+8.4099,12672371,CullingProcedural
+17.3944,12701879,CullingProcedural
+8.9374,12692435,CullingProcedural
+26.931,12720043,CullingProcedural
+9.8486,12708715,CullingProcedural
+8.2615,12699431,CullingProcedural
+8.762,12727103,CullingProcedural
+20.2029,12715823,CullingProcedural
+8.3338,12729899,CullingProcedural
+8.828699,13692668,CullingProcedural
+19.2912,12721511,CullingProcedural
+20.756,12724578,CullingProcedural
+22.7583,12680381,CullingProcedural
+17.0093,12726232,CullingProcedural
+16.5072,12754064,CullingProcedural
+15.9599,12754544,CullingProcedural
+23.7758,12754928,CullingProcedural
+9.1076,12720080,CullingProcedural
+8.8302,13153488,CullingProcedural
+39.5883,12762403,CullingProcedural
+8.306801,12762883,CullingProcedural
+8.078199,12763363,CullingProcedural
+8.6666,12764003,CullingProcedural
+28.7353,12764643,CullingProcedural
+9.3435,12765123,CullingProcedural
+8.713,12765603,CullingProcedural
+8.5173,12765987,CullingProcedural
+27.6613,12766467,CullingProcedural
+8.635301,12766947,CullingProcedural
+8.4311,12767427,CullingProcedural
+8.3381,12767907,CullingProcedural
+25.774,12744803,CullingProcedural
+8.7368,13429633,CullingProcedural
+20.8403,12749595,CullingProcedural
+27.8305,12777267,CullingProcedural
+10.7235,12777651,CullingProcedural
+11.3709,12778131,CullingProcedural
+7.6354,12778611,CullingProcedural
+25.7197,12767331,CullingProcedural
+11.1527,12757663,CullingProcedural
+9.3986,12786933,CullingProcedural
+22.958,12788482,CullingProcedural
+8.6695,12789122,CullingProcedural
+10.6625,12766082,CullingProcedural
+8.3901,12793754,CullingProcedural
+5.4977,12451392,CullingProcedural Lazy
+393.9919,12792460,CullingProcedural Lazy
+27.9291,11738880,CullingProcedural Lazy
+17.2245,12966424,CullingProcedural Lazy
+10.7614,11742456,CullingProcedural Lazy
+6.6412,13027327,CullingProcedural Lazy
+9.3619,11743416,CullingProcedural Lazy
+7.7415,13078311,CullingProcedural Lazy
+9.993299,11672064,CullingProcedural Lazy
+8.910399,12005365,CullingProcedural Lazy
+8.6143,11673024,CullingProcedural Lazy
+8.1332,12053169,CullingProcedural Lazy
+12.4422,11673760,CullingProcedural Lazy
+8.9426,12102156,CullingProcedural Lazy
+12.2768,11674880,CullingProcedural Lazy
+8.5841,12136720,CullingProcedural Lazy
+9.9075,11662424,CullingProcedural Lazy
+9.3019,12185547,CullingProcedural Lazy
+10.9524,11663384,CullingProcedural Lazy
+7.8912,12235029,CullingProcedural Lazy
+13.023,11664248,CullingProcedural Lazy
+8.8684,12283760,CullingProcedural Lazy
+9.6327,11676968,CullingProcedural Lazy
+9.5041,12304786,CullingProcedural Lazy
+9.5481,11677928,CullingProcedural Lazy
+7.8468,12341164,CullingProcedural Lazy
+10.0539,11678664,CullingProcedural Lazy
+8.492001,12382862,CullingProcedural Lazy
+10.0412,12190574,CullingProcedural Lazy
+8.0891,12432886,CullingProcedural Lazy
+12.0937,11692664,CullingProcedural Lazy
+7.8092,12497145,CullingProcedural Lazy
+9.6778,11681864,CullingProcedural Lazy
+8.4216,12547199,CullingProcedural Lazy
+10.1205,11694488,CullingProcedural Lazy
+9.3419,12584504,CullingProcedural Lazy
+10.0924,12380488,CullingProcedural Lazy
+8.9056,12647197,CullingProcedural Lazy
+9.1257,11696392,CullingProcedural Lazy
+10.4183,12685349,CullingProcedural Lazy
+12.5924,11685368,CullingProcedural Lazy
+9.227,12726901,CullingProcedural Lazy
+9.5491,11686488,CullingProcedural Lazy
+8.9405,12827875,CullingProcedural Lazy
+11.0151,11675848,CullingProcedural Lazy
+12.0732,11688088,CullingProcedural Lazy
+17.8411,12911947,CullingProcedural Lazy
+8.5864,11700712,CullingProcedural Lazy
+8.6707,12922202,CullingProcedural Lazy
+10.4198,11713432,CullingProcedural Lazy
+10.0388,12986605,CullingProcedural Lazy
+9.051,11690872,CullingProcedural Lazy
+9.0829,12004387,CullingProcedural Lazy
+9.906199,11703368,CullingProcedural Lazy
+8.3452,12053180,CullingProcedural Lazy
+12.6733,11692728,CullingProcedural Lazy
+8.8255,12115250,CullingProcedural Lazy
+9.6313,11693848,CullingProcedural Lazy
+9.3976,12139453,CullingProcedural Lazy
+8.469001,11718328,CullingProcedural Lazy
+8.815599,12187064,CullingProcedural Lazy
+8.9269,11707528,CullingProcedural Lazy
+10.2449,12225454,CullingProcedural Lazy
+11.1839,11696632,CullingProcedural Lazy
+8.5721,12304394,CullingProcedural Lazy
+9.3126,11697592,CullingProcedural Lazy
+8.2609,12366304,CullingProcedural Lazy
+12.0147,11698600,CullingProcedural Lazy
+8.6417,12430149,CullingProcedural Lazy
+9.322701,11699288,CullingProcedural Lazy
+7.732,12429603,CullingProcedural Lazy
+9.6958,11712168,CullingProcedural Lazy
+8.4277,12506915,CullingProcedural Lazy
+15.1917,11713288,CullingProcedural Lazy
+8.1167,12543421,CullingProcedural Lazy
+12.9554,12351229,CullingProcedural Lazy
+8.5108,11702872,CullingProcedural Lazy
+18.64,12672024,CullingProcedural Lazy
+13.4072,11692072,CullingProcedural Lazy
+9.2981,12709329,CullingProcedural Lazy
+12.8674,11692808,CullingProcedural Lazy
+10.255,12781177,CullingProcedural Lazy
+8.5746,11693928,CullingProcedural Lazy
+8.9999,12827160,CullingProcedural Lazy
+10.0435,11694888,CullingProcedural Lazy
+9.904401,12874693,CullingProcedural Lazy
+14.4739,11696008,CullingProcedural Lazy
+9.960999,12921171,CullingProcedural Lazy
+8.073199,11709464,CullingProcedural Lazy
+10.9111,12973678,CullingProcedural Lazy
+8.6877,11699296,CullingProcedural Lazy
+9.947599,13018021,CullingProcedural Lazy
+12.5512,11700256,CullingProcedural Lazy
+8.4546,13066193,CullingProcedural Lazy
+8.943299,11725344,CullingProcedural Lazy
+9.5111,11727792,CullingProcedural Lazy
+18.2829,12061588,CullingProcedural Lazy
+13.2829,11715976,CullingProcedural Lazy
+10.7398,12137302,CullingProcedural Lazy
+8.724999,11705176,CullingProcedural Lazy
