@@ -1,7 +1,7 @@
 ﻿using Unity.Burst;
 using Unity.Collections;
 using UniVox.Framework;
-using UniVox.Framework.Jobified;
+using UniVox.Framework.Common;
 
 namespace UniVox.Implementations.ProcGen
 {
@@ -23,7 +23,7 @@ namespace UniVox.Implementations.ProcGen
         /// Start-end positions in allLayers for each biome
         /// (by integer biome id)
         /// </summary>
-        public NativeArray<StartEnd> biomeLayers;
+        public NativeArray<StartEndRange> biomeLayers;
 
         /// <summary>
         /// All moisture definitions used by all elevation levels
@@ -44,7 +44,7 @@ namespace UniVox.Implementations.ProcGen
         public int GetBiomeID(float elevationPercentage, float moisturePercentage) 
         {
             //Simple linear search through elevation zones
-            StartEnd moisturelevels = new StartEnd() { start = 0, end = 0};
+            StartEndRange moisturelevels = new StartEndRange() { start = 0, end = 0};
             for (int i = 0; i < allElevationZones.Length; i++)
             {
                 var zone = allElevationZones[i];
@@ -78,7 +78,7 @@ namespace UniVox.Implementations.ProcGen
 
     public struct NativeElevationZone 
     {
-        public StartEnd moistureLevels;
+        public StartEndRange moistureLevels;
         public float maxElevationPercentage;
     }
 

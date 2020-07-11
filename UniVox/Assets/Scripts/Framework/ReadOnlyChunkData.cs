@@ -1,7 +1,5 @@
-﻿using UnityEngine;
-using System.Collections;
-using Unity.Collections;
-using System.Collections.Generic;
+﻿using Unity.Collections;
+using UnityEngine;
 
 namespace UniVox.Framework
 {
@@ -15,12 +13,17 @@ namespace UniVox.Framework
         }
 
         public VoxelTypeID this[Vector3Int index] { get => realData[index]; set => throw new System.NotImplementedException(); }
-        public VoxelTypeID this[int i, int j, int k] { get => realData[i,j,k]; set => throw new System.NotImplementedException(); }
+        public VoxelTypeID this[int i, int j, int k] { get => realData[i, j, k]; set => throw new System.NotImplementedException(); }
 
         public Vector3Int ChunkID { get => realData.ChunkID; set => throw new System.NotImplementedException(); }
         public Vector3Int Dimensions { get => realData.Dimensions; set => throw new System.NotImplementedException(); }
         public bool ModifiedSinceGeneration { get => realData.ModifiedSinceGeneration; set => throw new System.NotImplementedException(); }
         public bool FullyGenerated { get => realData.FullyGenerated; set => throw new System.NotImplementedException(); }
+
+        public NativeArray<VoxelTypeID> BorderToNative(int Direction)
+        {
+            return realData.BorderToNative(Direction);
+        }
 
         public NativeArray<RotatedVoxelEntry> NativeRotations(Allocator allocator = Allocator.Persistent)
         {
@@ -44,7 +47,7 @@ namespace UniVox.Framework
 
         public bool TryGetVoxelID(int x, int y, int z, out VoxelTypeID vox)
         {
-            return realData.TryGetVoxelID(x,y,z, out vox);
+            return realData.TryGetVoxelID(x, y, z, out vox);
         }
     }
 }

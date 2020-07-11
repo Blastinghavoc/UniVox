@@ -32,5 +32,13 @@ namespace UniVox.Framework
         void SetRotation(Vector3Int coords, VoxelRotation rotation);
 
         NativeArray<RotatedVoxelEntry> NativeRotations(Allocator allocator = Allocator.Persistent);
+
+        /// <summary>
+        /// Create a flattened 2D native array of all voxels on the border
+        /// in the given direction.
+        /// </summary>
+        /// <param name="Direction"></param>
+        /// <returns></returns>
+        NativeArray<VoxelTypeID> BorderToNative(int Direction);
     }
 }

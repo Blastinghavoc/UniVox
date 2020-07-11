@@ -4,6 +4,7 @@ using System.Linq;
 using Unity.Collections;
 using UnityEngine;
 using Utils;
+using UniVox.Framework.Common;
 
 namespace UniVox.Framework
 {
@@ -69,6 +70,87 @@ namespace UniVox.Framework
 
         protected abstract VoxelTypeID GetVoxelID(int x, int y, int z);
 
+        protected NativeArray<VoxelTypeID> ToNativeBruteForce(Allocator allocator = Allocator.Persistent)
+        {
+            //Copy chunk data to native array
+            NativeArray<VoxelTypeID> voxels = new NativeArray<VoxelTypeID>(Dimensions.x * Dimensions.y * Dimensions.z, allocator);
+
+            int i = 0;
+            for (int z = 0; z < Dimensions.z; z++)
+            {
+                for (int y = 0; y < Dimensions.y; y++)
+                {
+                    for (int x = 0; x < Dimensions.x; x++)
+                    {
+                        voxels[i] = this[x, y, z];
+
+                        i++;
+                    }
+                }
+            }
+
+            return voxels;
+        }
+
+        /// <summary>
+        /// Creates a native array representing the border of the chunk data in the given direction.
+        /// E.g, with Direction = UP creates a flattened 2D array of all blocks on the top border
+        /// of the chunk
+        /// </summary>
+        /// <typeparam name="V"></typeparam>
+        /// <param name="chunkData"></param>
+        /// <param name="Direction"></param>
+        /// <returns></returns>
+        public NativeArray<VoxelTypeID> BorderToNative(int Direction)
+        {
+            StartEndRange xRange = new StartEndRange() { start = 0, end = Dimensions.x };
+            StartEndRange yRange = new StartEndRange() { start = 0, end = Dimensions.y };
+            StartEndRange zRange = new StartEndRange() { start = 0, end = Dimensions.z };
+
+            switch (Direction)
+            {
+                case Directions.UP:
+                    yRange.start = yRange.end - 1;
+                    break;
+                case Directions.DOWN:
+                    yRange.end = yRange.start + 1;
+                    break;
+                case Directions.NORTH:
+                    zRange.start = zRange.end - 1;
+                    break;
+                case Directions.SOUTH:
+                    zRange.end = zRange.start + 1;
+                    break;
+                case Directions.EAST:
+                    xRange.start = xRange.end - 1;
+                    break;
+                case Directions.WEST:
+                    xRange.end = xRange.start + 1;
+                    break;
+                default:
+                    throw new ArgumentException($"direction {Direction} was not recognised");
+            }
+
+            NativeArray<VoxelTypeID> voxelData = new NativeArray<VoxelTypeID>(xRange.Length * yRange.Length * zRange.Length, Allocator.Persistent);
+
+            int i = 0;
+            for (int z = zRange.start; z < zRange.end; z++)
+            {
+                for (int y = yRange.start; y < yRange.end; y++)
+                {
+                    for (int x = xRange.start; x < xRange.end; x++)
+                    {
+                        voxelData[i] = this[x, y, z];
+
+                        i++;
+                    }
+                }
+            }
+
+            return voxelData;
+
+        }
+
         #region interface methods
 
         public bool TryGetVoxelID(Vector3Int coords, out VoxelTypeID vox)
@@ -93,13 +175,13 @@ namespace UniVox.Framework
 
         public virtual NativeArray<VoxelTypeID> ToNative(Allocator allocator = Allocator.Persistent)
         {
-            return this.ToNativeBruteForce(allocator);
+            return ToNativeBruteForce(allocator);
         }
 
-        public NativeArray<RotatedVoxelEntry> NativeRotations(Allocator allocator = Allocator.Persistent) 
+        public NativeArray<RotatedVoxelEntry> NativeRotations(Allocator allocator = Allocator.Persistent)
         {
             //This conversion from dictionary to array is only efficient under the assumption that there will be few rotated voxels per chunk
-            NativeArray<RotatedVoxelEntry> rotations = new NativeArray<RotatedVoxelEntry>(rotatedVoxels.Values.ToArray(),allocator);
+            NativeArray<RotatedVoxelEntry> rotations = new NativeArray<RotatedVoxelEntry>(rotatedVoxels.Values.ToArray(), allocator);
             return rotations;
         }
 
@@ -113,7 +195,7 @@ namespace UniVox.Framework
             }
             else
             {
-                rotatedVoxels[flat] = new RotatedVoxelEntry() { flatIndex = flat, rotation = rotation } ;
+                rotatedVoxels[flat] = new RotatedVoxelEntry() { flatIndex = flat, rotation = rotation };
             }
         }
         #endregion

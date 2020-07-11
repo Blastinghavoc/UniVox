@@ -5,7 +5,7 @@ using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UniVox.Framework;
-using UniVox.Framework.Jobified;
+using UniVox.Framework.Common;
 using Utils;
 
 namespace UniVox.Implementations.ProcGen
@@ -71,7 +71,7 @@ namespace UniVox.Implementations.ProcGen
         public NativeBiomeDatabase ConfigToNative(SOBiomeConfiguration config,VoxelTypeManager typeManager) 
         {
             List<NativeVoxelRange> allLayersList = new List<NativeVoxelRange>();
-            List<StartEnd> biomeLayersList = new List<StartEnd>();
+            List<StartEndRange> biomeLayersList = new List<StartEndRange>();
             List<NativeBiomeMoistureDefinition> allMoistureDefsList = new List<NativeBiomeMoistureDefinition>();
             List<NativeElevationZone> allElevationZonesList = new List<NativeElevationZone>();
 
@@ -80,7 +80,7 @@ namespace UniVox.Implementations.ProcGen
             {
                 NativeElevationZone elevationZone = new NativeElevationZone();
                 elevationZone.maxElevationPercentage = elevationEntry.max;
-                elevationZone.moistureLevels = new StartEnd() { start = allMoistureDefsList.Count };
+                elevationZone.moistureLevels = new StartEndRange() { start = allMoistureDefsList.Count };
 
                 foreach (var moistureEntry in elevationEntry.moistureLevelsLowToHigh)
                 {
@@ -95,7 +95,7 @@ namespace UniVox.Implementations.ProcGen
                         biomeDefinitionsById.Add(moistureEntry.biomeDefinition);
 
                         Assert.IsTrue(moistureEntry.biomeDefinition.topLayers.Count > 0,$"All biome definitions must have at least one layer,{moistureEntry.biomeDefinition.name} does not");
-                        StartEnd layersForThisBiome = new StartEnd() { start = allLayersList.Count };
+                        StartEndRange layersForThisBiome = new StartEndRange() { start = allLayersList.Count };
 
                         foreach (var layer in moistureEntry.biomeDefinition.topLayers)
                         {
@@ -129,7 +129,7 @@ namespace UniVox.Implementations.ProcGen
             biomeDatabase.defaultVoxelType = defaultVoxelType;
 
             biomeDatabase.allLayers = new NativeArray<NativeVoxelRange>(allLayersList.ToArray(), Allocator.Persistent);
-            biomeDatabase.biomeLayers = new NativeArray<StartEnd>(biomeLayersList.ToArray(), Allocator.Persistent);
+            biomeDatabase.biomeLayers = new NativeArray<StartEndRange>(biomeLayersList.ToArray(), Allocator.Persistent);
             biomeDatabase.allMoistureDefs = new NativeArray<NativeBiomeMoistureDefinition>(allMoistureDefsList.ToArray(), Allocator.Persistent);
             biomeDatabase.allElevationZones = new NativeArray<NativeElevationZone>(allElevationZonesList.ToArray(), Allocator.Persistent);
 

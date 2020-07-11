@@ -8,6 +8,7 @@ using Unity.Mathematics;
 using System;
 using static UniVox.Framework.VoxelTypeManager;
 using Utils;
+using UniVox.Framework.Common;
 
 namespace UniVox.Framework.Jobified
 {
@@ -26,7 +27,7 @@ namespace UniVox.Framework.Jobified
         /// mesh types. e.g, mesh type 0 uses the first 6 entries of this
         /// array to index the nodes used for its faces.
         /// </summary>
-        [ReadOnly] public NativeArray<StartEnd> nodesUsedByFaces;
+        [ReadOnly] public NativeArray<StartEndRange> nodesUsedByFaces;
 
         /// <summary>
         /// Indexes of triangles used for each face, restarting at 0 for each face,
@@ -38,7 +39,7 @@ namespace UniVox.Framework.Jobified
         /// Ranges into the relative triangles array for each face of a mesh type.
         /// Each mesh type has 6 contiguous entries in here.
         /// </summary>
-        [ReadOnly] public NativeArray<StartEnd> relativeTrianglesByFaces;
+        [ReadOnly] public NativeArray<StartEndRange> relativeTrianglesByFaces;
 
         /// <summary>
         /// Whether or not each of the 6 faces of a mesh are solid,
@@ -49,7 +50,7 @@ namespace UniVox.Framework.Jobified
         /// <summary>
         /// Defines the ranges into the "by faces" arrays for each mesh type.
         /// </summary>
-        [ReadOnly] public NativeArray<StartEnd> meshTypeRanges;
+        [ReadOnly] public NativeArray<StartEndRange> meshTypeRanges;
 
         /// <summary>
         /// Array mapping voxel types (index) to mesh type, which is an index into the
@@ -90,12 +91,12 @@ namespace UniVox.Framework.Jobified
         public static NativeMeshDatabase FromTypeData(List<VoxelTypeData> typeData)
         {
             List<Node> allMeshNodesList = new List<Node>();
-            List<StartEnd> nodesUsedByFacesList = new List<StartEnd>();
+            List<StartEndRange> nodesUsedByFacesList = new List<StartEndRange>();
             List<int> allRelativeTrianglesList = new List<int>();
-            List<StartEnd> relativeTrianglesByFacesList = new List<StartEnd>();
+            List<StartEndRange> relativeTrianglesByFacesList = new List<StartEndRange>();
             List<bool> isFaceSolidList = new List<bool>();
 
-            List<StartEnd> meshTypeRangesList = new List<StartEnd>();
+            List<StartEndRange> meshTypeRangesList = new List<StartEndRange>();
             List<int> voxelTypeToMeshTypeMapList = new List<int>();
             List<ushort> voxelTypeToMaterialIDMapList = new List<ushort>();
 
@@ -118,7 +119,7 @@ namespace UniVox.Framework.Jobified
                     //New Unique mesh defintion
                     meshID = meshTypeRangesList.Count;
                     uniqueMeshIDs.Add(SODef, meshID);
-                    StartEnd meshTypeRange = new StartEnd();
+                    StartEndRange meshTypeRange = new StartEndRange();
                     meshTypeRange.start = nodesUsedByFacesList.Count;                    
 
                     Flatten(SODef, allMeshNodesList, nodesUsedByFacesList, allRelativeTrianglesList, relativeTrianglesByFacesList, isFaceSolidList);
@@ -133,11 +134,11 @@ namespace UniVox.Framework.Jobified
 
             NativeMeshDatabase nativeMeshDatabase = new NativeMeshDatabase();
             nativeMeshDatabase.allMeshNodes = new NativeArray<Node>(allMeshNodesList.ToArray(), Allocator.Persistent);
-            nativeMeshDatabase.nodesUsedByFaces = new NativeArray<StartEnd>(nodesUsedByFacesList.ToArray(), Allocator.Persistent);
+            nativeMeshDatabase.nodesUsedByFaces = new NativeArray<StartEndRange>(nodesUsedByFacesList.ToArray(), Allocator.Persistent);
             nativeMeshDatabase.allRelativeTriangles = new NativeArray<int>(allRelativeTrianglesList.ToArray(), Allocator.Persistent);
-            nativeMeshDatabase.relativeTrianglesByFaces = new NativeArray<StartEnd>(relativeTrianglesByFacesList.ToArray(), Allocator.Persistent);
+            nativeMeshDatabase.relativeTrianglesByFaces = new NativeArray<StartEndRange>(relativeTrianglesByFacesList.ToArray(), Allocator.Persistent);
             nativeMeshDatabase.isFaceSolid = new NativeArray<bool>(isFaceSolidList.ToArray(), Allocator.Persistent);
-            nativeMeshDatabase.meshTypeRanges = new NativeArray<StartEnd>(meshTypeRangesList.ToArray(), Allocator.Persistent);
+            nativeMeshDatabase.meshTypeRanges = new NativeArray<StartEndRange>(meshTypeRangesList.ToArray(), Allocator.Persistent);
             nativeMeshDatabase.voxelTypeToMeshTypeMap = new NativeArray<int>(voxelTypeToMeshTypeMapList.ToArray(), Allocator.Persistent);
             nativeMeshDatabase.voxelTypeToMaterialIDMap = new NativeArray<ushort>(voxelTypeToMaterialIDMapList.ToArray(), Allocator.Persistent);
             nativeMeshDatabase.meshIdToIncludeBackfacesMap = meshIdToIncludeBackfacesMapList.ToArray().ToNative(Allocator.Persistent);
@@ -156,9 +157,9 @@ namespace UniVox.Framework.Jobified
         /// <param name="isFaceSolidList"></param>
         private static void Flatten(SOMeshDefinition def,
             List<Node> allMeshNodesList,
-            List<StartEnd> nodesUsedByFacesList,
+            List<StartEndRange> nodesUsedByFacesList,
             List<int> allRelativeTrianglesList,
-            List<StartEnd> relativeTrianglesByFacesList,
+            List<StartEndRange> relativeTrianglesByFacesList,
             List<bool> isFaceSolidList
             )
         {
@@ -167,7 +168,7 @@ namespace UniVox.Framework.Jobified
                 var faceDef = def.Faces[i];
                 isFaceSolidList.Add(faceDef.isSolid);
 
-                StartEnd nodesUsedIndexers = new StartEnd();
+                StartEndRange nodesUsedIndexers = new StartEndRange();
                 nodesUsedIndexers.start = allMeshNodesList.Count;
 
                 //Add all used nodes
@@ -186,7 +187,7 @@ namespace UniVox.Framework.Jobified
                 nodesUsedIndexers.end = allMeshNodesList.Count;
                 nodesUsedByFacesList.Add(nodesUsedIndexers);
 
-                StartEnd trianglesIndexers = new StartEnd();
+                StartEndRange trianglesIndexers = new StartEndRange();
                 trianglesIndexers.start = allRelativeTrianglesList.Count;
                 //Add all relative triangles
                 for (int j = 0; j < faceDef.Triangles.Length; j++)
@@ -203,7 +204,7 @@ namespace UniVox.Framework.Jobified
     public struct NativeVoxelTypeDatabase 
     {
         [ReadOnly] public NativeArray<float> zIndicesPerFace;
-        [ReadOnly] public NativeArray<StartEnd> voxelTypeToZIndicesRangeMap;
+        [ReadOnly] public NativeArray<StartEndRange> voxelTypeToZIndicesRangeMap;
         /// <summary>
         /// Whether or not each voxel type is passable (should be included in collision mesh)
         /// </summary>
@@ -215,16 +216,16 @@ namespace UniVox.Framework.Jobified
         public static NativeVoxelTypeDatabase FromTypeData(List<VoxelTypeData> typeData) 
         {
             List<float> zIndicesPerFaceList = new List<float>();
-            List<StartEnd> voxelTypeToZIndicesRangeMapList = new List<StartEnd>();
+            List<StartEndRange> voxelTypeToZIndicesRangeMapList = new List<StartEndRange>();
             List<bool> voxelTypeToIsPassableMapList = new List<bool>();
 
             //AIR
-            voxelTypeToZIndicesRangeMapList.Add(new StartEnd());
+            voxelTypeToZIndicesRangeMapList.Add(new StartEndRange());
             voxelTypeToIsPassableMapList.Add(true);
 
             for (int i = 1; i < typeData.Count; i++)
             {
-                StartEnd range = new StartEnd();
+                StartEndRange range = new StartEndRange();
                 range.start = zIndicesPerFaceList.Count;
 
                 var zIndices = typeData[i].zIndicesPerFace;
@@ -237,7 +238,7 @@ namespace UniVox.Framework.Jobified
 
             NativeVoxelTypeDatabase database = new NativeVoxelTypeDatabase();
             database.zIndicesPerFace = new NativeArray<float>(zIndicesPerFaceList.ToArray(), Allocator.Persistent);
-            database.voxelTypeToZIndicesRangeMap = new NativeArray<StartEnd>(voxelTypeToZIndicesRangeMapList.ToArray(), Allocator.Persistent);
+            database.voxelTypeToZIndicesRangeMap = new NativeArray<StartEndRange>(voxelTypeToZIndicesRangeMapList.ToArray(), Allocator.Persistent);
             database.voxelTypeToIsPassableMap = new NativeArray<bool>(voxelTypeToIsPassableMapList.ToArray(), Allocator.Persistent);
             return database;
         }
@@ -332,20 +333,5 @@ namespace UniVox.Framework.Jobified
         public float3 vertex;
         public float2 uv;
         public float3 normal;
-    }
-
-    [BurstCompile]
-    public struct StartEnd 
-    {
-        public int start;
-        public int end;//Exclusive
-
-        public int Length { get => end - start; }
-
-        public StartEnd(int start, int end) 
-        {
-            this.start = start;
-            this.end = end;
-        }
     }
 }

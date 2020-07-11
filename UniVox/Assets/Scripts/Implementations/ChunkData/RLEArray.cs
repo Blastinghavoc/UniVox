@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using UniVox.Framework.Jobified;
 using Unity;
 using UnityEngine;
 using UnityEngine.Profiling;
+using UniVox.Framework.Common;
 
 namespace UniVox.Implementations.ChunkData
 {
@@ -16,7 +16,7 @@ namespace UniVox.Implementations.ChunkData
     {
         public struct Run
         {
-            public StartEnd range;
+            public StartEndRange range;
             public T value;
         }
 
@@ -37,7 +37,7 @@ namespace UniVox.Implementations.ChunkData
         public RLEArray(int capacity)
         {
             //Initially a single empty/default run
-            runs.Add(new Run() { range = new StartEnd() { end = capacity }, value = default });
+            runs.Add(new Run() { range = new StartEndRange() { end = capacity }, value = default });
             Capacity = capacity;
         }
 
@@ -47,7 +47,7 @@ namespace UniVox.Implementations.ChunkData
             Capacity = initialValues.Length;
             //Initialise from array
             T currentRunValue = default;
-            StartEnd range = new StartEnd(0, 0);
+            StartEndRange range = new StartEndRange(0, 0);
             for (int i = 0; i < initialValues.Length; i++)
             {
                 var value = initialValues[i];
@@ -151,9 +151,9 @@ namespace UniVox.Implementations.ChunkData
                 }
 
                 //Have to split the run
-                Run prev = new Run() { range = new StartEnd(run.range.start, uncompressedIndex), value = run.value };
-                Run newRun = new Run() { range = new StartEnd(uncompressedIndex, uncompressedIndex + 1), value = value };
-                Run post = new Run() { range = new StartEnd(uncompressedIndex + 1, run.range.end) };
+                Run prev = new Run() { range = new StartEndRange(run.range.start, uncompressedIndex), value = run.value };
+                Run newRun = new Run() { range = new StartEndRange(uncompressedIndex, uncompressedIndex + 1), value = value };
+                Run post = new Run() { range = new StartEndRange(uncompressedIndex + 1, run.range.end) };
                 if (prev.range.Length > 0)
                 {
                     runs[runIndex++] = prev;
@@ -185,23 +185,23 @@ namespace UniVox.Implementations.ChunkData
 
         private void BSearch(int uncompressedIndex, out int runIndex)
         {
-            if (!rangeContains(new StartEnd(0, Capacity), uncompressedIndex))
+            if (!rangeContains(new StartEndRange(0, Capacity), uncompressedIndex))
             {
                 throw new IndexOutOfRangeException($"Index {uncompressedIndex} is not contained in the array");
             }
 
-            StartEnd runRange = new StartEnd(0, runs.Count);
+            StartEndRange runRange = new StartEndRange(0, runs.Count);
             runIndex = runRange.Length / 2;
-            StartEnd currentRange = runs[runIndex].range;
+            StartEndRange currentRange = runs[runIndex].range;
             while (!rangeContains(currentRange, uncompressedIndex, out bool left))
             {
                 if (left)
                 {
-                    runRange = new StartEnd(runRange.start, runIndex);
+                    runRange = new StartEndRange(runRange.start, runIndex);
                 }
                 else
                 {
-                    runRange = new StartEnd(runIndex + 1, runRange.end);
+                    runRange = new StartEndRange(runIndex + 1, runRange.end);
                 }
                 int prevRunIndex = runIndex;
                 runIndex = runRange.Length / 2 + runRange.start;
@@ -224,7 +224,7 @@ namespace UniVox.Implementations.ChunkData
         /// <param name="index"></param>
         /// <param name="left"></param>
         /// <returns></returns>
-        private bool rangeContains(StartEnd range, int index, out bool left)
+        private bool rangeContains(StartEndRange range, int index, out bool left)
         {
             bool valid = true;
             left = true;
@@ -240,7 +240,7 @@ namespace UniVox.Implementations.ChunkData
             return valid;
         }
 
-        private bool rangeContains(StartEnd range, int index)
+        private bool rangeContains(StartEndRange range, int index)
         {
             return index >= range.start && index < range.end;
         }
