@@ -3,7 +3,6 @@ using System.Collections;
 using UnityEngine.Assertions;
 using UniVox.Framework;
 using Unity.Collections;
-using Utils;
 
 namespace UniVox.Implementations.ChunkData
 {
@@ -13,32 +12,29 @@ namespace UniVox.Implementations.ChunkData
     /// </summary>
     public class ArrayChunkData : AbstractChunkData
     {
-        /// <summary>
-        /// XYZ Voxel Data
-        /// </summary>
-        protected VoxelTypeID[,,] voxels;
+        MultiDimensionalArrayVoxelStorage storage;
 
         public ArrayChunkData(Vector3Int ID, Vector3Int chunkDimensions,VoxelTypeID[] initialData = null) : base(ID, chunkDimensions,initialData) 
         {
+            storage = new MultiDimensionalArrayVoxelStorage();
             if (initialData == null)
             {
-                voxels = new VoxelTypeID[chunkDimensions.x, chunkDimensions.y, chunkDimensions.z];
+                storage.InitialiseEmpty(chunkDimensions);
             }
             else
             {
-                voxels = initialData.Expand(chunkDimensions);
+                storage.InitialiseWithData(chunkDimensions,initialData);
             }
         }
 
         protected override VoxelTypeID GetVoxelID(int x, int y, int z)
         {
-            return voxels[x, y, z];
+            return storage.Get(x, y, z);
         }
 
         protected override void SetVoxelID(int x, int y, int z, VoxelTypeID voxel)
         {
-            voxels[x, y, z] = voxel;
+            storage.Set(x, y, z, voxel);
         }
-
     }
 }

@@ -349,7 +349,7 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
             if (outOfWorld)
             {
                 //Out of world chunks get initialised empty, always.
-                ChunkComponent.Data = new EmptyChunkData(chunkID, chunkDimensions);
+                ChunkComponent.Data = new BoundaryChunkData(chunkID, chunkDimensions);
                 pipeline.AddWithData(chunkID, targetStage);
             }
             else if (chunkProvider.TryGetStoredDataForChunk(chunkID,out var data))

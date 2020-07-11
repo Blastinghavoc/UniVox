@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity;
 using UnityEngine;
+using UnityEngine.Assertions;
 using UnityEngine.Profiling;
 using UniVox.Framework.Common;
 
@@ -33,24 +34,42 @@ namespace UniVox.Implementations.ChunkData
 
         private List<Run> runs = new List<Run>();
 
-
-        public RLEArray(int capacity)
+        //Empty constructor
+        public RLEArray() 
         {
+        
+        }
+
+        public RLEArray(Vector3Int dimensions)
+        {            
+            InitialiseEmpty(dimensions);
+        }
+
+        public RLEArray(Vector3Int dimensions, T[] initialValues)
+        {
+            InitialiseWithData(dimensions,initialValues);
+        }
+
+        public virtual void InitialiseEmpty(Vector3Int dimensions)
+        {
+            var capacity = dimensions.x * dimensions.y * dimensions.z;
             //Initially a single empty/default run
             runs.Add(new Run() { range = new StartEndRange() { end = capacity }, value = default });
             Capacity = capacity;
         }
 
-        public RLEArray(T[] initialValues)
+        public virtual void InitialiseWithData(Vector3Int dimensions, T[] initialData)
         {
             Profiler.BeginSample("RLE From Array");
-            Capacity = initialValues.Length;
+            Capacity = initialData.Length;
+            Assert.AreEqual(dimensions.x * dimensions.y * dimensions.z, Capacity,"Length of initial data must equal product of dimensions");
+
             //Initialise from array
             T currentRunValue = default;
             StartEndRange range = new StartEndRange(0, 0);
-            for (int i = 0; i < initialValues.Length; i++)
+            for (int i = 0; i < initialData.Length; i++)
             {
-                var value = initialValues[i];
+                var value = initialData[i];
 
                 if (!value.Equals(currentRunValue))
                 {
@@ -70,7 +89,7 @@ namespace UniVox.Implementations.ChunkData
                 runs.Add(new Run() { range = range, value = currentRunValue });
             }
             Profiler.EndSample();
-        }
+        }        
 
         public T[] ToArray()
         {
@@ -260,6 +279,6 @@ namespace UniVox.Implementations.ChunkData
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
-        }
+        }        
     }
 }

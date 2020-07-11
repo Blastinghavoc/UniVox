@@ -15,11 +15,11 @@ namespace UniVox.Implementations.ChunkData
         {
             if (initialData != null)
             {
-                rle = new RLEArray<VoxelTypeID>(initialData);
+                rle = new RLEArray<VoxelTypeID>(chunkDimensions,initialData);
             }
             else
             {
-                rle = new RLEArray<VoxelTypeID>(chunkDimensions.x * chunkDimensions.y * chunkDimensions.z);
+                rle = new RLEArray<VoxelTypeID>(chunkDimensions);
             }
             dxdy = Dimensions.x * Dimensions.y;
         }

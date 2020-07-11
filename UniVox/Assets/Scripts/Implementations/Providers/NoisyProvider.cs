@@ -223,6 +223,9 @@ namespace UniVox.Implementations.Providers
             oceanGenJob.job.heightMap = nativeNoiseMaps.heightMap;
             oceanGenJob.job.biomeMap = nativeNoiseMaps.biomeMap;
 
+            //Setup check if empty job
+            var checkIfEmptyJob = new CheckIfChunkDataEmptyJob(oceanGenJob.job.chunkData, Allocator.Persistent);
+
             Func<IChunkData> cleanup = () =>
             {
                 Profiler.BeginSample("DataJobCleanup");
@@ -238,11 +241,21 @@ namespace UniVox.Implementations.Providers
                     noiseMapsPending.Remove(columnId);
                 }
 
-                //Pass resulting array to chunk data.
-                var ChunkData = chunkDataFactory.Create(chunkID, chunkDimensions, oceanGenJob.job.chunkData.ToArray());
+                
+                IChunkData ChunkData;
+                if (checkIfEmptyJob.isEmpty[0])
+                {
+                    ChunkData = chunkDataFactory.Create(chunkID, chunkDimensions);
+                }
+                else
+                {
+                    //Pass data only if not empty
+                    ChunkData = chunkDataFactory.Create(chunkID, chunkDimensions, oceanGenJob.job.chunkData.ToArray());
+                }
 
                 //Dispose of native arrays
                 oreGenJob.job.chunkData.Dispose();
+                checkIfEmptyJob.Dispose();
 
                 //Handle reference counting on noise maps
                 if (usingPending.TryGetValue(columnId, out var count))
@@ -285,6 +298,7 @@ namespace UniVox.Implementations.Providers
                     mainGenJob.Run();
                     oreGenJob.Run();
                     oceanGenJob.Run();
+                    checkIfEmptyJob.Run();
                     return cleanup();
                 });
             }
@@ -302,8 +316,9 @@ namespace UniVox.Implementations.Providers
  
             var oreHandle = oreGenJob.Schedule(mainGenHandle);
             var oceanHandle = oceanGenJob.Schedule(oreHandle);
+            var checkIfEmptyHandle = checkIfEmptyJob.Schedule(oceanHandle);
 
-            JobHandle finalHandle = oceanHandle;
+            JobHandle finalHandle = checkIfEmptyHandle;
             return new PipelineUnityJob<IChunkData>(finalHandle, cleanup);
         }
 

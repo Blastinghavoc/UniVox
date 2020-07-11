@@ -17,8 +17,8 @@ namespace Tests
        [SetUp]
         public void Reset()
         {
-            rle = new RLEArray<VoxelTypeID>(16 * 16 * 16);
             dimensions = new int3(16);
+            rle = new RLEArray<VoxelTypeID>(dimensions.ToBasic());
         }
 
         [Test]
@@ -198,7 +198,7 @@ namespace Tests
                 sourceArray[flat] = testId;
             }
 
-            rle = new RLEArray<VoxelTypeID>(sourceArray);
+            rle = new RLEArray<VoxelTypeID>(dimensions.ToBasic(),sourceArray);
 
             var resultArray = rle.ToArray();
 
@@ -213,7 +213,7 @@ namespace Tests
         public void FromArrayEmpty()
         {
             var sourceArray = new VoxelTypeID[dimensions.x * dimensions.y * dimensions.z];
-            RLEArray<VoxelTypeID> rle = new RLEArray<VoxelTypeID>(sourceArray);
+            RLEArray<VoxelTypeID> rle = new RLEArray<VoxelTypeID>(dimensions.ToBasic(), sourceArray);
             Assert.IsTrue(rle.IsEmpty, $"RLE not empty after initialisation from empty array");
         }
 
@@ -228,7 +228,7 @@ namespace Tests
                 sourceArray[i] = testId;
             }
 
-            RLEArray<VoxelTypeID> rle = new RLEArray<VoxelTypeID>(sourceArray);
+            RLEArray<VoxelTypeID> rle = new RLEArray<VoxelTypeID>(dimensions.ToBasic(),sourceArray);
             Assert.IsFalse(rle.IsEmpty, $"RLE empty after initialisation from full array");
         }
     }

@@ -8,6 +8,7 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.SceneManagement;
 using UnityStandardAssets.CrossPlatformInput;
+using UniVox.Gameplay;
 
 namespace PerformanceTesting
 {
@@ -64,6 +65,8 @@ namespace PerformanceTesting
 
         private IEnumerator RunTests()
         {
+            VoxelPlayer player = FindObjectOfType<VoxelPlayer>();
+            player.enabled = false;
             using (StreamWriter log = new StreamWriter(@TestResultPath + @LogFileName + @FileExtension))
             {
 
@@ -77,6 +80,9 @@ namespace PerformanceTesting
                     {
                         var fileName = $"{test.TestName}_R{repeatIndex}";
                         var completeFilePath = @testDirectory + @fileName + @FileExtension;
+
+                        Debug.Log($"Running test {test.TestName} repeat {repeatIndex} of {NumRepeats}");
+
                         using (StreamWriter testResults = new StreamWriter(completeFilePath))
                         {
                             log.WriteLine($"\n\n\nTest {fileName}:");
@@ -92,6 +98,7 @@ namespace PerformanceTesting
                                 CrossPlatformInputManager.SetActiveInputMethod(virtualPlayer);
 
                                 gameObj.SetActive(true);
+                                player.enabled = true; ;
 
                                 float subtestStartTime = Time.unscaledTime;                                
 
@@ -115,6 +122,8 @@ namespace PerformanceTesting
                                 yield return SceneManager.LoadSceneAsync(SceneManager.GetActiveScene().buildIndex);
                                 //Do garbage collection
                                 GC.Collect(GC.MaxGeneration, GCCollectionMode.Default, true);
+                                player = FindObjectOfType<VoxelPlayer>();
+                                player.enabled = false;
 
                                 yield return new WaitForSecondsRealtime(2);
                                 //Locate Worlds object in scene

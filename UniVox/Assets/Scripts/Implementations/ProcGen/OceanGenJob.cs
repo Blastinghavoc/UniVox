@@ -4,6 +4,7 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Collections;
 using Unity.Burst;
+using Utils;
 
 namespace UniVox.Implementations.ProcGen
 {

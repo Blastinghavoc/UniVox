@@ -8,7 +8,7 @@ using UniVox.Framework;
 
 namespace UniVox.Implementations.ChunkData
 {
-    public class SVO
+    public class SVOVoxelStorage: IVoxelStorageImplementation
     {
         public interface INode
         {
@@ -85,7 +85,17 @@ namespace UniVox.Implementations.ChunkData
         private readonly Vector3Int dimensionsOfLeafNodes = new Vector3Int(2,2,2);
         public bool IsEmpty { get => root.IsEmpty; }
 
-        public SVO(Vector3Int dimensions)
+        public SVOVoxelStorage(Vector3Int dimensions)
+        {
+            InitialiseEmpty(dimensions);
+        }
+
+        public SVOVoxelStorage(Vector3Int dimensions,VoxelTypeID[] initialData)
+        {
+            InitialiseWithData(dimensions, initialData);         
+        }
+
+        public void InitialiseEmpty(Vector3Int dimensions)
         {
             Assert.IsTrue(dimensions.All((_) => _ > 0), "Dimensions must be positive and non-zero");
 
@@ -112,29 +122,10 @@ namespace UniVox.Implementations.ChunkData
             }
         }
 
-        public SVO(Vector3Int dimensions,VoxelTypeID[] initialData) :this(dimensions)
+        public void InitialiseWithData(Vector3Int dimensions, VoxelTypeID[] initialData)
         {
-            Profiler.BeginSample("SVO FromArray");
-            //Initialise octree with data by brute force
-            //int flat = 0;
-            //for (int z = 0; z < dimensions.z; z++)
-            //{
-            //    for (int y = 0; y < dimensions.y; y++)
-            //    {
-            //        for (int x = 0; x < dimensions.x; x++, flat++)
-            //        {
-            //            var id = initialData[flat];
-            //            if (id != VoxelTypeManager.AIR_ID)
-            //            {
-            //                Set(x, y, z, id);
-            //            }
-            //        }
-            //    }
-            //}
-
-            //This is about 4x faster than brute force in preliminary testing
+            InitialiseEmpty(dimensions);
             FromArray(initialData);
-            Profiler.EndSample();
         }
 
         /// <summary>
@@ -143,9 +134,11 @@ namespace UniVox.Implementations.ChunkData
         /// </summary>
         /// <param name="array"></param>
         private void FromArray(VoxelTypeID[] array) 
-        {            
+        {
+            Profiler.BeginSample("SVO FromArray");
             int dxdy = dimensions.x * dimensions.y;
             FromArrayProcessChildIsEmpty(root, Vector3Int.zero, dimensions, array, dxdy);
+            Profiler.EndSample();
         }
 
         /// <summary>
@@ -441,6 +434,6 @@ namespace UniVox.Implementations.ChunkData
         public Vector3Int getLocalCoords(int index) 
         {
             return new Vector3Int(index % 2, (index / 2) % 2, (index / 4) % 2);
-        }
+        }        
     }
 }

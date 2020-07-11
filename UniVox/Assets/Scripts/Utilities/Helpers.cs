@@ -95,6 +95,26 @@ namespace Utils
             return result;
         }
 
+        public static T[] Flatten<T>(this T[,,] threeD) 
+        {
+            var dimensions = new Vector3Int(threeD.GetLength(0), threeD.GetLength(1), threeD.GetLength(2));
+            var result = new T[threeD.Length];
+            int i = 0;
+            for (int z = 0; z < dimensions.z; z++)
+            {
+                for (int y = 0; y < dimensions.y; y++)
+                {
+                    for (int x = 0; x < dimensions.x; x++)
+                    {
+                        result[i] = threeD[x, y, z];
+
+                        i++;
+                    }
+                }
+            }
+            return result;
+        }
+
 
         public static IEnumerable<Vector3Int> GetNeighboursDirectOnly(Vector3Int chunkID)
         {

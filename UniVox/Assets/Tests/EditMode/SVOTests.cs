@@ -18,7 +18,7 @@ namespace Tests
         [Test]
         public void GetFromEmptyIsAir() 
         {
-            SVO svo = new SVO(new Vector3Int(16, 16, 16));
+            SVOVoxelStorage svo = new SVOVoxelStorage(new Vector3Int(16, 16, 16));
 
             var testId = new VoxelTypeID();
 
@@ -38,7 +38,7 @@ namespace Tests
         [Test]
         public void SetSingleVoxel() 
         {
-            SVO svo = new SVO(new Vector3Int(16, 16, 16));
+            SVOVoxelStorage svo = new SVOVoxelStorage(new Vector3Int(16, 16, 16));
             var testId = new VoxelTypeID(5);
             int x = 10;
             int y = 4;
@@ -69,7 +69,7 @@ namespace Tests
         [Test]
         public void SetAndRemoveVoxel()
         {
-            SVO svo = new SVO(new Vector3Int(16, 16, 16));
+            SVOVoxelStorage svo = new SVOVoxelStorage(new Vector3Int(16, 16, 16));
             var testId = new VoxelTypeID(5);
             var Air = new VoxelTypeID();          
             int x = 10;
@@ -87,7 +87,7 @@ namespace Tests
         [Test]
         public void RemoveLastVoxelInLeafDoesntPruneTooMuch() 
         {
-            SVO svo = new SVO(new Vector3Int(16, 16, 16));
+            SVOVoxelStorage svo = new SVOVoxelStorage(new Vector3Int(16, 16, 16));
             var testId = new VoxelTypeID(5);
             var Air = new VoxelTypeID();
             //Add a complete leaf
@@ -119,7 +119,7 @@ namespace Tests
         [Test]
         public void SetMany() 
         {
-            SVO svo = new SVO(new Vector3Int(16, 16, 16));
+            SVOVoxelStorage svo = new SVOVoxelStorage(new Vector3Int(16, 16, 16));
             Vector3Int center = new Vector3Int(7, 7, 7);
             VoxelTypeID testId = new VoxelTypeID(5);
 
@@ -147,7 +147,7 @@ namespace Tests
         [Test]
         public void LocalCoords() 
         {
-            SVO svo = new SVO(new Vector3Int(16, 16, 16));
+            SVOVoxelStorage svo = new SVOVoxelStorage(new Vector3Int(16, 16, 16));
 
             Vector3Int[] expected = new Vector3Int[8] {
                 new Vector3Int(0,0,0),
@@ -171,7 +171,7 @@ namespace Tests
         public void ToArray() 
         {
             int3 dimensions = new int3(16);
-            SVO svo = new SVO(new Vector3Int(dimensions.x, dimensions.y, dimensions.z));
+            SVOVoxelStorage svo = new SVOVoxelStorage(new Vector3Int(dimensions.x, dimensions.y, dimensions.z));
             var testId = new VoxelTypeID(5);
             Vector3Int[] testPositions = new Vector3Int[] {
                 new Vector3Int(1,2,3),
@@ -201,7 +201,7 @@ namespace Tests
         public void FromArrayAndBack() 
         {
             int3 dimensions = new int3(16);
-            SVO svo;
+            SVOVoxelStorage svo;
             var testId = new VoxelTypeID(5);
 
             var sourceArray = new VoxelTypeID[dimensions.x * dimensions.y * dimensions.z];
@@ -221,7 +221,7 @@ namespace Tests
                 sourceArray[Utils.Helpers.MultiIndexToFlat(item.x, item.y, item.z, dimensions)] = testId;
             }
 
-            svo = new SVO(dimensions.ToBasic(), sourceArray);
+            svo = new SVOVoxelStorage(dimensions.ToBasic(), sourceArray);
 
             var resultArray = svo.ToArray();
 
@@ -237,7 +237,7 @@ namespace Tests
         {
             int3 dimensions = new int3(16);
             var sourceArray = new VoxelTypeID[dimensions.x * dimensions.y * dimensions.z];
-            SVO svo = new SVO(dimensions.ToBasic(), sourceArray);
+            SVOVoxelStorage svo = new SVOVoxelStorage(dimensions.ToBasic(), sourceArray);
             Assert.IsTrue(svo.IsEmpty, $"Octree not empty after initialisation from empty array");
         }
 
@@ -253,7 +253,7 @@ namespace Tests
                 sourceArray[i] = testId;
             }
 
-            SVO svo = new SVO(dimensions.ToBasic(), sourceArray);
+            SVOVoxelStorage svo = new SVOVoxelStorage(dimensions.ToBasic(), sourceArray);
             Assert.IsFalse(svo.IsEmpty, $"Octree empty after initialisation from full array");
         }
     }

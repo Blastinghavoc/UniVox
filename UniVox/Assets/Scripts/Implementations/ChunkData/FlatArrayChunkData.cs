@@ -1,8 +1,10 @@
-﻿using Unity.Collections;
+﻿using System.Runtime.CompilerServices;
+using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UniVox.Framework;
 using UniVox.Framework.Jobified;
+using Utils;
 
 namespace UniVox.Implementations.ChunkData
 {
@@ -12,40 +14,70 @@ namespace UniVox.Implementations.ChunkData
     /// </summary>
     public class FlatArrayChunkData : AbstractChunkData 
     {
-        /// <summary>
-        /// XYZ Voxel Data
-        /// </summary>
-        protected VoxelTypeID[] voxels;
-
-        //Dimensions.x*Dimensions.y cache
-        private int dxdy;
+        protected FlatArrayVoxelStorage storage;
             
         public FlatArrayChunkData(Vector3Int ID, Vector3Int chunkDimensions,VoxelTypeID[] initialData = null) : base(ID, chunkDimensions,initialData) 
         {
+            storage = new FlatArrayVoxelStorage();
             if (initialData == null)
             {
-                voxels = new VoxelTypeID[chunkDimensions.x * chunkDimensions.y * chunkDimensions.z];
+                storage.InitialiseEmpty(chunkDimensions);
             }
             else
             {
-                voxels = initialData;
+                storage.InitialiseWithData(chunkDimensions,initialData);
             }
-            dxdy = chunkDimensions.x * chunkDimensions.y;
         }
 
         protected override VoxelTypeID GetVoxelID(int x, int y, int z)
         {
-            return voxels[Utils.Helpers.MultiIndexToFlat(x,y,z,Dimensions.x,dxdy)];
+            return storage.Get(x,y,z);
         }
 
         protected override void SetVoxelID(int x, int y, int z, VoxelTypeID voxel)
         {
-            voxels[Utils.Helpers.MultiIndexToFlat(x, y, z, Dimensions.x, dxdy)] = voxel;
+            storage.Set(x, y, z, voxel);
         }
 
         public override NativeArray<VoxelTypeID> ToNative(Allocator allocator = Allocator.Persistent)
         {
-            return new NativeArray<VoxelTypeID>(voxels, allocator);
+            return storage.ToArray().ToNative(allocator);
+        }
+    }
+
+    public class FlatArrayVoxelStorage : IVoxelStorageImplementation
+    {
+        private VoxelTypeID[] voxels;
+        private int dx;
+        private int dxdy;
+
+        public VoxelTypeID Get(int x, int y, int z)
+        {
+            return voxels[Utils.Helpers.MultiIndexToFlat(x, y, z, dx, dxdy)];
+        }
+
+        public void InitialiseEmpty(Vector3Int dimensions)
+        {
+            dx = dimensions.x;
+            dxdy = dimensions.x * dimensions.y;
+            voxels = new VoxelTypeID[dxdy * dimensions.z];
+        }
+
+        public void InitialiseWithData(Vector3Int dimensions, VoxelTypeID[] initialData)
+        {
+            dx = dimensions.x;
+            dxdy = dimensions.x * dimensions.y;
+            voxels = initialData;
+        }
+
+        public void Set(int x, int y, int z, VoxelTypeID typeID)
+        {
+            voxels[Utils.Helpers.MultiIndexToFlat(x, y, z, dx, dxdy)] = typeID;
+        }
+
+        public VoxelTypeID[] ToArray()
+        {
+            return voxels;
         }
     }
 }

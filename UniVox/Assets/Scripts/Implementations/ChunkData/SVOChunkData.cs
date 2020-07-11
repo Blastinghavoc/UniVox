@@ -7,17 +7,17 @@ namespace UniVox.Implementations.ChunkData
 {
     public class SVOChunkData : AbstractChunkData
     {
-        private SVO octree;
+        private SVOVoxelStorage octree;
 
         public SVOChunkData(Vector3Int ID, Vector3Int chunkDimensions, VoxelTypeID[] initialData = null) : base(ID, chunkDimensions, initialData)
         {
             if (initialData == null)
             {
-                octree = new SVO(chunkDimensions);
+                octree = new SVOVoxelStorage(chunkDimensions);
             }
             else
             {
-                octree = new SVO(chunkDimensions,initialData);                
+                octree = new SVOVoxelStorage(chunkDimensions,initialData);                
             }
         }
 
