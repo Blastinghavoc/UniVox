@@ -15,7 +15,7 @@ namespace PerformanceTesting
             chunkManager.Initialise();
 
             //Wait until all chunks are complete
-            while (!chunkManager.AllChunksInTargetState())
+            while (!chunkManager.PipelineIsSettled())
             {
                 yield return null;
             }

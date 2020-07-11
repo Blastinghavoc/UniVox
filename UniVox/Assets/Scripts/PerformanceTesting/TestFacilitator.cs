@@ -90,6 +90,8 @@ namespace PerformanceTesting
                             //For each chunk manager
                             for (int i = 0; i < chunkManagerNames.Count; i++)
                             {
+                                Debug.Log($"Starting test for {chunkManagerNames[i]}");
+
                                 var gameObj = Worlds.Find(chunkManagerNames[i]).gameObject;
                                 var manager = gameObj.GetComponent<ITestableChunkManager>();
 

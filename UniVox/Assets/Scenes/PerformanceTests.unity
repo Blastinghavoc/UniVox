@@ -203,6 +203,81 @@ PrefabInstance:
       propertyPath: TestMode
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 4444681113471702657, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: renderedChunksRadii.x
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4444681113471702657, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: renderedChunksRadii.y
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4444681113471702657, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: renderedChunksRadii.z
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4678667611123125231, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: MaxGeneratedPerUpdate
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 4678667611123125231, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: MaxStructurePerUpdate
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 4678667611123125231, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: MaxMeshedPerUpdate
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 4678667611123125231, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: renderedChunksRadii.y
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4678667611123125231, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: renderedChunksRadii.x
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4678667611123125231, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: renderedChunksRadii.z
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7616483327761516500, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: MaxGeneratedPerUpdate
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 7616483327761516500, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: MaxStructurePerUpdate
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 7616483327761516500, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: MaxMeshedPerUpdate
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 7616483327761516500, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: renderedChunksRadii.y
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7616483327761516500, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: renderedChunksRadii.x
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7616483327761516500, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: renderedChunksRadii.z
+      value: 5
+      objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 398304577544639598, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 579d24a84d9385447b0eb6819a968722, type: 3}

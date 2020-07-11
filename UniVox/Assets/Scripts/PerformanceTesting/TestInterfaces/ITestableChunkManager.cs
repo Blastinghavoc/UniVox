@@ -7,7 +7,7 @@ namespace PerformanceTesting
 {
     public interface ITestableChunkManager:IChunkManager
     {
-        bool AllChunksInTargetState();
+        bool PipelineIsSettled();
 
         Rigidbody GetPlayer();
 

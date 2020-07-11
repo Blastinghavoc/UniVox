@@ -638,26 +638,9 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
     #region Test and debug facilitating methods
 
 
-    public bool AllChunksInTargetState()
+    public bool PipelineIsSettled()
     {
-        for (int x = -fullyGeneratedRadii.x; x <= fullyGeneratedRadii.x; x++)
-        {
-            for (int y = -fullyGeneratedRadii.y; y <= fullyGeneratedRadii.y; y++)
-            {
-                for (int z = -fullyGeneratedRadii.z; z <= fullyGeneratedRadii.z; z++)
-                {
-                    var chunkID = playerChunkID + new Vector3Int(x, y, z);
-
-                    if (pipeline.GetMinStage(chunkID) != pipeline.GetTargetStage(chunkID))
-                    {
-                        return false;
-                    }
-
-                }
-            }
-        }
-
-        return true;
+        return pipeline.IsSettled();
     }
 
     public Rigidbody GetPlayer()

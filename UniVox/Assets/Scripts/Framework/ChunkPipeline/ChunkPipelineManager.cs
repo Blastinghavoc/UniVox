@@ -481,6 +481,30 @@ namespace UniVox.Framework.ChunkPipeline
             return stageData.targetStage;
         }
 
+        /// <summary>
+        /// Returns true if there is no work in progress in the pipeline (denoted by all stages being empty).
+        /// Not valid to call this during the pipeline update.
+        /// </summary>
+        /// <returns></returns>
+        public bool IsSettled() 
+        {
+            if (updateLock)
+            {
+                throw new Exception("Can't determine if pipeline settled during pipeline update");
+            }
+            else
+            {                
+                foreach (var stage in stages)
+                {
+                    if (stage.Count > 0)
+                    {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        }
+
         public bool ChunkDataReadable(Vector3Int chunkId)
         {
             var stageData = GetStageData(chunkId);
