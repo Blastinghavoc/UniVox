@@ -1,5 +1,6 @@
 ﻿using PerformanceTesting;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Mathematics;
@@ -65,11 +66,19 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
     [Range(1, 100)]
     [SerializeField] protected ushort MaxMeshedPerUpdate = 1;
 
+    /// <summary>
+    /// Controls how many chunks are processed per update 
+    /// when the play area changes.
+    /// </summary>
+    [Range(1,1000)]
+    [SerializeField] protected ushort PlayAreaUpdateRate = 1;
+
     //TODO remove DEBUG
     [SerializeField] protected bool DebugPipeline = false;
 
     #endregion
-
+    protected Coroutine deactivationRoutine;
+    protected Coroutine updatePlayAreaRoutine;
 
     protected VoxelTypeManager VoxelTypeManager;
     protected IChunkProvider chunkProvider { get; set; }
@@ -143,7 +152,8 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
         playerChunkID = WorldToChunkPosition(Player.position);
         //Immediately request generation of the chunk the player is in
         SetTargetStageOfChunk(playerChunkID, pipeline.CompleteStage);
-        UpdatePlayerArea();
+
+        UpdateWholePlayArea();
     }
 
     protected virtual void Update()
@@ -153,7 +163,7 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
 
         if (playerChunkID != prevPlayerChunkID)
         {
-            UpdatePlayerArea();
+            OnPlayerChunkChanged();
         }
 
         //TODO remove DEBUG
@@ -202,77 +212,119 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
 
     }
 
+    #region Keeping set of loaded chunks up to date
     /// <summary>
-    /// Load chunks around the player, unload those that are too far.
+    /// What to do when the player changes chunk
     /// </summary>
-    protected void UpdatePlayerArea()
+    protected void OnPlayerChunkChanged() 
     {
-        Profiler.BeginSample("UpdatePlayArea");
+        //DetectAndDeactivateChunksBulk();
+        //UpdateWholePlayArea();
+        if (deactivationRoutine!= null)
+        {
+            StopCoroutine(deactivationRoutine);
+        }
+        deactivationRoutine = StartCoroutine(DeactivateChunksCoroutine());
 
-        //Deactivate any chunks that are outside the maximum radius
+        if (updatePlayAreaRoutine != null)
+        {
+            StopCoroutine(updatePlayAreaRoutine);
+        }
+        updatePlayAreaRoutine = StartCoroutine(UpdatePlayAreaCoroutine());
+    }
+
+    ///Deactivate any and all chunks that are outside the maximum radius
+    protected void DetectAndDeactivateChunksBulk() 
+    {        
         Profiler.BeginSample("DetectAndDeactivateChunks");
         var deactivate = loadedChunks.Select((pair) => pair.Key)
-            .Where((id) => !InsideChunkRadius(id, MaximumActiveRadii))
-            .ToList();
+            .Where((id) => !InsideChunkRadius(id, MaximumActiveRadii));
 
-        deactivate.ForEach(DeactivateChunk);
-        Profiler.EndSample();
+        foreach (var item in deactivate)
+        {
+            DeactivateChunk(item);
+        }
 
-        //for (int x = -MaximumActiveRadii.x; x <= MaximumActiveRadii.x; x++)
-        //{
-        //    for (int y = -MaximumActiveRadii.y; y <= MaximumActiveRadii.y; y++)
-        //    {
-        //        for (int z = -MaximumActiveRadii.z; z <= MaximumActiveRadii.z; z++)
-        //        {
-        //            var chunkID = playerChunkID + new Vector3Int(x, y, z);
-
-        //            if (InsideChunkRadius(chunkID, collidableChunksRadii))
-        //            {
-        //                SetTargetStageOfChunk(chunkID, pipeline.CompleteStage);//Request that this chunk should be complete
-        //            }
-        //            else if (InsideChunkRadius(chunkID, renderedChunksRadii))
-        //            {
-        //                SetTargetStageOfChunk(chunkID, pipeline.RenderedStage);//Request that this chunk should be rendered
-        //            }
-        //            else if (InsideChunkRadius(chunkID, fullyGeneratedRadii))
-        //            {
-        //                //This chunk should be fully generated including structures
-        //                SetTargetStageOfChunk(chunkID, pipeline.FullyGeneratedStage);
-        //            }
-        //            else if(InsideChunkRadius(chunkID,structureChunksRadii))
-        //            {
-        //                SetTargetStageOfChunk(chunkID, pipeline.OwnStructuresStage);
-        //            }
-        //            else
-        //            {
-        //                //Request that this chunk should be just terrain data, no structures
-        //                SetTargetStageOfChunk(chunkID, pipeline.TerrainDataStage);
-        //            }
-
-        //        }
-        //    }
-        //}
-        UpdatePlayerAreaIncrementally();
         Profiler.EndSample();
     }
 
-    /// <summary>
-    /// Rather than doing all the chunk target changes in one frame, this spreads the load out over multiple frames
-    /// </summary>
-    protected void UpdatePlayerAreaIncrementally() 
+    protected IEnumerator DeactivateChunksCoroutine() 
     {
-        //TODO deactivate chunks
-        //Update chunks nearest to farthest
+        //Take a copy of the keys at the time this coroutine was activated.
+        Vector3Int[] keys = new Vector3Int[loadedChunks.Keys.Count];
+        loadedChunks.Keys.CopyTo(keys,0);
+
+        int processedThisUpdate = 0;
+
+        foreach (var item in keys)
+        {
+            if (!InsideChunkRadius(item,MaximumActiveRadii))
+            {
+                DeactivateChunk(item);
+            }
+            processedThisUpdate++;
+            if (processedThisUpdate >= PlayAreaUpdateRate)
+            {
+                processedThisUpdate = 0;
+                yield return null;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Set the target stages of all chunks around the player
+    /// </summary>
+    protected void UpdateWholePlayArea()
+    {
+        Profiler.BeginSample("UpdateWholePlayArea");       
+
+        //Do the whole update at once
+        var iterator = UpdatePlayerAreaIncrementally();
+        while (iterator.MoveNext())
+        {
+        }
+        
+        Profiler.EndSample();
+    }
+
+    protected IEnumerator UpdatePlayAreaCoroutine() 
+    {
+        var iterator = UpdatePlayerAreaIncrementally();
+        int processedThisUpdate = 0;
+
+        while (iterator.MoveNext())
+        {
+            ++processedThisUpdate;
+            if (processedThisUpdate >= PlayAreaUpdateRate)
+            {
+                processedThisUpdate = 0;
+                yield return null;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Rather than doing all the chunk target changes in one frame, this yields after
+    /// each chunk id processed.
+    /// Updates chunks roughly nearest to farthest
+    /// </summary>
+    protected IEnumerator UpdatePlayerAreaIncrementally() 
+    {
+        //Initiali yield
+        yield return null;
+
         //Start with collidable chunks
         foreach (var chunkId in CuboidalArea(playerChunkID,collidableChunksRadii))
         {
             SetTargetStageOfChunk(chunkId, pipeline.CompleteStage);//Request that this chunk should be complete
+            yield return null;
         }
 
         //Then rendered chunks
         foreach (var chunkId in CuboidalArea(playerChunkID, renderedChunksRadii, collidableChunksRadii + Vector3Int.one))
         {
             SetTargetStageOfChunk(chunkId, pipeline.RenderedStage);//Request that this chunk should be rendered
+            yield return null;
         }
 
         //Then fully generated
@@ -280,6 +332,7 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
         {
             //These chunks should be fully generated including structures from other chunks
             SetTargetStageOfChunk(chunkId, pipeline.FullyGeneratedStage);
+            yield return null;
         }
 
         //Then own structures
@@ -287,6 +340,7 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
         {
             //These chunks should have generated their own structures.
             SetTargetStageOfChunk(chunkId, pipeline.OwnStructuresStage);
+            yield return null;
         }
 
         //Then just terrain data, no structures
@@ -294,8 +348,11 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
         {
             //Request that this chunk should be just terrain data, no structures
             SetTargetStageOfChunk(chunkId, pipeline.TerrainDataStage);
+            yield return null;
         }
     }
+
+#endregion
 
     private ChunkComponent GetChunkComponent(Vector3Int chunkID)
     {

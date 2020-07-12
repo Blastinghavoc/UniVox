@@ -46,7 +46,7 @@ namespace UniVox.Gameplay
                     }
                 }
 
-            }
+            }            
 
             Profiler.EndSample();
         }
