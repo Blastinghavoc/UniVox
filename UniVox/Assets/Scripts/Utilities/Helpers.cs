@@ -135,7 +135,7 @@ namespace Utils
         }
 
         /// <summary>
-        /// X-Z manhattan distance "circle"
+        /// X-Z manhattan distance "circle" (a diagonally oriented square)
         /// </summary>
         /// <param name="center"></param>
         /// <param name="radius"></param>
@@ -162,6 +162,120 @@ namespace Utils
                         }
                     }
 
+                }
+            }
+        }
+
+
+        public static IEnumerable<Vector3Int> CuboidalArea(Vector3Int center, Vector3Int endRadii) 
+        {
+            for (int x = 0; x <= endRadii.x; x++)
+            {
+                for (int y = 0; y <= endRadii.y; y++)
+                {
+                    for (int z = 0; z <= endRadii.z; z++)
+                    {
+                        foreach (var point in AllPointsOfSymmetry3D(center, x, y, z))
+                        {
+                            yield return point;
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// As above, but excludes all points that are not
+        /// at least within the start radii
+        /// </summary>
+        /// <param name="center"></param>
+        /// <param name="endRadii"></param>
+        /// <param name="startRadii"></param>
+        /// <returns></returns>
+        public static IEnumerable<Vector3Int> CuboidalArea(Vector3Int center, Vector3Int endRadii, Vector3Int startRadii)
+        {
+
+            for (int x = 0; x <= endRadii.x; x++)
+            {
+                //Do all values of Y that are inside the exclusion radii
+                for (int y = 0; y < startRadii.y; y++)
+                {
+                    if (x < startRadii.x)
+                    {
+                        //Neither x or y are valid, so z must be
+                        for (int z = startRadii.z; z <= endRadii.z; z++)
+                        {
+                            foreach (var point in AllPointsOfSymmetry3D(center, x, y, z))
+                            {
+                                yield return point;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        //X is valid, Y is not, Z is free to range over all values
+                        for (int z = 0; z <= endRadii.z; z++)
+                        {
+                            foreach (var point in AllPointsOfSymmetry3D(center, x, y, z))
+                            {
+                                yield return point;
+                            }
+                        }
+                    }
+                }
+
+                //Do all values of Y that are outside the exclusion radii
+                for (int y = startRadii.y; y <= endRadii.y; y++)
+                {
+                    //Y is valid, X and Z are free to range over all values    
+
+                    for (int z = 0; z <= endRadii.z; z++)
+                    {
+                        foreach (var point in AllPointsOfSymmetry3D(center,x,y,z))
+                        {
+                            yield return point;
+                        }
+                    }
+                }
+            }
+        }
+
+        private static IEnumerable<Vector3Int> AllPointsOfSymmetry3D(Vector3Int center,int x, int y, int z) 
+        {
+            //By symmetry we have the points in all 8 3d octants
+            yield return new Vector3Int(x + center.x, y + center.y, z + center.z);
+
+            bool xSymm = x != -x;
+            bool ySymm = y != -y;
+            bool zSymm = z != -z;
+
+            if (zSymm)
+            {
+                yield return new Vector3Int(x + center.x, y + center.y, -z + center.z);
+            }
+            if (xSymm)
+            {
+                yield return new Vector3Int(-x + center.x, y + center.y, z + center.z);
+                if (zSymm)
+                {
+                    yield return new Vector3Int(-x + center.x, y + center.y, -z + center.z);
+                }
+            }
+
+            if (ySymm)
+            {
+                yield return new Vector3Int(x + center.x, -y + center.y, z + center.z);
+                if (zSymm)
+                {
+                    yield return new Vector3Int(x + center.x, -y + center.y, -z + center.z);
+                }
+                if (xSymm)
+                {
+                    yield return new Vector3Int(-x + center.x, -y + center.y, z + center.z);
+                    if (zSymm)
+                    {
+                        yield return new Vector3Int(-x + center.x, -y + center.y, -z + center.z);
+                    }
                 }
             }
         }

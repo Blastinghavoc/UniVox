@@ -328,6 +328,7 @@ MonoBehaviour:
   Parrallel: 1
   chunkDataFactory:
     typeToCreate: 2
+    lazy: 1
   worldSettings:
     HeightmapScale: 125
     MoistureMapScale: 1000
@@ -767,6 +768,7 @@ MonoBehaviour:
   Parrallel: 1
   chunkDataFactory:
     typeToCreate: 0
+    lazy: 1
   worldSettings:
     HeightmapScale: 125
     MoistureMapScale: 1000
@@ -1169,6 +1171,7 @@ MonoBehaviour:
   Parrallel: 1
   chunkDataFactory:
     typeToCreate: 3
+    lazy: 1
   worldSettings:
     HeightmapScale: 125
     MoistureMapScale: 1000
@@ -1211,6 +1214,10 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
       propertyPath: Parrallel
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1560840840, guid: 579d24a84d9385447b0eb6819a968722, type: 3}
+      propertyPath: chunkDataFactory.lazy
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 398304577423018871, guid: 579d24a84d9385447b0eb6819a968722,

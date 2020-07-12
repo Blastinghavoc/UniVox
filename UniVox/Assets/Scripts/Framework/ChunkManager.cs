@@ -10,6 +10,7 @@ using UniVox.Framework;
 using UniVox.Framework.ChunkPipeline;
 using UniVox.Framework.Common;
 using Utils.Pooling;
+using static Utils.Helpers;
 
 public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
 {
@@ -217,41 +218,83 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
         deactivate.ForEach(DeactivateChunk);
         Profiler.EndSample();
 
-        for (int x = -MaximumActiveRadii.x; x <= MaximumActiveRadii.x; x++)
-        {
-            for (int y = -MaximumActiveRadii.y; y <= MaximumActiveRadii.y; y++)
-            {
-                for (int z = -MaximumActiveRadii.z; z <= MaximumActiveRadii.z; z++)
-                {
-                    var chunkID = playerChunkID + new Vector3Int(x, y, z);
+        //for (int x = -MaximumActiveRadii.x; x <= MaximumActiveRadii.x; x++)
+        //{
+        //    for (int y = -MaximumActiveRadii.y; y <= MaximumActiveRadii.y; y++)
+        //    {
+        //        for (int z = -MaximumActiveRadii.z; z <= MaximumActiveRadii.z; z++)
+        //        {
+        //            var chunkID = playerChunkID + new Vector3Int(x, y, z);
 
-                    if (InsideChunkRadius(chunkID, collidableChunksRadii))
-                    {
-                        SetTargetStageOfChunk(chunkID, pipeline.CompleteStage);//Request that this chunk should be complete
-                    }
-                    else if (InsideChunkRadius(chunkID, renderedChunksRadii))
-                    {
-                        SetTargetStageOfChunk(chunkID, pipeline.RenderedStage);//Request that this chunk should be rendered
-                    }
-                    else if (InsideChunkRadius(chunkID, fullyGeneratedRadii))
-                    {
-                        //This chunk should be fully generated including structures
-                        SetTargetStageOfChunk(chunkID, pipeline.FullyGeneratedStage);
-                    }
-                    else if(InsideChunkRadius(chunkID,structureChunksRadii))
-                    {
-                        SetTargetStageOfChunk(chunkID, pipeline.OwnStructuresStage);
-                    }
-                    else
-                    {
-                        //Request that this chunk should be just terrain data, no structures
-                        SetTargetStageOfChunk(chunkID, pipeline.TerrainDataStage);
-                    }
+        //            if (InsideChunkRadius(chunkID, collidableChunksRadii))
+        //            {
+        //                SetTargetStageOfChunk(chunkID, pipeline.CompleteStage);//Request that this chunk should be complete
+        //            }
+        //            else if (InsideChunkRadius(chunkID, renderedChunksRadii))
+        //            {
+        //                SetTargetStageOfChunk(chunkID, pipeline.RenderedStage);//Request that this chunk should be rendered
+        //            }
+        //            else if (InsideChunkRadius(chunkID, fullyGeneratedRadii))
+        //            {
+        //                //This chunk should be fully generated including structures
+        //                SetTargetStageOfChunk(chunkID, pipeline.FullyGeneratedStage);
+        //            }
+        //            else if(InsideChunkRadius(chunkID,structureChunksRadii))
+        //            {
+        //                SetTargetStageOfChunk(chunkID, pipeline.OwnStructuresStage);
+        //            }
+        //            else
+        //            {
+        //                //Request that this chunk should be just terrain data, no structures
+        //                SetTargetStageOfChunk(chunkID, pipeline.TerrainDataStage);
+        //            }
 
-                }
-            }
-        }
+        //        }
+        //    }
+        //}
+        UpdatePlayerAreaIncrementally();
         Profiler.EndSample();
+    }
+
+    /// <summary>
+    /// Rather than doing all the chunk target changes in one frame, this spreads the load out over multiple frames
+    /// </summary>
+    protected void UpdatePlayerAreaIncrementally() 
+    {
+        //TODO deactivate chunks
+        //Update chunks nearest to farthest
+        //Start with collidable chunks
+        foreach (var chunkId in CuboidalArea(playerChunkID,collidableChunksRadii))
+        {
+            SetTargetStageOfChunk(chunkId, pipeline.CompleteStage);//Request that this chunk should be complete
+        }
+
+        //Then rendered chunks
+        foreach (var chunkId in CuboidalArea(playerChunkID, renderedChunksRadii, collidableChunksRadii + Vector3Int.one))
+        {
+            SetTargetStageOfChunk(chunkId, pipeline.RenderedStage);//Request that this chunk should be rendered
+        }
+
+        //Then fully generated
+        foreach (var chunkId in CuboidalArea(playerChunkID, fullyGeneratedRadii, renderedChunksRadii + Vector3Int.one))        
+        {
+            //These chunks should be fully generated including structures from other chunks
+            SetTargetStageOfChunk(chunkId, pipeline.FullyGeneratedStage);
+        }
+
+        //Then own structures
+        foreach (var chunkId in CuboidalArea(playerChunkID, structureChunksRadii, fullyGeneratedRadii + Vector3Int.one))
+        {
+            //These chunks should have generated their own structures.
+            SetTargetStageOfChunk(chunkId, pipeline.OwnStructuresStage);
+        }
+
+        //Then just terrain data, no structures
+        foreach (var chunkId in CuboidalArea(playerChunkID, MaximumActiveRadii, structureChunksRadii + Vector3Int.one))
+        {
+            //Request that this chunk should be just terrain data, no structures
+            SetTargetStageOfChunk(chunkId, pipeline.TerrainDataStage);
+        }
     }
 
     private ChunkComponent GetChunkComponent(Vector3Int chunkID)
