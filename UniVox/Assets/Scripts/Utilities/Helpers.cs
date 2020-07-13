@@ -287,5 +287,9 @@ namespace Utils
             v2 = tmp;
         }
 
+        public static bool SameSign(int a, int b) 
+        {
+            return (a ^ b) >= 0;//Bitwise xor
+        }
     }
 }

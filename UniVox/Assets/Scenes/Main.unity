@@ -606,7 +606,7 @@ PrefabInstance:
     - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: PlayAreaUpdateRate
-      value: 24
+      value: 48
       objectReference: {fileID: 0}
     - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
@@ -1360,7 +1360,7 @@ PrefabInstance:
     - target: {fileID: 398304578996345519, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
       propertyPath: m_IsKinematic
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3231851409899628765, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}

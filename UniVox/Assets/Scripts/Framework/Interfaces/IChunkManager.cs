@@ -18,6 +18,7 @@ namespace UniVox.Framework
 
         //Maximum radii from the player on each axis at which chunks may be active (in the lowest pipeline stage)
         Vector3Int MaximumActiveRadii { get; }
+        bool GenerateStructures { get; }
 
         void Initialise();
 

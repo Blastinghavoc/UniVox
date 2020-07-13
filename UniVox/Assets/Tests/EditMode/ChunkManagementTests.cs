@@ -122,6 +122,56 @@ namespace Tests
             }
         }
 
+        [Test]
+        public void CuboidalAreaNonUniformEndRadii() 
+        {
+            Vector3Int center = new Vector3Int(0, 0, 0);
+            Vector3Int radii = new Vector3Int(2, 5, 2);
+            Vector3Int startRadii = new Vector3Int(1, 1, 1);
+
+            var definitive = GenerateDefinitive(center, radii, startRadii);
+
+            List<Vector3Int> fromGenerator = Utils.Helpers.CuboidalArea(center, radii, startRadii).ToList();
+
+            foreach (var item in definitive)
+            {
+                Assert.IsTrue(fromGenerator.Contains(item), $"Definitive produced {item} which was not in generated list");
+            }
+
+            Assert.AreEqual(definitive.Count, fromGenerator.Count, $"The lists should contain the same number of items");
+            Debug.Log($"Produced {fromGenerator.Count} items");
+
+            foreach (var item in fromGenerator)
+            {
+                Assert.IsTrue(definitive.Contains(item), $"Generator produced {item} which was not in definitive list");
+            }
+        }
+
+        [Test]
+        public void CuboidalAreaNonUniformStartAndEndRadii()
+        {
+            Vector3Int center = new Vector3Int(0, 0, 0);
+            Vector3Int radii = new Vector3Int(2, 5, 2);
+            Vector3Int startRadii = new Vector3Int(1, 0, 1);
+
+            var definitive = GenerateDefinitive(center, radii, startRadii);
+
+            List<Vector3Int> fromGenerator = Utils.Helpers.CuboidalArea(center, radii, startRadii).ToList();
+
+            foreach (var item in definitive)
+            {
+                Assert.IsTrue(fromGenerator.Contains(item), $"Definitive produced {item} which was not in generated list");
+            }
+
+            Assert.AreEqual(definitive.Count, fromGenerator.Count, $"The lists should contain the same number of items");
+            Debug.Log($"Produced {fromGenerator.Count} items");
+
+            foreach (var item in fromGenerator)
+            {
+                Assert.IsTrue(definitive.Contains(item), $"Generator produced {item} which was not in definitive list");
+            }
+        }
+
         List<Vector3Int> GenerateDefinitive(Vector3Int center,Vector3Int radii,Vector3Int startRadii = default) 
         {            
             Vector3Int maxRadii = radii + Vector3Int.one;
