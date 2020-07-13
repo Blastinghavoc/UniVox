@@ -11,6 +11,7 @@ using UniVox.Framework.ChunkPipeline.VirtualJobs;
 using UniVox.Framework.Jobified;
 using UniVox.Implementations.ChunkData;
 using UniVox.Implementations.ProcGen;
+using Utils;
 using Utils.Noise;
 using static UniVox.Framework.FrameworkEventManager;
 using static UniVox.Implementations.ProcGen.ChunkColumnNoiseMaps;
@@ -45,12 +46,11 @@ namespace UniVox.Implementations.Providers
         [SerializeField] private OreGenerationSettingsComponent oreSettings = null;
 
 
-        private Dictionary<Vector2Int, ChunkColumnNoiseMaps> noiseMaps;
-        //Noise maps currently being generated
-        private Dictionary<Vector2Int, KeyValuePair<JobHandle, NativeChunkColumnNoiseMaps>> noiseMapsPending;
-        //Records how many jobs are currently using a pending noise job's result. (Reference counting)
-        private Dictionary<Vector2Int, int> usingPending;
+        private int3 chunkDimensions;
 
+        //Previously generated noise maps
+        private Dictionary<Vector2Int, ChunkColumnNoiseMaps> noiseMaps;
+        private JobReferenceCounter<Vector2Int, NativeChunkColumnNoiseMaps> noiseGenReferenceCounter;
 
         public override void Initialise(VoxelTypeManager voxelTypeManager, IChunkManager chunkManager, FrameworkEventManager eventManager)
         {
@@ -63,6 +63,8 @@ namespace UniVox.Implementations.Providers
 
             bedrockID = voxelTypeManager.GetId(bedrockType);
             waterID = voxelTypeManager.GetId(waterType);
+
+            chunkDimensions = chunkManager.ChunkDimensions.ToNative();
 
             if (chunkManager.IsWorldHeightLimited)
             {
@@ -79,8 +81,7 @@ namespace UniVox.Implementations.Providers
             oceanGenConfig.waterID = waterID;
 
             noiseMaps = new Dictionary<Vector2Int, ChunkColumnNoiseMaps>();
-            noiseMapsPending = new Dictionary<Vector2Int, KeyValuePair<JobHandle, NativeChunkColumnNoiseMaps>>();
-            usingPending = new Dictionary<Vector2Int, int>();
+            noiseGenReferenceCounter = new JobReferenceCounter<Vector2Int, NativeChunkColumnNoiseMaps>(MakeNoiseJob);
 
             structureGenerator = new StructureGenerator();
             structureGenerator.Initalise(voxelTypeManager, biomeDatabaseComponent, treeSettings.TreeThreshold, (int)treemapNoise.Seed);
@@ -117,14 +118,12 @@ namespace UniVox.Implementations.Providers
 
         public override AbstractPipelineJob<IChunkData> GenerateTerrainData(Vector3Int chunkID)
         {
-            var chunkDimensions = chunkManager.ChunkDimensions;
-
-            bool waitForNoiseMapGeneration = false;
+            bool noisemapInReferenceCounter = false;
             bool thisJobIsGeneratingTheNoiseMaps = false;
 
             var chunkPosition = chunkManager.ChunkToWorldPosition(chunkID);
             NativeChunkColumnNoiseMaps nativeNoiseMaps;
-            JobHandle noiseGenHandle = new JobHandle();
+            JobHandle noiseGenHandle = default;
 
             var columnId = new Vector2Int(chunkID.x, chunkID.z);
 
@@ -137,53 +136,10 @@ namespace UniVox.Implementations.Providers
             }
             else
             {
-                //If another job is already generating the noise maps, wait for it
-                if (noiseMapsPending.TryGetValue(columnId, out var pair))
-                {
-                    noiseGenHandle = pair.Key;
-                    nativeNoiseMaps = pair.Value;
-                    //Reference counting
-                    if (usingPending.TryGetValue(columnId, out var count))
-                    {
-                        usingPending[columnId] = count + 1;
-                    }
-                    else
-                    {
-                        throw new Exception("A noise map job is pending but its reference count does not exist");
-                    }
-                }
-                else
-                {
-                    //Otherwise, make a job to generate the noise maps
-                    var noiseGenJob = new JobWrapper<NoiseMapGenerationJob>();
-                    noiseGenJob.job.worldSettings = worldSettings;
-                    noiseGenJob.job.treeSettings = treeSettings;
-                    noiseGenJob.job.biomeDatabase = biomeDatabaseComponent.BiomeDatabase;
-                    noiseGenJob.job.chunkPosition = chunkPosition;
-                    noiseGenJob.job.heightmapNoise = heightmapNoise;
-                    noiseGenJob.job.moisturemapNoise = moisturemapNoise;
-                    noiseGenJob.job.treemapNoise = treemapNoise;
-                    nativeNoiseMaps = new NativeChunkColumnNoiseMaps(chunkDimensions.x * chunkDimensions.z, Allocator.Persistent);
-                    noiseGenJob.job.noiseMaps = nativeNoiseMaps;
+                noiseGenReferenceCounter.Add(columnId, out noiseGenHandle, out nativeNoiseMaps, out thisJobIsGeneratingTheNoiseMaps);
 
-                    thisJobIsGeneratingTheNoiseMaps = true;
-
-                    if (!Parrallel)
-                    {
-                        noiseGenJob.Run();
-                    }
-                    else
-                    {
-                        noiseGenHandle = noiseGenJob.Schedule();
-                    }
-
-                    //Add to the pending noise jobs
-                    noiseMapsPending.Add(columnId, new KeyValuePair<JobHandle, NativeChunkColumnNoiseMaps>(noiseGenHandle, nativeNoiseMaps));
-                    //Reference counting
-                    usingPending[columnId] = 1;
-                }
-
-                waitForNoiseMapGeneration = true;
+                //The noise map is in the reference counter.
+                noisemapInReferenceCounter = true;
             }
 
             Profiler.EndSample();
@@ -237,20 +193,18 @@ namespace UniVox.Implementations.Providers
                     {
                         noiseMaps.Add(columnId, new ChunkColumnNoiseMaps(nativeNoiseMaps));
                     }
-                    //Remove from pending
-                    noiseMapsPending.Remove(columnId);
                 }
 
                 
                 IChunkData ChunkData;
                 if (checkIfEmptyJob.isEmpty[0])
                 {
-                    ChunkData = chunkDataFactory.Create(chunkID, chunkDimensions);
+                    ChunkData = chunkDataFactory.Create(chunkID, chunkDimensions.ToBasic());
                 }
                 else
                 {
                     //Pass data only if not empty
-                    ChunkData = chunkDataFactory.Create(chunkID, chunkDimensions, oceanGenJob.job.chunkData.ToArray());
+                    ChunkData = chunkDataFactory.Create(chunkID, chunkDimensions.ToBasic(), oceanGenJob.job.chunkData.ToArray());
                 }
 
                 //Dispose of native arrays
@@ -258,16 +212,11 @@ namespace UniVox.Implementations.Providers
                 checkIfEmptyJob.Dispose();
 
                 //Handle reference counting on noise maps
-                if (usingPending.TryGetValue(columnId, out var count))
+                if (noisemapInReferenceCounter)
                 {
-                    count -= 1;
-                    if (count > 0)
+                    //This noise map was tracked by the reference counter, check if it can be disposed.
+                    if (noiseGenReferenceCounter.Done(columnId))
                     {
-                        usingPending[columnId] = count;
-                    }
-                    else
-                    {
-                        usingPending.Remove(columnId);
                         //Dispose noise maps
                         try
                         {
@@ -275,13 +224,15 @@ namespace UniVox.Implementations.Providers
                         }
                         catch (Exception e)
                         {
-                            throw new Exception($"Error trying to dispose of noise maps for column {columnId}. Count was {count}.", e);
+                            throw new Exception($"Error trying to dispose of noise maps for chunk {chunkID}." +
+                                $" Was this the job generating the noise maps? {thisJobIsGeneratingTheNoiseMaps}"
+                                , e);
                         }
                     }
                 }
                 else
                 {
-                    //Dispose noise maps
+                    //This job had exclusive ownership of the noise map, and is free to dispose it.
                     nativeNoiseMaps.Dispose();
                 }
 
@@ -295,6 +246,7 @@ namespace UniVox.Implementations.Providers
                 //Single threaded version  DEBUG
                 return new BasicFunctionJob<IChunkData>(() =>
                 {
+                    //Note that when not parallel, the noise gen job will have run by this point
                     mainGenJob.Run();
                     oreGenJob.Run();
                     oceanGenJob.Run();
@@ -302,17 +254,8 @@ namespace UniVox.Implementations.Providers
                     return cleanup();
                 });
             }
-
-            JobHandle mainGenHandle;
-
-            if (waitForNoiseMapGeneration)
-            {
-                mainGenHandle = mainGenJob.Schedule(noiseGenHandle);
-            }
-            else
-            {
-                mainGenHandle = mainGenJob.Schedule();
-            }
+        
+            var mainGenHandle = mainGenJob.Schedule(noiseGenHandle);       
  
             var oreHandle = oreGenJob.Schedule(mainGenHandle);
             var oceanHandle = oceanGenJob.Schedule(oreHandle);
@@ -321,6 +264,34 @@ namespace UniVox.Implementations.Providers
             JobHandle finalHandle = checkIfEmptyHandle;
             return new PipelineUnityJob<IChunkData>(finalHandle, cleanup);
         }
+
+        private JobReferenceCounter<Vector2Int, NativeChunkColumnNoiseMaps>.JobResultPair MakeNoiseJob(Vector2Int columnId) 
+        {
+            float3 worldPos = chunkManager.ChunkToWorldPosition(new Vector3Int(columnId.x,0,columnId.y));
+
+            var noiseGenJob = new JobWrapper<NoiseMapGenerationJob>();
+            noiseGenJob.job.worldSettings = worldSettings;
+            noiseGenJob.job.treeSettings = treeSettings;
+            noiseGenJob.job.biomeDatabase = biomeDatabaseComponent.BiomeDatabase;
+            noiseGenJob.job.chunkPositionXZ = worldPos.xz;
+            noiseGenJob.job.heightmapNoise = heightmapNoise;
+            noiseGenJob.job.moisturemapNoise = moisturemapNoise;
+            noiseGenJob.job.treemapNoise = treemapNoise;
+            var nativeNoiseMaps = new NativeChunkColumnNoiseMaps(chunkDimensions.x * chunkDimensions.z, Allocator.Persistent);
+            noiseGenJob.job.noiseMaps = nativeNoiseMaps;
+
+            JobHandle handle = default;
+            if (Parrallel)
+            {
+                handle = noiseGenJob.Schedule();
+            }
+            else
+            {
+                noiseGenJob.Run();
+            }
+
+            return new JobReferenceCounter<Vector2Int, NativeChunkColumnNoiseMaps>.JobResultPair() { handle = handle, result = nativeNoiseMaps };
+        } 
 
         public override AbstractPipelineJob<ChunkNeighbourhood> GenerateStructuresForNeighbourhood(Vector3Int centerChunkID, ChunkNeighbourhood neighbourhood)
         {

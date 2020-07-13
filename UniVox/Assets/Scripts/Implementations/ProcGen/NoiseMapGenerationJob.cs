@@ -11,7 +11,7 @@ namespace UniVox.Implementations.ProcGen
     [BurstCompile]
     public struct NoiseMapGenerationJob : IJob
     {
-        [ReadOnly] public float3 chunkPosition;
+        [ReadOnly] public float2 chunkPositionXZ;
         [ReadOnly] public WorldSettings worldSettings;
 
         [ReadOnly] public FractalNoise heightmapNoise;
@@ -44,7 +44,7 @@ namespace UniVox.Implementations.ProcGen
             {
                 for (int x = 0; x < dimensions.x; x++,i++)
                 {
-                    var samplePoint = new float2(x + chunkPosition.x, z + chunkPosition.z)* treeSettings.TreemapScale;
+                    var samplePoint = new float2(x + chunkPositionXZ.x, z + chunkPositionXZ.y)* treeSettings.TreemapScale;
                     var sample = treemapNoise.Sample(samplePoint); 
 
                     noiseMaps.treeMap[i] = sample;
@@ -84,7 +84,7 @@ namespace UniVox.Implementations.ProcGen
                 {
                     moistureMap[i] = ZeroToOne(
                         moisturemapNoise.Sample(
-                            new float2(x + chunkPosition.x, z + chunkPosition.z) * worldSettings.MoistureMapScale)
+                            new float2(x + chunkPositionXZ.x, z + chunkPositionXZ.y) * worldSettings.MoistureMapScale)
                         );
                     i++;
                 }
@@ -98,7 +98,7 @@ namespace UniVox.Implementations.ProcGen
             {
                 for (int x = 0; x < dimensions.x; x++)
                 {
-                    noiseMaps.heightMap[i] = CalculateHeightMapAt(new float2(x + chunkPosition.x, z + chunkPosition.z));
+                    noiseMaps.heightMap[i] = CalculateHeightMapAt(new float2(x + chunkPositionXZ.x, z + chunkPositionXZ.y));
                     i++;
                 }
             }
