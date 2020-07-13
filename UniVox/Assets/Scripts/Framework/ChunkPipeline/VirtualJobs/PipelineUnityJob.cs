@@ -1,5 +1,6 @@
 ﻿using System;
 using Unity.Jobs;
+using UnityEngine.Profiling;
 using UniVox.Framework.Jobified;
 
 namespace UniVox.Framework.ChunkPipeline.VirtualJobs
@@ -41,9 +42,11 @@ namespace UniVox.Framework.ChunkPipeline.VirtualJobs
 
         private void DoCleanup()
         {
+            Profiler.BeginSample("PipelineJobCleanup");
             handle.Complete();
             Result = cleanup();
             cleanedUp = true;
+            Profiler.EndSample();
         }
 
         /// <summary>

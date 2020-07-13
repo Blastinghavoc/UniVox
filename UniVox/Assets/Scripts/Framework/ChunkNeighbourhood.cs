@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Unity.Collections;
 using UnityEngine;
+using UnityEngine.Profiling;
 
 namespace UniVox.Framework
 {
@@ -74,6 +75,7 @@ namespace UniVox.Framework
 
         public ChunkNeighbourhood(Vector3Int center, Func<Vector3Int, IChunkData> getData, bool includeDiagonals = false)
         {
+            Profiler.BeginSample("CreateChunkNeighbourhood");
             data = new Dictionary<Vector3Int, IChunkData>();
 
             Func<Vector3Int, IEnumerable<Vector3Int>> neighbourIdGenerator = Utils.Helpers.GetNeighboursDirectOnly;
@@ -91,6 +93,7 @@ namespace UniVox.Framework
             {
                 data.Add(item, getData(item));
             }
+            Profiler.EndSample();
         }
 
         private IChunkData extendedIndex(ref int x,ref int y,ref int z) 

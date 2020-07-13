@@ -80,5 +80,11 @@ namespace UniVox.Framework
         {
             return chunkManager.GetPipelineStatus();
         }
+
+        public void GetChunkManagerCoroutineStatus(out int waitingForUpdate,out int waitingForDeactivate) 
+        {
+            waitingForUpdate = chunkManager.WaitingForPlayAreaUpdate;
+            waitingForDeactivate = chunkManager.WaitingForPlayAreaDeactivate;
+        }
     }
 }

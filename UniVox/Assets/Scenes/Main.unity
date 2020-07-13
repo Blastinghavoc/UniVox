@@ -608,6 +608,11 @@ PrefabInstance:
       propertyPath: PlayAreaUpdateRate
       value: 24
       objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: PlayAreaDeactivateRate
+      value: 128
+      objectReference: {fileID: 0}
     - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: VoxelTypeManager

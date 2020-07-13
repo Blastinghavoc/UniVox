@@ -72,6 +72,14 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
     /// </summary>
     [Range(1,1000)]
     [SerializeField] protected ushort PlayAreaUpdateRate = 1;
+    public int WaitingForPlayAreaUpdate { get; private set; }//DEBUG
+    /// <summary>
+    /// Controls how many chunks are checked for being out of the play area
+    /// each update.
+    /// </summary>
+    [Range(1, 1000)]
+    [SerializeField] protected ushort PlayAreaDeactivateRate = 1;
+    public int WaitingForPlayAreaDeactivate { get; private set; }//DEBUG
 
     //TODO remove DEBUG
     [SerializeField] protected bool DebugPipeline = false;
@@ -220,6 +228,7 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
     {
         //DetectAndDeactivateChunksBulk();
         //UpdateWholePlayArea();
+
         if (deactivationRoutine!= null)
         {
             StopCoroutine(deactivationRoutine);
@@ -254,6 +263,8 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
         Vector3Int[] keys = new Vector3Int[loadedChunks.Keys.Count];
         loadedChunks.Keys.CopyTo(keys,0);
 
+        WaitingForPlayAreaDeactivate = keys.Length;
+
         int processedThisUpdate = 0;
 
         foreach (var item in keys)
@@ -263,6 +274,8 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
                 DeactivateChunk(item);
             }
             processedThisUpdate++;
+            WaitingForPlayAreaDeactivate--;
+
             if (processedThisUpdate >= PlayAreaUpdateRate)
             {
                 processedThisUpdate = 0;
@@ -292,9 +305,16 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
         var iterator = UpdatePlayerAreaIncrementally();
         int processedThisUpdate = 0;
 
+        var numChunksX = MaximumActiveRadii.x * 2 + 1;
+        var numChunksY = MaximumActiveRadii.y * 2 + 1;
+        var numChunksZ = MaximumActiveRadii.z * 2 + 1;
+
+        WaitingForPlayAreaUpdate = numChunksX*numChunksY*numChunksZ;
+
         while (iterator.MoveNext())
         {
             ++processedThisUpdate;
+            --WaitingForPlayAreaUpdate;
             if (processedThisUpdate >= PlayAreaUpdateRate)
             {
                 processedThisUpdate = 0;
@@ -310,9 +330,6 @@ public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
     /// </summary>
     protected IEnumerator UpdatePlayerAreaIncrementally() 
     {
-        //Initiali yield
-        yield return null;
-
         //Start with collidable chunks
         foreach (var chunkId in CuboidalArea(playerChunkID,collidableChunksRadii))
         {

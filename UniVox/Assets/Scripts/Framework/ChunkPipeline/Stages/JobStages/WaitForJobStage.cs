@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Assertions;
+using UnityEngine.Profiling;
 using UniVox.Framework.ChunkPipeline.VirtualJobs;
 using UniVox.Framework.ChunkPipeline.WaitForNeighbours;
 
@@ -37,16 +38,20 @@ namespace UniVox.Framework.ChunkPipeline
             {
                 var chunkId = pair.Key;
                 var job = pair.Value;
+                Profiler.BeginSample("CheckIfJobDone");
                 if (job.Done)
                 {
                     if (CheckAndResolvePreconditionsBeforeExit(chunkId))
                     {
                         MovingOnThisUpdate.Add(chunkId);
+                        Profiler.BeginSample("OnJobDone");
                         OnJobDone(chunkId, job.Result);
+                        Profiler.EndSample();
                         //Remove this id from the stage, as it's moving on
                         removalHelper.Add(chunkId);
                     }
                 }
+                Profiler.EndSample();
             }
 
             foreach (var item in removalHelper)

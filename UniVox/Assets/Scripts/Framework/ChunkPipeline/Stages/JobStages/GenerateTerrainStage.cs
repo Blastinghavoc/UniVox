@@ -17,7 +17,7 @@ namespace UniVox.Framework.ChunkPipeline
         protected override void OnJobDone(Vector3Int chunkId, IChunkData result)
         {
             ///If structure generation is on, the chunk is not fully generated until after that.
-            ///Otherwise the chunk is fully generated after the terrain stage.
+            ///Otherwise the chunk is fully generated after the terrain stage.            
             result.FullyGenerated = !pipeline.GenerateStructures;
             pipeline.getChunkComponent(chunkId).Data = result;
         }
