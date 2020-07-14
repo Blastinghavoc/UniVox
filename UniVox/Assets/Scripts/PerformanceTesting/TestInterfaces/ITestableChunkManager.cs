@@ -2,14 +2,17 @@
 using System.Collections;
 using UniVox.Framework;
 using System;
+using UniVox.Framework.PlayAreaManagement;
 
 namespace PerformanceTesting
 {
     public interface ITestableChunkManager:IChunkManager
     {
+        PlayAreaManager PlayArea { get; }
+
         bool PipelineIsSettled();
 
-        Rigidbody GetPlayer();
+        IVoxelPlayer GetPlayer();
 
         string GetPipelineStatus();
 

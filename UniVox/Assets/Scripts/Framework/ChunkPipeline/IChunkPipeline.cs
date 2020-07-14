@@ -17,6 +17,11 @@ namespace UniVox.Framework.ChunkPipeline
         Func<Vector3Int, IChunkComponent> getChunkComponent { get; }
         bool GenerateStructures { get; }
         IChunkMesher chunkMesher { get; }
+        int TerrainDataStage { get; }
+        int OwnStructuresStage { get; }
+        int FullyGeneratedStage { get; }
+        int RenderedStage { get; }
+        int CompleteStage { get; }
 
         bool NextStageFreeForChunk(Vector3Int chunkID, int currentStage);
 

@@ -78,6 +78,11 @@ public static class VectorExtensions
         return new Vector3Int(operation(v1.x,v2.x), operation(v1.y,v2.y), operation(v1.z,v2.z));
     }
 
+    public static int Dot(this Vector3Int v1, Vector3Int v2) 
+    {
+        return (v1.x * v2.x) + (v1.y * v2.y) + (v1.z * v2.z);
+    }
+
     /// <summary>
     /// Used to unpack a Vector3Int
     /// </summary>

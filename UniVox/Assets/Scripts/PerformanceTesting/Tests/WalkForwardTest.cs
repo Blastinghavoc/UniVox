@@ -27,7 +27,7 @@ namespace PerformanceTesting
 
             var player = chunkManager.GetPlayer();
 
-            var startpos = player.position;
+            var startpos = player.Position;
             var distanceSqr = WalkDistance * WalkDistance;
 
             var startTime = Time.unscaledTime;
@@ -36,7 +36,7 @@ namespace PerformanceTesting
             TestFacilitator.virtualPlayer.SetAxis("Vertical", 1);
 
             //Wait until they've walked far enough
-            while (Vector3.SqrMagnitude(player.position - startpos) < distanceSqr)
+            while (Vector3.SqrMagnitude(player.Position - startpos) < distanceSqr)
             {
                 UpdatePerFrameCounters();
                 yield return null;

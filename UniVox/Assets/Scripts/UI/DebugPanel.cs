@@ -55,7 +55,6 @@ namespace UniVox.UI
                 new DebugItem("Coords"),
                 new DebugItem("ChunkID"),
                 new DebugItem("WaitingForUpdateCheck"),
-                new DebugItem("WaitingForDeactivationCheck"),
                 new DebugItem("Pipeline Status")
                 
             };
@@ -85,9 +84,8 @@ namespace UniVox.UI
                 debugItems["Coords"].Update(player.position.ToString());
                 debugItems["ChunkID"].Update(world.WorldToChunkPosition(player.position).ToString());
                 debugItems["Pipeline Status"].Update(world.GetPipelineStatus());
-                world.GetChunkManagerCoroutineStatus(out var updateStatus, out var deativateStatus);
+                world.GetChunkManagerCoroutineStatus(out var updateStatus);
                 debugItems["WaitingForUpdateCheck"].Update(updateStatus.ToString());
-                debugItems["WaitingForDeactivationCheck"].Update(deativateStatus.ToString());
 
                 numFramesSinceLast++;
                 if (Time.time > nextTimeToMeasureFPS)

@@ -66,9 +66,9 @@ namespace UniVox.Implementations.Providers
 
             chunkDimensions = chunkManager.ChunkDimensions.ToNative();
 
-            if (chunkManager.IsWorldHeightLimited)
+            if (chunkManager.WorldLimits.IsWorldHeightLimited)
             {
-                minY = chunkManager.MinChunkY * chunkManager.ChunkDimensions.y;
+                minY = chunkManager.WorldLimits.MinChunkY * chunkManager.ChunkDimensions.y;
             }
 
             worldSettings.Initialise(minY, chunkManager.ChunkDimensions.ToNative());

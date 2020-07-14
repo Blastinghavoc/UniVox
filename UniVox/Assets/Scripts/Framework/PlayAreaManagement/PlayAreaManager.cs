@@ -7,6 +7,7 @@ using static Utils.Helpers;
 
 namespace UniVox.Framework.PlayAreaManagement
 {
+
     /// <summary>
     /// Class responsible for managing the state of the play area as the 
     /// player moves
@@ -38,43 +39,49 @@ namespace UniVox.Framework.PlayAreaManagement
 
         #region variables for incremental processing
 
-        protected bool IncrementalDone;
+        protected bool IncrementalDone = true;
         protected IEnumerator IncrementalProcessIterator;
 
-        #endregion
+        #endregion        
 
-        //Should the world height be limited (like minecraft)
-        [SerializeField] protected bool limitWorldHeight;
-        //Vertical chunk limit of 8 -> max chunkid Y coordinate is 7, min -8
-        [SerializeField] protected int verticalChunkLimit;
-        public bool IsWorldHeightLimited { get => limitWorldHeight; }
-        public int MaxChunkY { get; protected set; }
-        public int MinChunkY { get; protected set; }
-
-        [SerializeField] public Rigidbody Player;
+        public IVoxelPlayer Player { get; protected set; }
 
         /// <summary>
         /// Controls how many chunks are processed per update 
         /// when the play area changes.
         /// </summary>
         [Range(1, 1000)]
-        [SerializeField] protected ushort UpdateRate = 1;
+        [SerializeField] protected ushort updateRate = 1;
+        public ushort UpdateRate { get => updateRate; set => updateRate = value; }
+
         public int WaitingForPlayAreaUpdate { get; private set; }//DEBUG
 
         //Current chunkID occupied by the Player
         public Vector3Int playerChunkID { get; protected set; }
         public Vector3Int prevPlayerChunkID { get; protected set; }        
 
-        protected ChunkManager chunkManager;
-        protected ChunkPipelineManager pipeline;
+        protected IChunkManager chunkManager;
 
-        public void Initialise(ChunkManager chunkManager, ChunkPipelineManager pipeline)
+        protected WorldSizeLimits worldLimits;
+
+        public PlayAreaManager(Vector3Int collidableChunksRadii, Vector3Int renderedChunksRadii)
+        {
+            this.collidableChunksRadii = collidableChunksRadii;
+            this.renderedChunksRadii = renderedChunksRadii;
+        }
+
+        public void Initialise(IChunkManager chunkManager, IChunkPipeline pipeline,IVoxelPlayer player)
         {
             this.chunkManager = chunkManager;
-            this.pipeline = pipeline;
+            this.Player = player;
+            worldLimits = chunkManager.WorldLimits;
+
+            IncrementalDone = true;
 
             Assert.IsTrue(RenderedChunksRadii.All((a, b) => a >= b, CollidableChunksRadii),
                 "The rendering radii must be at least as large as the collidable radii");
+            Assert.IsTrue(CollidableChunksRadii.All(a => a > 0),"Play area manager does not support collidable radii with any" +
+                $" dimensions less than 1. Given collidable radii was {CollidableChunksRadii}");
 
             //Calculate chunk radii
 
@@ -95,17 +102,9 @@ namespace UniVox.Framework.PlayAreaManagement
             new ChunkStage(FullyGeneratedRadii,pipeline.FullyGeneratedStage),
             new ChunkStage(StructureChunksRadii,pipeline.OwnStructuresStage),
             new ChunkStage(MaximumActiveRadii,pipeline.TerrainDataStage),
-            };
+            };            
 
-            //Set up world height limits
-            MaxChunkY = limitWorldHeight ? verticalChunkLimit - 1 : int.MaxValue;
-            MinChunkY = limitWorldHeight ? -verticalChunkLimit : int.MinValue;
-
-            //Set up player
-            Player.position = new Vector3(5, 17, 5);
-            Player.velocity = Vector3.zero;
-
-            playerChunkID = chunkManager.WorldToChunkPosition(Player.position);
+            playerChunkID = chunkManager.WorldToChunkPosition(Player.Position);
 
             //Immediately request generation of the chunk the player is in
             chunkManager.SetTargetStageOfChunk(playerChunkID, pipeline.CompleteStage);
@@ -117,7 +116,7 @@ namespace UniVox.Framework.PlayAreaManagement
         public void Update()
         {
             prevPlayerChunkID = playerChunkID;
-            playerChunkID = chunkManager.WorldToChunkPosition(Player.position);
+            playerChunkID = chunkManager.WorldToChunkPosition(Player.Position);
 
             if (playerChunkID != prevPlayerChunkID)
             {
@@ -132,29 +131,45 @@ namespace UniVox.Framework.PlayAreaManagement
             //Freeze the player if the chunk they are in is not complete yet.
             if (!chunkManager.IsChunkComplete(playerChunkID))
             {
-                if (playerChunkID.y > MinChunkY && playerChunkID.y < MaxChunkY)
+                if (playerChunkID.y > worldLimits.MinChunkY && playerChunkID.y < worldLimits.MaxChunkY)
                 {
                     //Freeze player if the chunk isn't ready for them (doesn't exist or doesn't have collision mesh)
                     //But only if the chunk is within the world limits
-                    Player.constraints |= RigidbodyConstraints.FreezePosition;
+                    Player.AllowMove(false);
                 }
             }
             else
             {
                 //Remove constraints
-                Player.constraints &= ~RigidbodyConstraints.FreezePosition;
+                Player.AllowMove(true);
             }
         }
 
         protected void RestartIncrementalProcessing() 
         {
-            IncrementalProcessIterator = UpdatePlayerAreaIncrementallyDifferenceOnly();
+            var chunkDifference = playerChunkID - prevPlayerChunkID;
+            var absChunkDifference = chunkDifference.ElementWise(Mathf.Abs);
+
+            ///If the absolute chunk difference is greater than 1 in any direction, 
+            ///just recalculate all the targets.
+            if (absChunkDifference.Any((_)=> _ > 1))
+            {
+                IncrementalProcessIterator = SetAllTargetsProcess();
+            }
+            else
+            {
+                ///Otherwise, a smarter approach is employed that just updates the chunks for which
+                ///the target should change.
+                IncrementalProcessIterator = UpdatePlayerAreaIncrementallyDifferenceOnly();
+            }
 
             var numChunksX = MaximumActiveRadii.x * 2 + 1;
             var numChunksY = MaximumActiveRadii.y * 2 + 1;
             var numChunksZ = MaximumActiveRadii.z * 2 + 1;
 
             WaitingForPlayAreaUpdate = numChunksX * numChunksY * numChunksZ;
+
+            IncrementalDone = false;
         }
 
         protected void ProcessChunksIncrementally() 
@@ -165,7 +180,7 @@ namespace UniVox.Framework.PlayAreaManagement
             {
                 ++processedThisUpdate;
                 --WaitingForPlayAreaUpdate;
-                if (processedThisUpdate >= UpdateRate)
+                if (processedThisUpdate >= updateRate)
                 {
                     return;
                 }
@@ -199,42 +214,23 @@ namespace UniVox.Framework.PlayAreaManagement
         protected IEnumerator SetAllTargetsProcess()
         {
 
-            //Start with collidable chunks
-            foreach (var chunkId in CuboidalArea(playerChunkID, CollidableChunksRadii))
+            for (int i = 0; i < radiiSequence.Length; i++)
             {
-                chunkManager.SetTargetStageOfChunk(chunkId, pipeline.CompleteStage);//Request that this chunk should be complete
-                yield return null;
-            }
+                var stage = radiiSequence[i];
 
-            //Then rendered chunks
-            foreach (var chunkId in CuboidalArea(playerChunkID, RenderedChunksRadii, CollidableChunksRadii + Vector3Int.one))
-            {
-                chunkManager.SetTargetStageOfChunk(chunkId, pipeline.RenderedStage);//Request that this chunk should be rendered
-                yield return null;
-            }
+                var endRadii = stage.radii;
+                Vector3Int startRadii = Vector3Int.zero;
+                if (i > 0)
+                {
+                    var prevStage = radiiSequence[i - 1];
+                    startRadii = prevStage.radii + Vector3Int.one;
+                }
 
-            //Then fully generated
-            foreach (var chunkId in CuboidalArea(playerChunkID, FullyGeneratedRadii, RenderedChunksRadii + Vector3Int.one))
-            {
-                //These chunks should be fully generated including structures from other chunks
-                chunkManager.SetTargetStageOfChunk(chunkId, pipeline.FullyGeneratedStage);
-                yield return null;
-            }
-
-            //Then own structures
-            foreach (var chunkId in CuboidalArea(playerChunkID, StructureChunksRadii, FullyGeneratedRadii + Vector3Int.one))
-            {
-                //These chunks should have generated their own structures.
-                chunkManager.SetTargetStageOfChunk(chunkId, pipeline.OwnStructuresStage);
-                yield return null;
-            }
-
-            //Then just terrain data, no structures
-            foreach (var chunkId in CuboidalArea(playerChunkID, MaximumActiveRadii, StructureChunksRadii + Vector3Int.one))
-            {
-                //Request that this chunk should be just terrain data, no structures
-                chunkManager.SetTargetStageOfChunk(chunkId, pipeline.TerrainDataStage);
-                yield return null;
+                foreach (var chunkId in CuboidalArea(playerChunkID, endRadii,startRadii))
+                {
+                    chunkManager.SetTargetStageOfChunk(chunkId, stage.pipelineStage);
+                    yield return null;
+                }
             }
         }
 
@@ -248,10 +244,13 @@ namespace UniVox.Framework.PlayAreaManagement
         {
 
             //TODO WIP
-
             var chunkDifference = playerChunkID - prevPlayerChunkID;
             var negativeChunkDifference = -1 * chunkDifference;
             var absChunkDifference = chunkDifference.ElementWise(Mathf.Abs);
+
+            Assert.IsTrue(absChunkDifference.All(_ => _ <= 1),$"Difference-based incremental update" +
+                $"does not support chunk differences greater than 1 in any dimension. " +
+                $"Absoloute difference was {absChunkDifference}");
 
             //For each stage
 
@@ -264,7 +263,9 @@ namespace UniVox.Framework.PlayAreaManagement
                 ChunkStage nextStage = i + 1 < radiiSequence.Length ? radiiSequence[i + 1] : null;
 
                 var endRadii = stage.radii;
+
                 Vector3Int startRadii = Vector3Int.zero;
+
                 if (i > 0)
                 {
                     var prevStage = radiiSequence[i - 1];
@@ -272,25 +273,67 @@ namespace UniVox.Framework.PlayAreaManagement
                 }
 
                 //No point having a radius much greater than the vertical chunk limit, as nothing can be out there
-                if (limitWorldHeight)
+                if (worldLimits.IsWorldHeightLimited)
                 {
-                    endRadii.y = Mathf.Min(endRadii.y, verticalChunkLimit + 1);
+                    endRadii.y = Mathf.Min(endRadii.y, worldLimits.HeightLimit + 1);
                 }
 
+                var adjustedStartRadii = (endRadii - absChunkDifference).ElementWise((_)=>Mathf.Max(_,0)) +Vector3Int.one;
+                //adjustedStartRadii.Clamp(Vector3Int.zero, endRadii);
                 //Only inspect the area that is different
-                startRadii = startRadii.ElementWise((a, b) => Mathf.Max(a, b), endRadii - absChunkDifference);
+                startRadii = startRadii.ElementWise((a, b) => Mathf.Max(a, b), adjustedStartRadii);
 
                 foreach (var offset in CuboidalArea(Vector3Int.zero, endRadii, startRadii))
                 {
 
-                    if (offset.All((a, b) => SameSign(a, b), chunkDifference))
+                    if (offset == Vector3Int.zero)
                     {
-                        //This offset represents a chunk id that just entered this stage radii
+                        continue;//Skip
+                    }
+
+                    ////TODO remove DEBUG
+                    //var dbgChunkId = offset + playerChunkID;
+                    //if (dbgChunkId.x == 1 && dbgChunkId.y == 1 && dbgChunkId.z == -1)
+                    //{
+                    //    Debug.Log("ShouldAdd");
+                    //}
+
+                    ////TODO remove DEBUG
+                    //var dbgChunkIdPrv = offset;
+                    //if (dbgChunkIdPrv.x == 1 && dbgChunkIdPrv.y == 1 && dbgChunkIdPrv.z == -1)
+                    //{
+                    //    Debug.Log("ShouldRemove");
+                    //}
+
+                    var dotProd = offset.Dot(chunkDifference);
+                    var products = offset * chunkDifference;
+
+                    var chunkId = offset + playerChunkID;
+                    var displacementFromCurrent = offset;
+                    var displacementFromPrevious = chunkId - prevPlayerChunkID;
+
+                    bool add = false;
+
+                    if (displacementFromCurrent.Dot(chunkDifference) >= 0)
+                    {
+                        add = true;
+                    }
+
+                    bool remove = false;
+
+                    //WIP
+
+                    //Note that both of these conditions can be true at the same time
+
+                    if (dotProd >= 0)//This offset represents a chunk id that just entered this stage radii                    
+                    {
+                        Assert.IsTrue(add,"Add disagrees");
                         chunkManager.SetTargetStageOfChunk(offset + playerChunkID, stage.pipelineStage);
                     }
-                    else
-                    {
-                        //The chunk should now be in the next stage outwards from the player
+
+                    //if (dotProd <= 0)//The chunk should now be in the next stage outwards from the player
+                    if (products.Any(a=>a<=0))//The chunk should now be in the next stage outwards from the player
+                    {                       
 
                         if (nextStage != null)
                         {
@@ -299,8 +342,8 @@ namespace UniVox.Framework.PlayAreaManagement
                         else
                         {
                             //The next stage out from here does not exist -> deactivate the chunk
-                            var chunkId = offset + prevPlayerChunkID;                            
-                            chunkManager.TryDeactivateChunk(offset + prevPlayerChunkID);                            
+                            var chunkId = offset + prevPlayerChunkID;
+                            chunkManager.TryDeactivateChunk(chunkId);
                         }
                     }
 

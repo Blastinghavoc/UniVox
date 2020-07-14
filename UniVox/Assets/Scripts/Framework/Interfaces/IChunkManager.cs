@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using UniVox.Framework.PlayAreaManagement;
 
 namespace UniVox.Framework
 {
@@ -12,13 +13,10 @@ namespace UniVox.Framework
         Vector3Int LocalVoxelIndexOfPosition(Vector3Int position);
         Vector3 SnapToVoxelCenter(Vector3 pos);
 
-        bool IsWorldHeightLimited { get; }
-        int MaxChunkY { get; }
-        int MinChunkY { get;}
-
         //Maximum radii from the player on each axis at which chunks may be active (in the lowest pipeline stage)
         Vector3Int MaximumActiveRadii { get; }
         bool GenerateStructures { get; }
+        WorldSizeLimits WorldLimits { get; }
 
         void Initialise();
 
@@ -39,5 +37,8 @@ namespace UniVox.Framework
         /// <param name="chunkID"></param>
         /// <returns></returns>
         Tuple<bool, bool> ContainsChunkID(Vector3Int chunkID);
+        bool IsChunkComplete(Vector3Int chunkId);
+        void SetTargetStageOfChunk(Vector3Int chunkID, int targetStage);
+        bool TryDeactivateChunk(Vector3Int chunkID);
     }
 }

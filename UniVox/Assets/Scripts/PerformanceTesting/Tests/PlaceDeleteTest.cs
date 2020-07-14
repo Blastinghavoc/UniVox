@@ -31,7 +31,7 @@ namespace PerformanceTesting
             yield return new WaitForSecondsRealtime(1);
 
             var player = chunkManager.GetPlayer();
-            var playerPos = player.position;
+            var playerPos = player.Position;
             var basePosition = playerPos + new Vector3(2, -1, 2);
 
             //Start the real test, recording frame time and memory while breaking blocks

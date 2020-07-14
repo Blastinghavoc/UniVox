@@ -177,6 +177,61 @@ PrefabInstance:
       propertyPath: MaxMeshedPerUpdate
       value: 24
       objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: playArea.collidableChunksRadii.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: playArea.collidableChunksRadii.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: playArea.collidableChunksRadii.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: playArea.renderedChunksRadii.x
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: playArea.renderedChunksRadii.y
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: playArea.renderedChunksRadii.z
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: playArea.limitWorldHeight
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: playArea.verticalChunkLimit
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: playArea.updateRate
+      value: 40
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: player
+      value: 
+      objectReference: {fileID: 1820829729}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: generateStructures
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: VoxelTypeManager
@@ -430,6 +485,56 @@ PrefabInstance:
       propertyPath: chunkDimensions.z
       value: 16
       objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: playArea.collidableChunksRadii.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: playArea.collidableChunksRadii.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: playArea.collidableChunksRadii.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: playArea.renderedChunksRadii.x
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: playArea.renderedChunksRadii.y
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: playArea.renderedChunksRadii.z
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: playArea.limitWorldHeight
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: playArea.verticalChunkLimit
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: playArea.updateRate
+      value: 40
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: player
+      value: 
+      objectReference: {fileID: 1820829729}
     - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: VoxelTypeManager
@@ -612,6 +717,61 @@ PrefabInstance:
         type: 3}
       propertyPath: PlayAreaDeactivateRate
       value: 128
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: playArea.collidableChunksRadii.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: playArea.collidableChunksRadii.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: playArea.collidableChunksRadii.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: playArea.renderedChunksRadii.x
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: playArea.renderedChunksRadii.y
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: playArea.renderedChunksRadii.z
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: playArea.limitWorldHeight
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: playArea.verticalChunkLimit
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: playArea.updateRate
+      value: 40
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: player
+      value: 
+      objectReference: {fileID: 1820829729}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: generateStructures
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
@@ -859,6 +1019,56 @@ PrefabInstance:
       propertyPath: renderedChunksRadii.x
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: playArea.collidableChunksRadii.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: playArea.collidableChunksRadii.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: playArea.collidableChunksRadii.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: playArea.renderedChunksRadii.x
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: playArea.renderedChunksRadii.y
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: playArea.renderedChunksRadii.z
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: playArea.limitWorldHeight
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: playArea.verticalChunkLimit
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: playArea.updateRate
+      value: 40
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: player
+      value: 
+      objectReference: {fileID: 1820829729}
     - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: VoxelTypeManager
@@ -1024,6 +1234,61 @@ PrefabInstance:
         type: 3}
       propertyPath: MaxMeshedPerUpdate
       value: 24
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: playArea.collidableChunksRadii.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: playArea.collidableChunksRadii.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: playArea.collidableChunksRadii.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: playArea.renderedChunksRadii.x
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: playArea.renderedChunksRadii.y
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: playArea.renderedChunksRadii.z
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: playArea.limitWorldHeight
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: playArea.verticalChunkLimit
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: playArea.updateRate
+      value: 40
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: player
+      value: 
+      objectReference: {fileID: 1820829729}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: generateStructures
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4110033766405619853, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
@@ -1215,6 +1480,12 @@ MonoBehaviour:
   oceanBiome: {fileID: 11400000, guid: bc7732a614701f04ca9c506c02132cc4, type: 2}
   biomeDatabaseComponent: {fileID: 398304578466534662}
   oreSettings: {fileID: 398304578466534661}
+--- !u!1 &1820829729 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 398304578991225289, guid: 579d24a84d9385447b0eb6819a968722,
+    type: 3}
+  m_PrefabInstance: {fileID: 398304578466534659}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &398304578466534659
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1397,6 +1668,61 @@ PrefabInstance:
       propertyPath: renderedChunksRadii.z
       value: 10
       objectReference: {fileID: 0}
+    - target: {fileID: 4444681113471702657, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: playArea.collidableChunksRadii.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4444681113471702657, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: playArea.collidableChunksRadii.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4444681113471702657, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: playArea.collidableChunksRadii.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4444681113471702657, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: playArea.renderedChunksRadii.x
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 4444681113471702657, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: playArea.renderedChunksRadii.y
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 4444681113471702657, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: playArea.renderedChunksRadii.z
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 4444681113471702657, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: playArea.limitWorldHeight
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4444681113471702657, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: playArea.verticalChunkLimit
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 4444681113471702657, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: playArea.updateRate
+      value: 40
+      objectReference: {fileID: 0}
+    - target: {fileID: 4444681113471702657, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: player
+      value: 
+      objectReference: {fileID: 1820829729}
+    - target: {fileID: 4444681113471702657, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: generateStructures
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4678667611123125231, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
       propertyPath: MaxGeneratedPerUpdate
@@ -1427,6 +1753,56 @@ PrefabInstance:
       propertyPath: renderedChunksRadii.z
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 4678667611123125231, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: playArea.collidableChunksRadii.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4678667611123125231, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: playArea.collidableChunksRadii.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4678667611123125231, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: playArea.collidableChunksRadii.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4678667611123125231, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: playArea.renderedChunksRadii.x
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 4678667611123125231, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: playArea.renderedChunksRadii.y
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 4678667611123125231, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: playArea.renderedChunksRadii.z
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 4678667611123125231, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: playArea.limitWorldHeight
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4678667611123125231, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: playArea.verticalChunkLimit
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 4678667611123125231, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: playArea.updateRate
+      value: 40
+      objectReference: {fileID: 0}
+    - target: {fileID: 4678667611123125231, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: player
+      value: 
+      objectReference: {fileID: 1820829729}
     - target: {fileID: 5880167504519198131, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
       propertyPath: m_IsActive
@@ -1588,6 +1964,56 @@ PrefabInstance:
       propertyPath: MaxMeshedPerUpdate
       value: 10
       objectReference: {fileID: 0}
+    - target: {fileID: 7616483327761516500, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: playArea.collidableChunksRadii.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7616483327761516500, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: playArea.collidableChunksRadii.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7616483327761516500, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: playArea.collidableChunksRadii.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7616483327761516500, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: playArea.renderedChunksRadii.x
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 7616483327761516500, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: playArea.renderedChunksRadii.y
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 7616483327761516500, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: playArea.renderedChunksRadii.z
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 7616483327761516500, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: playArea.limitWorldHeight
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7616483327761516500, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: playArea.verticalChunkLimit
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 7616483327761516500, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: playArea.updateRate
+      value: 40
+      objectReference: {fileID: 0}
+    - target: {fileID: 7616483327761516500, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: player
+      value: 
+      objectReference: {fileID: 1820829729}
     - target: {fileID: 8628052440443065350, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
       propertyPath: config

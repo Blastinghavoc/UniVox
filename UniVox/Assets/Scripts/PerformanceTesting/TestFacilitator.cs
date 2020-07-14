@@ -13,7 +13,7 @@ using UniVox.Gameplay;
 namespace PerformanceTesting
 {
     /// <summary>
-    /// To be attached to the VoxelWorld to facilitate automated performance testing
+    /// Facilitates automated performance testing
     /// </summary>
     public class TestFacilitator : MonoBehaviour
     {

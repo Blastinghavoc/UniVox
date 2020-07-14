@@ -1,8 +1,6 @@
 ﻿using PerformanceTesting;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Profiling;
@@ -10,7 +8,6 @@ using UniVox.Framework.ChunkPipeline;
 using UniVox.Framework.Common;
 using UniVox.Framework.PlayAreaManagement;
 using Utils.Pooling;
-using static Utils.Helpers;
 
 namespace UniVox.Framework
 {
@@ -26,14 +23,14 @@ namespace UniVox.Framework
         protected int VoxelSize { get => voxelSize; }
 
         [SerializeField] protected PlayAreaManager playArea;
+        public PlayAreaManager PlayArea { get => playArea; }
         public Vector3Int MaximumActiveRadii => playArea.MaximumActiveRadii;
 
-        public bool IsWorldHeightLimited { get => playArea.IsWorldHeightLimited; }
-        public int MaxChunkY { get => playArea.MaxChunkY; }
-        public int MinChunkY { get => playArea.MaxChunkY; }
-
+        [SerializeField] protected WorldSizeLimits worldSizeLimits;
+        public WorldSizeLimits WorldLimits { get => worldSizeLimits; }
         #endregion
 
+        public GameObject player;
 
         [SerializeField] protected GameObject chunkPrefab;
         protected PrefabPool chunkPool;
@@ -56,7 +53,7 @@ namespace UniVox.Framework
         /// Controls how many chunks can be meshed per update
         /// </summary>
         [Range(1, 100)]
-        [SerializeField] protected ushort MaxMeshedPerUpdate = 1;        
+        [SerializeField] protected ushort MaxMeshedPerUpdate = 1;
 
         //TODO remove DEBUG
         [SerializeField] protected bool DebugPipeline = false;
@@ -65,9 +62,9 @@ namespace UniVox.Framework
 
         protected VoxelTypeManager VoxelTypeManager;
         protected IChunkProvider chunkProvider { get; set; }
-        protected IChunkMesher chunkMesher { get; set; }        
+        protected IChunkMesher chunkMesher { get; set; }
 
-        protected Dictionary<Vector3Int, ChunkComponent> loadedChunks;        
+        protected Dictionary<Vector3Int, ChunkComponent> loadedChunks;
 
         private ChunkPipelineManager pipeline;
 
@@ -76,6 +73,8 @@ namespace UniVox.Framework
         public virtual void Initialise()
         {
             eventManager = new FrameworkEventManager();
+
+            worldSizeLimits.Initalise();
 
             //Enforce positioning of ChunkManager at the world origin
             transform.position = Vector3.zero;
@@ -110,15 +109,18 @@ namespace UniVox.Framework
                 MaxMeshedPerUpdate,
                 MaxMeshedPerUpdate,
                 generateStructures,
-                MaxStructurePerUpdate);            
-            
+                MaxStructurePerUpdate);
+
             //Initialise play area manager
-            playArea.Initialise(this, pipeline);     
-                        
+            var voxelPlayer = player.GetComponent<IVoxelPlayer>();
+            Assert.IsNotNull(voxelPlayer, "Chunk manager must have a reference to a player with a component" +
+                " that implements IVoxelPlayer");
+            playArea.Initialise(this, pipeline, voxelPlayer);
+
         }
 
         protected virtual void Update()
-        {          
+        {
 
             //TODO remove DEBUG
             pipeline.DebugMode = DebugPipeline;
@@ -128,7 +130,9 @@ namespace UniVox.Framework
                 DebugPipeline = false;
             }
 
-            pipeline.Update();           
+            playArea.Update();
+
+            pipeline.Update();
         }
 
         /// <summary>
@@ -150,12 +154,12 @@ namespace UniVox.Framework
 
         }
 
-        public bool IsChunkComplete(Vector3Int chunkId) 
+        public bool IsChunkComplete(Vector3Int chunkId)
         {
             return loadedChunks.ContainsKey(chunkId) && pipeline.GetMaxStage(chunkId).Equals(pipeline.CompleteStage);
         }
 
-        public Vector3Int[] GetAllLoadedChunkIds() 
+        public Vector3Int[] GetAllLoadedChunkIds()
         {
             Vector3Int[] keys = new Vector3Int[loadedChunks.Keys.Count];
             loadedChunks.Keys.CopyTo(keys, 0);
@@ -212,7 +216,7 @@ namespace UniVox.Framework
                 //Return chunk gameobject to pool
                 chunkPool.ReturnToPool(chunkComponent.gameObject);
 
-                eventManager.FireChunkDeactivated(chunkID, playArea.playerChunkID, MaximumActiveRadii);                
+                eventManager.FireChunkDeactivated(chunkID, playArea.playerChunkID, MaximumActiveRadii);
             }
             Profiler.EndSample();
             return wasPresent;
@@ -227,10 +231,11 @@ namespace UniVox.Framework
         {
             Profiler.BeginSample("SetTargetStageOfChunk");
             bool outOfWorld = false;
-            if (chunkID.y > MaxChunkY || chunkID.y < MinChunkY)
+            if (chunkID.y > WorldLimits.MaxChunkY || chunkID.y < WorldLimits.MinChunkY)
             {
                 outOfWorld = true;
-                var absDistanceOutisedWorld = chunkID.y > MaxChunkY ? chunkID.y - MaxChunkY : MinChunkY - chunkID.y;
+                var absDistanceOutisedWorld = (chunkID.y > WorldLimits.MaxChunkY) ? chunkID.y - WorldLimits.MaxChunkY 
+                    : WorldLimits.MinChunkY - chunkID.y;
 
                 Assert.IsTrue(absDistanceOutisedWorld > 0);
 
@@ -553,7 +558,7 @@ namespace UniVox.Framework
             return pipeline.IsSettled();
         }
 
-        public Rigidbody GetPlayer()
+        public IVoxelPlayer GetPlayer()
         {
             return playArea.Player;
         }
