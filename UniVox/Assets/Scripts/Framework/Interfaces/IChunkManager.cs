@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using UniVox.Framework.ChunkPipeline;
 using UniVox.Framework.PlayAreaManagement;
 
 namespace UniVox.Framework
@@ -37,8 +38,13 @@ namespace UniVox.Framework
         /// <param name="chunkID"></param>
         /// <returns></returns>
         Tuple<bool, bool> ContainsChunkID(Vector3Int chunkID);
+
+        //TODO remove DEBUG
+        int GetMinPipelineStageOfChunk(Vector3Int chunkId);
+
         bool IsChunkComplete(Vector3Int chunkId);
-        void SetTargetStageOfChunk(Vector3Int chunkID, int targetStage);
+        void SetTargetStageOfChunk(Vector3Int chunkID, int targetStage,TargetUpdateMode updateMode = TargetUpdateMode.any);
         bool TryDeactivateChunk(Vector3Int chunkID);
+        Vector3Int[] GetAllLoadedChunkIds();
     }
 }

@@ -30,7 +30,6 @@ namespace UniVox.Framework.ChunkPipeline
 
         IPipelineStage GetStage(int stageIndex);
         bool ChunkMinStageGreaterThan(Vector3Int id, int stageId);
-
-
+        void SetTarget(Vector3Int chunkId, int targetStage, TargetUpdateMode mode = TargetUpdateMode.any);
     }
 }

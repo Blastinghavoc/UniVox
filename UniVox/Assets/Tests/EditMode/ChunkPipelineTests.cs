@@ -385,6 +385,32 @@ namespace Tests
         }
 
         [Test]
+        public void SetTargetHigherThanCurrentButUpgradeNotAllowed()
+        {
+            MakePipeline(1000, 1, 1);
+
+            var testChunkID = new Vector3Int(0, 0, 0);
+
+            mockAddNewChunkWithTarget(testChunkID, pipeline.RenderedStage);
+            AddAllDependenciesNecessaryForChunkToGetToStage(testChunkID, pipeline.RenderedStage);
+
+            pipeline.Update();
+
+            //Chunk ends up in rendered stage
+            AssertChunkStages(testChunkID, pipeline.RenderedStage);
+
+            pipeline.Update();
+            //Further updates do not take the chunk higher than its target stage
+            AssertChunkStages(testChunkID, pipeline.RenderedStage);
+
+            //Try to update the target, but using the downgrade mode
+            pipeline.SetTarget(testChunkID, pipeline.CompleteStage,TargetUpdateMode.downgradeOnly);
+
+            //Target and other attributes should be unchanged
+            AssertChunkStages(testChunkID, pipeline.RenderedStage);
+        }
+
+        [Test]
         public void SetTargetHigherThanCurrentWithWIP()
         {
             MakePipeline(1000, 1, 1);
@@ -438,6 +464,30 @@ namespace Tests
 
             //Max stage and target should have been decreased, min stage should have decreased to max
             AssertChunkStages(testChunkID, pipeline.FullyGeneratedStage);
+        }
+
+        [Test]
+        public void SetTargetLowerThanCurrentButDowngradeNotAllowed()
+        {
+            MakePipeline(1000, 1, 1);
+
+            var testChunkID = new Vector3Int(0, 0, 0);
+
+            mockAddNewChunkWithTarget(testChunkID, pipeline.RenderedStage);
+            AddAllDependenciesNecessaryForChunkToGetToStage(testChunkID, pipeline.RenderedStage);
+
+            pipeline.Update();
+
+            AssertChunkStages(testChunkID, pipeline.RenderedStage);
+
+            //Set target lower than the current target, and lower than the current max stage
+            pipeline.SetTarget(testChunkID, pipeline.FullyGeneratedStage,TargetUpdateMode.upgradeOnly);
+
+            //Render mesh should NOT have been removed
+            Assert.IsNotNull(mockComponentStorage[testChunkID].RenderMesh);
+
+            //Max stage and target should NOT have been decreased, min stage should NOT have decreased
+            AssertChunkStages(testChunkID, pipeline.RenderedStage);
         }
 
         [Test]

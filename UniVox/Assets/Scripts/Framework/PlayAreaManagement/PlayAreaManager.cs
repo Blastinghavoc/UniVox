@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Profiling;
@@ -17,8 +19,8 @@ namespace UniVox.Framework.PlayAreaManagement
     {
         [SerializeField] private Vector3Int collidableChunksRadii;
         [SerializeField] private Vector3Int renderedChunksRadii;
-        public Vector3Int CollidableChunksRadii { get => collidableChunksRadii;protected set => collidableChunksRadii = value; }
-        public Vector3Int RenderedChunksRadii { get => renderedChunksRadii;protected set => renderedChunksRadii = value; }
+        public Vector3Int CollidableChunksRadii { get => collidableChunksRadii; protected set => collidableChunksRadii = value; }
+        public Vector3Int RenderedChunksRadii { get => renderedChunksRadii; protected set => renderedChunksRadii = value; }
         public Vector3Int FullyGeneratedRadii { get; protected set; }
         public Vector3Int StructureChunksRadii { get; protected set; }
         public Vector3Int MaximumActiveRadii { get; protected set; }
@@ -40,8 +42,8 @@ namespace UniVox.Framework.PlayAreaManagement
         #region variables for incremental processing
 
         protected bool IncrementalDone = true;
-        protected IEnumerator IncrementalProcessIterator;
-
+        protected Queue<IEnumerator>[] processQueuesByRadii;
+        private int incrementalProcessCount;//TODO remove DEBUG
         #endregion        
 
         public IVoxelPlayer Player { get; protected set; }
@@ -50,7 +52,7 @@ namespace UniVox.Framework.PlayAreaManagement
         /// Controls how many chunks are processed per update 
         /// when the play area changes.
         /// </summary>
-        [Range(1, 1000)]
+        [Range(1, 10000)]
         [SerializeField] protected ushort updateRate = 1;
         public ushort UpdateRate { get => updateRate; set => updateRate = value; }
 
@@ -58,7 +60,7 @@ namespace UniVox.Framework.PlayAreaManagement
 
         //Current chunkID occupied by the Player
         public Vector3Int playerChunkID { get; protected set; }
-        public Vector3Int prevPlayerChunkID { get; protected set; }        
+        public Vector3Int prevPlayerChunkID { get; protected set; }
 
         protected IChunkManager chunkManager;
 
@@ -70,17 +72,22 @@ namespace UniVox.Framework.PlayAreaManagement
             this.renderedChunksRadii = renderedChunksRadii;
         }
 
-        public void Initialise(IChunkManager chunkManager, IChunkPipeline pipeline,IVoxelPlayer player)
+        public void Initialise(IChunkManager chunkManager, IChunkPipeline pipeline, IVoxelPlayer player)
         {
             this.chunkManager = chunkManager;
             this.Player = player;
             worldLimits = chunkManager.WorldLimits;
+            processQueuesByRadii = new Queue<IEnumerator>[5];
+            for (int i = 0; i < processQueuesByRadii.Length; i++)
+            {
+                processQueuesByRadii[i] = new Queue<IEnumerator>();
+            }
 
             IncrementalDone = true;
 
             Assert.IsTrue(RenderedChunksRadii.All((a, b) => a >= b, CollidableChunksRadii),
                 "The rendering radii must be at least as large as the collidable radii");
-            Assert.IsTrue(CollidableChunksRadii.All(a => a > 0),"Play area manager does not support collidable radii with any" +
+            Assert.IsTrue(CollidableChunksRadii.All(a => a > 0), "Play area manager does not support collidable radii with any" +
                 $" dimensions less than 1. Given collidable radii was {CollidableChunksRadii}");
 
             //Calculate chunk radii
@@ -102,7 +109,7 @@ namespace UniVox.Framework.PlayAreaManagement
             new ChunkStage(FullyGeneratedRadii,pipeline.FullyGeneratedStage),
             new ChunkStage(StructureChunksRadii,pipeline.OwnStructuresStage),
             new ChunkStage(MaximumActiveRadii,pipeline.TerrainDataStage),
-            };            
+            };
 
             playerChunkID = chunkManager.WorldToChunkPosition(Player.Position);
 
@@ -115,6 +122,7 @@ namespace UniVox.Framework.PlayAreaManagement
 
         public void Update()
         {
+            Profiler.BeginSample("PlayAreaManagerUpdate");
             prevPlayerChunkID = playerChunkID;
             playerChunkID = chunkManager.WorldToChunkPosition(Player.Position);
 
@@ -143,51 +151,88 @@ namespace UniVox.Framework.PlayAreaManagement
                 //Remove constraints
                 Player.AllowMove(true);
             }
+            Profiler.EndSample();
         }
 
-        protected void RestartIncrementalProcessing() 
+        protected void RestartIncrementalProcessing()
         {
             var chunkDifference = playerChunkID - prevPlayerChunkID;
             var absChunkDifference = chunkDifference.ElementWise(Mathf.Abs);
 
             ///If the absolute chunk difference is greater than 1 in any direction, 
             ///just recalculate all the targets.
-            if (absChunkDifference.Any((_)=> _ > 1))
+            ///
+            //IEnumerator incrementalProcessIterator;
+            if (absChunkDifference.Any((_) => _ > 1))
             {
-                IncrementalProcessIterator = SetAllTargetsProcess();
+                ///The player most likely teleported, an incremental approach is not guaranteed
+                ///to be possible.
+                Debug.LogWarning($"Player teleported (moved more than 1 chunk per update) with absolute chunk difference {absChunkDifference}" +
+                    $", brute force play area update used");
+                ResolveTeleport();
+                
+                //throw new NotImplementedException();
+                //This does not deactivate chunks at the moment!
+                //incrementalProcessIterator = SetAllTargetsProcess(playerChunkID, prevPlayerChunkID);
             }
             else
             {
                 ///Otherwise, a smarter approach is employed that just updates the chunks for which
                 ///the target should change.
-                IncrementalProcessIterator = UpdatePlayerAreaIncrementallyDifferenceOnly();
+                //incrementalProcessIterator = UpdatePlayerAreaIncrementallyDifferenceOnly(playerChunkID,prevPlayerChunkID);
+                for (int i = 0; i < radiiSequence.Length; i++)
+                {
+                    processQueuesByRadii[i].Enqueue(DifferenceBasedIncrementalUpdater(playerChunkID, prevPlayerChunkID, i));
+                }
             }
 
             var numChunksX = MaximumActiveRadii.x * 2 + 1;
             var numChunksY = MaximumActiveRadii.y * 2 + 1;
             var numChunksZ = MaximumActiveRadii.z * 2 + 1;
 
-            WaitingForPlayAreaUpdate = numChunksX * numChunksY * numChunksZ;
+            WaitingForPlayAreaUpdate += numChunksX * numChunksY * numChunksZ;
 
             IncrementalDone = false;
+            incrementalProcessCount = 0;
         }
 
-        protected void ProcessChunksIncrementally() 
+        protected void ProcessChunksIncrementally()
         {
             int processedThisUpdate = 0;
 
-            while (IncrementalProcessIterator.MoveNext())
+            for (int i = 0; i < processQueuesByRadii.Length; i++)
             {
-                ++processedThisUpdate;
-                --WaitingForPlayAreaUpdate;
-                if (processedThisUpdate >= updateRate)
+                var processQueue = processQueuesByRadii[i];
+                while (processQueue.Count > 0)
                 {
-                    return;
+                    var processIterator = processQueue.Peek();
+
+                    if (processedThisUpdate >= updateRate)
+                    {
+                        //Check before we start iterating too, to prevent updating anything if update rate is 0
+                        return;
+                    }
+
+                    while (processIterator.MoveNext())
+                    {
+                        ++processedThisUpdate;
+                        ++incrementalProcessCount;
+                        --WaitingForPlayAreaUpdate;
+                        if (processedThisUpdate >= updateRate)
+                        {
+                            return;
+                        }
+                    }
+                    //This process is done
+                    processQueue.Dequeue();
                 }
             }
-            //Done processing
+
+            //Done all processes
             IncrementalDone = true;
             WaitingForPlayAreaUpdate = 0;
+
+            Debug.Log($"ProcessChunksIncrementally did {incrementalProcessCount} updates");
         }
 
         /// <summary>
@@ -198,9 +243,45 @@ namespace UniVox.Framework.PlayAreaManagement
             Profiler.BeginSample("UpdateWholePlayArea");
 
             //Do the whole update at once
-            var iterator = SetAllTargetsProcess();
+            var iterator = SetAllTargetsProcess(playerChunkID, prevPlayerChunkID);
+
+            //DEBUG
+            int count = 0;
+
             while (iterator.MoveNext())
             {
+                count++;
+            }
+
+            Debug.Log($"UpdateWholePlayArea did {count} updates");
+
+            Profiler.EndSample();
+        }
+
+        protected void ResolveTeleport() 
+        {
+            Profiler.BeginSample("UpdateWholePlayArea");
+
+            //Do the whole update at once
+            var iterator = SetAllTargetsProcess(playerChunkID, prevPlayerChunkID);
+
+            var outsideRangeSet = new HashSet<Vector3Int>(chunkManager.GetAllLoadedChunkIds());
+
+            while (iterator.MoveNext())
+            {
+                outsideRangeSet.Remove((Vector3Int)iterator.Current);
+            }
+
+            //remove any chunks that were not processed, as these must be outside the play area
+            foreach (var chunkId in outsideRangeSet)
+            {
+                chunkManager.TryDeactivateChunk(chunkId);
+            }
+
+            //Clear the process queues, as we've just done the whole update by brute force
+            for (int i = 0; i < processQueuesByRadii.Length; i++)
+            {
+                processQueuesByRadii[i].Clear();
             }
 
             Profiler.EndSample();
@@ -210,8 +291,9 @@ namespace UniVox.Framework.PlayAreaManagement
         /// Sets the targets of ALL chunks in the radii. This is good when the world loads and the 
         /// chunks don't have a target yet, but inefficient when the player chunk changes, 
         /// as not every chunk will need to change target.
+        /// Note that this method does not deactivate any chunks
         /// </summary>
-        protected IEnumerator SetAllTargetsProcess()
+        protected IEnumerator SetAllTargetsProcess(Vector3Int newChunkId, Vector3Int oldChunkId)
         {
 
             for (int i = 0; i < radiiSequence.Length; i++)
@@ -226,129 +308,115 @@ namespace UniVox.Framework.PlayAreaManagement
                     startRadii = prevStage.radii + Vector3Int.one;
                 }
 
-                foreach (var chunkId in CuboidalArea(playerChunkID, endRadii,startRadii))
+                foreach (var chunkId in CuboidalArea(newChunkId, endRadii, startRadii))
                 {
                     chunkManager.SetTargetStageOfChunk(chunkId, stage.pipelineStage);
-                    yield return null;
+                    yield return chunkId;
                 }
             }
         }
 
         /// <summary>
-        /// Only sets the targets of chunks that for which the target has changed.
-        /// Also deactivates chunks as necessary. This is designed to be an efficient
-        /// way to keep the world up to date as the player moves.
+        /// Incremental updater for a single set of radii in the sequence
         /// </summary>
+        /// <param name="newChunkId"></param>
+        /// <param name="oldChunkId"></param>
+        /// <param name="sequenceIndex"></param>
         /// <returns></returns>
-        protected IEnumerator UpdatePlayerAreaIncrementallyDifferenceOnly()
+        protected IEnumerator DifferenceBasedIncrementalUpdater(Vector3Int newChunkId, Vector3Int oldChunkId, int sequenceIndex)
         {
-
-            //TODO WIP
-            var chunkDifference = playerChunkID - prevPlayerChunkID;
-            var negativeChunkDifference = -1 * chunkDifference;
+            var chunkDifference = newChunkId - oldChunkId;
             var absChunkDifference = chunkDifference.ElementWise(Mathf.Abs);
 
-            Assert.IsTrue(absChunkDifference.All(_ => _ <= 1),$"Difference-based incremental update" +
-                $"does not support chunk differences greater than 1 in any dimension. " +
+            Assert.IsTrue(absChunkDifference.All(_ => _ <= 1), $"Difference-based incremental update" +
+                $" does not support chunk differences greater than 1 in any dimension. " +
                 $"Absoloute difference was {absChunkDifference}");
+            //if (!absChunkDifference.All(_ => _ <= 1))
+            //{
+            //    Debug.LogWarning($"Difference-based incremental update" +
+            //        $" does not support chunk differences greater than 1 in any dimension. " +
+            //        $"Absoloute difference was {absChunkDifference}");
+            //}
 
-            //For each stage
+            var stage = radiiSequence[sequenceIndex];
+            ChunkStage nextStage = sequenceIndex + 1 < radiiSequence.Length ? radiiSequence[sequenceIndex + 1] : null;
 
-            //Set all chunks in the negative chunk difference area around the prev chunk to the next stage
-            //Set all chunks in the positive chunk difference area around the current chunk to the current stage.
+            var endRadii = stage.radii;
 
-            for (int i = 0; i < radiiSequence.Length; i++)
+            Vector3Int startRadii = Vector3Int.zero;
+
+            ///Used to prevent later stages overwriting stuff done by previous stages
+            Vector3Int prevStageRadii = Vector3Int.zero;
+            if (sequenceIndex > 0)
             {
-                var stage = radiiSequence[i];
-                ChunkStage nextStage = i + 1 < radiiSequence.Length ? radiiSequence[i + 1] : null;
+                var prevStage = radiiSequence[sequenceIndex - 1];
+                prevStageRadii = prevStage.radii;
+                startRadii = prevStage.radii + Vector3Int.one;
+            }
 
-                var endRadii = stage.radii;
+            var adjustedStartRadii = (endRadii - absChunkDifference).ElementWise((_) => Mathf.Max(_, 0)) + Vector3Int.one;
+            //adjustedStartRadii.Clamp(Vector3Int.zero, endRadii);
+            //Only inspect the area that is different
+            startRadii = startRadii.ElementWise((a, b) => Mathf.Max(a, b), adjustedStartRadii);
 
-                Vector3Int startRadii = Vector3Int.zero;
+            ///IMPORTANT: this is NOT always the same as newChunkId, because
+            ///this process may be executing late as part of a queue.
+            Vector3Int currentPlayerChunkIdAtTimeOfExecution = playerChunkID;
+            bool thereIsPreviousWork = currentPlayerChunkIdAtTimeOfExecution != newChunkId;
+            ///Ensures that the above two variables always remain correct,
+            ///irrespective of when the iterator yields (and external values change)
+            Action afterYield = () => {
+                currentPlayerChunkIdAtTimeOfExecution = playerChunkID;
+                thereIsPreviousWork = (sequenceIndex > 0)? currentPlayerChunkIdAtTimeOfExecution != newChunkId
+                    : false;//There cannot be any previous work if this is the first stage
+            };
 
-                if (i > 0)
+            foreach (var offset in CuboidalArea(Vector3Int.zero, endRadii, startRadii))
+            {           
+
+                var chunkIdFromOldPos = oldChunkId + offset;
+                var chunkIdFromNewPos = newChunkId + offset;                
+
+                ///By definition, the chunk id according to the current pos is in the new area
+                ///Check if it is also in the old area, because if it is not then it is a 
+                ///chunk that has just been moved into, so needs to upgrade its stage
+                if (!InsideCuboid(chunkIdFromNewPos, oldChunkId, endRadii))
                 {
-                    var prevStage = radiiSequence[i - 1];
-                    startRadii = prevStage.radii + Vector3Int.one;
+                    ///Prevent overwriting previous work
+                    if (!thereIsPreviousWork || !InsideCuboid(chunkIdFromNewPos, currentPlayerChunkIdAtTimeOfExecution, prevStageRadii))
+                    {
+                        //Upgrade the target stage of the chunk, making sure it is an upgrade
+                        chunkManager.SetTargetStageOfChunk(chunkIdFromNewPos, stage.pipelineStage, TargetUpdateMode.upgradeOnly);
+                        yield return null;
+                        afterYield();
+                    }
                 }
 
-                //No point having a radius much greater than the vertical chunk limit, as nothing can be out there
-                if (worldLimits.IsWorldHeightLimited)
-                {
-                    endRadii.y = Mathf.Min(endRadii.y, worldLimits.HeightLimit + 1);
-                }
+                ///Must check if the id according to the prev pos is in the new area.
+                ///If it is, nothing needs to be done, but if it is not, that chunk Id
+                ///needs to be downgraded one stage.
+                if (!InsideCuboid(chunkIdFromOldPos, newChunkId, endRadii))
+                {                  
 
-                var adjustedStartRadii = (endRadii - absChunkDifference).ElementWise((_)=>Mathf.Max(_,0)) +Vector3Int.one;
-                //adjustedStartRadii.Clamp(Vector3Int.zero, endRadii);
-                //Only inspect the area that is different
-                startRadii = startRadii.ElementWise((a, b) => Mathf.Max(a, b), adjustedStartRadii);
-
-                foreach (var offset in CuboidalArea(Vector3Int.zero, endRadii, startRadii))
-                {
-
-                    if (offset == Vector3Int.zero)
+                    ///Prevent overwriting previous work
+                    if (!thereIsPreviousWork || !InsideCuboid(chunkIdFromOldPos, currentPlayerChunkIdAtTimeOfExecution, prevStageRadii))
                     {
-                        continue;//Skip
-                    }
-
-                    ////TODO remove DEBUG
-                    //var dbgChunkId = offset + playerChunkID;
-                    //if (dbgChunkId.x == 1 && dbgChunkId.y == 1 && dbgChunkId.z == -1)
-                    //{
-                    //    Debug.Log("ShouldAdd");
-                    //}
-
-                    ////TODO remove DEBUG
-                    //var dbgChunkIdPrv = offset;
-                    //if (dbgChunkIdPrv.x == 1 && dbgChunkIdPrv.y == 1 && dbgChunkIdPrv.z == -1)
-                    //{
-                    //    Debug.Log("ShouldRemove");
-                    //}
-
-                    var dotProd = offset.Dot(chunkDifference);
-                    var products = offset * chunkDifference;
-
-                    var chunkId = offset + playerChunkID;
-                    var displacementFromCurrent = offset;
-                    var displacementFromPrevious = chunkId - prevPlayerChunkID;
-
-                    bool add = false;
-
-                    if (displacementFromCurrent.Dot(chunkDifference) >= 0)
-                    {
-                        add = true;
-                    }
-
-                    bool remove = false;
-
-                    //WIP
-
-                    //Note that both of these conditions can be true at the same time
-
-                    if (dotProd >= 0)//This offset represents a chunk id that just entered this stage radii                    
-                    {
-                        Assert.IsTrue(add,"Add disagrees");
-                        chunkManager.SetTargetStageOfChunk(offset + playerChunkID, stage.pipelineStage);
-                    }
-
-                    //if (dotProd <= 0)//The chunk should now be in the next stage outwards from the player
-                    if (products.Any(a=>a<=0))//The chunk should now be in the next stage outwards from the player
-                    {                       
-
                         if (nextStage != null)
                         {
-                            chunkManager.SetTargetStageOfChunk(offset + prevPlayerChunkID, nextStage.pipelineStage);
+                            //Downgrade the target stage of the chunk, making sure it is a downgrade
+                            chunkManager.SetTargetStageOfChunk(chunkIdFromOldPos, nextStage.pipelineStage, TargetUpdateMode.downgradeOnly);
                         }
                         else
                         {
                             //The next stage out from here does not exist -> deactivate the chunk
-                            var chunkId = offset + prevPlayerChunkID;
-                            chunkManager.TryDeactivateChunk(chunkId);
+                            chunkManager.TryDeactivateChunk(chunkIdFromOldPos);
                         }
+                        yield return null;
+                        afterYield();
                     }
 
-                    yield return null;
                 }
+
             }
         }
 

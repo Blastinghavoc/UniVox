@@ -232,6 +232,16 @@ PrefabInstance:
       propertyPath: generateStructures
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: worldSizeLimits.limitWorldHeight
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: worldSizeLimits.verticalChunkLimit
+      value: 8
+      objectReference: {fileID: 0}
     - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: VoxelTypeManager
@@ -535,6 +545,16 @@ PrefabInstance:
       propertyPath: player
       value: 
       objectReference: {fileID: 1820829729}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: worldSizeLimits.limitWorldHeight
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: worldSizeLimits.verticalChunkLimit
+      value: 8
+      objectReference: {fileID: 0}
     - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: VoxelTypeManager
@@ -772,6 +792,16 @@ PrefabInstance:
         type: 3}
       propertyPath: generateStructures
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: worldSizeLimits.limitWorldHeight
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: worldSizeLimits.verticalChunkLimit
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
@@ -1069,6 +1099,16 @@ PrefabInstance:
       propertyPath: player
       value: 
       objectReference: {fileID: 1820829729}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: worldSizeLimits.limitWorldHeight
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: worldSizeLimits.verticalChunkLimit
+      value: 8
+      objectReference: {fileID: 0}
     - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: VoxelTypeManager
@@ -1289,6 +1329,16 @@ PrefabInstance:
         type: 3}
       propertyPath: generateStructures
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: worldSizeLimits.limitWorldHeight
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: worldSizeLimits.verticalChunkLimit
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 4110033766405619853, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
@@ -1723,6 +1773,16 @@ PrefabInstance:
       propertyPath: generateStructures
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 4444681113471702657, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: worldSizeLimits.limitWorldHeight
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4444681113471702657, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: worldSizeLimits.verticalChunkLimit
+      value: 8
+      objectReference: {fileID: 0}
     - target: {fileID: 4678667611123125231, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
       propertyPath: MaxGeneratedPerUpdate
@@ -1803,6 +1863,16 @@ PrefabInstance:
       propertyPath: player
       value: 
       objectReference: {fileID: 1820829729}
+    - target: {fileID: 4678667611123125231, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: worldSizeLimits.limitWorldHeight
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4678667611123125231, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: worldSizeLimits.verticalChunkLimit
+      value: 8
+      objectReference: {fileID: 0}
     - target: {fileID: 5880167504519198131, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
       propertyPath: m_IsActive
@@ -2014,6 +2084,16 @@ PrefabInstance:
       propertyPath: player
       value: 
       objectReference: {fileID: 1820829729}
+    - target: {fileID: 7616483327761516500, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: worldSizeLimits.limitWorldHeight
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7616483327761516500, guid: 579d24a84d9385447b0eb6819a968722,
+        type: 3}
+      propertyPath: worldSizeLimits.verticalChunkLimit
+      value: 8
+      objectReference: {fileID: 0}
     - target: {fileID: 8628052440443065350, guid: 579d24a84d9385447b0eb6819a968722,
         type: 3}
       propertyPath: config

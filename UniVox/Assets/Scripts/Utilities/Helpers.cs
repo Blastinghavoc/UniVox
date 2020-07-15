@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using Unity.Burst;
 using Unity.Mathematics;
 using UnityEngine;
@@ -240,6 +241,21 @@ namespace Utils
             }
         }
 
+        /// <summary>
+        /// Checks if a point is inside an axis aligned cuboid
+        /// </summary>
+        /// <param name="point"></param>
+        /// <param name="cuboidCenter"></param>
+        /// <param name="cuboidRadii"></param>
+        /// <returns></returns>
+        public static bool InsideCuboid(Vector3Int point, Vector3Int cuboidCenter, Vector3Int cuboidRadii) 
+        {
+            var displacementFromCenter = point - cuboidCenter;
+            var absDisplacement = displacementFromCenter.ElementWise(Mathf.Abs);
+
+            return absDisplacement.All((a, b) => a <= b, cuboidRadii);
+        }
+
         private static IEnumerable<Vector3Int> AllPointsOfSymmetry3D(Vector3Int center,int x, int y, int z) 
         {
             //By symmetry we have the points in all 8 3d octants
@@ -290,6 +306,17 @@ namespace Utils
         public static bool SameSign(int a, int b) 
         {
             return (a ^ b) >= 0;//Bitwise xor
+        }
+
+        public static string ArrayToString<T>(this T[] arr) 
+        {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < arr.Length; i++)
+            {
+                sb.Append(arr[i].ToString());
+                sb.Append(",");
+            }
+            return sb.ToString();
         }
     }
 }

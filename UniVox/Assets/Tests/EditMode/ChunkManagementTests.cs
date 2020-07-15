@@ -7,6 +7,7 @@ using System.Text;
 using UnityEngine;
 using UniVox.Framework;
 using UniVox.Framework.ChunkPipeline;
+using UniVox.Framework.Common;
 using UniVox.Framework.PlayAreaManagement;
 using static Utils.Helpers;
 
@@ -38,6 +39,7 @@ namespace Tests
             mockManager.WorldToChunkPosition(Arg.Any<Vector3>()).Returns(args => WorldToChunkPos((Vector3)args[0], chunkDimensions));
 
             mockManager.WorldLimits.Returns(worldSizeLimits);
+            mockManager.GetAllLoadedChunkIds().Returns((_) => statusMap.Keys.ToArray());
 
             mockPipeline = Substitute.For<IChunkPipeline>();
             mockPipeline.TerrainDataStage.Returns(0);
@@ -50,12 +52,28 @@ namespace Tests
 
             //Mock set target to write to the status map instead
             mockManager
-                .When(_ => _.SetTargetStageOfChunk(Arg.Any<Vector3Int>(), Arg.Any<int>()))
+                .When(_ => _.SetTargetStageOfChunk(Arg.Any<Vector3Int>(), Arg.Any<int>(),Arg.Any<TargetUpdateMode>()))
                 .Do(args =>
                 {
                     Vector3Int pos = (Vector3Int)args[0];
                     int newStatus = (int)args[1];
-                    statusMap[pos] = newStatus;
+                    var mode = (TargetUpdateMode)args[2];
+
+                    if (statusMap.TryGetValue(pos,out var currentStatus))
+                    {//If the pos exists, ensure update modes are respected
+                        if (newStatus > currentStatus && mode.allowsUpgrade())
+                        {
+                            statusMap[pos] = newStatus;
+                        }
+                        else if (newStatus < currentStatus && mode.allowsDowngrade())
+                        {
+                            statusMap[pos] = newStatus;
+                        }
+                    }
+                    else
+                    {//Otherwise, add the new pos and status
+                        statusMap[pos] = newStatus;
+                    }
                 });
 
             //Mock deactivate to remove from the status map
@@ -177,6 +195,26 @@ namespace Tests
         }
 
         [Test]
+        public void CuboidalAreaWithStartGreaterThanEndRadii()
+        {
+            Vector3Int center = new Vector3Int(16, 12, -5);
+            Vector3Int radii = new Vector3Int(5, 4, 5);
+            Vector3Int startRadii = new Vector3Int(5,5,5);
+
+            List<Vector3Int> definitive = GenerateDefinitive(center, radii, startRadii);
+
+            List<Vector3Int> fromGenerator = CuboidalArea(center, radii, startRadii).ToList();
+
+            Assert.AreEqual(definitive.Count, fromGenerator.Count, $"The lists should contain the same number of items");
+            Debug.Log($"Produced {fromGenerator.Count} items");
+
+            foreach (Vector3Int item in fromGenerator)
+            {
+                Assert.IsTrue(definitive.Contains(item), $"Generator produced {item} which was not in definitive list");
+            }
+        }
+
+        [Test]
         public void CuboidalAreaNonUniformEndRadii()
         {
             Vector3Int center = new Vector3Int(0, 0, 0);
@@ -251,19 +289,10 @@ namespace Tests
 
             //After initialise, check all positions have the expected target.
             AssertStatusMapCorrect(MaxActiveRadii, PlayerChunkId, playArea);
-
-
         }
 
         [Test]
-        [TestCase(0, 0, 0)]
-        [TestCase(0, 0, 1)]
-        [TestCase(0, 1, 0)]
-        [TestCase(0, 1, 1)]
-        [TestCase(1, 0, 0)]
-        [TestCase(1, 0, 1)]
-        [TestCase(1, 1, 0)]
-        [TestCase(1, 1, 1)]
+        [TestCaseSource("AllDirectionOffsets")]
         public void PlayAreaUpdate(int xDisp, int yDisp, int zDisp)
         {
             Vector3Int displacement = new Vector3Int(xDisp, yDisp, zDisp);
@@ -285,8 +314,9 @@ namespace Tests
             Vector3Int originalPlayerChunkId = playArea.playerChunkID;
 
             player.Position += displacement * chunkDimensions;
-            Debug.Log("PreUpdate");
-            printStageMap2DSlice(MaxActiveRadii, 0, originalPlayerChunkId);
+            //Debug.Log("PreUpdate");
+            //printStageMap2DSlice(MaxActiveRadii, 0, originalPlayerChunkId);
+
             playArea.Update();
 
             Vector3Int playerChunkIdAfterUpdate = playArea.playerChunkID;
@@ -294,16 +324,135 @@ namespace Tests
             Assert.AreEqual(originalPlayerChunkId + displacement, playerChunkIdAfterUpdate,
                 $"Player chunk id was incorrect");
 
-            Debug.Log("PostUpdate");
-            //TODO remove DEBUG
-            printStageMap2DSlice(MaxActiveRadii, 0, playerChunkIdAfterUpdate);
-            //for (int i = -MaxActiveRadii.y; i <= MaxActiveRadii.y; i++)
-            //{
-            //    printStageMap2DSlice(MaxActiveRadii, i,playerChunkIdAfterUpdate);
-            //}
+            //Debug.Log("PostUpdate");
+            //printStageMap2DSlice(MaxActiveRadii, 0, playerChunkIdAfterUpdate);
 
             //Check play area is correct
             AssertStatusMapCorrect(MaxActiveRadii, playerChunkIdAfterUpdate, playArea);
+        }
+
+        /// <summary>
+        /// Tests what happens when the player moves further than one chunk 
+        /// in a single update (which is assumed to be a teleport action)
+        /// </summary>
+        [Test]
+        [TestCaseSource("AllDirectionOffsets")]
+        public void PlayAreaUpdateWithLargeDisplacement(int xDisp, int yDisp, int zDisp)
+        {
+            Vector3Int displacement = new Vector3Int(xDisp, yDisp, zDisp)*10;
+            Debug.Log(displacement);
+
+            Vector3Int chunkDimensions = new Vector3Int(16, 16, 16);
+
+            Vector3Int collidableRadii = new Vector3Int(1, 1, 1);
+            Vector3Int renderedRadii = new Vector3Int(2, 2, 2);
+
+            //Set up the mocks
+            SetupMocks(chunkDimensions);
+
+            PlayAreaManager playArea = new PlayAreaManager(collidableRadii, renderedRadii);
+            playArea.UpdateRate = ushort.MaxValue;//Unlimited update rate for testing
+
+            //Initialise play area
+            playArea.Initialise(mockManager, mockPipeline, player);
+            Vector3Int MaxActiveRadii = playArea.MaximumActiveRadii;
+            Vector3Int originalPlayerChunkId = playArea.playerChunkID;
+
+            player.Position += displacement * chunkDimensions;
+            //Debug.Log("PreUpdate");
+            //printStageMap2DSlice(MaxActiveRadii, 0, originalPlayerChunkId);
+
+            playArea.Update();
+
+            Vector3Int playerChunkIdAfterUpdate = playArea.playerChunkID;
+            //Ensure player chunk updated correctly
+            Assert.AreEqual(originalPlayerChunkId + displacement, playerChunkIdAfterUpdate,
+                $"Player chunk id was incorrect");
+
+            //Debug.Log("PostUpdate");
+            //printStageMap2DSlice(MaxActiveRadii, 0, playerChunkIdAfterUpdate);
+
+            //Check play area is correct
+            AssertStatusMapCorrect(MaxActiveRadii, playerChunkIdAfterUpdate, playArea);
+        }
+
+        [Test]
+        [TestCaseSource("UpdateInterruptedCases")]
+        public void PlayAreaIncrementalUpdateInterrupted(Vector3Int[] displacements) 
+        {
+            Debug.Log($"Displacement sequence {displacements.ArrayToString()}");
+
+            Vector3Int chunkDimensions = new Vector3Int(16, 16, 16);
+
+            Vector3Int collidableRadii = new Vector3Int(1, 1, 1);
+            Vector3Int renderedRadii = new Vector3Int(2, 2, 2);
+
+            //Set up the mocks
+            SetupMocks(chunkDimensions);
+
+            PlayAreaManager playArea = new PlayAreaManager(collidableRadii, renderedRadii);
+
+            playArea.UpdateRate = 5;//Limited update rate
+
+            //Initialise play area
+            playArea.Initialise(mockManager, mockPipeline, player);
+            Vector3Int MaxActiveRadii = playArea.MaximumActiveRadii;
+            Vector3Int originalPlayerChunkId = playArea.playerChunkID;
+            //printStageMap2DSlice(MaxActiveRadii, 0, originalPlayerChunkId);
+
+            printStageMap2DSlice(MaxActiveRadii, 0, playArea.playerChunkID);
+            for (int i = 0; i < displacements.Length; i++)
+            {
+                player.Position += displacements[i] * chunkDimensions;//move player interrupting progress
+                
+                playArea.Update();
+            }
+
+            //remove update limit
+            playArea.UpdateRate = ushort.MaxValue;
+            playArea.Update();//Final update
+
+            Vector3Int playerChunkIdAfterUpdate = playArea.playerChunkID;
+
+            Debug.Log("PostUpdate");
+
+            //printStageMap2DSlice(MaxActiveRadii, 0, playArea.playerChunkID);
+
+            //Check play area is correct
+            AssertStatusMapCorrect(MaxActiveRadii, playerChunkIdAfterUpdate, playArea);
+        }        
+     
+
+        private static IEnumerable<TestCaseData> AllDirectionOffsets() 
+        {
+            foreach (var item in DiagonalDirectionExtensions.Vectors)
+            {
+                yield return new TestCaseData(item.x, item.y, item.z);
+            }
+        }
+
+        private static IEnumerable<TestCaseData> UpdateInterruptedCases() 
+        {
+            //This test case causes problems before the introduction of upgrade/downgrade only modes
+            Vector3Int[] displacements = new Vector3Int[]
+            {
+                new Vector3Int(1,0,0),
+                new Vector3Int(0,1,0),
+                new Vector3Int(0,1,1),
+            };
+            yield return new TestCaseData(displacements).SetName("Case1");
+
+            displacements = new Vector3Int[]
+            {
+                new Vector3Int(1,0,0),
+                new Vector3Int(0,1,0),
+                new Vector3Int(0,1,1),
+                new Vector3Int(-1,0,0),
+                new Vector3Int(-1,0,0),
+                new Vector3Int(-1,0,0),
+                new Vector3Int(1,0,1),
+            };
+            yield return new TestCaseData(displacements).SetName("Case2");
         }
 
         private void AssertStatusMapCorrect(Vector3Int MaxActiveRadii, Vector3Int PlayerChunkId, PlayAreaManager playArea)

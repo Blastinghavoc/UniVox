@@ -309,8 +309,14 @@ namespace UniVox.Implementations.Providers
             else
             {
                 var (managerHad, pipelinehad) = chunkManager.ContainsChunkID(centerChunkID);
+                string minStage = "NA";
+                if (pipelinehad)
+                {
+                    minStage = chunkManager.GetMinPipelineStageOfChunk(centerChunkID).ToString();
+                }
                 throw new Exception($"No noisemaps found when trying to generate structures for chunk {centerChunkID}." +
-                    $" Did manager contain chunk? {managerHad}. Did pipeline contain chunk? {pipelinehad}.");
+                    $" Did manager contain chunk? {managerHad}. Did pipeline contain chunk? {pipelinehad}." +
+                    $" Min pipeline stage of chunk {minStage}");
             }
 
         }

@@ -312,7 +312,7 @@ namespace UniVox.Framework.ChunkPipeline
             Profiler.EndSample();
         }
 
-        public void SetTarget(Vector3Int chunkId, int targetStage)
+        public void SetTarget(Vector3Int chunkId, int targetStage, TargetUpdateMode mode = TargetUpdateMode.any)
         {
             CheckLockBeforeExternalOperation();
 
@@ -334,11 +334,16 @@ namespace UniVox.Framework.ChunkPipeline
             {
                 //If targets equal, no work to be done
                 return;
-            }                        
+            }
 
             //Upgrade
             if (targetStage > prevTarget)
             {
+                if (!mode.allowsUpgrade())
+                {
+                    return;//Nothing to be done if the mode does not allow upgrading
+                }
+
                 if (stageData.WorkInProgress)//Have to check work in progress against the old target
                 {
                     //The existing work will reach the new target
@@ -353,8 +358,13 @@ namespace UniVox.Framework.ChunkPipeline
                     ReenterAtStage(chunkId, stageData.maxStage, stageData);
                 }
             }
-            else if (targetStage < prevTarget)
-            {            
+            else//Downgrade
+            {
+                if (!mode.allowsDowngrade())
+                {
+                    return;//Nothing to be done if the mode does not allow downgrading
+                }
+
                 var prevMax = stageData.maxStage;
 
                 if (targetStage < FullyGeneratedStage && prevMax >= FullyGeneratedStage)

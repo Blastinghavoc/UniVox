@@ -227,7 +227,7 @@ namespace UniVox.Framework
         /// </summary>
         /// <param name="chunkID"></param>
         /// <param name="targetStage"></param>
-        public void SetTargetStageOfChunk(Vector3Int chunkID, int targetStage)
+        public void SetTargetStageOfChunk(Vector3Int chunkID, int targetStage,TargetUpdateMode updateMode = TargetUpdateMode.any)
         {
             Profiler.BeginSample("SetTargetStageOfChunk");
             bool outOfWorld = false;
@@ -288,7 +288,7 @@ namespace UniVox.Framework
                 return;
             }
 
-            pipeline.SetTarget(chunkID, targetStage);
+            pipeline.SetTarget(chunkID, targetStage,updateMode);
             Profiler.EndSample();
         }
 
@@ -573,6 +573,10 @@ namespace UniVox.Framework
             return new Tuple<bool, bool>(loadedChunks.ContainsKey(chunkID), pipeline.Contains(chunkID));
         }
 
+        public int GetMinPipelineStageOfChunk(Vector3Int chunkId) 
+        {
+            return pipeline.GetMinStage(chunkId);
+        }
         #endregion
     }
 }
