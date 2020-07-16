@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &4110033766405619853
+--- !u!114 &330970366
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -9,9 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 6061144537135917622}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 538b6927067033e429fffb278cb2e4e6, type: 3}
+  m_Script: {fileID: 11500000, guid: 3ab5b525b6386c143a010fbc46fd0390, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Parrallel: 1
 --- !u!1001 &9026157632115559789
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -19,6 +20,71 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: -4221288470819912599, guid: 55373a8976e0c014e90e0bb7e64d046a,
+        type: 3}
+      propertyPath: playArea.collidableChunksRadii.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -4221288470819912599, guid: 55373a8976e0c014e90e0bb7e64d046a,
+        type: 3}
+      propertyPath: playArea.collidableChunksRadii.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -4221288470819912599, guid: 55373a8976e0c014e90e0bb7e64d046a,
+        type: 3}
+      propertyPath: playArea.collidableChunksRadii.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -4221288470819912599, guid: 55373a8976e0c014e90e0bb7e64d046a,
+        type: 3}
+      propertyPath: playArea.renderedChunksRadii.x
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: -4221288470819912599, guid: 55373a8976e0c014e90e0bb7e64d046a,
+        type: 3}
+      propertyPath: playArea.renderedChunksRadii.y
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: -4221288470819912599, guid: 55373a8976e0c014e90e0bb7e64d046a,
+        type: 3}
+      propertyPath: playArea.renderedChunksRadii.z
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: -4221288470819912599, guid: 55373a8976e0c014e90e0bb7e64d046a,
+        type: 3}
+      propertyPath: playArea.updateRate
+      value: 40
+      objectReference: {fileID: 0}
+    - target: {fileID: -4221288470819912599, guid: 55373a8976e0c014e90e0bb7e64d046a,
+        type: 3}
+      propertyPath: worldSizeLimits.limitWorldHeight
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -4221288470819912599, guid: 55373a8976e0c014e90e0bb7e64d046a,
+        type: 3}
+      propertyPath: worldSizeLimits.verticalChunkLimit
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: -4221288470819912599, guid: 55373a8976e0c014e90e0bb7e64d046a,
+        type: 3}
+      propertyPath: MaxGeneratedPerUpdate
+      value: 24
+      objectReference: {fileID: 0}
+    - target: {fileID: -4221288470819912599, guid: 55373a8976e0c014e90e0bb7e64d046a,
+        type: 3}
+      propertyPath: generateStructures
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -4221288470819912599, guid: 55373a8976e0c014e90e0bb7e64d046a,
+        type: 3}
+      propertyPath: MaxStructurePerUpdate
+      value: 24
+      objectReference: {fileID: 0}
+    - target: {fileID: -4221288470819912599, guid: 55373a8976e0c014e90e0bb7e64d046a,
+        type: 3}
+      propertyPath: MaxMeshedPerUpdate
+      value: 24
+      objectReference: {fileID: 0}
     - target: {fileID: 2981057896917559127, guid: 55373a8976e0c014e90e0bb7e64d046a,
         type: 3}
       propertyPath: dirtType
@@ -129,7 +195,7 @@ PrefabInstance:
     - target: {fileID: 2981057896917559131, guid: 55373a8976e0c014e90e0bb7e64d046a,
         type: 3}
       propertyPath: m_Name
-      value: CullingDebugWorld
+      value: GreedyDebug
       objectReference: {fileID: 0}
     - target: {fileID: 2981057896917559131, guid: 55373a8976e0c014e90e0bb7e64d046a,
         type: 3}

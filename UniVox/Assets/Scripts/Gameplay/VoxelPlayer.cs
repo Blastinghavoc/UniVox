@@ -5,7 +5,6 @@ using UniVox.Framework;
 
 namespace UniVox.Gameplay
 {
-
     public class VoxelPlayer : MonoBehaviour,IVoxelPlayer 
     {
         private VoxelWorldInterface WorldInterface;
