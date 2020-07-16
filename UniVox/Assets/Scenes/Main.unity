@@ -199,6 +199,12 @@ PrefabInstance:
       propertyPath: underwaterOverlay
       value: 
       objectReference: {fileID: 6129928740833918942}
+    - target: {fileID: 18740858033875789, guid: 5b1c90c2d322bbf48890283c565b2b7f,
+        type: 3}
+      propertyPath: blockToPlace
+      value: 
+      objectReference: {fileID: 11400000, guid: 2269b894a3c39474f93f612313029305,
+        type: 2}
     - target: {fileID: 3599045744008904855, guid: 5b1c90c2d322bbf48890283c565b2b7f,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -738,6 +744,26 @@ PrefabInstance:
       propertyPath: player
       value: 
       objectReference: {fileID: 1832009154}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: playArea.renderedChunksRadii.x
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: playArea.renderedChunksRadii.z
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: playArea.renderedChunksRadii.y
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: generateStructures
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6061144537135917621, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -801,7 +827,7 @@ PrefabInstance:
     - target: {fileID: 6061144537135917622, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 37b9cc2f16198bf4c84ddc72031aedb3, type: 3}
@@ -1048,7 +1074,7 @@ PrefabInstance:
     - target: {fileID: 6061144537135917622, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 6061144537135917626, guid: 37b9cc2f16198bf4c84ddc72031aedb3, type: 3}
@@ -1335,6 +1361,11 @@ PrefabInstance:
         type: 3}
       propertyPath: worldSizeLimits.verticalChunkLimit
       value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: generateStructures
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
@@ -2447,7 +2478,7 @@ MonoBehaviour:
   voxelSize: 1
   playArea:
     collidableChunksRadii: {x: 1, y: 1, z: 1}
-    renderedChunksRadii: {x: 10, y: 8, z: 10}
+    renderedChunksRadii: {x: 4, y: 4, z: 4}
     updateRate: 40
   worldSizeLimits:
     limitWorldHeight: 1
@@ -2456,7 +2487,7 @@ MonoBehaviour:
   chunkPrefab: {fileID: 5697091069406414600, guid: 9bd18ceaff69a844299df4d590e1d694,
     type: 3}
   MaxGeneratedPerUpdate: 10
-  generateStructures: 0
+  generateStructures: 1
   MaxStructurePerUpdate: 10
   MaxMeshedPerUpdate: 10
   DebugPipeline: 0

@@ -25,7 +25,7 @@ namespace Tests
         {
         }
 
-        private void SetupMocks(Vector3Int chunkDimensions,WorldSizeLimits worldSizeLimits = null)
+        private void SetupMocks(Vector3Int chunkDimensions,WorldSizeLimits worldSizeLimits = null,bool generateStructures = true)
         {
             if (worldSizeLimits == null)
             {
@@ -35,7 +35,7 @@ namespace Tests
 
 
             mockManager = Substitute.For<IChunkManager>();
-            mockManager.GenerateStructures.Returns(true);
+            mockManager.GenerateStructures.Returns(generateStructures);
             mockManager.WorldToChunkPosition(Arg.Any<Vector3>()).Returns(args => WorldToChunkPos((Vector3)args[0], chunkDimensions));
 
             mockManager.WorldLimits.Returns(worldSizeLimits);
@@ -292,6 +292,36 @@ namespace Tests
         }
 
         [Test]
+        public void PlayAreaInitialiseNoStructures()
+        {
+            Vector3Int chunkDimensions = new Vector3Int(16, 16, 16);
+            Vector3Int collidableRadii = new Vector3Int(1, 1, 1);
+            Vector3Int renderedRadii = new Vector3Int(4, 4, 4);
+
+            //Set up the mocks
+            SetupMocks(chunkDimensions,generateStructures:false);
+
+            PlayAreaManager playArea = new PlayAreaManager(collidableRadii, renderedRadii);
+
+            //Initialise play area
+            playArea.Initialise(mockManager, mockPipeline, player);
+
+            Vector3Int MaxActiveRadii = renderedRadii + new Vector3Int(1, 1, 1);
+            //Ensure we've got the max active radii correct
+            Assert.AreEqual(MaxActiveRadii, playArea.MaximumActiveRadii);
+
+            Vector3Int PlayerChunkId = playArea.playerChunkID;
+            //Ensure player chunk id correct
+            Assert.AreEqual(Vector3Int.zero, PlayerChunkId);
+
+            //After initialise, check all positions have the expected target.
+
+            //printStageMap2DSlice(MaxActiveRadii,0,PlayerChunkId);
+
+            AssertStatusMapCorrect(MaxActiveRadii, PlayerChunkId, playArea);
+        }
+
+        [Test]
         [TestCaseSource("AllDirectionOffsets")]
         public void PlayAreaUpdate(int xDisp, int yDisp, int zDisp)
         {
@@ -326,6 +356,46 @@ namespace Tests
 
             //Debug.Log("PostUpdate");
             //printStageMap2DSlice(MaxActiveRadii, 0, playerChunkIdAfterUpdate);
+
+            //Check play area is correct
+            AssertStatusMapCorrect(MaxActiveRadii, playerChunkIdAfterUpdate, playArea);
+        }
+
+        [Test]
+        [TestCaseSource("AllDirectionOffsets")]
+        public void PlayAreaUpdateNoStructures(int xDisp, int yDisp, int zDisp)
+        {
+            Vector3Int displacement = new Vector3Int(xDisp, yDisp, zDisp);
+
+            Vector3Int chunkDimensions = new Vector3Int(16, 16, 16);
+
+            Vector3Int collidableRadii = new Vector3Int(1, 1, 1);
+            Vector3Int renderedRadii = new Vector3Int(2, 2, 2);
+
+            //Set up the mocks
+            SetupMocks(chunkDimensions,generateStructures:false);
+
+            PlayAreaManager playArea = new PlayAreaManager(collidableRadii, renderedRadii);
+            playArea.UpdateRate = ushort.MaxValue;//Unlimited update rate for testing
+
+            //Initialise play area
+            playArea.Initialise(mockManager, mockPipeline, player);
+            Vector3Int MaxActiveRadii = playArea.MaximumActiveRadii;
+            Vector3Int originalPlayerChunkId = playArea.playerChunkID;
+
+            player.Position += displacement * chunkDimensions;
+            //Debug.Log("PreUpdate");
+            //printStageMap2DSlice(MaxActiveRadii, 0, originalPlayerChunkId);
+
+            playArea.Update();
+
+            Vector3Int playerChunkIdAfterUpdate = playArea.playerChunkID;
+            //Ensure player chunk updated correctly
+            Assert.AreEqual(originalPlayerChunkId + displacement, playerChunkIdAfterUpdate,
+                $"Player chunk id was incorrect");
+
+            //Debug.Log("PostUpdate");
+            printStageMap2DSlice(MaxActiveRadii+Vector3Int.one, 0, playerChunkIdAfterUpdate);
 
             //Check play area is correct
             AssertStatusMapCorrect(MaxActiveRadii, playerChunkIdAfterUpdate, playArea);

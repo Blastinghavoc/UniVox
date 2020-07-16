@@ -76,12 +76,7 @@ namespace UniVox.Framework.PlayAreaManagement
         {
             this.chunkManager = chunkManager;
             this.Player = player;
-            worldLimits = chunkManager.WorldLimits;
-            processQueuesByRadii = new Queue<IEnumerator>[5];
-            for (int i = 0; i < processQueuesByRadii.Length; i++)
-            {
-                processQueuesByRadii[i] = new Queue<IEnumerator>();
-            }
+            worldLimits = chunkManager.WorldLimits;            
 
             IncrementalDone = true;
 
@@ -95,21 +90,34 @@ namespace UniVox.Framework.PlayAreaManagement
             //Chunks can exist as just data one chunk further away than the rendered chunks
             FullyGeneratedRadii = RenderedChunksRadii + new Vector3Int(1, 1, 1);
             MaximumActiveRadii = FullyGeneratedRadii;
+            int numRadii = 3;
             if (chunkManager.GenerateStructures)
             {
+                numRadii = 5;
                 StructureChunksRadii = FullyGeneratedRadii + new Vector3Int(1, 1, 1);
                 //Extra radius for just terrain data.
                 MaximumActiveRadii = StructureChunksRadii + new Vector3Int(1, 1, 1);
             }
 
+            processQueuesByRadii = new Queue<IEnumerator>[numRadii];
+            for (int i = 0; i < processQueuesByRadii.Length; i++)
+            {
+                processQueuesByRadii[i] = new Queue<IEnumerator>();
+            }
+
             //Initialise radii sequence
-            radiiSequence = new ChunkStage[5] {
-            new ChunkStage(CollidableChunksRadii,pipeline.CompleteStage),
-            new ChunkStage(RenderedChunksRadii,pipeline.RenderedStage),
-            new ChunkStage(FullyGeneratedRadii,pipeline.FullyGeneratedStage),
-            new ChunkStage(StructureChunksRadii,pipeline.OwnStructuresStage),
-            new ChunkStage(MaximumActiveRadii,pipeline.TerrainDataStage),
-            };
+            radiiSequence = new ChunkStage[numRadii];
+            radiiSequence[0] = new ChunkStage(CollidableChunksRadii, pipeline.CompleteStage);
+            radiiSequence[1] = new ChunkStage(RenderedChunksRadii, pipeline.RenderedStage);
+            radiiSequence[2] = new ChunkStage(FullyGeneratedRadii, pipeline.FullyGeneratedStage);
+
+            //extra radii in the sequence if generating structures
+            if (chunkManager.GenerateStructures)
+            {
+                radiiSequence[3] = new ChunkStage(StructureChunksRadii, pipeline.OwnStructuresStage);
+                radiiSequence[4] = new ChunkStage(MaximumActiveRadii, pipeline.TerrainDataStage);
+
+            }
 
             playerChunkID = chunkManager.WorldToChunkPosition(Player.Position);
 
