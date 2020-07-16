@@ -24,9 +24,58 @@ namespace UniVox.Framework
 
         public bool isBlank { get => (val & 0x3F) == 0; }
 
+        public int this[int axis] 
+        {
+            get {
+                switch (axis)
+                {
+                    case 0:
+                        return x;
+                    case 1:
+                        return y;
+                    case 2:
+                        return z;
+                    default:
+                        throw new IndexOutOfRangeException($"Voxel rotation has no element {axis}");
+                }
+            }
+
+            set 
+            {
+                switch (axis)
+                {
+                    case 0:
+                        x = value;
+                        break;
+                    case 1:
+                        y = value;
+                        break;
+                    case 2:
+                        z = value;
+                        break;
+                    default:
+                        throw new IndexOutOfRangeException($"Voxel rotation has no element {axis}");
+                }
+            }
+        }
+
         public bool Equals(VoxelRotation other)
         {
             return (val & 0x3F) == (other.val & 0x3F);
+        }
+
+        public override string ToString()
+        {
+            return $"({x},{y},{z})";
+        }
+
+        public VoxelRotation Inverse() 
+        {
+            VoxelRotation rot = this;
+            rot.x = (4 - x) % 4;
+            rot.y = (4 - y) % 4;
+            rot.z = (4 - z) % 4;
+            return rot;
         }
     }
     

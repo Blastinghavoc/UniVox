@@ -9,7 +9,7 @@ using Utils;
 namespace UniVox.Framework
 {
     [BurstCompile]
-    public struct NativeDirectionRotator 
+    public struct NativeDirectionRotator :IDisposable
     {
         [ReadOnly] public NativeArray<int3> DirectionVectors;
         [ReadOnly] public NativeArray<Direction> DirectionOpposites;
@@ -40,9 +40,41 @@ namespace UniVox.Framework
             return dir;
         }
 
+        public Direction GetDirectionBeforeRotation(Direction dir, VoxelRotation rot) 
+        {
+            rot = rot.Inverse();//Opposite rotation
+
+            //Opposite order of rotations
+            for (int i = 0; i < rot.z; i++)
+            {
+                dir = ZRotationMatix[(byte)dir];
+            }
+
+            for (int i = 0; i < rot.x; i++)
+            {
+                dir = XRotationMatix[(byte)dir];
+            }
+
+            for (int i = 0; i < rot.y; i++)
+            {
+                dir = YRotationMatix[(byte)dir];
+            }
+
+            return dir;
+        }
+
         public quaternion GetRotationQuat(VoxelRotation rotation) 
         {
             return quaternion.Euler(PI_2 * rotation.x, PI_2 * rotation.y, PI_2 * rotation.z, math.RotationOrder.YXZ);
+        }
+
+        public void Dispose()
+        {
+            XRotationMatix.SmartDispose();
+            YRotationMatix.SmartDispose();
+            ZRotationMatix.SmartDispose();
+            DirectionOpposites.SmartDispose();
+            DirectionVectors.SmartDispose();
         }
     }
 
@@ -85,16 +117,7 @@ namespace UniVox.Framework
             native.ZRotationMatix = zArr.ToNative(Allocator.Persistent);
 
             return native;
-        }
-
-        public static void Dispose(this NativeDirectionRotator native) 
-        {
-            native.XRotationMatix.SmartDispose();
-            native.YRotationMatix.SmartDispose();
-            native.ZRotationMatix.SmartDispose();
-            native.DirectionOpposites.SmartDispose();
-            native.DirectionVectors.SmartDispose();
-        }
+        }        
 
         /// <summary>
         /// Rotate 90 degrees clockwise about the Y axis

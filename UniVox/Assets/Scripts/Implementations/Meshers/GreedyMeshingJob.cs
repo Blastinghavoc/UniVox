@@ -114,19 +114,16 @@ namespace UniVox.Implementations.Meshers
                 Direction negativeAxisDirection;
                 if (axis == 0)
                 {
-                    //currentMeshDirection = (reverseAxis) ? Direction.west : Direction.east;
                     positiveAxisDirection = Direction.east;
                     negativeAxisDirection = Direction.west;
                 }
                 else if (axis == 1)
                 {
-                    //currentMeshDirection = (reverseAxis) ? Direction.down : Direction.up;
                     positiveAxisDirection = Direction.up;
                     negativeAxisDirection = Direction.down;
                 }
                 else
                 {
-                    //currentMeshDirection = (reverseAxis) ? Direction.south : Direction.north;
                     positiveAxisDirection = Direction.north;
                     negativeAxisDirection = Direction.south;
                 }
@@ -340,37 +337,63 @@ namespace UniVox.Implementations.Meshers
             var usedNodesSlice = data.meshDatabase.nodesUsedByFaces[meshRange.start + (int)currentMaskValue.faceDirection];
             var uvStart = data.voxelTypeDatabase.voxelTypeToZIndicesRangeMap[currentMaskValue.typeId].start;
             var uvZ = data.voxelTypeDatabase.zIndicesPerFace[uvStart + (int)currentMaskValue.faceDirection];
+            
 
             var materialId = data.meshDatabase.voxelTypeToMaterialIDMap[currentMaskValue.typeId];
             //Update material runs
             runTracker.Update(materialId, data.materialRuns, data.allTriangleIndices);
 
-            int3 du = new int3();
-            int3 dv = new int3();
+            //int3 du = new int3();
+            //int3 dv = new int3();
 
-            du[secondaryAxis] = width;
-            dv[tertiaryAxis] = height;
+            //du[secondaryAxis] = width;
+            //dv[tertiaryAxis] = height;
 
-            float3 bl = workingCoordinates;
-            float3 tr = workingCoordinates + du + dv;
-            float3 br = workingCoordinates + du;
-            float3 tl = workingCoordinates + dv;
+            //float3 bl = workingCoordinates;
+            //float3 tr = workingCoordinates + du + dv;
+            //float3 br = workingCoordinates + du;
+            //float3 tl = workingCoordinates + dv;
 
             Node nodebl = data.meshDatabase.allMeshNodes[usedNodesSlice.start];
             Node nodetr = data.meshDatabase.allMeshNodes[usedNodesSlice.start + 1];
             Node nodebr = data.meshDatabase.allMeshNodes[usedNodesSlice.start + 2];
             Node nodetl = data.meshDatabase.allMeshNodes[usedNodesSlice.start + 3];
 
+            //Apply rotation
+            if (!currentMaskValue.rotation.isBlank)
+            {
+                var rotationQuat = directionRotator.GetRotationQuat(currentMaskValue.rotation);
+                nodebl = adjustForRotation(nodebl, rotationQuat);
+                nodetr = adjustForRotation(nodetr, rotationQuat);
+                nodebr = adjustForRotation(nodebr, rotationQuat);
+                nodetl = adjustForRotation(nodetl, rotationQuat);
+            }
+
+            int3 scale = new int3();
+            scale[secondaryAxis] = width;
+            scale[tertiaryAxis] = height;
+            //Apply scaling
+            nodebl.vertex *= scale;
+            nodetr.vertex *= scale;
+            nodebr.vertex *= scale;
+            nodetl.vertex *= scale;
+            //Apply translation
+            nodebl.vertex += workingCoordinates;
+            nodetr.vertex += workingCoordinates;
+            nodebr.vertex += workingCoordinates;
+            nodetl.vertex += workingCoordinates;
+
+
             int3 normal = new int3();
             normal[primaryAxis] = 1;
 
             ///NOTE for negative faces, the UVs are already flipped in the face definition
             ///Therefore, flip just the vertices and normals when necessary
-            if (flip)
-            {
-                Swap(ref bl, ref br);
-                Swap(ref tr, ref tl);
-            }
+            //if (flip)
+            //{
+            //    Swap(ref nodebl, ref nodebr);
+            //    Swap(ref nodetr, ref nodetl);
+            //}
             if (flipNormals)
             {
                 normal *= -1;
@@ -381,12 +404,13 @@ namespace UniVox.Implementations.Meshers
             nodebr.normal = normal;
             nodetl.normal = normal;
 
-            nodebl.vertex = bl;
-            nodetr.vertex = tr;
-            nodebr.vertex = br;
-            nodetl.vertex = tl;
+            //nodebl.vertex = bl;
+            //nodetr.vertex = tr;
+            //nodebr.vertex = br;
+            //nodetl.vertex = tl;
 
-            int2 uvScale = new int2(width, height);
+            //Flip uv scaling if rotation around primary axis is not even
+            int2 uvScale = (currentMaskValue.rotation[primaryAxis] % 2 == 0)?  new int2(width, height): new int2(height,width);
 
             //Scale the UVs
             //nodebl.uv *= uvScale;//Don't need to scale the bottom left, as its UV should be 0,0
@@ -397,6 +421,13 @@ namespace UniVox.Implementations.Meshers
             bool makeBackface = data.meshDatabase.meshIdToIncludeBackfacesMap[meshID];
 
             AddQuad(nodebl, nodetr, nodebr, nodetl, uvZ, makeBackface);
+        }
+
+        private Node adjustForRotation(Node node, quaternion quat) 
+        {
+            float3 rotationOffset = new float3(.5f, .5f, .5f);
+            node.vertex = math.mul(quat, node.vertex - rotationOffset) + rotationOffset;
+            return node;
         }
 
         private void AddQuad(Node v0, Node v1, Node v2, Node v3, float uvZ, bool makeBackface = false)
@@ -516,7 +547,9 @@ namespace UniVox.Implementations.Meshers
 
             if (!rotation.isBlank)
             {
-                faceDirection = directionRotator.GetDirectionAfterRotation(originalDirection, rotation);
+                ///Face direction needs to be the direction index of the face currently pointing in the original
+                ///direction. Therefore it is the direction such that applying the rotation gives the original direction.
+                faceDirection = directionRotator.GetDirectionBeforeRotation(originalDirection, rotation);
             }
 
             FaceDescriptor faceDescriptor = new FaceDescriptor()

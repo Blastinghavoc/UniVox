@@ -3,6 +3,7 @@ using NUnit.Framework.Internal;
 using Unity.Mathematics;
 using UnityEngine;
 using UniVox.Framework;
+using UniVox.Framework.Common;
 
 namespace Tests
 {
@@ -104,6 +105,30 @@ namespace Tests
             Assert.AreEqual(2, rot.x);
             Assert.AreEqual(3, rot.y);
             Assert.AreEqual(2, rot.z);
+        }
+
+        [Test]
+        public void Inverse() 
+        {
+            using (var directionHelper = DirectionRotatorExtensions.Create()) 
+            {
+                for (int i = 0; i < 4; i++)
+                {
+                    for (int j = 0; j < 4; j++)
+                    {
+                        for (int k = 0; k < 4; k++)
+                        {
+                            var rotation = new VoxelRotation() { x = i, y = j, z = k };
+                            var testDirection = Direction.north;
+
+                            var thereAndBackAgain = directionHelper.GetDirectionBeforeRotation(directionHelper.GetDirectionAfterRotation(testDirection, rotation), rotation);
+
+                            Assert.AreEqual(testDirection, thereAndBackAgain,$"Failed to invert rotation {rotation}");
+
+                        }
+                    }
+                }
+            }
         }
 
         [Test]

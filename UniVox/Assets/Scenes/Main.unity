@@ -203,7 +203,7 @@ PrefabInstance:
         type: 3}
       propertyPath: blockToPlace
       value: 
-      objectReference: {fileID: 11400000, guid: 2269b894a3c39474f93f612313029305,
+      objectReference: {fileID: 11400000, guid: 0d19bc4aebacb334bb47bda924b95884,
         type: 2}
     - target: {fileID: 3599045744008904855, guid: 5b1c90c2d322bbf48890283c565b2b7f,
         type: 3}
@@ -739,6 +739,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1998389611}
     m_Modifications:
+    - target: {fileID: 330970366, guid: 37b9cc2f16198bf4c84ddc72031aedb3, type: 3}
+      propertyPath: Parrallel
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: player
@@ -747,22 +751,27 @@ PrefabInstance:
     - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: playArea.renderedChunksRadii.x
-      value: 4
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: playArea.renderedChunksRadii.z
-      value: 4
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: playArea.renderedChunksRadii.y
-      value: 4
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: generateStructures
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: MaxMeshedPerUpdate
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6061144537135917621, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
@@ -1944,70 +1953,12 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &2120146547
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2120146549}
-  - component: {fileID: 2120146548}
-  m_Layer: 0
-  m_Name: VoxelTypeManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &2120146548
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2120146547}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1353d68cabec63b40bea3bdc78c05035, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  VoxelTypes:
-  - {fileID: 11400000, guid: 3b5947e841c3a4845b8c9cbf0efbbebc, type: 2}
-  - {fileID: 11400000, guid: a03c76065d9f24749ae1e10da8247535, type: 2}
-  - {fileID: 11400000, guid: da8f3cdeb3374df40a2e8e80b40a9e01, type: 2}
-  - {fileID: 11400000, guid: 41f8baae3c348e340a11f923c17c715e, type: 2}
-  - {fileID: 11400000, guid: 0e2fe9399ec31f9429b1ef2145e8f4db, type: 2}
-  - {fileID: 11400000, guid: 4312d675a9aae974ca00ae7930641832, type: 2}
-  - {fileID: 11400000, guid: a8aff50ee8c68ea4192732a3ece092b4, type: 2}
-  - {fileID: 11400000, guid: 29a81a7c3885cee43ad6f88a9ba44766, type: 2}
-  - {fileID: 11400000, guid: 87614466a334d894aa80e5f6226a40ad, type: 2}
-  - {fileID: 11400000, guid: 2269b894a3c39474f93f612313029305, type: 2}
-  - {fileID: 11400000, guid: e65f9d668c841884c8fdd21948ede172, type: 2}
-  - {fileID: 11400000, guid: 2c2bb2ed4022e10428e552100de13718, type: 2}
-  - {fileID: 11400000, guid: 179ba0b19a064594c945e272499717e3, type: 2}
-  - {fileID: 11400000, guid: 5c859d982220e0e4a8222b17a36bc765, type: 2}
-  - {fileID: 11400000, guid: db418c079ab87fd4abbc1d1bae58d86c, type: 2}
-  - {fileID: 11400000, guid: f5e7b8b5b373a1244bc6ffe29912bf49, type: 2}
-  - {fileID: 11400000, guid: 43b906b3da8fa8742b6f311be930b118, type: 2}
-  - {fileID: 11400000, guid: c551685b681742544b92b9d38936d244, type: 2}
-  - {fileID: 11400000, guid: 18d977694b9dda94bb69bbc52cbdfd0f, type: 2}
-  - {fileID: 11400000, guid: baae83fcb2163924791b78d5d9f2d0d8, type: 2}
---- !u!4 &2120146549
+--- !u!4 &2120146549 stripped
 Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 2310299740901447960, guid: a25dffd42c0abbc41abf6bb991749b65,
+    type: 3}
+  m_PrefabInstance: {fileID: 2310299741273278317}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2120146547}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 2101607675}
-  m_RootOrder: 5
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &398304576905699211
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2194,6 +2145,75 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   TestMode: 0
+--- !u!1001 &2310299741273278317
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 2101607675}
+    m_Modifications:
+    - target: {fileID: 2310299740901447960, guid: a25dffd42c0abbc41abf6bb991749b65,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2310299740901447960, guid: a25dffd42c0abbc41abf6bb991749b65,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2310299740901447960, guid: a25dffd42c0abbc41abf6bb991749b65,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2310299740901447960, guid: a25dffd42c0abbc41abf6bb991749b65,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2310299740901447960, guid: a25dffd42c0abbc41abf6bb991749b65,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2310299740901447960, guid: a25dffd42c0abbc41abf6bb991749b65,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2310299740901447960, guid: a25dffd42c0abbc41abf6bb991749b65,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2310299740901447960, guid: a25dffd42c0abbc41abf6bb991749b65,
+        type: 3}
+      propertyPath: m_RootOrder
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2310299740901447960, guid: a25dffd42c0abbc41abf6bb991749b65,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2310299740901447960, guid: a25dffd42c0abbc41abf6bb991749b65,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2310299740901447960, guid: a25dffd42c0abbc41abf6bb991749b65,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2310299740901447966, guid: a25dffd42c0abbc41abf6bb991749b65,
+        type: 3}
+      propertyPath: m_Name
+      value: VoxelTypeManager
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: a25dffd42c0abbc41abf6bb991749b65, type: 3}
 --- !u!114 &2981057895866662354
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2487,7 +2507,7 @@ MonoBehaviour:
   chunkPrefab: {fileID: 5697091069406414600, guid: 9bd18ceaff69a844299df4d590e1d694,
     type: 3}
   MaxGeneratedPerUpdate: 10
-  generateStructures: 1
+  generateStructures: 0
   MaxStructurePerUpdate: 10
   MaxMeshedPerUpdate: 10
   DebugPipeline: 0
