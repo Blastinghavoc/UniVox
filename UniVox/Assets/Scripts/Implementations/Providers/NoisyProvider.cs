@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NSubstitute;
+using System;
 using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Jobs;
@@ -50,6 +51,9 @@ namespace UniVox.Implementations.Providers
 
         //Previously generated noise maps
         private Dictionary<Vector2Int, ChunkColumnNoiseMaps> noiseMaps;
+        ///Tracks the number of active chunks in each column so that we know
+        ///when to remove a noise map from the storage.
+        private Dictionary<Vector2Int, int> numActiveChunksInColumn;
         private JobReferenceCounter<Vector2Int, NativeChunkColumnNoiseMaps> noiseGenReferenceCounter;
 
         public override void Initialise(VoxelTypeManager voxelTypeManager, IChunkManager chunkManager, FrameworkEventManager eventManager)
@@ -81,6 +85,7 @@ namespace UniVox.Implementations.Providers
             oceanGenConfig.waterID = waterID;
 
             noiseMaps = new Dictionary<Vector2Int, ChunkColumnNoiseMaps>();
+            numActiveChunksInColumn = new Dictionary<Vector2Int, int>();
             noiseGenReferenceCounter = new JobReferenceCounter<Vector2Int, NativeChunkColumnNoiseMaps>(MakeNoiseJob);
 
             structureGenerator = new StructureGenerator();
@@ -88,14 +93,26 @@ namespace UniVox.Implementations.Providers
 
             oreSettings.Initialise(voxelTypeManager);
 
+            eventManager.OnChunkActivated += OnChunkActivated;
             eventManager.OnChunkDeactivated += OnChunkDeactivated;
         }
 
         public void Dispose()
         {
+            eventManager.OnChunkActivated -= OnChunkActivated;
             eventManager.OnChunkDeactivated -= OnChunkDeactivated;
             oreSettings.Dispose();
             biomeDatabaseComponent.Dispose();
+        }
+
+        private void OnChunkActivated(object sender, ChunkActivatedArgs args) 
+        {
+            var columnId = new Vector2Int(args.chunkId.x, args.chunkId.z);
+            if (!numActiveChunksInColumn.TryGetValue(columnId,out var count))
+            {
+                count = 0;
+            }
+            numActiveChunksInColumn[columnId] = count + 1;
         }
 
         /// <summary>
@@ -105,14 +122,33 @@ namespace UniVox.Implementations.Providers
         /// <param name="args"></param>
         private void OnChunkDeactivated(object sender, ChunkDeactivatedArgs args)
         {
-            if (args.absAmountOutsideRadii.x > 0 || args.absAmountOutsideRadii.z > 0)
+            var columnId = new Vector2Int(args.chunkID.x, args.chunkID.z);
+
+            if (numActiveChunksInColumn.TryGetValue(columnId,out var count))
             {
-                noiseMaps.Remove(new Vector2Int(args.chunkID.x, args.chunkID.z));
-                var (managerHas, pipelineHas) = chunkManager.ContainsChunkID(args.chunkID);
+                count--;                
+            }
+            else
+            {
+                count = 0;
+            }
+
+            if (count < 1)
+            {
+                //Remove
+                noiseMaps.Remove(columnId);//Delete noise map
+                numActiveChunksInColumn.Remove(columnId);//Stop counting for this column
+
                 //TODO remove DEBUG
+                var (managerHas, pipelineHas) = chunkManager.ContainsChunkID(args.chunkID);
                 Assert.IsTrue((!managerHas && !pipelineHas), $"When removing a noisemap, both the pipeline and the chunk" +
                     $" manager should have removed the corresponding id {args.chunkID}." +
                     $"Manager had it = {managerHas}, pipeline had it = {pipelineHas}");
+            }
+            else 
+            {
+                //Update stored count
+                numActiveChunksInColumn[columnId] = count;
             }
         }
 
@@ -188,8 +224,9 @@ namespace UniVox.Implementations.Providers
 
                 if (thisJobIsGeneratingTheNoiseMaps)
                 {
-                    //Store the noise maps, provided that the chunk id is still in the active range.
-                    if (chunkManager.InsideChunkRadius(chunkID, chunkManager.MaximumActiveRadii))
+                    //Store the noise maps, provided that there are still active chunks in the column
+                    var numInColumn = numActiveChunksInColumn.TryGetValue(columnId, out var count) ? count : 0;
+                    if (numInColumn > 0)
                     {
                         noiseMaps.Add(columnId, new ChunkColumnNoiseMaps(nativeNoiseMaps));
                     }
@@ -314,9 +351,12 @@ namespace UniVox.Implementations.Providers
                 {
                     minStage = chunkManager.GetMinPipelineStageOfChunk(centerChunkID).ToString();
                 }
+                var columnId = new Vector2Int(centerChunkID.x, centerChunkID.z);
+                var numInColumn = numActiveChunksInColumn.TryGetValue(columnId, out var count) ? count : 0;
                 throw new Exception($"No noisemaps found when trying to generate structures for chunk {centerChunkID}." +
                     $" Did manager contain chunk? {managerHad}. Did pipeline contain chunk? {pipelinehad}." +
-                    $" Min pipeline stage of chunk {minStage}");
+                    $" Min pipeline stage of chunk {minStage}." +
+                    $" Num in column {numInColumn}");
             }
 
         }

@@ -283,6 +283,8 @@ namespace UniVox.Framework
                     pipeline.Add(chunkID, targetStage);
                 }
 
+                eventManager.FireChunkActivated(chunkID);
+
                 Profiler.EndSample();
                 Profiler.EndSample();
                 return;

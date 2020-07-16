@@ -83,7 +83,7 @@ namespace UniVox.Framework
 
         public void GetChunkManagerCoroutineStatus(out int waitingForUpdate) 
         {
-            waitingForUpdate = chunkManager.PlayArea.WaitingForPlayAreaUpdate;
+            waitingForUpdate = chunkManager.PlayArea.ProcessesQueued;
         }
     }
 }

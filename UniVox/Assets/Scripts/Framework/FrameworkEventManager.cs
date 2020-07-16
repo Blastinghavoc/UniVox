@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.Profiling;
 
 namespace UniVox.Framework
 {
@@ -33,14 +34,33 @@ namespace UniVox.Framework
         }
         #endregion
 
+        #region ChunkActivated
+        public event EventHandler<ChunkActivatedArgs> OnChunkActivated = delegate { };
+
+        public void FireChunkActivated(Vector3Int chunkId) 
+        {
+            Profiler.BeginSample("ChunkActivatedEvent");
+            OnChunkActivated(this, new ChunkActivatedArgs() { chunkId = chunkId });
+            Profiler.EndSample();
+        }
+
+        public class ChunkActivatedArgs : EventArgs 
+        {
+            public Vector3Int chunkId;
+        }
+        #endregion
+
+        #region ChunkDeactivated
         public event EventHandler<ChunkDeactivatedArgs> OnChunkDeactivated = delegate { };
 
         public void FireChunkDeactivated(Vector3Int chunkID,Vector3Int playerChunkID,Vector3Int maxChunkRadii) 
         {
+            Profiler.BeginSample("ChunkDeactivatedEvent");
             var displacement = playerChunkID - chunkID;
             var absDisplacement = displacement.ElementWise(Mathf.Abs);
             var args = new ChunkDeactivatedArgs() { chunkID = chunkID, absAmountOutsideRadii = absDisplacement - maxChunkRadii };
             OnChunkDeactivated(this, args);
+            Profiler.EndSample();
         }
 
         public class ChunkDeactivatedArgs : EventArgs 
@@ -48,5 +68,6 @@ namespace UniVox.Framework
             public Vector3Int chunkID;
             public Vector3Int absAmountOutsideRadii;
         }
+        #endregion
     }
 }

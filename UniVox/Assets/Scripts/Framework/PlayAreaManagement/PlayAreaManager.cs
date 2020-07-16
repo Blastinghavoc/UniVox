@@ -56,7 +56,7 @@ namespace UniVox.Framework.PlayAreaManagement
         [SerializeField] protected ushort updateRate = 1;
         public ushort UpdateRate { get => updateRate; set => updateRate = value; }
 
-        public int WaitingForPlayAreaUpdate { get; private set; }//DEBUG
+        public int ProcessesQueued { get; private set; }//DEBUG
 
         //Current chunkID occupied by the Player
         public Vector3Int playerChunkID { get; protected set; }
@@ -183,14 +183,10 @@ namespace UniVox.Framework.PlayAreaManagement
                 for (int i = 0; i < radiiSequence.Length; i++)
                 {
                     processQueuesByRadii[i].Enqueue(DifferenceBasedIncrementalUpdater(playerChunkID, prevPlayerChunkID, i));
+                    ProcessesQueued += 1;
                 }
             }
 
-            var numChunksX = MaximumActiveRadii.x * 2 + 1;
-            var numChunksY = MaximumActiveRadii.y * 2 + 1;
-            var numChunksZ = MaximumActiveRadii.z * 2 + 1;
-
-            WaitingForPlayAreaUpdate += numChunksX * numChunksY * numChunksZ;
 
             IncrementalDone = false;
             incrementalProcessCount = 0;
@@ -217,20 +213,20 @@ namespace UniVox.Framework.PlayAreaManagement
                     {
                         ++processedThisUpdate;
                         ++incrementalProcessCount;
-                        --WaitingForPlayAreaUpdate;
                         if (processedThisUpdate >= updateRate)
                         {
                             return;
                         }
                     }
                     //This process is done
+                    --ProcessesQueued;
                     processQueue.Dequeue();
                 }
             }
 
             //Done all processes
             IncrementalDone = true;
-            WaitingForPlayAreaUpdate = 0;
+            ProcessesQueued = 0;
 
             Debug.Log($"ProcessChunksIncrementally did {incrementalProcessCount} updates");
         }
@@ -267,16 +263,23 @@ namespace UniVox.Framework.PlayAreaManagement
 
             var outsideRangeSet = new HashSet<Vector3Int>(chunkManager.GetAllLoadedChunkIds());
 
+            var countProcessed = 0;
+
             while (iterator.MoveNext())
             {
                 outsideRangeSet.Remove((Vector3Int)iterator.Current);
+                countProcessed++;
             }
+
+            var countRemoved = outsideRangeSet.Count;
 
             //remove any chunks that were not processed, as these must be outside the play area
             foreach (var chunkId in outsideRangeSet)
             {
                 chunkManager.TryDeactivateChunk(chunkId);
             }
+
+            Debug.Log($"ResolveTeleport did {countProcessed} chunk updates and {countRemoved} deactivations");
 
             //Clear the process queues, as we've just done the whole update by brute force
             for (int i = 0; i < processQueuesByRadii.Length; i++)
@@ -331,12 +334,6 @@ namespace UniVox.Framework.PlayAreaManagement
             Assert.IsTrue(absChunkDifference.All(_ => _ <= 1), $"Difference-based incremental update" +
                 $" does not support chunk differences greater than 1 in any dimension. " +
                 $"Absoloute difference was {absChunkDifference}");
-            //if (!absChunkDifference.All(_ => _ <= 1))
-            //{
-            //    Debug.LogWarning($"Difference-based incremental update" +
-            //        $" does not support chunk differences greater than 1 in any dimension. " +
-            //        $"Absoloute difference was {absChunkDifference}");
-            //}
 
             var stage = radiiSequence[sequenceIndex];
             ChunkStage nextStage = sequenceIndex + 1 < radiiSequence.Length ? radiiSequence[sequenceIndex + 1] : null;
