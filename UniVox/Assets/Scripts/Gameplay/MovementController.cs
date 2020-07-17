@@ -153,7 +153,6 @@ namespace UniVox.Gameplay
             if (CrossPlatformInputManager.GetButtonDown("ToggleFly"))
             {
                 m_flying = !m_flying;
-                advancedSettings.airControl = m_flying;
                 m_RigidBody.useGravity = !m_flying;
             }
         }

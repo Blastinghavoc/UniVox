@@ -84,7 +84,7 @@ namespace UniVox.UI
                 debugItems["Coords"].Update(player.position.ToString());
                 debugItems["ChunkID"].Update(world.WorldToChunkPosition(player.position).ToString());
                 debugItems["Pipeline Status"].Update(world.GetPipelineStatus());
-                world.GetChunkManagerCoroutineStatus(out var updateStatus);
+                world.GetPlayAreaProcessingStatus(out var updateStatus);
                 debugItems["WaitingForUpdateCheck"].Update(updateStatus.ToString());
 
                 numFramesSinceLast++;

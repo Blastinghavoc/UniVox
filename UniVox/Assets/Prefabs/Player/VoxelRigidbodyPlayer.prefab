@@ -251,6 +251,7 @@ MonoBehaviour:
     BackwardSpeed: 4
     StrafeSpeed: 4
     RunMultiplier: 2
+    FlyVerticalSpeed: 8
     JumpForce: 50
     SlopeCurveModifier:
       serializedVersion: 2
@@ -319,7 +320,7 @@ MonoBehaviour:
   PickButton: 2
   IndicatorPrefab: {fileID: 3839814877241860285, guid: 176d6024de2cf5a49bfccb79f5a83be2,
     type: 3}
-  blockToPlace: {fileID: 11400000, guid: a8aff50ee8c68ea4192732a3ece092b4, type: 2}
+  blockToPlace: {fileID: 11400000, guid: 0d19bc4aebacb334bb47bda924b95884, type: 2}
   rotationX: 0
   rotationY: 0
   rotationZ: 0
@@ -337,3 +338,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   underwaterOverlay: {fileID: 0}
   waterType: {fileID: 11400000, guid: 29a81a7c3885cee43ad6f88a9ba44766, type: 2}
+  rigidbody: {fileID: 3599045744014409685}

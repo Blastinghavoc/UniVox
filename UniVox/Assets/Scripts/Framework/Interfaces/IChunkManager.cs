@@ -46,5 +46,6 @@ namespace UniVox.Framework
         void SetTargetStageOfChunk(Vector3Int chunkID, int targetStage,TargetUpdateMode updateMode = TargetUpdateMode.any);
         bool TryDeactivateChunk(Vector3Int chunkID);
         Vector3Int[] GetAllLoadedChunkIds();
+        bool IsChunkFullyGenerated(Vector3Int chunkId);
     }
 }

@@ -81,9 +81,19 @@ namespace UniVox.Framework
             return chunkManager.GetPipelineStatus();
         }
 
-        public void GetChunkManagerCoroutineStatus(out int waitingForUpdate) 
+        public void GetPlayAreaProcessingStatus(out int waitingForUpdate) 
         {
             waitingForUpdate = chunkManager.PlayArea.ProcessesQueued;
+        }
+
+        public bool IsChunkComplete(Vector3Int chunkId) 
+        {
+            return chunkManager.IsChunkComplete(chunkId);
+        }
+
+        public bool IsChunkFullyGenerated(Vector3Int chunkId)
+        {
+            return chunkManager.IsChunkFullyGenerated(chunkId);
         }
     }
 }

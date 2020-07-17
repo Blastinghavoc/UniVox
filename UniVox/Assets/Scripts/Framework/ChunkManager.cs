@@ -159,6 +159,11 @@ namespace UniVox.Framework
             return loadedChunks.ContainsKey(chunkId) && pipeline.GetMaxStage(chunkId).Equals(pipeline.CompleteStage);
         }
 
+        public bool IsChunkFullyGenerated(Vector3Int chunkId) 
+        {
+            return loadedChunks.ContainsKey(chunkId) && pipeline.GetMaxStage(chunkId) >= (pipeline.FullyGeneratedStage);
+        }
+
         public Vector3Int[] GetAllLoadedChunkIds()
         {
             Vector3Int[] keys = new Vector3Int[loadedChunks.Keys.Count];
