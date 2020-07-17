@@ -5,19 +5,19 @@ using Utils;
 
 namespace UniVox.Implementations.ChunkData
 {
-    public class SVOChunkData : AbstractChunkData
+    public class OctreeChunkData : AbstractChunkData
     {
-        private SVOVoxelStorage octree;
+        private OctreeVoxelStorage octree;
 
-        public SVOChunkData(Vector3Int ID, Vector3Int chunkDimensions, VoxelTypeID[] initialData = null) : base(ID, chunkDimensions, initialData)
+        public OctreeChunkData(Vector3Int ID, Vector3Int chunkDimensions, VoxelTypeID[] initialData = null) : base(ID, chunkDimensions, initialData)
         {
             if (initialData == null)
             {
-                octree = new SVOVoxelStorage(chunkDimensions);
+                octree = new OctreeVoxelStorage(chunkDimensions);
             }
             else
             {
-                octree = new SVOVoxelStorage(chunkDimensions,initialData);                
+                octree = new OctreeVoxelStorage(chunkDimensions,initialData);                
             }
         }
 

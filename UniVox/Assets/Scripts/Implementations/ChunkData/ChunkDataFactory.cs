@@ -13,7 +13,7 @@ namespace UniVox.Implementations.ChunkData
         { 
             FlatArray,
             MultiArray,
-            SVO,
+            Octree,
             RLE
         }
 
@@ -36,12 +36,12 @@ namespace UniVox.Implementations.ChunkData
                         return new LazyChunkData<MultiDimensionalArrayVoxelStorage>(chunkID, chunkDimensions, initialData);
                     }
                     return new ArrayChunkData(chunkID, chunkDimensions, initialData);
-                case ChunkDataType.SVO:
+                case ChunkDataType.Octree:
                     if (lazy)
                     {
-                        return new LazyChunkData<SVOVoxelStorage>(chunkID, chunkDimensions, initialData);
+                        return new LazyChunkData<OctreeVoxelStorage>(chunkID, chunkDimensions, initialData);
                     }
-                    return new SVOChunkData(chunkID, chunkDimensions, initialData);
+                    return new OctreeChunkData(chunkID, chunkDimensions, initialData);
                 case ChunkDataType.RLE:
                     if (lazy)
                     {
