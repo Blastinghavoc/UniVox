@@ -3,6 +3,7 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
+using UnityEngine;
 using UniVox.Framework;
 using UniVox.Framework.Common;
 using UniVox.Framework.Jobified;
@@ -337,7 +338,7 @@ namespace UniVox.Implementations.Meshers
             var usedNodesSlice = data.meshDatabase.nodesUsedByFaces[meshRange.start + (int)currentMaskValue.faceDirection];
             var uvStart = data.voxelTypeDatabase.voxelTypeToZIndicesRangeMap[currentMaskValue.typeId].start;
             var uvZ = data.voxelTypeDatabase.zIndicesPerFace[uvStart + (int)currentMaskValue.faceDirection];
-            
+
 
             var materialId = data.meshDatabase.voxelTypeToMaterialIDMap[currentMaskValue.typeId];
             //Update material runs
@@ -368,6 +369,7 @@ namespace UniVox.Implementations.Meshers
                 nodebr = adjustForRotation(nodebr, rotationQuat);
                 nodetl = adjustForRotation(nodetl, rotationQuat);
             }
+
 
             int3 scale = new int3();
             scale[secondaryAxis] = width;
@@ -409,8 +411,30 @@ namespace UniVox.Implementations.Meshers
             //nodebr.vertex = br;
             //nodetl.vertex = tl;
 
-            //Flip uv scaling if rotation around primary axis is not even
-            int2 uvScale = (currentMaskValue.rotation[primaryAxis] % 2 == 0)?  new int2(width, height): new int2(height,width);
+            var secondaryDif = math.lengthsq(nodetl.vertex - nodebl.vertex);
+            var tertiaryDif = math.lengthsq(nodebr.vertex - nodebl.vertex);
+            int2 uvScale = new int2(width,height);
+            ///Calculate the correct uv scale based on which axis is longer 
+            ///(if they are equal it doesn't matter).
+            ///This is needed because it is difficult to track the correct orientation
+            ///of width and height after rotation
+            if (!currentMaskValue.rotation.isBlank)
+            {
+                if (width > height)
+                {
+                    if (secondaryDif > tertiaryDif)
+                    {
+                        uvScale = new int2(height, width);
+                    }
+                }
+                else
+                {
+                    if (secondaryDif < tertiaryDif)
+                    {
+                        uvScale = new int2(height, width);
+                    }
+                }
+            }
 
             //Scale the UVs
             //nodebl.uv *= uvScale;//Don't need to scale the bottom left, as its UV should be 0,0
@@ -423,7 +447,7 @@ namespace UniVox.Implementations.Meshers
             AddQuad(nodebl, nodetr, nodebr, nodetl, uvZ, makeBackface);
         }
 
-        private Node adjustForRotation(Node node, quaternion quat) 
+        private Node adjustForRotation(Node node, quaternion quat)
         {
             float3 rotationOffset = new float3(.5f, .5f, .5f);
             node.vertex = math.mul(quat, node.vertex - rotationOffset) + rotationOffset;
