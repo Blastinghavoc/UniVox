@@ -242,10 +242,8 @@ namespace UniVox.Framework.ChunkPipeline
             updateLock = false;
             Profiler.EndSample();
 
-            Profiler.BeginSample("DispatchJobs");
-            ///Ensure that all jobs batched during the pipeline update
-            ///get scheduled
-            JobHandle.ScheduleBatchedJobs();
+            Profiler.BeginSample("ScheduleBatchedJobs");
+            JobHandle.ScheduleBatchedJobs();//Ensure all jobs are scheduled
             Profiler.EndSample();
 
             if (DebugMode)

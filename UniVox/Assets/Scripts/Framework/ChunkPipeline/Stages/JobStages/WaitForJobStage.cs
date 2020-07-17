@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Jobs;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Profiling;
@@ -31,14 +32,13 @@ namespace UniVox.Framework.ChunkPipeline
         protected abstract void OnJobDone(Vector3Int chunkId,T result);
 
         public override void Update()
-        {
+        {            
             base.Update();
 
             foreach (var pair in jobs)
             {
                 var chunkId = pair.Key;
-                var job = pair.Value;
-                Profiler.BeginSample("CheckIfJobDone");
+                var job = pair.Value;                
                 if (job.Done)
                 {
                     if (CheckAndResolvePreconditionsBeforeExit(chunkId))
@@ -50,8 +50,7 @@ namespace UniVox.Framework.ChunkPipeline
                         //Remove this id from the stage, as it's moving on
                         removalHelper.Add(chunkId);
                     }
-                }
-                Profiler.EndSample();
+                }                
             }
 
             foreach (var item in removalHelper)

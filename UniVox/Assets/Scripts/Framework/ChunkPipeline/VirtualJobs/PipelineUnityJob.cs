@@ -15,13 +15,19 @@ namespace UniVox.Framework.ChunkPipeline.VirtualJobs
 
         private bool cleanedUp = false;
         public override bool Done { get {
+                Profiler.BeginSample("handleIsCompleted");
                 if (handle.IsCompleted)
                 {
+                    Profiler.EndSample();
                     if (!cleanedUp)
                     {
                         DoCleanup();
                     }
                     return true;
+                }
+                else
+                {
+                    Profiler.EndSample();
                 }
                 return false; 
             } 
