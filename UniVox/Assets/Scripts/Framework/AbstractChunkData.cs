@@ -4,6 +4,7 @@ using System.Linq;
 using Unity.Collections;
 using UnityEngine;
 using UniVox.Framework.Common;
+using UniVox.Framework.Lighting;
 
 namespace UniVox.Framework
 {
@@ -17,8 +18,10 @@ namespace UniVox.Framework
         public Vector3Int ChunkID { get; set; }
         public Vector3Int Dimensions { get; set; }
         public bool ModifiedSinceGeneration { get; set; } = false;
-
         public bool FullyGenerated { get; set; } = false;
+
+        //For lighting
+        public LightChunkData lightChunk { get; protected set; }
 
         /// <summary>
         /// Store flattended indices of voxels that have a non-default rotation.
@@ -40,6 +43,7 @@ namespace UniVox.Framework
                         $" with total size {expectedLength}");
                 }
             }
+            lightChunk = new LightChunkData(chunkDimensions);
         }
 
 

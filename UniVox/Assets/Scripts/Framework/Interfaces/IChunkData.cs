@@ -4,6 +4,7 @@ using System;
 using Unity.Collections;
 using System.Collections.Generic;
 using UniVox.Framework.Common;
+using UniVox.Framework.Lighting;
 
 namespace UniVox.Framework
 {
@@ -41,5 +42,7 @@ namespace UniVox.Framework
         /// <param name="Direction"></param>
         /// <returns></returns>
         NativeArray<VoxelTypeID> BorderToNative(Direction dir);
+
+        LightChunkData lightChunk { get; }
     }
 }

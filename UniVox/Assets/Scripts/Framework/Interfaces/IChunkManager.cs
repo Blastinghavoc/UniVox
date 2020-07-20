@@ -25,6 +25,8 @@ namespace UniVox.Framework
         bool TryGetVoxel(Vector3 worldPos,out VoxelTypeID voxelTypeID);
         bool TryGetVoxel(Vector3Int chunkID, Vector3Int localVoxelIndex, out VoxelTypeID voxelTypeID);
         ReadOnlyChunkData GetReadOnlyChunkData(Vector3Int chunkID);
+
+        IChunkData GetChunkData(Vector3Int chunkId);
         MeshDescriptor GetMeshDescriptor(Vector3Int chunkID);
 
         bool InsideChunkRadius(Vector3Int id, Vector3Int radii);

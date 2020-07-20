@@ -10,17 +10,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 36add9c34f86f4e4c849947280fc7666, type: 3}
-  m_Name: DEBUG
+  m_Name: Lamp
   m_EditorClassIdentifier: 
-  DisplayName: DEBUG
+  DisplayName: Lamp
   FaceTextures:
-  - {fileID: 2800000, guid: 57c96efb5c79b6748b0e37e6ec558de0, type: 3}
-  - {fileID: 2800000, guid: 57c96efb5c79b6748b0e37e6ec558de0, type: 3}
-  - {fileID: 2800000, guid: 57c96efb5c79b6748b0e37e6ec558de0, type: 3}
-  - {fileID: 2800000, guid: 57c96efb5c79b6748b0e37e6ec558de0, type: 3}
-  - {fileID: 2800000, guid: 57c96efb5c79b6748b0e37e6ec558de0, type: 3}
-  - {fileID: 2800000, guid: 57c96efb5c79b6748b0e37e6ec558de0, type: 3}
+  - {fileID: 2800000, guid: 978343050358db744a8e93dc9d12c4e2, type: 3}
+  - {fileID: 2800000, guid: 978343050358db744a8e93dc9d12c4e2, type: 3}
+  - {fileID: 2800000, guid: 978343050358db744a8e93dc9d12c4e2, type: 3}
+  - {fileID: 2800000, guid: 978343050358db744a8e93dc9d12c4e2, type: 3}
+  - {fileID: 2800000, guid: 978343050358db744a8e93dc9d12c4e2, type: 3}
+  - {fileID: 2800000, guid: 978343050358db744a8e93dc9d12c4e2, type: 3}
   meshDefinition: {fileID: 11400000, guid: ceb9d116af1d072479bb06beaf15efac, type: 2}
   material: {fileID: 2100000, guid: 2b40641d357875449a01958e36c0f6ba, type: 2}
   isPassable: 0
   rotationConfiguration: {fileID: 0}
+  lightConfiguration: {fileID: 11400000, guid: 941745fa9ae72cc479acc6a4293d14ec, type: 2}

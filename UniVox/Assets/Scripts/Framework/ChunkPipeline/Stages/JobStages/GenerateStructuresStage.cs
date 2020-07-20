@@ -14,7 +14,7 @@ namespace UniVox.Framework.ChunkPipeline
         protected override AbstractPipelineJob<ChunkNeighbourhood> MakeJob(Vector3Int chunkId)
         {
             return pipeline.chunkProvider.GenerateStructuresForNeighbourhood(chunkId,
-                        new ChunkNeighbourhood(chunkId, (neighId) => pipeline.getChunkComponent(neighId).Data, true));
+                        new ChunkNeighbourhood(chunkId, (neighId) => pipeline.getChunkComponent(neighId).Data));
         }
 
         protected override void OnJobDone(Vector3Int chunkId, ChunkNeighbourhood result)

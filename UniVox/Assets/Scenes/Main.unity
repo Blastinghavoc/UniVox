@@ -16,10 +16,10 @@ RenderSettings:
   serializedVersion: 9
   m_Fog: 0
   m_FogColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-  m_FogMode: 3
+  m_FogMode: 1
   m_FogDensity: 0.01
   m_LinearFogStart: 0
-  m_LinearFogEnd: 300
+  m_LinearFogEnd: 20
   m_AmbientSkyColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
@@ -199,6 +199,12 @@ PrefabInstance:
       propertyPath: underwaterOverlay
       value: 
       objectReference: {fileID: 6129928740833918942}
+    - target: {fileID: 18740858033875789, guid: 5b1c90c2d322bbf48890283c565b2b7f,
+        type: 3}
+      propertyPath: blockToPlace
+      value: 
+      objectReference: {fileID: 11400000, guid: de60f55576c5b2b4fafe93ce51892259,
+        type: 2}
     - target: {fileID: 3599045744008904855, guid: 5b1c90c2d322bbf48890283c565b2b7f,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -726,6 +732,51 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1035334669}
   m_CullTransparentMesh: 0
+--- !u!1 &1059055053
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1059055055}
+  - component: {fileID: 1059055054}
+  m_Layer: 0
+  m_Name: LightManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1059055054
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1059055053}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c196f7c024dd1d4b9ae2c0e6a846abd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GlobalLightName: GlobalLightLevel
+  GlobalLightValue: 0.446
+--- !u!4 &1059055055
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1059055053}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1081904564
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1077,7 +1128,7 @@ PrefabInstance:
     - target: {fileID: 6061144537135917622, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 6061144537135917626, guid: 37b9cc2f16198bf4c84ddc72031aedb3, type: 3}
@@ -1821,7 +1872,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1777791462
 Transform:
   m_ObjectHideFlags: 0
@@ -2201,6 +2252,17 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2310299740901447961, guid: a25dffd42c0abbc41abf6bb991749b65,
+        type: 3}
+      propertyPath: VoxelTypes.Array.size
+      value: 22
+      objectReference: {fileID: 0}
+    - target: {fileID: 2310299740901447961, guid: a25dffd42c0abbc41abf6bb991749b65,
+        type: 3}
+      propertyPath: VoxelTypes.Array.data[21]
+      value: 
+      objectReference: {fileID: 11400000, guid: de60f55576c5b2b4fafe93ce51892259,
+        type: 2}
     - target: {fileID: 2310299740901447966, guid: a25dffd42c0abbc41abf6bb991749b65,
         type: 3}
       propertyPath: m_Name

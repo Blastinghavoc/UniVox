@@ -338,12 +338,6 @@ namespace UniVox.Implementations.ChunkData
                     var flat = Utils.Helpers.MultiIndexToFlat(leafOffset.x, leafOffset.y, leafOffset.z, rootDimensions.x, dxdy);
                     var voxel = array[flat];
 
-                    //TODO remove DEBUG
-                    if (flat == 130)
-                    {
-                        var test = "t";
-                    }
-
                     if (voxel != VoxelTypeManager.AIR_ID)
                     {
                         leaf.children[i] = voxel;

@@ -11,7 +11,7 @@ using UniVox.Framework.Common;
 
 namespace UniVox.Framework
 {
-    public class VoxelTypeManager : MonoBehaviour, IDisposable
+    public class VoxelTypeManager : MonoBehaviour, IVoxelTypeManager
     {
         public class VoxelTypeData
         {
@@ -64,7 +64,7 @@ namespace UniVox.Framework
 
                 DefinitionToIDMap.Add(item, (VoxelTypeID)currentID);
 
-                if (!materialIDMap.TryGetValue(item.material,out var matID))
+                if (!materialIDMap.TryGetValue(item.material, out var matID))
                 {
                     //New material
                     matID = (ushort)materialIDMap.Count;
@@ -73,7 +73,7 @@ namespace UniVox.Framework
                 }
 
                 typesByMaterialID[matID].Add(item);
-                typeData.Add(new VoxelTypeData() { definition = item,materialID = matID });
+                typeData.Add(new VoxelTypeData() { definition = item, materialID = matID });
 
                 currentID++;
             }
@@ -86,7 +86,7 @@ namespace UniVox.Framework
                 var material = pair.Key;
                 var types = typesByMaterialID[pair.Value];
 
-                Dictionary<Texture2D, int> uniqueTextures = new Dictionary<Texture2D, int>();     
+                Dictionary<Texture2D, int> uniqueTextures = new Dictionary<Texture2D, int>();
                 int currentZ = 0;
 
                 foreach (var item in types)
@@ -117,7 +117,7 @@ namespace UniVox.Framework
 
                 }
 
-                CreateTextureArray(material,uniqueTextures, commonTexSize);
+                CreateTextureArray(material, uniqueTextures, commonTexSize);
             }
 
             materialIdToMaterialMap = new Material[materialIDMap.Count];
@@ -129,13 +129,13 @@ namespace UniVox.Framework
             InitialiseJobified();
         }
 
-        private void InitialiseJobified() 
+        private void InitialiseJobified()
         {
             nativeMeshDatabase = NativeMeshDatabaseExtensions.FromTypeData(typeData);
             nativeVoxelTypeDatabase = NativeVoxelTypeDatabaseExtensions.FromTypeData(typeData);
         }
 
-        public void Dispose() 
+        public void Dispose()
         {
             if (!disposed)
             {
@@ -148,6 +148,27 @@ namespace UniVox.Framework
         private void OnDestroy()
         {
             Dispose();
+        }
+
+        public int GetLightEmission(VoxelTypeID voxelType)
+        {
+            try
+            {
+                var def = typeData[voxelType].definition;
+                if (def != null)
+                {
+                    var lightConfig = def.lightConfiguration;
+                    if (lightConfig != null)
+                    {
+                        return lightConfig.Intensity;
+                    }
+                }
+                return 0;
+            }
+            catch (IndexOutOfRangeException e)
+            {
+                throw new IndexOutOfRangeException($"No voxel type exists for id {voxelType}", e);
+            }
         }
 
         public VoxelTypeData GetData(ushort voxelTypeID)
@@ -164,7 +185,7 @@ namespace UniVox.Framework
             throw new IndexOutOfRangeException($"No id has been generated for the voxel type {def.DisplayName}");
         }
 
-        public SOVoxelTypeDefinition GetDefinition(ushort id) 
+        public SOVoxelTypeDefinition GetDefinition(VoxelTypeID id)
         {
             try
             {
@@ -172,11 +193,11 @@ namespace UniVox.Framework
             }
             catch (IndexOutOfRangeException e)
             {
-                throw new IndexOutOfRangeException($"No voxel type exists for id {id}",e);
+                throw new IndexOutOfRangeException($"No voxel type exists for id {id}", e);
             }
         }
 
-        public Material GetMaterial(ushort materialID) 
+        public Material GetMaterial(ushort materialID)
         {
             try
             {
@@ -188,7 +209,7 @@ namespace UniVox.Framework
             }
         }
 
-        public void CreateTextureArray(Material material,Dictionary<Texture2D, int> SourceTextures, RectInt commonTexSize)
+        private void CreateTextureArray(Material material, Dictionary<Texture2D, int> SourceTextures, RectInt commonTexSize)
         {
             //REF: Based on https://medium.com/@calebfaith/how-to-use-texture-arrays-in-unity-a830ae04c98b
 

@@ -1,6 +1,7 @@
 ﻿using Unity.Collections;
 using UnityEngine;
 using UniVox.Framework.Common;
+using UniVox.Framework.Lighting;
 
 namespace UniVox.Framework
 {
@@ -20,6 +21,8 @@ namespace UniVox.Framework
         public Vector3Int Dimensions { get => realData.Dimensions; set => throw new System.NotImplementedException(); }
         public bool ModifiedSinceGeneration { get => realData.ModifiedSinceGeneration; set => throw new System.NotImplementedException(); }
         public bool FullyGenerated { get => realData.FullyGenerated; set => throw new System.NotImplementedException(); }
+
+        public LightChunkData lightChunk => realData.lightChunk;
 
         public NativeArray<VoxelTypeID> BorderToNative(Direction dir)
         {

@@ -332,7 +332,6 @@ namespace UniVox.Implementations.Providers
 
         public override AbstractPipelineJob<ChunkNeighbourhood> GenerateStructuresForNeighbourhood(Vector3Int centerChunkID, ChunkNeighbourhood neighbourhood)
         {
-            Assert.IsTrue(neighbourhood.HasDiagonals);
 
             if (noiseMaps.TryGetValue(new Vector2Int(centerChunkID.x, centerChunkID.z), out var chunkColumnNoise))
             {

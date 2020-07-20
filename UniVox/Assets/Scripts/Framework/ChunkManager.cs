@@ -423,6 +423,20 @@ namespace UniVox.Framework
                 $" Did the pipeline contain the chunk? {pipeline.Contains(chunkID)}");
         }
 
+        public IChunkData GetChunkData(Vector3Int chunkId) 
+        {
+            if (loadedChunks.TryGetValue(chunkId, out var chunkComponent))
+            {
+                if (chunkComponent.Data == null)
+                {
+                    throw new ArgumentException($"It is not valid to get data for chunk ID {chunkId}, as its data is null");
+                }
+                return chunkComponent.Data;
+            }
+            throw new ArgumentException($"It is not valid to get data for chunk ID {chunkId}, as it is not in the loaded chunks." +
+                $" Did the pipeline contain the chunk? {pipeline.Contains(chunkId)}");
+        }
+
         public bool TrySetVoxel(Vector3 worldPos, VoxelTypeID voxelTypeID, VoxelRotation voxelRotation = default, bool overrideExisting = false)
         {
             Vector3Int localVoxelIndex;
