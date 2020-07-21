@@ -6,6 +6,7 @@ using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UniVox.Framework.Common;
+using UniVox.Framework.Lighting;
 using Utils;
 
 namespace UniVox.Framework.Jobified
@@ -67,7 +68,7 @@ namespace UniVox.Framework.Jobified
                     {
                         var voxelTypeID = data.voxels[i];
 
-                        if (voxelTypeID != VoxelTypeManager.AIR_ID)
+                        if (voxelTypeID != VoxelTypeID.AIR_ID)
                         {
                             bool rotated = false;
                             VoxelRotation rotation = default;
@@ -140,7 +141,7 @@ namespace UniVox.Framework.Jobified
                 for (byte dir = 0; dir < numDirections; dir++)
                 {
                     var rotatedDirection = (byte)directionHelper.GetDirectionAfterRotation((Direction)dir, rotation);
-                    var faceIsSolid = data.meshDatabase.isFaceSolid[meshRange.start + rotatedDirection];
+                    var faceIsSolid = data.meshDatabase.isFaceSolid[meshRange.start + rotatedDirection];                    
                     if (IncludeFace(id, position, rotatedDirection, faceIsSolid))
                     {
                         AddFaceRotated(meshID, data.voxelTypeDatabase.zIndicesPerFace[faceZRange.start + dir], dir, position, rotation);
@@ -163,6 +164,11 @@ namespace UniVox.Framework.Jobified
 
         private void AddFaceRotated(int meshID, float uvZ, int direction, int3 position, VoxelRotation rotation) 
         {
+            //Lighting
+            var directionVector = directionHelper.DirectionVectors[direction];
+            var lightForFace = data.GetLightValue(position + directionVector);
+            var vertexColourValue = lightForFace.ToVertexColour();
+
             var meshRange = data.meshDatabase.meshTypeRanges[meshID];
 
             var usedNodesSlice = data.meshDatabase.nodesUsedByFaces[meshRange.start + direction];
@@ -181,6 +187,7 @@ namespace UniVox.Framework.Jobified
                 var rotatedVert = math.mul(rotationQuat, node.vertex-rotationOffset)+rotationOffset;
                 var adjustedVert = rotatedVert + position;
                 data.vertices.Add(adjustedVert);
+                data.vertexColours.Add(vertexColourValue);
                 data.uvs.Add(new float3(node.uv, uvZ));
                 var adjustedNorm = math.mul(rotationQuat, node.normal);
                 data.normals.Add(adjustedNorm);
@@ -199,6 +206,11 @@ namespace UniVox.Framework.Jobified
 
         private void AddFace(int meshID, float uvZ, int direction, int3 position)
         {
+            //Lighting
+            var directionVector = directionHelper.DirectionVectors[direction];
+            var lightForFace = data.GetLightValue(position + directionVector);
+            var vertexColourValue = lightForFace.ToVertexColour();
+
             var meshRange = data.meshDatabase.meshTypeRanges[meshID];
 
             var usedNodesSlice = data.meshDatabase.nodesUsedByFaces[meshRange.start + direction];
@@ -210,6 +222,7 @@ namespace UniVox.Framework.Jobified
             {
                 var node = data.meshDatabase.allMeshNodes[i];
                 data.vertices.Add(node.vertex + position);
+                data.vertexColours.Add(vertexColourValue);
                 data.uvs.Add(new float3(node.uv, uvZ));
                 data.normals.Add(node.normal);
             }
@@ -231,7 +244,7 @@ namespace UniVox.Framework.Jobified
                     data.allTriangleIndices.Add(data.meshDatabase.allRelativeTriangles[i] + currentIndex);
                 }                
             }
-        }
+        }        
 
         private bool IncludeFace(ushort voxelID,int3 position, int directionIndex,bool faceIsSolid)
         {
@@ -277,7 +290,7 @@ namespace UniVox.Framework.Jobified
 
         private bool IncludeFaceOfAdjacentWithID(ushort voxelTypeID, int direction)
         {
-            if (voxelTypeID == VoxelTypeManager.AIR_ID)
+            if (voxelTypeID == VoxelTypeID.AIR_ID)
             {
                 //Include the face if the adjacent voxel is air
                 return true;
@@ -299,7 +312,7 @@ namespace UniVox.Framework.Jobified
                 voxelId = data.voxels[Utils.Helpers.MultiIndexToFlat(pos.x, pos.y, pos.z, data.dimensions)];
                 return true;
             }
-            voxelId = VoxelTypeManager.AIR_ID;
+            voxelId = VoxelTypeID.AIR_ID;
             return false;
         }
 

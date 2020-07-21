@@ -8,6 +8,8 @@ namespace UniVox.Framework
     [BurstCompile]
     public struct VoxelTypeID: IEquatable<VoxelTypeID>
     {
+        public const ushort AIR_ID = 0;
+
         private ushort value;
 
         public VoxelTypeID(ushort typeID)

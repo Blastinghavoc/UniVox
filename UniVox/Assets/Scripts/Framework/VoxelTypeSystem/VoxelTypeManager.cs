@@ -33,9 +33,6 @@ namespace UniVox.Framework
         public NativeVoxelTypeDatabase nativeVoxelTypeDatabase;
         #endregion
 
-        //Ensure that default initialisation of a VoxelData instance is Air
-        public const ushort AIR_ID = 0;
-
         private bool disposed = false;
 
         public void Initialise()
@@ -57,7 +54,7 @@ namespace UniVox.Framework
             var typesByMaterialID = new List<List<SOVoxelTypeDefinition>>();
 
             //Process voxel types and split by material used
-            ushort currentID = AIR_ID + 1;
+            ushort currentID = VoxelTypeID.AIR_ID + 1;
             foreach (var item in VoxelTypes)
             {
                 Assert.AreEqual(DirectionExtensions.numDirections, item.FaceTextures.Length, $"Voxel type {item.name} does not define a texture for each face");

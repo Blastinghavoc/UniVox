@@ -1,5 +1,10 @@
-﻿namespace UniVox.Framework.Lighting
+﻿using Unity.Burst;
+using Unity.Mathematics;
+using UnityEngine;
+
+namespace UniVox.Framework.Lighting
 {
+    [BurstCompile]
     public struct LightValue 
     {
         public const int IntensityRange = 16;
@@ -10,5 +15,19 @@
 
         public int Sun { get => bits& 0xF; set => bits = (byte)((bits&0xF0)|value); }
         public int Dynamic { get => (bits>>4)& 0xF; set => bits = (byte)((bits&0xF)|value<<4); }
+
+
+        public Color ToVertexColour() 
+        {
+            var dynamicIntensity = (1f / (IntensityRange - 1)) *Dynamic;
+            var sunIntensity = (1f / (IntensityRange - 1)) * Sun;
+            Color col = new Color(dynamicIntensity,dynamicIntensity,dynamicIntensity,sunIntensity);
+            return col;
+        }
+
+        public override string ToString()
+        {
+            return $"(sun:{Sun},dynamic:{Dynamic})";
+        }
     }
 } 

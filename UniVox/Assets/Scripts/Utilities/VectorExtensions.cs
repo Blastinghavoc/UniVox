@@ -97,6 +97,11 @@ public static class VectorExtensions
         z = v.z;
     }
 
+    public static int ManhattanMagnitude(this Vector3Int v) 
+    {
+        return Math.Abs(v.x) + Math.Abs(v.y) + Math.Abs(v.z);
+    }
+
     #endregion
 
     #region Vector3

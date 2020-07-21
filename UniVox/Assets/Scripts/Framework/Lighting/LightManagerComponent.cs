@@ -1,18 +1,30 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace UniVox.Framework.Lighting
 {
-    public class LightManagerComponent : MonoBehaviour
+    public class LightManagerComponent : MonoBehaviour, ILightManager
     {
         public string GlobalLightName;
-        [Range(0,1)]
+        [Range(0, 1)]
         public float GlobalLightValue;
 
-        private LightManager lightManager;
+        private ILightManager lightManager;
 
-        private void Awake()
+        public void Initialise(IVoxelTypeManager voxelTypeManager)
         {
             lightManager = new LightManager();
+            lightManager.Initialise(voxelTypeManager);
+        }
+
+        public void OnChunkGenerated(IChunkData chunkData, IChunkData aboveChunkData)
+        {
+            lightManager.OnChunkGenerated(chunkData, aboveChunkData);
+        }
+
+        public List<Vector3Int> UpdateLightOnVoxelSet(ChunkNeighbourhood neighbourhood, Vector3Int localCoords, VoxelTypeID voxelType, VoxelTypeID previousType)
+        {
+            return lightManager.UpdateLightOnVoxelSet(neighbourhood, localCoords, voxelType, previousType);
         }
 
         // Start is called before the first frame update
@@ -25,6 +37,6 @@ namespace UniVox.Framework.Lighting
         void Update()
         {
             Shader.SetGlobalFloat(GlobalLightName, GlobalLightValue);
-        }       
+        }
     }
 }

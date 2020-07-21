@@ -45,7 +45,7 @@ namespace UniVox.Implementations.ProcGen
 
                             int y = yStart;
                             int flatIndex = MultiIndexToFlat(x, y, z, dx, dxdy);
-                            while (y >= 0 && chunkData[flatIndex] == VoxelTypeManager.AIR_ID)
+                            while (y >= 0 && chunkData[flatIndex] == VoxelTypeID.AIR_ID)
                             {
                                 chunkData[flatIndex] = new VoxelTypeID(config.waterID);
                                 y--;

@@ -22,6 +22,8 @@ namespace UniVox.Framework.ChunkPipeline
 
         public Func<Vector3Int, IChunkComponent> getChunkComponent { get; private set; }
 
+        public event Action<Vector3Int> OnChunkFinishedGenerating = delegate { };
+
         public event Action<Vector3Int> OnChunkRemovedFromPipeline = delegate { };
         //args: id, added at stage
         public event Action<Vector3Int, int> OnChunkAddedToPipeline = delegate { };
@@ -104,7 +106,8 @@ namespace UniVox.Framework.ChunkPipeline
                 waitingForAllNeighboursToHaveStructures.OnWaitEnded = (id) => {
                         Assert.IsFalse(getChunkComponent(id).Data.FullyGenerated,$"Chunk data for {id} was listed as fully generated before all its neighbours had structures");
                         getChunkComponent(id).Data.FullyGenerated = true;
-                    };
+                        FireChunkFinishedGeneratingEvent(id);
+                };
 
                 stages.Add(waitingForAllNeighboursToHaveStructures);
 
@@ -695,5 +698,9 @@ namespace UniVox.Framework.ChunkPipeline
             return stages[stageIndex];            
         }
 
+        public void FireChunkFinishedGeneratingEvent(Vector3Int chunkId)
+        {            
+            OnChunkFinishedGenerating(chunkId);
+        }
     }
 }

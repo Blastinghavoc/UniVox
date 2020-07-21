@@ -1,5 +1,7 @@
 ﻿Shader "Unlit/VoxelLighting"
 {
+    //Based on https://github.com/b3agz/Code-A-Game-Like-Minecraft-In-Unity/blob/master/15-lighting-part-1/Assets/Scripts/StandardBlockShader.shader
+
     Properties
     {
         _MainTex ("Texture", 2DArray) = "white" {}
@@ -25,6 +27,7 @@
             {
                 float4 vertex : POSITION;
                 float3 uv : TEXCOORD0;
+                float4 color : COLOR;
             };
 
             struct v2f
@@ -32,6 +35,7 @@
                 float3 uv : TEXCOORD0;
                 UNITY_FOG_COORDS(1)
                 float4 vertex : SV_POSITION;
+                float4 color : COLOR;
             };
 
             UNITY_DECLARE_TEX2DARRAY(_MainTex);
@@ -43,6 +47,8 @@
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 o.uv = v.uv;
+                o.color = v.color;
+
                 UNITY_TRANSFER_FOG(o,o.vertex);
                 return o;
             }
@@ -51,10 +57,12 @@
             {
                 // sample the texture
                 fixed4 col = UNITY_SAMPLE_TEX2DARRAY(_MainTex, i.uv);
-
-                //Global light lerp
-                float localLight = clamp(GlobalLightLevel,0,1);
-                col = lerp(float4(0,0,0,1),col,GlobalLightLevel);
+                
+                float localSunLight = GlobalLightLevel * i.color.a;
+                float3 sunColour = float3(localSunLight,localSunLight,localSunLight) * col.xyz;
+                float3 dynamicColour = i.color.xyz * col.xyz;
+                float3 combinedColour = clamp(sunColour+dynamicColour,0,1);
+                col.xyz = combinedColour;
 
                 // apply fog
                 UNITY_APPLY_FOG(i.fogCoord, col);

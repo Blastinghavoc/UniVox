@@ -16,7 +16,7 @@ namespace UniVox.Framework
 
         protected override VoxelTypeID GetVoxelID(int x, int y, int z)
         {
-            return new VoxelTypeID(VoxelTypeManager.AIR_ID);
+            return new VoxelTypeID(VoxelTypeID.AIR_ID);
         }
 
         protected override void SetVoxelID(int x, int y, int z, VoxelTypeID voxel)

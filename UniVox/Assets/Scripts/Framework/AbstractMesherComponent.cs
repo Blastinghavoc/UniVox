@@ -104,6 +104,7 @@ namespace UniVox.Framework
             var meshingJob = createMeshingJob(new MeshJobData(chunkDimensions.ToNative(),
                 voxels,
                 chunkData.NativeRotations(),
+                chunkData.lightChunk.ToNative(),
                 neighbourData,
                 voxelTypeManager.nativeMeshDatabase,
                 voxelTypeManager.nativeVoxelTypeDatabase,
@@ -132,6 +133,7 @@ namespace UniVox.Framework
                 }
 
                 mesh.vertices = meshingJob.data.vertices.ToArray();
+                mesh.colors = meshingJob.data.vertexColours.ToArray();
                 mesh.SetUVs(0, meshingJob.data.uvs.ToArray());
                 mesh.normals = meshingJob.data.normals.ToArray();
 

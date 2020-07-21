@@ -52,7 +52,7 @@ namespace UniVox.Implementations.ChunkData
 
             public VoxelTypeID Get(int x, int y, int z)
             {
-                return (VoxelTypeID)VoxelTypeManager.AIR_ID;
+                return (VoxelTypeID)VoxelTypeID.AIR_ID;
             }
 
             public void InitialiseEmpty(Vector3Int dimensions)

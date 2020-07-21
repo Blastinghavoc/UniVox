@@ -534,7 +534,7 @@ namespace UniVox.Implementations.Meshers
                 return false;//Dont include faces between voxels of the same type
             }
 
-            if (oppositeFace.typeId == VoxelTypeManager.AIR_ID)
+            if (oppositeFace.typeId == VoxelTypeID.AIR_ID)
             {
                 //Include the face if the opposite voxel is air
                 return true;
@@ -562,7 +562,7 @@ namespace UniVox.Implementations.Meshers
 
         private FaceDescriptor makeFaceDescriptor(VoxelTypeID typeId, Direction originalDirection, VoxelRotation rotation = default)
         {
-            if (typeId == VoxelTypeManager.AIR_ID)
+            if (typeId == VoxelTypeID.AIR_ID)
             {
                 return nullFace;
             }

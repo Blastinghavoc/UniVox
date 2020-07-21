@@ -100,7 +100,7 @@ namespace UniVox.Implementations.ProcGen
                                 if (caveNoise > worldSettings.CaveThreshold)
                                 {
                                     //Cave
-                                    idToPlace = VoxelTypeManager.AIR_ID;
+                                    idToPlace = VoxelTypeID.AIR_ID;
                                 }
                             }
                         }

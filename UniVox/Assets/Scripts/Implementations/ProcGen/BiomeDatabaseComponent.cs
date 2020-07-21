@@ -120,7 +120,7 @@ namespace UniVox.Implementations.ProcGen
 
             NativeBiomeDatabase biomeDatabase = new NativeBiomeDatabase();
 
-            VoxelTypeID defaultVoxelType = new VoxelTypeID(VoxelTypeManager.AIR_ID);
+            VoxelTypeID defaultVoxelType = new VoxelTypeID(VoxelTypeID.AIR_ID);
             if (config.defaultVoxelType != null)
             {
                 defaultVoxelType = typeManager.GetId(config.defaultVoxelType);

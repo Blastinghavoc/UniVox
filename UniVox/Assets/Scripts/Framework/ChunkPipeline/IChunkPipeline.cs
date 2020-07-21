@@ -5,6 +5,12 @@ namespace UniVox.Framework.ChunkPipeline
 {
     public interface IChunkPipeline 
     {
+        /// <summary>
+        /// Event for when a chunk finishes generation
+        /// </summary>
+        event Action<Vector3Int> OnChunkFinishedGenerating;
+        void FireChunkFinishedGeneratingEvent(Vector3Int chunkId);
+
         event Action<Vector3Int> OnChunkRemovedFromPipeline;
         //args: id, added at stage
         event Action<Vector3Int,int> OnChunkAddedToPipeline;

@@ -38,7 +38,7 @@ namespace UniVox.Implementations.ProcGen
                     {
                         var groundY = (int)math.floor(hm - chunkPosition.y);
                         //Check ground is still there (not been removed by cave)
-                        if (neighbourhood[x,groundY,z] != VoxelTypeManager.AIR_ID)
+                        if (neighbourhood[x,groundY,z] != VoxelTypeID.AIR_ID)
                         {
                             if (chunkColumnNoise.treeMap[mapIndex] > treeThreshold)
                             {

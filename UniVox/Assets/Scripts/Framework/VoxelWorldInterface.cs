@@ -52,7 +52,7 @@ namespace UniVox.Framework
 
         public void RemoveVoxel(Vector3 position)
         {
-            chunkManager.TrySetVoxel(position, (VoxelTypeID)VoxelTypeManager.AIR_ID,default, true);
+            chunkManager.TrySetVoxel(position, (VoxelTypeID)VoxelTypeID.AIR_ID,default, true);
         }
 
         public Vector3 CenterOfVoxelAt(Vector3 position)

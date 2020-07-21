@@ -33,8 +33,8 @@ namespace UniVox.Implementations.ProcGen
             def.maxHeight = maxHeight;
             def.minHeight = minHeight;
             def.minLeafClearance = minLeafClearance;
-            def.leafID = (leafType == null) ? (VoxelTypeID)VoxelTypeManager.AIR_ID : typeManager.GetId(leafType);
-            def.logID = (logType == null) ? (VoxelTypeID)VoxelTypeManager.AIR_ID : typeManager.GetId(logType);
+            def.leafID = (leafType == null) ? (VoxelTypeID)VoxelTypeID.AIR_ID : typeManager.GetId(leafType);
+            def.logID = (logType == null) ? (VoxelTypeID)VoxelTypeID.AIR_ID : typeManager.GetId(logType);
             def.style = Style;
             return def;
         }

@@ -93,7 +93,7 @@ namespace UniVox.Framework
         public void SetIfUnoccupied(int x, int y, int z,VoxelTypeID typeID) 
         {
             var chunkData = extendedIndex(ref x,ref y,ref z);
-            if (chunkData[x,y,z] == VoxelTypeManager.AIR_ID)
+            if (chunkData[x,y,z] == VoxelTypeID.AIR_ID)
             {
                 chunkData[x, y, z] = typeID;
             }

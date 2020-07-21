@@ -33,7 +33,7 @@ namespace UniVox.Implementations.ChunkData
         {
             public VoxelTypeID[] children = new VoxelTypeID[8];
 
-            public bool IsEmpty => !children.Any((id) => id != VoxelTypeManager.AIR_ID);
+            public bool IsEmpty => !children.Any((id) => id != VoxelTypeID.AIR_ID);
             public bool IsLeaf => true;
 
             public bool Equals(INode other)
@@ -338,7 +338,7 @@ namespace UniVox.Implementations.ChunkData
                     var flat = Utils.Helpers.MultiIndexToFlat(leafOffset.x, leafOffset.y, leafOffset.z, rootDimensions.x, dxdy);
                     var voxel = array[flat];
 
-                    if (voxel != VoxelTypeManager.AIR_ID)
+                    if (voxel != VoxelTypeID.AIR_ID)
                     {
                         leaf.children[i] = voxel;
                         empty = false;
@@ -561,7 +561,7 @@ namespace UniVox.Implementations.ChunkData
             var (index,childNodeLocal) = getIndexAndAdjustedNodeLocalCoords(nodeLocal, childDimensions);
             if (node == null)
             {
-                return (VoxelTypeID)VoxelTypeManager.AIR_ID;
+                return (VoxelTypeID)VoxelTypeID.AIR_ID;
             }
             if (node.IsLeaf)
             {

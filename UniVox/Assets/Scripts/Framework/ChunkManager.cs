@@ -6,6 +6,7 @@ using UnityEngine.Assertions;
 using UnityEngine.Profiling;
 using UniVox.Framework.ChunkPipeline;
 using UniVox.Framework.Common;
+using UniVox.Framework.Lighting;
 using UniVox.Framework.PlayAreaManagement;
 using Utils.Pooling;
 
@@ -58,11 +59,14 @@ namespace UniVox.Framework
         //TODO remove DEBUG
         [SerializeField] protected bool DebugPipeline = false;
 
+        [SerializeField] protected GameObject LightManagerGO = null;
+
         #endregion        
 
         protected VoxelTypeManager VoxelTypeManager;
-        protected IChunkProvider chunkProvider { get; set; }
-        protected IChunkMesher chunkMesher { get; set; }
+        protected IChunkProvider chunkProvider;
+        protected IChunkMesher chunkMesher;
+        protected ILightManager lightManager;
 
         protected Dictionary<Vector3Int, ChunkComponent> loadedChunks;
 
@@ -94,11 +98,14 @@ namespace UniVox.Framework
 
             chunkProvider = GetComponent<IChunkProvider>();
             chunkMesher = GetComponent<IChunkMesher>();
+            lightManager = LightManagerGO.GetComponent<ILightManager>();
             Assert.IsNotNull(chunkProvider, "Chunk Manager must have a chunk provider component");
             Assert.IsNotNull(chunkMesher, "Chunk Manager must have a chunk mesher component");
+            Assert.IsNotNull(lightManager, "Chunk Manager must have a reference to a gameobject with a light manager component");
 
             chunkProvider.Initialise(VoxelTypeManager, this, eventManager);
             chunkMesher.Initialise(VoxelTypeManager, this, eventManager);
+            lightManager.Initialise(VoxelTypeManager);
 
             pipeline = new ChunkPipelineManager(
                 chunkProvider,
@@ -110,6 +117,8 @@ namespace UniVox.Framework
                 MaxMeshedPerUpdate,
                 generateStructures,
                 MaxStructurePerUpdate);
+
+            pipeline.OnChunkFinishedGenerating += OnChunkFullyGenerated;
 
             //Initialise play area manager
             var voxelPlayer = player.GetComponent<IVoxelPlayer>();
@@ -140,6 +149,7 @@ namespace UniVox.Framework
         /// </summary>
         private void OnDestroy()
         {
+            pipeline.OnChunkFinishedGenerating -= OnChunkFullyGenerated;
             pipeline.Dispose();
             VoxelTypeManager.Dispose();
             if (chunkMesher is IDisposable disposableChunkMesher)
@@ -152,6 +162,29 @@ namespace UniVox.Framework
                 disposableChunkProvider.Dispose();
             }
 
+        }
+
+        private void OnChunkFullyGenerated(Vector3Int chunkId) 
+        {
+            if (loadedChunks.TryGetValue(chunkId,out var chunkComponent))
+            {
+                IChunkData aboveChunkData = null;
+                var verticalNeighbourId = chunkId + Vector3Int.up;
+                if (loadedChunks.TryGetValue(verticalNeighbourId, out var aboveChunkComponent))
+                {
+                    if (pipeline.GetMaxStage(verticalNeighbourId)>= pipeline.FullyGeneratedStage)
+                    {
+                        aboveChunkData = new ReadOnlyChunkData(aboveChunkComponent.Data);
+                    }
+
+                }
+
+                lightManager.OnChunkGenerated(chunkComponent.Data, aboveChunkData);
+            }
+            else
+            {
+                throw new Exception($"Chunk with id {chunkId} does not exist");
+            }
         }
 
         public bool IsChunkComplete(Vector3Int chunkId)
@@ -369,6 +402,17 @@ namespace UniVox.Framework
                 }
             }
 
+            var chunksTouchedByLightingUpdate = lightManager.UpdateLightOnVoxelSet(new ChunkNeighbourhood(chunkID, GetChunkData),
+                localVoxelIndex, newTypeID, previousTypeID);
+
+            foreach (var id in chunksTouchedByLightingUpdate)
+            {
+                if (pipeline.GetTargetStage(id) >= pipeline.RenderedStage) 
+                {
+                    RedoChunkFromStage(id, pipeline.FullyGeneratedStage);
+                }
+            }
+
             if (pipeline.GetTargetStage(chunkID) >= pipeline.RenderedStage)
             {
                 //The chunk that changed will need remeshing if its target stage has a mesh
@@ -458,7 +502,7 @@ namespace UniVox.Framework
                 if (!overrideExisting)
                 {
                     //Disallow setting voxel if one already exists
-                    if (prevID != (VoxelTypeID)VoxelTypeManager.AIR_ID)
+                    if (prevID != (VoxelTypeID)VoxelTypeID.AIR_ID)
                     {
                         return false;
                     }
@@ -484,7 +528,7 @@ namespace UniVox.Framework
 
         public bool TryGetVoxel(Vector3Int chunkID, Vector3Int localVoxelIndex, out VoxelTypeID voxelTypeID)
         {
-            voxelTypeID = (VoxelTypeID)VoxelTypeManager.AIR_ID;
+            voxelTypeID = (VoxelTypeID)VoxelTypeID.AIR_ID;
 
             if (loadedChunks.TryGetValue(chunkID, out var chunkComponent))
             {

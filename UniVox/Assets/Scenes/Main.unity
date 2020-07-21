@@ -762,7 +762,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   GlobalLightName: GlobalLightLevel
-  GlobalLightValue: 0.446
+  GlobalLightValue: 1
 --- !u!4 &1059055055
 Transform:
   m_ObjectHideFlags: 0
@@ -2389,6 +2389,7 @@ MonoBehaviour:
   MaxStructurePerUpdate: 24
   MaxMeshedPerUpdate: 24
   DebugPipeline: 0
+  LightManagerGO: {fileID: 0}
 --- !u!114 &4110033765651139083
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2431,6 +2432,7 @@ MonoBehaviour:
   MaxStructurePerUpdate: 10
   MaxMeshedPerUpdate: 10
   DebugPipeline: 0
+  LightManagerGO: {fileID: 0}
 --- !u!1 &6061144535608697008
 GameObject:
   m_ObjectHideFlags: 0
@@ -2567,6 +2569,7 @@ MonoBehaviour:
   MaxStructurePerUpdate: 10
   MaxMeshedPerUpdate: 10
   DebugPipeline: 0
+  LightManagerGO: {fileID: 1059055053}
 --- !u!114 &7859985559551744862
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -26,7 +26,7 @@ namespace UniVox.Implementations.ProcGen
 
         public void Execute()
         {
-            VoxelTypeID air = (VoxelTypeID)VoxelTypeManager.AIR_ID;
+            VoxelTypeID air = (VoxelTypeID)VoxelTypeID.AIR_ID;
             for (int i = 0; i < chunkData.Length; i++)
             {
                 if (chunkData[i] != air)
