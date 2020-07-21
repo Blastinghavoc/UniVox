@@ -25,3 +25,4 @@ MonoBehaviour:
   isPassable: 0
   rotationConfiguration: {fileID: 11400000, guid: 018807804b156fa4fa332c909c217b4c,
     type: 2}
+  lightConfiguration: {fileID: 11400000, guid: da2475bc2d3d8b840b5ba5ba6f8031dc, type: 2}

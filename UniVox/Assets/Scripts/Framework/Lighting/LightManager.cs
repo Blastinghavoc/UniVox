@@ -36,16 +36,18 @@ namespace UniVox.Framework.Lighting
         public List<Vector3Int> UpdateLightOnVoxelSet(ChunkNeighbourhood neighbourhood, Vector3Int localCoords, VoxelTypeID voxelType, VoxelTypeID previousType)
         {
             Profiler.BeginSample("LightOnVoxelSet");
-            var lightEmissionCurrent = voxelTypeManager.GetLightEmission(voxelType);
-            var lightEmissionPrevious = voxelTypeManager.GetLightEmission(previousType);
+            var (emissionCurrent,absorptionCurrent) = voxelTypeManager.GetLightProperties(voxelType);
+            var (emissionPrevious,absorptionPrevious) = voxelTypeManager.GetLightProperties(previousType);
 
             var (x, y, z) = localCoords;
 
             Queue<Vector3Int> propagateQueue = null;
 
-            if (lightEmissionPrevious > 1)
+            var previousLv = neighbourhood.GetLightValue(x, y, z);
+
+            if (emissionPrevious > 1 || (previousLv.Dynamic >1 && absorptionCurrent!=absorptionPrevious))
             {
-                //if previous type emitted light, undo light 
+                //if there was light at this position, remove it
                 Profiler.BeginSample("RemoveLight");
                 BfsRemovalDynamic(neighbourhood, localCoords, out propagateQueue);
                 Profiler.EndSample();
@@ -56,20 +58,18 @@ namespace UniVox.Framework.Lighting
             }
 
 
-            if (lightEmissionCurrent > 1)
+            if (emissionCurrent > 1)
             {
                 //if voxel type emits light, bfs set light values.
                 var lv = neighbourhood.GetLightValue(x, y, z);
-                lv.Dynamic = lightEmissionCurrent;
+                lv.Dynamic = emissionCurrent;
                 neighbourhood.SetLightValue(x, y, z, lv);
                 propagateQueue.Enqueue(localCoords);
             }
-            else
-            {
-                //Otherwise, update light propagation of neighbours into this block
-                //TODO incorporate sunlight
-                //TODO incorporate opacity 
-            }
+
+            //TODO incorporate sunlight
+            //TODO incorporate opacity 
+
 
             BfsPropagateDynamic(neighbourhood, propagateQueue);
 
@@ -80,14 +80,21 @@ namespace UniVox.Framework.Lighting
         private void BfsRemovalDynamic(ChunkNeighbourhood neighbourhood, Vector3Int localCoords, out Queue<Vector3Int> propagateQueue)
         {
             Queue<Vector3Int> removalQueue = new Queue<Vector3Int>();
+            Queue<LightValue> lightValuesQueue = new Queue<LightValue>();
             removalQueue.Enqueue(localCoords);
+            var initialLightValue = neighbourhood.GetLightValue(localCoords.x, localCoords.y, localCoords.z);
+            lightValuesQueue.Enqueue(initialLightValue);
+            initialLightValue.Dynamic = 0;
+            neighbourhood.SetLightValue(localCoords.x, localCoords.y, localCoords.z, initialLightValue);
+
             propagateQueue = new Queue<Vector3Int>();
+
+            int processed = 0;//TODO remove DEBUG
 
             while (removalQueue.Count > 0)
             {
                 var coords = removalQueue.Dequeue();
-                var (x, y, z) = coords;
-                var currentLv = neighbourhood.GetLightValue(x, y, z);
+                var currentLv = lightValuesQueue.Dequeue();
 
                 foreach (var offset in DirectionExtensions.Vectors)
                 {
@@ -97,33 +104,40 @@ namespace UniVox.Framework.Lighting
                     {
                         //this neighbour must be removed
                         removalQueue.Enqueue(neighbourCoord);
+                        lightValuesQueue.Enqueue(neighbourLightValue);
+                        //remove this light
+                        neighbourLightValue.Dynamic = 0;
+                        neighbourhood.SetLightValue(neighbourCoord.x, neighbourCoord.y, neighbourCoord.z, neighbourLightValue);
                     }
                     else if (neighbourLightValue.Dynamic >= currentLv.Dynamic)
                     {
                         //This neighbour will need to re-propagate
                         propagateQueue.Enqueue(neighbourCoord);
                     }
-                }
-
-                //remove this light
-                currentLv.Dynamic = 0;
-                neighbourhood.SetLightValue(x, y, z, currentLv);
+                }                
+                processed++;
             }
+
+            Debug.Log($"Removal processed {processed}");
 
         }
 
         private void BfsPropagateDynamic(ChunkNeighbourhood neighbourhood, Queue<Vector3Int> localCoordsToUpdate)
         {
+            int processed = 0;//TODO remove DEBUG
             while (localCoordsToUpdate.Count > 0)
             {
                 var coords = localCoordsToUpdate.Dequeue();
                 var (x, y, z) = coords;
                 var thisLightValue = neighbourhood.GetLightValue(x, y, z);
-                var next = thisLightValue.Dynamic - 1;
+
                 foreach (var offset in DirectionExtensions.Vectors)
                 {
                     var neighbourCoord = coords + offset;
                     var neighbourLightValue = neighbourhood.GetLightValue(neighbourCoord.x, neighbourCoord.y, neighbourCoord.z);
+                    var (_, absorption) = voxelTypeManager.GetLightProperties(neighbourhood.GetVoxel(neighbourCoord.x, neighbourCoord.y, neighbourCoord.z));
+                    var next = thisLightValue.Dynamic - absorption;          
+
                     if (neighbourLightValue.Dynamic < next)
                     {
                         neighbourLightValue.Dynamic = next;
@@ -131,8 +145,10 @@ namespace UniVox.Framework.Lighting
                         localCoordsToUpdate.Enqueue(neighbourCoord);
                     }
                 }
-
+                processed++;
             }
+
+            Debug.Log($"Propagation processed {processed}");
         }
 
     }

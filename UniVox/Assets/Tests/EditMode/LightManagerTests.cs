@@ -18,7 +18,8 @@ namespace Tests
         IVoxelTypeManager voxelTypeManager;
         LightManager lightManager;
         VoxelTypeID lampId;
-        int lampIntensity;
+        VoxelTypeID blockerId;
+        int maxIntensity;
         Vector3Int chunkDimensions;
 
         Dictionary<Vector3Int, IChunkData> chunkStorage;
@@ -28,20 +29,25 @@ namespace Tests
         [SetUp]
         public void Reset()
         {
-            lampIntensity = LightValue.IntensityRange - 1;
+            maxIntensity = LightValue.IntensityRange - 1;
             chunkDimensions = new Vector3Int(16, 16, 16);
             chunkStorage = new Dictionary<Vector3Int, IChunkData>();
 
-            lampId = (VoxelTypeID)1337;
+            lampId = (VoxelTypeID)1;
+            blockerId = (VoxelTypeID)2;
             voxelTypeManager = Substitute.For<IVoxelTypeManager>();
-            voxelTypeManager.GetLightEmission(Arg.Any<VoxelTypeID>())
+            voxelTypeManager.GetLightProperties(Arg.Any<VoxelTypeID>())
                 .Returns((args)=> {
                     var typeId = (VoxelTypeID) args[0];
                     if (typeId.Equals(lampId))
                     {
-                        return lampIntensity;
+                        return (maxIntensity, maxIntensity);
                     }
-                    return 0;
+                    else if(typeId.Equals(blockerId))
+                    {
+                        return (0, maxIntensity);
+                    }
+                    return (0,1);
                 });
 
             lightManager = new LightManager();
@@ -70,19 +76,96 @@ namespace Tests
 
             //PrintSlice(neighbourhood, 0);
            
-            for (int z = -lampIntensity; z <= lampIntensity; z++)
+            for (int z = -maxIntensity; z <= maxIntensity; z++)
             {
-                for (int y = -lampIntensity; y <= lampIntensity; y++)
+                for (int y = -maxIntensity; y <= maxIntensity; y++)
                 {
-                    for (int x = -lampIntensity; x <= lampIntensity; x++)
+                    for (int x = -maxIntensity; x <= maxIntensity; x++)
                     {
                         var pos = new Vector3Int(x, y, z);
-                        var expectedLv = math.max(lampIntensity - pos.ManhattanMagnitude(),0);
+                        var expectedLv = math.max(maxIntensity - pos.ManhattanMagnitude(),0);
                         Assert.AreEqual(expectedLv, neighbourhood.GetLightValue(x, y, z).Dynamic,
                             $"Light value not as expected for position {x},{y},{z}");
                     }
                 }
             }            
+        }
+
+        [Test]
+        public void PropagateDynamicOnLightSourcePlacedWithExistingBarrier()
+        {
+            ChunkNeighbourhood neighbourhood = new ChunkNeighbourhood(Vector3Int.zero, GetMockChunkData);
+
+            for (int z = -maxIntensity; z <= maxIntensity; z++)
+            {
+                for (int y = -maxIntensity; y <= maxIntensity; y++)
+                {
+                    neighbourhood.SetVoxel(-1, y, z, blockerId);
+                }
+            }
+
+            lightManager.UpdateLightOnVoxelSet(neighbourhood, Vector3Int.zero, lampId, (VoxelTypeID)VoxelTypeID.AIR_ID);
+
+            //PrintSlice(neighbourhood, 0);
+
+            for (int z = -maxIntensity; z <= maxIntensity; z++)
+            {
+                for (int y = -maxIntensity; y <= maxIntensity; y++)
+                {
+                    for (int x = -maxIntensity; x <= maxIntensity; x++)
+                    {
+                        var pos = new Vector3Int(x, y, z);
+                        var expectedLv = math.max(maxIntensity - pos.ManhattanMagnitude(), 0);
+
+                        if (x <= -1)
+                        {
+                            expectedLv = 0;
+                        }
+
+                        Assert.AreEqual(expectedLv, neighbourhood.GetLightValue(x, y, z).Dynamic,
+                            $"Light value not as expected for position {x},{y},{z}");
+                    }
+                }
+            }
+        }
+
+        [Test]
+        public void UpdateOnVoxelSetCreateBarrier()
+        {
+            ChunkNeighbourhood neighbourhood = new ChunkNeighbourhood(Vector3Int.zero, GetMockChunkData);
+
+            lightManager.UpdateLightOnVoxelSet(neighbourhood, Vector3Int.zero, lampId, (VoxelTypeID)VoxelTypeID.AIR_ID);
+
+            for (int z = -maxIntensity; z <= maxIntensity; z++)
+            {
+                for (int y = -maxIntensity; y <= maxIntensity; y++)
+                {
+                    neighbourhood.SetVoxel(-1, y, z, blockerId);
+                    lightManager.UpdateLightOnVoxelSet(neighbourhood, new Vector3Int(-1, y, z), blockerId, (VoxelTypeID)VoxelTypeID.AIR_ID);
+                }
+            }
+
+            PrintSlice(neighbourhood, 0);
+
+            for (int z = -maxIntensity; z <= maxIntensity; z++)
+            {
+                for (int y = -maxIntensity; y <= maxIntensity; y++)
+                {
+                    for (int x = -maxIntensity; x <= maxIntensity; x++)
+                    {
+                        var pos = new Vector3Int(x, y, z);
+                        var expectedLv = math.max(maxIntensity - pos.ManhattanMagnitude(), 0);
+
+                        if (x <= -1)
+                        {
+                            expectedLv = 0;
+                        }
+
+                        Assert.AreEqual(expectedLv, neighbourhood.GetLightValue(x, y, z).Dynamic,
+                            $"Light value not as expected for position {x},{y},{z}");
+                    }
+                }
+            }
         }
 
         [Test]
@@ -94,11 +177,11 @@ namespace Tests
 
             //PrintSlice(neighbourhood,0);
 
-            for (int z = -lampIntensity; z <= lampIntensity; z++)
+            for (int z = -maxIntensity; z <= maxIntensity; z++)
             {
-                for (int y = -lampIntensity; y <= lampIntensity; y++)
+                for (int y = -maxIntensity; y <= maxIntensity; y++)
                 {
-                    for (int x = -lampIntensity; x <= lampIntensity; x++)
+                    for (int x = -maxIntensity; x <= maxIntensity; x++)
                     {
                         var pos = new Vector3Int(x, y, z);
                         var expectedLv = 0;
@@ -128,14 +211,14 @@ namespace Tests
             //PrintSlice(neighbourhood,0);
 
             //The remaining light should be that of the first light only
-            for (int z = -lampIntensity; z <= lampIntensity; z++)
+            for (int z = -maxIntensity; z <= maxIntensity; z++)
             {
-                for (int y = -lampIntensity; y <= lampIntensity; y++)
+                for (int y = -maxIntensity; y <= maxIntensity; y++)
                 {
-                    for (int x = -lampIntensity; x <= lampIntensity; x++)
+                    for (int x = -maxIntensity; x <= maxIntensity; x++)
                     {
                         var pos = new Vector3Int(x, y, z);
-                        var expectedLv = math.max(lampIntensity - pos.ManhattanMagnitude(), 0);
+                        var expectedLv = math.max(maxIntensity - pos.ManhattanMagnitude(), 0);
                         Assert.AreEqual(expectedLv, neighbourhood.GetLightValue(x, y, z).Dynamic,
                             $"Light value not as expected for position {x},{y},{z}");
                     }
@@ -146,9 +229,9 @@ namespace Tests
         private void PrintSlice(ChunkNeighbourhood neighbourhood,int y,bool dynamic = true) 
         {
             StringBuilder sb = new StringBuilder();
-            for (int z = lampIntensity; z >= -lampIntensity; z--)
+            for (int z = maxIntensity; z >= -maxIntensity; z--)
             {
-                for (int x = -lampIntensity; x <= lampIntensity; x++)
+                for (int x = -maxIntensity; x <= maxIntensity; x++)
                 {
                     if (dynamic)
                     {

@@ -147,7 +147,12 @@ namespace UniVox.Framework
             Dispose();
         }
 
-        public int GetLightEmission(VoxelTypeID voxelType)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="voxelType"></param>
+        /// <returns>EmissionIntensity,DiminishLightAmount</returns>
+        public (int,int) GetLightProperties(VoxelTypeID voxelType)
         {
             try
             {
@@ -157,10 +162,10 @@ namespace UniVox.Framework
                     var lightConfig = def.lightConfiguration;
                     if (lightConfig != null)
                     {
-                        return lightConfig.Intensity;
+                        return (lightConfig.EmissionIntensity,lightConfig.DiminishLightAmount);
                     }
                 }
-                return 0;
+                return (0,1);
             }
             catch (IndexOutOfRangeException e)
             {

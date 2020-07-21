@@ -8,7 +8,7 @@ namespace UniVox.Framework
         VoxelTypeManager.VoxelTypeData GetData(ushort voxelTypeID);
         SOVoxelTypeDefinition GetDefinition(VoxelTypeID id);
         VoxelTypeID GetId(SOVoxelTypeDefinition def);
-        int GetLightEmission(VoxelTypeID voxelType);
+        (int, int) GetLightProperties(VoxelTypeID voxelType);
         Material GetMaterial(ushort materialID);
         void Initialise();
     }
