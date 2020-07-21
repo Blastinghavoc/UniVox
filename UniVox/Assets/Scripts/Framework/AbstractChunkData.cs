@@ -100,7 +100,6 @@ namespace UniVox.Framework
         /// E.g, with Direction = UP creates a flattened 2D array of all blocks on the top border
         /// of the chunk
         /// </summary>
-        /// <typeparam name="V"></typeparam>
         /// <param name="chunkData"></param>
         /// <param name="dir"></param>
         /// <returns></returns>
@@ -154,7 +153,54 @@ namespace UniVox.Framework
 
         }
 
-        #region interface methods
+        public NativeArray<LightValue> BorderToNativeLight(Direction dir)
+        {
+            StartEndRange xRange = new StartEndRange() { start = 0, end = Dimensions.x };
+            StartEndRange yRange = new StartEndRange() { start = 0, end = Dimensions.y };
+            StartEndRange zRange = new StartEndRange() { start = 0, end = Dimensions.z };
+
+            switch (dir)
+            {
+                case Direction.up:
+                    yRange.start = yRange.end - 1;
+                    break;
+                case Direction.down:
+                    yRange.end = yRange.start + 1;
+                    break;
+                case Direction.north:
+                    zRange.start = zRange.end - 1;
+                    break;
+                case Direction.south:
+                    zRange.end = zRange.start + 1;
+                    break;
+                case Direction.east:
+                    xRange.start = xRange.end - 1;
+                    break;
+                case Direction.west:
+                    xRange.end = xRange.start + 1;
+                    break;
+                default:
+                    throw new ArgumentException($"direction {dir} was not recognised");
+            }
+
+            NativeArray<LightValue> lightData = new NativeArray<LightValue>(xRange.Length * yRange.Length * zRange.Length, Allocator.Persistent);
+
+            int i = 0;
+            for (int z = zRange.start; z < zRange.end; z++)
+            {
+                for (int y = yRange.start; y < yRange.end; y++)
+                {
+                    for (int x = xRange.start; x < xRange.end; x++)
+                    {
+                        lightData[i] = lightChunk[x, y, z];
+
+                        i++;
+                    }
+                }
+            }
+
+            return lightData;
+        }
 
         public bool TryGetVoxelID(Vector3Int coords, out VoxelTypeID vox)
         {
@@ -200,7 +246,6 @@ namespace UniVox.Framework
             {
                 rotatedVoxels[flat] = new RotatedVoxelEntry() { flatIndex = flat, rotation = rotation };
             }
-        }
-        #endregion
+        }        
     }
 }

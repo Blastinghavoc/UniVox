@@ -29,6 +29,11 @@ namespace UniVox.Framework
             return realData.BorderToNative(dir);
         }
 
+        public NativeArray<LightValue> BorderToNativeLight(Direction dir)
+        {
+            return realData.BorderToNativeLight(dir);
+        }
+
         public NativeArray<RotatedVoxelEntry> NativeRotations(Allocator allocator = Allocator.Persistent)
         {
             return realData.NativeRotations(allocator);

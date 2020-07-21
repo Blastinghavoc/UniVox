@@ -4,6 +4,7 @@ using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 using UniVox.Framework.Lighting;
+using UniVox.Framework.Common;
 
 namespace UniVox.Framework.Jobified
 {
@@ -81,18 +82,160 @@ namespace UniVox.Framework.Jobified
             collisionSubmesh.Dispose();
         }
 
-        public LightValue GetLightValue(int3 pos) 
+        /// <summary>
+        /// Returns true if the position is in this chunk,
+        /// false if its in one of the neighbours
+        /// </summary>
+        /// <param name="pos"></param>
+        /// <returns>inChunk</returns>
+        private bool TryGetIndexOf(int3 pos,out int index)
         {
             if (pos.x >= 0 && pos.x < dimensions.x &&
                 pos.y >= 0 && pos.y < dimensions.y &&
                 pos.z >= 0 && pos.z < dimensions.z)
-            {//Inside chunk
-                return lights[ Utils.Helpers.MultiIndexToFlat(pos.x, pos.y, pos.z, dimensions)];
+            {//In this chunk
+                index = Utils.Helpers.MultiIndexToFlat(pos.x, pos.y, pos.z, dimensions);
+                return true;
+            }
+            index = 0;
+            return false;
+        }
+
+        /// <summary>
+        /// Adjusts the given position to be relative to the
+        /// chunk that it's in. First return indicates whether
+        /// the pos is in the center chunk, if false the second
+        /// return gives the direction of the neighbour chunk.
+        /// It is assumed and required that the pos is in either
+        /// the center chunk or one of the 6 neighbours.
+        /// </summary>
+        /// <param name="pos"></param>
+        private void AdjustLocalPos(ref int3 pos,out bool isInChunk,out Direction directionOfNeighbour) 
+        {
+            isInChunk = true;
+            directionOfNeighbour = new Direction();
+
+            if (pos.x < 0)
+            {
+                directionOfNeighbour = Direction.west;
+                pos.x += dimensions.x;
+                isInChunk = false;                
+                return;
+            }
+            else if (pos.x >= dimensions.x)
+            {
+                directionOfNeighbour = Direction.east;
+                pos.x -= dimensions.x;
+                isInChunk = false;
+                return;
+            }
+
+            if (pos.y < 0)
+            {
+                directionOfNeighbour = Direction.down;
+                pos.y += dimensions.y;
+                isInChunk = false;
+                return;
+            }
+            else if (pos.y >= dimensions.y)
+            {
+                directionOfNeighbour = Direction.up;
+                pos.y -= dimensions.y;
+                isInChunk = false;
+                return;
+            }
+
+            if (pos.z < 0)
+            {
+                directionOfNeighbour = Direction.south;
+                pos.z += dimensions.z;
+                isInChunk = false;
+                return;
+            }
+            else if (pos.z >= dimensions.z)
+            {
+                directionOfNeighbour = Direction.north;
+                pos.z -= dimensions.z;
+                isInChunk = false;
+                return;
+            }            
+            return;
+        }
+
+        /// <summary>
+        /// Project fullCoords to 2D in the relevant primary axis
+        /// </summary>
+        public int2 IndicesInNeighbour(int primaryAxis, int3 fullCoords)
+        {
+            switch (primaryAxis)
+            {
+                case 0:
+                    return new int2(fullCoords.y, fullCoords.z);
+                case 1:
+                    return new int2(fullCoords.x, fullCoords.z);
+                case 2:
+                    return new int2(fullCoords.x, fullCoords.y);
+                default:
+                    throw new Exception("Invalid axis given");
+            }
+        }
+
+        /// <summary>
+        /// As above, but for a direction
+        /// </summary>
+        /// <param name="direction"></param>
+        /// <param name="fullCoords"></param>
+        /// <returns></returns>
+        public int2 IndicesInNeighbour(Direction direction, int3 fullCoords)
+        {
+            if (direction == Direction.east || direction == Direction.west )
+            {
+                return new int2(fullCoords.y, fullCoords.z);
+            }
+            if (direction == Direction.up || direction == Direction.down)
+            {
+                return new int2(fullCoords.x, fullCoords.z);
+            }
+            //if (direction == Direction.north || direction == Direction.south)
+            return new int2(fullCoords.x, fullCoords.y);
+        }
+
+        public VoxelTypeID GetVoxel(int3 pos) 
+        {
+            AdjustLocalPos(ref pos,out var InChunk,out var DirectionOfNeighbour);
+            if (InChunk)
+            {
+                return voxels[Utils.Helpers.MultiIndexToFlat(pos.x, pos.y, pos.z, dimensions)];
             }
             else
             {
-                return new LightValue();//TODO replace with lv in neighbour
+                var localIndexInNeighbour = IndicesInNeighbour(DirectionOfNeighbour, pos);
+                var neighbourDimensions = IndicesInNeighbour(DirectionOfNeighbour, dimensions);
+
+                var flattenedIndex = Utils.Helpers.MultiIndexToFlat(localIndexInNeighbour.x, localIndexInNeighbour.y, neighbourDimensions);
+
+                var neighbourVoxelData = neighbourData.GetVoxels(DirectionOfNeighbour);
+                return neighbourVoxelData[flattenedIndex];
             }
+        }
+
+        public LightValue GetLightValue(int3 pos) 
+        {
+            AdjustLocalPos(ref pos, out var InChunk, out var DirectionOfNeighbour);
+            if (InChunk)
+            {
+                return lights[Utils.Helpers.MultiIndexToFlat(pos.x, pos.y, pos.z, dimensions)];
+            }
+            else
+            {
+                var localIndexInNeighbour = IndicesInNeighbour(DirectionOfNeighbour, pos);
+                var neighbourDimensions = IndicesInNeighbour(DirectionOfNeighbour, dimensions);
+
+                var flattenedIndex = Utils.Helpers.MultiIndexToFlat(localIndexInNeighbour.x, localIndexInNeighbour.y, neighbourDimensions);
+
+                var neighbourLightData = neighbourData.GetLightValues(DirectionOfNeighbour);
+                return neighbourLightData[flattenedIndex];
+            }            
         }
     }
 }

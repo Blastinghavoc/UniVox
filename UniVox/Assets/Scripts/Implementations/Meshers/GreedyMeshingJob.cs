@@ -494,11 +494,11 @@ namespace UniVox.Implementations.Meshers
 
         private FaceDescriptor GetFaceInNeighbour(int3 position, Direction neighbourDirection, Direction faceDirection, int primaryAxis)
         {
-            var localIndexOfAdjacentVoxelInNeighbour = IndicesInNeighbour(primaryAxis, position);
+            var localIndexOfAdjacentVoxelInNeighbour = data.IndicesInNeighbour(primaryAxis, position);
 
-            var neighbourChunkData = data.neighbourData[(int)neighbourDirection];
+            var neighbourChunkData = data.neighbourData.GetVoxels(neighbourDirection);
 
-            var neighbourDimensions = IndicesInNeighbour(primaryAxis, data.dimensions);
+            var neighbourDimensions = data.IndicesInNeighbour(primaryAxis, data.dimensions);
 
             var flattenedIndex = MultiIndexToFlat(localIndexOfAdjacentVoxelInNeighbour.x, localIndexOfAdjacentVoxelInNeighbour.y, neighbourDimensions);
 
@@ -506,25 +506,6 @@ namespace UniVox.Implementations.Meshers
 
             //NOTE currently the rotation data is not fetched for neighbours, so this can't be incorporated.
             return makeFaceDescriptor(id, faceDirection);
-        }
-
-        /// <summary>
-        /// Project fullCoords to 2D in the relevant primary axis
-        /// </summary>
-        private int2 IndicesInNeighbour(int primaryAxis, int3 fullCoords)
-        {
-            switch (primaryAxis)
-            {
-                case 0:
-                    return new int2(fullCoords.y, fullCoords.z);
-                case 1:
-                    return new int2(fullCoords.x, fullCoords.z);
-                case 2:
-                    return new int2(fullCoords.x, fullCoords.y);
-                default:
-                    throw new Exception("Invalid axis given");
-            }
-
         }
 
         private bool IncludeFace(FaceDescriptor thisFace, FaceDescriptor oppositeFace)

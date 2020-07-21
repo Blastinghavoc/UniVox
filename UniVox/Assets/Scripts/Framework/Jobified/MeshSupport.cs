@@ -1,21 +1,19 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System;
+using System.Collections.Generic;
 using Unity.Burst;
 using Unity.Collections;
-using System.Runtime.CompilerServices;
-using System.Collections.Generic;
 using Unity.Mathematics;
-using System;
-using static UniVox.Framework.VoxelTypeManager;
-using Utils;
 using UniVox.Framework.Common;
+using UniVox.Framework.Lighting;
+using Utils;
+using static UniVox.Framework.VoxelTypeManager;
 
 namespace UniVox.Framework.Jobified
 {
     /// <summary>
     /// flattened and indexed collections of mesh definitions for use by meshing jobs
     /// </summary>
-    public struct NativeMeshDatabase: IDisposable
+    public struct NativeMeshDatabase : IDisposable
     {
         /// <summary>
         /// All nodes used in all the different mesh types
@@ -56,7 +54,7 @@ namespace UniVox.Framework.Jobified
         /// Array mapping voxel types (index) to mesh type, which is an index into the
         /// meshTypeRanges array.
         /// </summary>
-        [ReadOnly] public NativeArray<int> voxelTypeToMeshTypeMap;        
+        [ReadOnly] public NativeArray<int> voxelTypeToMeshTypeMap;
 
         /// <summary>
         /// Array mapping voxel types (index) to material ID
@@ -106,7 +104,7 @@ namespace UniVox.Framework.Jobified
 
             //AIR
             voxelTypeToMeshTypeMapList.Add(0);
-            voxelTypeToMaterialIDMapList.Add(0);            
+            voxelTypeToMaterialIDMapList.Add(0);
 
             for (ushort voxelId = 1; voxelId < typeData.Count; voxelId++)
             {
@@ -120,7 +118,7 @@ namespace UniVox.Framework.Jobified
                     meshID = meshTypeRangesList.Count;
                     uniqueMeshIDs.Add(SODef, meshID);
                     StartEndRange meshTypeRange = new StartEndRange();
-                    meshTypeRange.start = nodesUsedByFacesList.Count;                    
+                    meshTypeRange.start = nodesUsedByFacesList.Count;
 
                     Flatten(SODef, allMeshNodesList, nodesUsedByFacesList, allRelativeTrianglesList, relativeTrianglesByFacesList, isFaceSolidList);
 
@@ -198,10 +196,10 @@ namespace UniVox.Framework.Jobified
 
                 relativeTrianglesByFacesList.Add(trianglesIndexers);
             }
-        }        
+        }
     }
 
-    public struct NativeVoxelTypeDatabase 
+    public struct NativeVoxelTypeDatabase
     {
         [ReadOnly] public NativeArray<float> zIndicesPerFace;
         [ReadOnly] public NativeArray<StartEndRange> voxelTypeToZIndicesRangeMap;
@@ -211,9 +209,9 @@ namespace UniVox.Framework.Jobified
         [ReadOnly] public NativeArray<bool> voxelTypeToIsPassableMap;
     }
 
-    public static class NativeVoxelTypeDatabaseExtensions 
+    public static class NativeVoxelTypeDatabaseExtensions
     {
-        public static NativeVoxelTypeDatabase FromTypeData(List<VoxelTypeData> typeData) 
+        public static NativeVoxelTypeDatabase FromTypeData(List<VoxelTypeData> typeData)
         {
             List<float> zIndicesPerFaceList = new List<float>();
             List<StartEndRange> voxelTypeToZIndicesRangeMapList = new List<StartEndRange>();
@@ -243,7 +241,7 @@ namespace UniVox.Framework.Jobified
             return database;
         }
 
-        public static void Dispose(ref this NativeVoxelTypeDatabase database) 
+        public static void Dispose(ref this NativeVoxelTypeDatabase database)
         {
             database.voxelTypeToZIndicesRangeMap.SmartDispose();
             database.zIndicesPerFace.SmartDispose();
@@ -252,7 +250,7 @@ namespace UniVox.Framework.Jobified
     }
 
     [BurstCompile]
-    public struct NeighbourData
+    public struct NeighbourData : IDisposable
     {
         [ReadOnly] public NativeArray<VoxelTypeID> up;
         [ReadOnly] public NativeArray<VoxelTypeID> down;
@@ -261,63 +259,120 @@ namespace UniVox.Framework.Jobified
         [ReadOnly] public NativeArray<VoxelTypeID> east;
         [ReadOnly] public NativeArray<VoxelTypeID> west;
 
-        public NativeArray<VoxelTypeID> this[int dir] 
+        [ReadOnly] public NativeArray<LightValue> upLight;
+        [ReadOnly] public NativeArray<LightValue> downLight;
+        [ReadOnly] public NativeArray<LightValue> northLight;
+        [ReadOnly] public NativeArray<LightValue> southLight;
+        [ReadOnly] public NativeArray<LightValue> eastLight;
+        [ReadOnly] public NativeArray<LightValue> westLight;        
+
+        public NativeArray<VoxelTypeID> GetVoxels(Direction dir) 
         {
-            get {
-                switch ((Direction)dir)
-                {
-                    case Direction.up:
-                        return up;
-                    case Direction.down:
-                        return down;
-                    case Direction.north:
-                        return north;
-                    case Direction.south:
-                        return south;
-                    case Direction.east:
-                        return east;
-                    case Direction.west:
-                        return west;
-                    default:                        
-                        throw new Exception($"direction {dir} was not recognised");
-                }
+            switch (dir)
+            {
+                case Direction.up:
+                    return up;
+                case Direction.down:
+                    return down;
+                case Direction.north:
+                    return north;
+                case Direction.south:
+                    return south;
+                case Direction.east:
+                    return east;
+                case Direction.west:
+                    return west;
+                default:
+                    throw new Exception($"direction {dir} was not recognised");
             }
         }
-    }
 
-    public static class NeighbourDataExtensions 
-    {
-        public static void Dispose(ref this NeighbourData neighbourData)
+        public NativeArray<LightValue> GetLightValues(Direction dir) 
         {
-            neighbourData.up.SmartDispose();
-            neighbourData.down.SmartDispose();
-            neighbourData.north.SmartDispose();
-            neighbourData.south.SmartDispose();
-            neighbourData.east.SmartDispose();
-            neighbourData.west.SmartDispose();
+            switch (dir)
+            {
+                case Direction.up:
+                    return upLight;
+                case Direction.down:
+                    return downLight;
+                case Direction.north:
+                    return northLight;
+                case Direction.south:
+                    return southLight;
+                case Direction.east:
+                    return eastLight;
+                case Direction.west:
+                    return westLight;
+                default:
+                    throw new Exception($"direction {dir} was not recognised");
+            }
         }
 
-        public static void Add(ref this NeighbourData container, Direction direction, NativeArray<VoxelTypeID> data)
+        public void Dispose()
+        {
+            up.SmartDispose();
+            down.SmartDispose();
+            north.SmartDispose();
+            south.SmartDispose();
+            east.SmartDispose();
+            west.SmartDispose();
+
+            upLight.SmartDispose();
+            downLight.SmartDispose();
+            northLight.SmartDispose();
+            southLight.SmartDispose();
+            eastLight.SmartDispose();
+            westLight.SmartDispose();
+        }
+
+        public void Add(Direction direction, NativeArray<VoxelTypeID> data)
         {
             switch (direction)
             {
                 case Direction.up:
-                    container.up = data;
+                    up = data;
                     break;
                 case Direction.down:
-                    container.down = data;
+                    down = data;
                     break;
                 case Direction.north:
-                    container.north = data;
+                    north = data;
                     break;
                 case Direction.south:
-                    container.south = data;
+                    south = data;
                     break;
                 case Direction.east:
-                    container.east = data;
+                    east = data;
                     break;
                 case Direction.west:
-                    container.west = data;
+                    west = data;
+                    break;
+                default:
+                    throw new ArgumentException($"direction {direction} was not recognised");
+            }
+        }
+
+        public void Add(Direction direction, NativeArray<LightValue> lightData)
+        {
+            switch (direction)
+            {
+                case Direction.up:
+                    upLight = lightData;
+                    break;
+                case Direction.down:
+                    downLight = lightData;
+                    break;
+                case Direction.north:
+                    northLight = lightData;
+                    break;
+                case Direction.south:
+                    southLight = lightData;
+                    break;
+                case Direction.east:
+                    eastLight = lightData;
+                    break;
+                case Direction.west:
+                    westLight = lightData;
                     break;
                 default:
                     throw new ArgumentException($"direction {direction} was not recognised");
@@ -328,7 +383,7 @@ namespace UniVox.Framework.Jobified
     /// <summary>
     /// A unique mesh node
     /// </summary>
-    public struct Node 
+    public struct Node
     {
         public float3 vertex;
         public float2 uv;

@@ -255,37 +255,8 @@ namespace UniVox.Framework.Jobified
             var directionVector = directionHelper.DirectionVectors[directionIndex];
             var adjacentVoxelIndex = position + directionVector;
 
-            if (TryGetVoxelAt(adjacentVoxelIndex, out var adjacentID))
-            {//If adjacent voxel is in the chunk
-
-                if (adjacentID == voxelID)
-                {
-                    return false;
-                }
-
-                return IncludeFaceOfAdjacentWithID(adjacentID, directionIndex);
-            }
-            else
-            {
-                //If adjacent voxel is in the neighbouring chunk
-
-                var localIndexOfAdjacentVoxelInNeighbour = DirectionToIndicesInSlice(directionVector, LocalVoxelIndexOfPosition(adjacentVoxelIndex));
-
-                var neighbourChunkData = data.neighbourData[directionIndex];
-
-                var neighbourDimensions = DirectionToIndicesInSlice(directionVector, data.dimensions);
-
-                var flattenedIndex = Utils.Helpers.MultiIndexToFlat(localIndexOfAdjacentVoxelInNeighbour.x, localIndexOfAdjacentVoxelInNeighbour.y, neighbourDimensions);
-
-                adjacentID = neighbourChunkData[flattenedIndex];
-
-                if (adjacentID == voxelID)
-                {
-                    return false;
-                }
-
-                return IncludeFaceOfAdjacentWithID(adjacentID, directionIndex);
-            }
+            var adjacentId = data.GetVoxel(adjacentVoxelIndex);
+            return IncludeFaceOfAdjacentWithID(adjacentId, directionIndex);
         }
 
         private bool IncludeFaceOfAdjacentWithID(ushort voxelTypeID, int direction)
@@ -301,68 +272,6 @@ namespace UniVox.Framework.Jobified
 
             //Exclude this face if adjacent face is solid
             return !faceIsSolid;
-        }
-
-        private bool TryGetVoxelAt(int3 pos, out ushort voxelId)
-        {
-            if (pos.x >= 0 && pos.x < data.dimensions.x &&
-                pos.y >= 0 && pos.y < data.dimensions.y &&
-                pos.z >= 0 && pos.z < data.dimensions.z)
-            {
-                voxelId = data.voxels[Utils.Helpers.MultiIndexToFlat(pos.x, pos.y, pos.z, data.dimensions)];
-                return true;
-            }
-            voxelId = VoxelTypeID.AIR_ID;
-            return false;
-        }
-
-        /// <summary>
-        /// Verbose version of ChunkManager's method with the same name.
-        /// </summary>
-        /// <param name="position"></param>
-        /// <returns></returns>
-        private int3 LocalVoxelIndexOfPosition(int3 position)
-        {
-            var remainder = position % data.dimensions;
-
-            if (remainder.x < 0)
-            {
-                remainder.x += data.dimensions.x;
-            }
-
-            if (remainder.y < 0)
-            {
-                remainder.y += data.dimensions.y;
-            }
-
-            if (remainder.z < 0)
-            {
-                remainder.z += data.dimensions.z;
-            }
-
-            return remainder;
-        }
-
-        /// <summary>
-        /// Takes a direction vector, assumed to have just one non-zero element,
-        /// and returns the values of fullCoords for the dimensions that are
-        /// zero in the direction. I.e, projects fullCoords to 2D in the relevant direction
-        /// </summary>
-        /// <param name="direction"></param>
-        /// <returns></returns>
-        private int2 DirectionToIndicesInSlice(int3 direction, int3 fullCoords)
-        {
-            if (direction.x != 0)
-            {
-                return new int2(fullCoords.y, fullCoords.z);
-            }
-            if (direction.y != 0)
-            {
-                return new int2(fullCoords.x, fullCoords.z);
-            }
-            //if (direction.z != 0)
-            return new int2(fullCoords.x, fullCoords.y);
-
         }
 
         public void Run()

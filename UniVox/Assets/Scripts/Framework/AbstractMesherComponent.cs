@@ -1,13 +1,11 @@
 ﻿using System;
 using Unity.Collections;
-using Unity.Jobs;
-using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Profiling;
 using UniVox.Framework.ChunkPipeline.VirtualJobs;
 using UniVox.Framework.Common;
 using UniVox.Framework.Jobified;
-using Utils;
+using UniVox.Framework.Lighting;
 
 namespace UniVox.Framework
 {
@@ -79,7 +77,9 @@ namespace UniVox.Framework
                     try
                     {
                         var neighbour = chunkManager.GetReadOnlyChunkData(neighbourID);
-                        neighbourData.Add((Direction)i, neighbour.BorderToNative(DirectionExtensions.Opposite[i]));
+                        var oppositeDir = DirectionExtensions.Opposite[i];
+                        neighbourData.Add((Direction)i, neighbour.BorderToNative(oppositeDir));
+                        neighbourData.Add((Direction)i, neighbour.BorderToNativeLight(oppositeDir));
                     }
                     catch (Exception e)
                     {
@@ -96,11 +96,12 @@ namespace UniVox.Framework
                 for (int i = 0; i < DirectionExtensions.numDirections; i++)
                 {
                     neighbourData.Add((Direction)i, new NativeArray<VoxelTypeID>(1, Allocator.Persistent));
+                    neighbourData.Add((Direction)i, new NativeArray<LightValue>(1, Allocator.Persistent));
                 }
             }
             Profiler.EndSample();
 
-            
+
             var meshingJob = createMeshingJob(new MeshJobData(chunkDimensions.ToNative(),
                 voxels,
                 chunkData.NativeRotations(),
@@ -109,8 +110,8 @@ namespace UniVox.Framework
                 voxelTypeManager.nativeMeshDatabase,
                 voxelTypeManager.nativeVoxelTypeDatabase,
                 Allocator.Persistent
-                ));           
-            
+                ));
+
 
             var indexingWrapper = new JobWrapper<SortIndicesByMaterialJob>();
             //AsDeferredJobArray takes the length etc at the time of execution, rather than now.
@@ -187,7 +188,7 @@ namespace UniVox.Framework
 
         }
 
-        protected virtual IMeshingJob createMeshingJob(MeshJobData data) 
+        protected virtual IMeshingJob createMeshingJob(MeshJobData data)
         {
             var job = new MeshingJob();
             job.data = data;

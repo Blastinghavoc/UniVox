@@ -762,7 +762,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   GlobalLightName: GlobalLightLevel
-  GlobalLightValue: 1
+  GlobalLightValue: 0.345
 --- !u!4 &1059055055
 Transform:
   m_ObjectHideFlags: 0

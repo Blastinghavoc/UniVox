@@ -42,6 +42,7 @@ namespace UniVox.Framework
         /// <param name="Direction"></param>
         /// <returns></returns>
         NativeArray<VoxelTypeID> BorderToNative(Direction dir);
+        NativeArray<LightValue> BorderToNativeLight(Direction dir);
 
         LightChunkData lightChunk { get; }
     }
