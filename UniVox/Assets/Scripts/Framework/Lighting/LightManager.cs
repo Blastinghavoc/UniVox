@@ -21,13 +21,17 @@ namespace UniVox.Framework.Lighting
             //TODO compute sunlight
             //TODO compute point lights, for now assuming none are generated
 
-            var flatLength = chunkData.Dimensions.x * chunkData.Dimensions.y * chunkData.Dimensions.z;
-            var lightChunk = chunkData.lightChunk;
-
             //For now, just set sunlight to a fixed value
-            for (int i = 0; i < flatLength; i++)
+            for (int z = 0; z < chunkData.Dimensions.z; z++)
             {
-                lightChunk[i] = new LightValue() { Sun = 15 };
+                for (int y = 0; y < chunkData.Dimensions.y; y++)
+                {
+                    for (int x = 0; x < chunkData.Dimensions.x; x++)
+                    {
+                        chunkData.SetLight(x,y,z,new LightValue() { Sun = 15 });
+
+                    }
+                }
             }
 
             Profiler.EndSample();
@@ -45,7 +49,9 @@ namespace UniVox.Framework.Lighting
 
             var previousLv = neighbourhood.GetLightValue(x, y, z);
 
-            if (emissionPrevious > 1 || (previousLv.Dynamic >1 && absorptionCurrent!=absorptionPrevious))
+            bool willBeDarker = emissionCurrent < previousLv.Dynamic && absorptionCurrent > absorptionPrevious;
+
+            if (emissionPrevious > 1 || willBeDarker)
             {
                 //if there was light at this position, remove it
                 Profiler.BeginSample("RemoveLight");
@@ -58,13 +64,21 @@ namespace UniVox.Framework.Lighting
             }
 
 
-            if (emissionCurrent > 1)
+            if (emissionCurrent > previousLv.Dynamic)
             {
-                //if voxel type emits light, bfs set light values.
+                //if voxel type emits light greater than what was there before, bfs set light values.
                 var lv = neighbourhood.GetLightValue(x, y, z);
                 lv.Dynamic = emissionCurrent;
                 neighbourhood.SetLightValue(x, y, z, lv);
                 propagateQueue.Enqueue(localCoords);
+            }
+            else if (absorptionCurrent < absorptionPrevious)
+            {
+                //Update all neighbours to propagate into this voxel
+                foreach (var offset in DirectionExtensions.Vectors)
+                {
+                    propagateQueue.Enqueue(localCoords + offset);
+                }
             }
 
             //TODO incorporate sunlight
@@ -118,7 +132,10 @@ namespace UniVox.Framework.Lighting
                 processed++;
             }
 
-            Debug.Log($"Removal processed {processed}");
+            if (processed > 0)
+            {
+                Debug.Log($"Removal processed {processed}");
+            }
 
         }
 
@@ -148,7 +165,10 @@ namespace UniVox.Framework.Lighting
                 processed++;
             }
 
-            Debug.Log($"Propagation processed {processed}");
+            if (processed > 0)
+            {
+                Debug.Log($"Propagation processed {processed}");
+            }
         }
 
     }

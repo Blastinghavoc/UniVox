@@ -69,7 +69,7 @@ namespace Tests
         }
 
         [Test]
-        public void PropagateDynamicOnLightSourcePlaced() 
+        public void PlaceLampNoBarrier() 
         {
             ChunkNeighbourhood neighbourhood = new ChunkNeighbourhood(Vector3Int.zero, GetMockChunkData);
             lightManager.UpdateLightOnVoxelSet(neighbourhood, Vector3Int.zero, lampId, (VoxelTypeID)VoxelTypeID.AIR_ID);
@@ -92,7 +92,7 @@ namespace Tests
         }
 
         [Test]
-        public void PropagateDynamicOnLightSourcePlacedWithExistingBarrier()
+        public void PlaceBarrierThenLamp()
         {
             ChunkNeighbourhood neighbourhood = new ChunkNeighbourhood(Vector3Int.zero, GetMockChunkData);
 
@@ -100,11 +100,12 @@ namespace Tests
             {
                 for (int y = -maxIntensity; y <= maxIntensity; y++)
                 {
-                    neighbourhood.SetVoxel(-1, y, z, blockerId);
+                    setVoxel(new Vector3Int(-1, y, z), blockerId);
                 }
             }
 
-            lightManager.UpdateLightOnVoxelSet(neighbourhood, Vector3Int.zero, lampId, (VoxelTypeID)VoxelTypeID.AIR_ID);
+            //Create lamp
+            setVoxel(Vector3Int.zero, lampId);
 
             //PrintSlice(neighbourhood, 0);
 
@@ -130,18 +131,17 @@ namespace Tests
         }
 
         [Test]
-        public void UpdateOnVoxelSetCreateBarrier()
+        public void PlaceLampThenBarrier()
         {
             ChunkNeighbourhood neighbourhood = new ChunkNeighbourhood(Vector3Int.zero, GetMockChunkData);
 
-            lightManager.UpdateLightOnVoxelSet(neighbourhood, Vector3Int.zero, lampId, (VoxelTypeID)VoxelTypeID.AIR_ID);
+            setVoxel(Vector3Int.zero, lampId);
 
             for (int z = -maxIntensity; z <= maxIntensity; z++)
             {
                 for (int y = -maxIntensity; y <= maxIntensity; y++)
                 {
-                    neighbourhood.SetVoxel(-1, y, z, blockerId);
-                    lightManager.UpdateLightOnVoxelSet(neighbourhood, new Vector3Int(-1, y, z), blockerId, (VoxelTypeID)VoxelTypeID.AIR_ID);
+                    setVoxel(new Vector3Int(-1, y, z), blockerId);
                 }
             }
 
@@ -166,6 +166,73 @@ namespace Tests
                     }
                 }
             }
+        }
+
+        [Test]
+        public void PlaceBarrierThenLampThenRemoveBarrier()
+        {
+            ChunkNeighbourhood neighbourhood = new ChunkNeighbourhood(Vector3Int.zero, GetMockChunkData);
+
+            //Create barrier before lamp
+            for (int z = -maxIntensity; z <= maxIntensity; z++)
+            {
+                for (int y = -maxIntensity; y <= maxIntensity; y++)
+                {
+                    setVoxel(new Vector3Int(-1, y, z), blockerId);
+                }
+            }
+
+            //create lamp
+            lightManager.UpdateLightOnVoxelSet(neighbourhood, Vector3Int.zero, lampId, (VoxelTypeID)VoxelTypeID.AIR_ID);
+            
+            //Assert light blocked correctly
+            for (int z = -maxIntensity; z <= maxIntensity; z++)
+            {
+                for (int y = -maxIntensity; y <= maxIntensity; y++)
+                {
+                    for (int x = -maxIntensity; x <= maxIntensity; x++)
+                    {
+                        var pos = new Vector3Int(x, y, z);
+                        var expectedLv = math.max(maxIntensity - pos.ManhattanMagnitude(), 0);
+
+                        if (x <= -1)
+                        {
+                            expectedLv = 0;
+                        }
+
+                        Assert.AreEqual(expectedLv, neighbourhood.GetLightValue(x, y, z).Dynamic,
+                            $"Light value not as expected for position {x},{y},{z}");
+                    }
+                }
+            }
+
+            //Remove barrier
+            for (int z = -maxIntensity; z <= maxIntensity; z++)
+            {
+                for (int y = -maxIntensity; y <= maxIntensity; y++)
+                {
+                    setVoxel(new Vector3Int(-1, y, z), (VoxelTypeID)VoxelTypeID.AIR_ID);
+                }
+            }
+
+            PrintSlice(neighbourhood, 0);
+
+            //Assert light no longer blocked
+            for (int z = -maxIntensity; z <= maxIntensity; z++)
+            {
+                for (int y = -maxIntensity; y <= maxIntensity; y++)
+                {
+                    for (int x = -maxIntensity; x <= maxIntensity; x++)
+                    {
+                        var pos = new Vector3Int(x, y, z);
+                        var expectedLv = math.max(maxIntensity - pos.ManhattanMagnitude(), 0);
+
+                        Assert.AreEqual(expectedLv, neighbourhood.GetLightValue(x, y, z).Dynamic,
+                            $"Light value not as expected for position {x},{y},{z}");
+                    }
+                }
+            }
+
         }
 
         [Test]
@@ -224,6 +291,36 @@ namespace Tests
                     }
                 }
             }
+        }
+
+        private void setVoxel(Vector3Int worldPos,VoxelTypeID setTo) 
+        {
+            var localPos = worldPos;
+            var centeredNeigh = neighbourhoodFor(ref localPos);
+            var prevVoxel = centeredNeigh.GetVoxel(localPos.x, localPos.y, localPos.z);
+            centeredNeigh.SetVoxel(localPos.x, localPos.y, localPos.z, setTo);
+            lightManager.UpdateLightOnVoxelSet(centeredNeigh, localPos, setTo, prevVoxel);
+        }
+
+
+        /// <summary>
+        /// Can reuse the same neighbourhood if operating on positions within
+        /// the same chunk, otherwise the light manager expects a neighbourhood
+        /// centered on the chunk containing the modified voxel.
+        /// Adjusts voxel pos to be relative to the center chunk.
+        /// </summary>
+        /// <param name="voxelPos"></param>
+        /// <returns></returns>
+        private ChunkNeighbourhood neighbourhoodFor(ref Vector3Int voxelPos) 
+        {
+            //ChunkId is elementwise integer division by the Chunk dimensions
+            var chunkId = voxelPos.ElementWise((a, b) => Mathf.FloorToInt(a / (float)b), chunkDimensions);
+
+            var remainder = voxelPos.ElementWise((a, b) => a % b, chunkDimensions);
+            //Local voxel index is the remainder, with negatives adjusted
+            voxelPos = remainder.ElementWise((a, b) => a < 0 ? b + a : a, chunkDimensions);
+
+            return new ChunkNeighbourhood(chunkId, GetMockChunkData);
         }
 
         private void PrintSlice(ChunkNeighbourhood neighbourhood,int y,bool dynamic = true) 

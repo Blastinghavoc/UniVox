@@ -44,6 +44,11 @@ namespace UniVox.Framework
         NativeArray<VoxelTypeID> BorderToNative(Direction dir);
         NativeArray<LightValue> BorderToNativeLight(Direction dir);
 
-        LightChunkData lightChunk { get; }
+
+        LightValue GetLight(int x, int y, int z);
+        LightValue GetLight(Vector3Int pos);
+        void SetLight(int x, int y, int z, LightValue lightValue);
+        void SetLight(Vector3Int pos,LightValue lightValue);
+        NativeArray<LightValue> LightToNative(Allocator allocator = Allocator.Persistent);
     }
 }

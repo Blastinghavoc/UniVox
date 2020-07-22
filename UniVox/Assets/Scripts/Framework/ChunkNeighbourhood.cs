@@ -81,13 +81,13 @@ namespace UniVox.Framework
         public LightValue GetLightValue(int x, int y, int z)
         {
             var chunkData = extendedIndex(ref x, ref y, ref z);
-            return chunkData.lightChunk[x,y,z];
+            return chunkData.GetLight(x,y,z);
         }
 
         public void SetLightValue(int x, int y, int z, LightValue value)
         {
             var chunkData = extendedIndex(ref x, ref y, ref z);
-            chunkData.lightChunk[x,y,z] = value;
+            chunkData.SetLight(x,y,z,value);
         }
 
         public void SetIfUnoccupied(int x, int y, int z,VoxelTypeID typeID) 

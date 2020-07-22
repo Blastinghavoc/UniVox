@@ -21,7 +21,7 @@ namespace UniVox.Framework
         public bool FullyGenerated { get; set; } = false;
 
         //For lighting
-        public LightChunkData lightChunk { get; protected set; }
+        protected LightChunkData lightChunk { get; set; }
 
         /// <summary>
         /// Store flattended indices of voxels that have a non-default rotation.
@@ -246,6 +246,31 @@ namespace UniVox.Framework
             {
                 rotatedVoxels[flat] = new RotatedVoxelEntry() { flatIndex = flat, rotation = rotation };
             }
-        }        
+        }
+
+        public LightValue GetLight(int x, int y, int z)
+        {
+            return lightChunk[x,y,z];
+        }
+
+        public LightValue GetLight(Vector3Int pos)
+        {
+            return lightChunk[pos.x, pos.y, pos.z];
+        }
+
+        public void SetLight(int x, int y, int z, LightValue lightValue)
+        {
+            lightChunk[x, y, z] = lightValue;
+        }
+
+        public void SetLight(Vector3Int pos, LightValue lightValue)
+        {
+            lightChunk[pos.x, pos.y, pos.z] = lightValue;
+        }
+
+        public NativeArray<LightValue> LightToNative(Allocator allocator = Allocator.Persistent)
+        {
+            return lightChunk.ToNative(allocator);
+        }
     }
 }

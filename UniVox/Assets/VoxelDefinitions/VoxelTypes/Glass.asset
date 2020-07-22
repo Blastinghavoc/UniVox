@@ -24,4 +24,4 @@ MonoBehaviour:
   material: {fileID: 2100000, guid: b37b6f729ea188a4bb49677dc0d6b05c, type: 2}
   isPassable: 0
   rotationConfiguration: {fileID: 0}
-  lightConfiguration: {fileID: 11400000, guid: da2475bc2d3d8b840b5ba5ba6f8031dc, type: 2}
+  lightConfiguration: {fileID: 11400000, guid: a39da96d0b91f74439f048b06b0d1892, type: 2}

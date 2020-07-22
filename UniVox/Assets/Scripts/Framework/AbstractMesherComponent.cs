@@ -105,7 +105,7 @@ namespace UniVox.Framework
             var meshingJob = createMeshingJob(new MeshJobData(chunkDimensions.ToNative(),
                 voxels,
                 chunkData.NativeRotations(),
-                chunkData.lightChunk.ToNative(),
+                chunkData.LightToNative(),
                 neighbourData,
                 voxelTypeManager.nativeMeshDatabase,
                 voxelTypeManager.nativeVoxelTypeDatabase,

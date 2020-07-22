@@ -174,7 +174,7 @@ namespace UniVox.Framework
                 {
                     if (pipeline.GetMaxStage(verticalNeighbourId)>= pipeline.FullyGeneratedStage)
                     {
-                        aboveChunkData = new ReadOnlyChunkData(aboveChunkComponent.Data);
+                        aboveChunkData = new RestrictedChunkData(aboveChunkComponent.Data,allowModifyLight: true);
                     }
 
                 }
@@ -453,7 +453,7 @@ namespace UniVox.Framework
             return borderDirections;
         }
 
-        public ReadOnlyChunkData GetReadOnlyChunkData(Vector3Int chunkID)
+        public RestrictedChunkData GetReadOnlyChunkData(Vector3Int chunkID)
         {
             if (loadedChunks.TryGetValue(chunkID, out var chunkComponent))
             {
@@ -461,7 +461,7 @@ namespace UniVox.Framework
                 {
                     throw new ArgumentException($"It is not valid to get read-only data for chunk ID {chunkID}, as its data is null");
                 }
-                return new ReadOnlyChunkData(chunkComponent.Data);
+                return new RestrictedChunkData(chunkComponent.Data);
             }
             throw new ArgumentException($"It is not valid to get read-only data for chunk ID {chunkID}, as it is not in the loaded chunks." +
                 $" Did the pipeline contain the chunk? {pipeline.Contains(chunkID)}");
