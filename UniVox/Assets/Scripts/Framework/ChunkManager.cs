@@ -105,7 +105,7 @@ namespace UniVox.Framework
 
             chunkProvider.Initialise(VoxelTypeManager, this, eventManager);
             chunkMesher.Initialise(VoxelTypeManager, this, eventManager);
-            lightManager.Initialise(VoxelTypeManager);
+            lightManager.Initialise(this,VoxelTypeManager);
 
             pipeline = new ChunkPipelineManager(
                 chunkProvider,
@@ -168,18 +168,7 @@ namespace UniVox.Framework
         {
             if (loadedChunks.TryGetValue(chunkId,out var chunkComponent))
             {
-                IChunkData aboveChunkData = null;
-                var verticalNeighbourId = chunkId + Vector3Int.up;
-                if (loadedChunks.TryGetValue(verticalNeighbourId, out var aboveChunkComponent))
-                {
-                    if (pipeline.GetMaxStage(verticalNeighbourId)>= pipeline.FullyGeneratedStage)
-                    {
-                        aboveChunkData = new RestrictedChunkData(aboveChunkComponent.Data,allowModifyLight: true);
-                    }
-
-                }
-
-                lightManager.OnChunkGenerated(chunkComponent.Data, aboveChunkData);
+                lightManager.OnChunkFullyGenerated(new ChunkNeighbourhood(chunkComponent.Data, GetChunkData));
             }
             else
             {
@@ -313,6 +302,8 @@ namespace UniVox.Framework
                 {
                     //Chunks with saved data bypass the generation process.
                     ChunkComponent.Data = data;
+                    //Re-generate/update lighting
+                    lightManager.OnChunkFullyGenerated(new ChunkNeighbourhood(ChunkComponent.Data, GetChunkData));
                     pipeline.AddWithData(chunkID, targetStage);
                 }
                 else

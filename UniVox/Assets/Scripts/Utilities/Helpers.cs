@@ -318,5 +318,48 @@ namespace Utils
             }
             return sb.ToString();
         }
+
+        public static IEnumerable<Vector3Int> AllPositionsOnChunkBorder(Direction dir, Vector3Int chunkDimensions)
+        {
+            StartEndRange xRange = new StartEndRange() { start = 0, end = chunkDimensions.x };
+            StartEndRange yRange = new StartEndRange() { start = 0, end = chunkDimensions.y };
+            StartEndRange zRange = new StartEndRange() { start = 0, end = chunkDimensions.z };
+
+            switch (dir)
+            {
+                case Direction.up:
+                    yRange.start = yRange.end - 1;
+                    break;
+                case Direction.down:
+                    yRange.end = yRange.start + 1;
+                    break;
+                case Direction.north:
+                    zRange.start = zRange.end - 1;
+                    break;
+                case Direction.south:
+                    zRange.end = zRange.start + 1;
+                    break;
+                case Direction.east:
+                    xRange.start = xRange.end - 1;
+                    break;
+                case Direction.west:
+                    xRange.end = xRange.start + 1;
+                    break;
+                default:
+                    throw new ArgumentException($"direction {dir} was not recognised");
+            }
+
+          
+            for (int z = zRange.start; z < zRange.end; z++)
+            {
+                for (int y = yRange.start; y < yRange.end; y++)
+                {
+                    for (int x = xRange.start; x < xRange.end; x++)
+                    {
+                        yield return new Vector3Int(x, y, z);
+                    }
+                }
+            }
+        }
     }
 }

@@ -103,7 +103,7 @@ namespace UniVox.Framework
         /// <param name="chunkData"></param>
         /// <param name="dir"></param>
         /// <returns></returns>
-        public NativeArray<VoxelTypeID> BorderToNative(Direction dir)
+        public NativeArray<VoxelTypeID> BorderToNative(Direction dir, Allocator allocator = Allocator.Persistent)
         {
             StartEndRange xRange = new StartEndRange() { start = 0, end = Dimensions.x };
             StartEndRange yRange = new StartEndRange() { start = 0, end = Dimensions.y };
@@ -133,7 +133,7 @@ namespace UniVox.Framework
                     throw new ArgumentException($"direction {dir} was not recognised");
             }
 
-            NativeArray<VoxelTypeID> voxelData = new NativeArray<VoxelTypeID>(xRange.Length * yRange.Length * zRange.Length, Allocator.Persistent);
+            NativeArray<VoxelTypeID> voxelData = new NativeArray<VoxelTypeID>(xRange.Length * yRange.Length * zRange.Length, allocator);
 
             int i = 0;
             for (int z = zRange.start; z < zRange.end; z++)
@@ -153,7 +153,7 @@ namespace UniVox.Framework
 
         }
 
-        public NativeArray<LightValue> BorderToNativeLight(Direction dir)
+        public NativeArray<LightValue> BorderToNativeLight(Direction dir, Allocator allocator = Allocator.Persistent)
         {
             StartEndRange xRange = new StartEndRange() { start = 0, end = Dimensions.x };
             StartEndRange yRange = new StartEndRange() { start = 0, end = Dimensions.y };
@@ -183,7 +183,7 @@ namespace UniVox.Framework
                     throw new ArgumentException($"direction {dir} was not recognised");
             }
 
-            NativeArray<LightValue> lightData = new NativeArray<LightValue>(xRange.Length * yRange.Length * zRange.Length, Allocator.Persistent);
+            NativeArray<LightValue> lightData = new NativeArray<LightValue>(xRange.Length * yRange.Length * zRange.Length, allocator);
 
             int i = 0;
             for (int z = zRange.start; z < zRange.end; z++)

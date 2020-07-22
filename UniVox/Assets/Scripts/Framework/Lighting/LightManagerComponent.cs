@@ -11,15 +11,15 @@ namespace UniVox.Framework.Lighting
 
         private ILightManager lightManager;
 
-        public void Initialise(IVoxelTypeManager voxelTypeManager)
+        public void Initialise(IChunkManager chunkManager, IVoxelTypeManager voxelTypeManager)
         {
             lightManager = new LightManager();
-            lightManager.Initialise(voxelTypeManager);
+            lightManager.Initialise(chunkManager,voxelTypeManager);
         }
 
-        public void OnChunkGenerated(IChunkData chunkData, IChunkData aboveChunkData)
+        public void OnChunkFullyGenerated(ChunkNeighbourhood neighbourhood)
         {
-            lightManager.OnChunkGenerated(chunkData, aboveChunkData);
+            lightManager.OnChunkFullyGenerated(neighbourhood);
         }
 
         public List<Vector3Int> UpdateLightOnVoxelSet(ChunkNeighbourhood neighbourhood, Vector3Int localCoords, VoxelTypeID voxelType, VoxelTypeID previousType)

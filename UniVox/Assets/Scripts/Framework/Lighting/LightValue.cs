@@ -1,11 +1,12 @@
-﻿using Unity.Burst;
+﻿using System;
+using Unity.Burst;
 using Unity.Mathematics;
 using UnityEngine;
 
 namespace UniVox.Framework.Lighting
 {
     [BurstCompile]
-    public struct LightValue 
+    public struct LightValue : IEquatable<LightValue>
     {
         public const int IntensityRange = 16;
 
@@ -28,6 +29,11 @@ namespace UniVox.Framework.Lighting
         public override string ToString()
         {
             return $"(sun:{Sun},dynamic:{Dynamic})";
+        }
+
+        public bool Equals(LightValue other)
+        {
+            return other.bits == bits;
         }
     }
 } 

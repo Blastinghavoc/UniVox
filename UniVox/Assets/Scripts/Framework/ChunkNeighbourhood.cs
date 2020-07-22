@@ -78,13 +78,13 @@ namespace UniVox.Framework
             chunkData[x, y, z] = value;
         }
 
-        public LightValue GetLightValue(int x, int y, int z)
+        public LightValue GetLight(int x, int y, int z)
         {
             var chunkData = extendedIndex(ref x, ref y, ref z);
             return chunkData.GetLight(x,y,z);
         }
 
-        public void SetLightValue(int x, int y, int z, LightValue value)
+        public void SetLight(int x, int y, int z, LightValue value)
         {
             var chunkData = extendedIndex(ref x, ref y, ref z);
             chunkData.SetLight(x,y,z,value);
@@ -136,7 +136,7 @@ namespace UniVox.Framework
             return data.Keys.ToList();
         }
 
-        private IChunkData extendedIndex(ref int x,ref int y,ref int z) 
+        public Vector3Int extendedIndexChunkId(ref int x, ref int y, ref int z)
         {
             var ChunkId = center.ChunkID;
             var dimensions = center.Dimensions;
@@ -172,6 +172,31 @@ namespace UniVox.Framework
                 ChunkId.z++;
                 z -= dimensions.z;
             }
+
+            return ChunkId;
+        }
+
+        public IChunkData GetChunkData(Vector3Int chunkId) 
+        {
+            if (chunkId != center.ChunkID)
+            {
+                if (data.TryGetValue(chunkId, out var chunkData))
+                {
+                    return chunkData;
+                }
+                else
+                {
+                    chunkData = getData(chunkId);
+                    data[chunkId] = chunkData;
+                    return chunkData;
+                }
+            }
+            return center;
+        }
+
+        public IChunkData extendedIndex(ref int x,ref int y,ref int z) 
+        {
+            var ChunkId = extendedIndexChunkId(ref x, ref y, ref z);
 
             if (ChunkId!= center.ChunkID)
             {

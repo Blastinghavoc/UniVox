@@ -50,14 +50,14 @@ namespace UniVox.Framework
         public bool ModifiedSinceGeneration { get => realData.ModifiedSinceGeneration; set => throw new System.NotImplementedException(); }
         public bool FullyGenerated { get => realData.FullyGenerated; set => throw new System.NotImplementedException(); }
 
-        public NativeArray<VoxelTypeID> BorderToNative(Direction dir)
+        public NativeArray<VoxelTypeID> BorderToNative(Direction dir, Allocator allocator = Allocator.Persistent)
         {
-            return realData.BorderToNative(dir);
+            return realData.BorderToNative(dir, allocator);
         }
 
-        public NativeArray<LightValue> BorderToNativeLight(Direction dir)
+        public NativeArray<LightValue> BorderToNativeLight(Direction dir, Allocator allocator = Allocator.Persistent)
         {
-            return realData.BorderToNativeLight(dir);
+            return realData.BorderToNativeLight(dir, allocator);
         }
 
         public LightValue GetLight(int x, int y, int z)

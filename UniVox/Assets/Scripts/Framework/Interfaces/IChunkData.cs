@@ -41,8 +41,8 @@ namespace UniVox.Framework
         /// </summary>
         /// <param name="Direction"></param>
         /// <returns></returns>
-        NativeArray<VoxelTypeID> BorderToNative(Direction dir);
-        NativeArray<LightValue> BorderToNativeLight(Direction dir);
+        NativeArray<VoxelTypeID> BorderToNative(Direction dir, Allocator allocator = Allocator.Persistent);
+        NativeArray<LightValue> BorderToNativeLight(Direction dir, Allocator allocator = Allocator.Persistent);
 
 
         LightValue GetLight(int x, int y, int z);
