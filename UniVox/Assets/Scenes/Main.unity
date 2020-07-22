@@ -185,7 +185,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 2101607675}
-  m_RootOrder: 4
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &149472974
 PrefabInstance:
@@ -243,7 +243,7 @@ PrefabInstance:
     - target: {fileID: 3599045744008904855, guid: 5b1c90c2d322bbf48890283c565b2b7f,
         type: 3}
       propertyPath: m_RootOrder
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3599045744008904855, guid: 5b1c90c2d322bbf48890283c565b2b7f,
         type: 3}
@@ -375,6 +375,11 @@ PrefabInstance:
       propertyPath: worldSizeLimits.verticalChunkLimit
       value: 8
       objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: LightManagerGO
+      value: 
+      objectReference: {fileID: 1059055053}
     - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: VoxelTypeManager
@@ -651,13 +656,28 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 705507993}
-  m_LocalRotation: {x: -0.9933728, y: 0, z: 0, w: -0.11493704}
+  m_LocalRotation: {x: -0.9933728, y: -0, z: -0, w: -0.11493704}
   m_LocalPosition: {x: 1.61, y: 6.84, z: -2.79}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
-  m_Father: {fileID: 2101607675}
+  m_Father: {fileID: 1059055055}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: -193.2, y: 0, z: 0}
+--- !u!1 &832008706 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3599045744009403569, guid: 5b1c90c2d322bbf48890283c565b2b7f,
+    type: 3}
+  m_PrefabInstance: {fileID: 149472974}
+  m_PrefabAsset: {fileID: 0}
+--- !u!45 &832008712
+Skybox:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 832008706}
+  m_Enabled: 1
+  m_CustomSkybox: {fileID: 2100000, guid: 9cd49762ce8f3194fbfece30821c1f93, type: 2}
 --- !u!1 &1035334669
 GameObject:
   m_ObjectHideFlags: 0
@@ -763,6 +783,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   GlobalLightName: GlobalLightLevel
   GlobalLightValue: 0.345
+  sunLight: {fileID: 705507994}
+  skyboxMaterial: {fileID: 2100000, guid: 9cd49762ce8f3194fbfece30821c1f93, type: 2}
 --- !u!4 &1059055055
 Transform:
   m_ObjectHideFlags: 0
@@ -773,7 +795,8 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
+  m_Children:
+  - {fileID: 705507995}
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -818,6 +841,11 @@ PrefabInstance:
       propertyPath: MaxMeshedPerUpdate
       value: 24
       objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: LightManagerGO
+      value: 
+      objectReference: {fileID: 1059055053}
     - target: {fileID: 6061144537135917621, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -1003,6 +1031,11 @@ PrefabInstance:
       propertyPath: worldSizeLimits.verticalChunkLimit
       value: 8
       objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: LightManagerGO
+      value: 
+      objectReference: {fileID: 1059055053}
     - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: VoxelTypeManager
@@ -1302,7 +1335,7 @@ RectTransform:
   - {fileID: 1035334670}
   - {fileID: 398304578072361659}
   m_Father: {fileID: 2101607675}
-  m_RootOrder: 3
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -1421,6 +1454,11 @@ PrefabInstance:
       propertyPath: generateStructures
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: LightManagerGO
+      value: 
+      objectReference: {fileID: 1059055053}
     - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: VoxelTypeManager
@@ -1658,6 +1696,11 @@ PrefabInstance:
       propertyPath: worldSizeLimits.verticalChunkLimit
       value: 8
       objectReference: {fileID: 0}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: LightManagerGO
+      value: 
+      objectReference: {fileID: 1059055053}
     - target: {fileID: 4110033766405619853, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: Parrallel
@@ -1872,7 +1915,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1777791462
 Transform:
   m_ObjectHideFlags: 0
@@ -1948,7 +1991,7 @@ Transform:
   - {fileID: 1141379473}
   - {fileID: 1741429806}
   m_Father: {fileID: 2101607675}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1998389612
 MonoBehaviour:
@@ -1989,7 +2032,6 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
-  - {fileID: 705507995}
   - {fileID: 149472975}
   - {fileID: 1998389611}
   - {fileID: 1456567349}
@@ -2235,7 +2277,7 @@ PrefabInstance:
     - target: {fileID: 2310299740901447960, guid: a25dffd42c0abbc41abf6bb991749b65,
         type: 3}
       propertyPath: m_RootOrder
-      value: 5
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 2310299740901447960, guid: a25dffd42c0abbc41abf6bb991749b65,
         type: 3}
@@ -2389,7 +2431,7 @@ MonoBehaviour:
   MaxStructurePerUpdate: 24
   MaxMeshedPerUpdate: 24
   DebugPipeline: 0
-  LightManagerGO: {fileID: 0}
+  LightManagerGO: {fileID: 1059055053}
 --- !u!114 &4110033765651139083
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2432,7 +2474,7 @@ MonoBehaviour:
   MaxStructurePerUpdate: 10
   MaxMeshedPerUpdate: 10
   DebugPipeline: 0
-  LightManagerGO: {fileID: 0}
+  LightManagerGO: {fileID: 1059055053}
 --- !u!1 &6061144535608697008
 GameObject:
   m_ObjectHideFlags: 0
@@ -2451,7 +2493,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &6061144535608697011
 Transform:
   m_ObjectHideFlags: 0

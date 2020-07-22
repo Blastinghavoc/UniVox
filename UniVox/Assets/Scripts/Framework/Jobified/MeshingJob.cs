@@ -256,7 +256,7 @@ namespace UniVox.Framework.Jobified
             var adjacentVoxelIndex = position + directionVector;
 
             var adjacentId = data.GetVoxel(adjacentVoxelIndex);
-            return IncludeFaceOfAdjacentWithID(adjacentId, directionIndex);
+            return (voxelID!=adjacentId) && IncludeFaceOfAdjacentWithID(adjacentId, directionIndex);
         }
 
         private bool IncludeFaceOfAdjacentWithID(ushort voxelTypeID, int direction)

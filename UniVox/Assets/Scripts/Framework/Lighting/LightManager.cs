@@ -135,9 +135,7 @@ namespace UniVox.Framework.Lighting
             if (emissionPrevious > 1 || willBeDarker)
             {
                 //if there was light at this position, remove it
-                Profiler.BeginSample("RemoveLight");
                 BfsRemovalDynamic(neighbourhood, localCoords, out propagateQueue);
-                Profiler.EndSample();
             }
             else
             {

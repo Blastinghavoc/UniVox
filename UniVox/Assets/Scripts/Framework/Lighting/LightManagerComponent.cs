@@ -8,13 +8,15 @@ namespace UniVox.Framework.Lighting
         public string GlobalLightName;
         [Range(0, 1)]
         public float GlobalLightValue;
+        public Light sunLight;
+        public Material skyboxMaterial;
 
         private ILightManager lightManager;
 
         public void Initialise(IChunkManager chunkManager, IVoxelTypeManager voxelTypeManager)
         {
             lightManager = new LightManager();
-            lightManager.Initialise(chunkManager,voxelTypeManager);
+            lightManager.Initialise(chunkManager,voxelTypeManager);            
         }
 
         public void OnChunkFullyGenerated(ChunkNeighbourhood neighbourhood)
@@ -36,6 +38,8 @@ namespace UniVox.Framework.Lighting
         // Update is called once per frame
         void Update()
         {
+            sunLight.transform.rotation = Quaternion.Euler(Mathf.Lerp(-90, 90, GlobalLightValue),0,0);
+            skyboxMaterial.SetFloat("_Exposure", GlobalLightValue);
             Shader.SetGlobalFloat(GlobalLightName, GlobalLightValue);
         }
     }
