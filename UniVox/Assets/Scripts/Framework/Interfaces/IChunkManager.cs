@@ -11,7 +11,6 @@ namespace UniVox.Framework
 
         Vector3 ChunkToWorldPosition(Vector3Int chunkID);
         Vector3Int WorldToChunkPosition(Vector3 pos);
-        Vector3Int LocalVoxelIndexOfPosition(Vector3Int position);
         Vector3 SnapToVoxelCenter(Vector3 pos);
 
         //Maximum radii from the player on each axis at which chunks may be active (in the lowest pipeline stage)

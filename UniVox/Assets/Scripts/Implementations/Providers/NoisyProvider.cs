@@ -359,5 +359,25 @@ namespace UniVox.Implementations.Providers
             }
 
         }
+
+        public override int[] GetHeightMapForColumn(Vector2Int columnId)
+        {
+            if (noiseMaps.TryGetValue(columnId,out var columnNoiseMaps))
+            {
+                return columnNoiseMaps.heightMap;
+            }
+            else
+            {//If the heightmap doesn't exist, guess it to be flat 
+                var array = new int[chunkDimensions.x * chunkDimensions.z];
+                if (worldSettings.HeightmapYOffset != 0)
+                {
+                    for (int i = 0; i < array.Length; i++)
+                    {
+                        array[i] = worldSettings.HeightmapYOffset;
+                    }
+                }
+                return array;
+            }
+        }
     }
 }

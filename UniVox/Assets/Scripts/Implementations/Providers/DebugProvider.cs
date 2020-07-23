@@ -122,5 +122,11 @@ namespace UniVox.Implementations.Providers
         {
             return new BasicFunctionJob<ChunkNeighbourhood>(()=>neighbourhood);
         }
+
+        public override int[] GetHeightMapForColumn(Vector2Int columnId)
+        {
+            //Ground height assumed to be 0.
+            return new int[chunkManager.ChunkDimensions.x * chunkManager.ChunkDimensions.z];            
+        }
     }
 }

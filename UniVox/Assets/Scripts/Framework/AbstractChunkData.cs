@@ -202,12 +202,12 @@ namespace UniVox.Framework
             return lightData;
         }
 
-        public bool TryGetVoxelID(Vector3Int coords, out VoxelTypeID vox)
+        public bool TryGetVoxel(Vector3Int coords, out VoxelTypeID vox)
         {
-            return TryGetVoxelID(coords.x, coords.y, coords.z, out vox);
+            return TryGetVoxel(coords.x, coords.y, coords.z, out vox);
         }
 
-        public bool TryGetVoxelID(int x, int y, int z, out VoxelTypeID vox)
+        public bool TryGetVoxel(int x, int y, int z, out VoxelTypeID vox)
         {
             bool xValid = x >= 0 && x < Dimensions.x;
             bool yValid = y >= 0 && y < Dimensions.y;

@@ -9,6 +9,7 @@ namespace UniVox.Framework.Lighting
     public struct LightValue : IEquatable<LightValue>
     {
         public const int IntensityRange = 16;
+        public const int MaxIntensity = IntensityRange - 1;
 
         //4 bits for dynamic light intensity, 4 bits for sun light intensity
         //ddddssss

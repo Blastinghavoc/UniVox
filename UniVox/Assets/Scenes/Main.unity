@@ -656,13 +656,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 705507993}
-  m_LocalRotation: {x: -0.9933728, y: -0, z: -0, w: -0.11493704}
+  m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
   m_LocalPosition: {x: 1.61, y: 6.84, z: -2.79}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1059055055}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: -193.2, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
 --- !u!1 &832008706 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3599045744009403569, guid: 5b1c90c2d322bbf48890283c565b2b7f,
@@ -782,7 +782,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   GlobalLightName: GlobalLightLevel
-  GlobalLightValue: 0.345
+  GlobalLightValue: 0.729
   sunLight: {fileID: 705507994}
   skyboxMaterial: {fileID: 2100000, guid: 9cd49762ce8f3194fbfece30821c1f93, type: 2}
 --- !u!4 &1059055055
@@ -2418,7 +2418,7 @@ MonoBehaviour:
   voxelSize: 1
   playArea:
     collidableChunksRadii: {x: 1, y: 1, z: 1}
-    renderedChunksRadii: {x: 10, y: 8, z: 10}
+    renderedChunksRadii: {x: 4, y: 4, z: 4}
     updateRate: 40
   worldSizeLimits:
     limitWorldHeight: 1

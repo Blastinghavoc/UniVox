@@ -5,7 +5,7 @@ using UniVox.Framework.Jobified;
 
 namespace UniVox.Framework
 {
-    public interface IChunkProvider
+    public interface IChunkProvider:IHeightMapProvider
     {
         ///Stores modified chunk data
         void StoreModifiedChunkData(Vector3Int chunkID, IChunkData data);
@@ -27,5 +27,11 @@ namespace UniVox.Framework
         AbstractPipelineJob<ChunkNeighbourhood> GenerateStructuresForNeighbourhood(Vector3Int centerChunkID,ChunkNeighbourhood neighbourhood);
 
         void Initialise(VoxelTypeManager voxelTypeManager, IChunkManager chunkManager,FrameworkEventManager eventManager);
+
+    }
+
+    public interface IHeightMapProvider 
+    {
+        int[] GetHeightMapForColumn(Vector2Int columnId);
     }
 }

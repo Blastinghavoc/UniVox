@@ -1,4 +1,4 @@
-﻿Shader "Unlit/VoxelLighting"
+﻿Shader "Unlit/VoxelLightingTransparent"
 {
     //Based on https://github.com/b3agz/Code-A-Game-Like-Minecraft-In-Unity/blob/master/15-lighting-part-1/Assets/Scripts/StandardBlockShader.shader
 
@@ -8,8 +8,9 @@
     }
     SubShader
     {
-        Tags { "RenderType"="Opaque" }
-        //LOD 100
+        Tags {"Queue"="Transparent" "RenderType"="Transparent"}
+        ZWrite Off
+        Blend SrcAlpha OneMinusSrcAlpha
 
         Pass
         {

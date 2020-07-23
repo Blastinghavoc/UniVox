@@ -26,8 +26,8 @@ namespace UniVox.Framework
         VoxelTypeID this[Vector3Int index] { get; set; }
 
         //Coords are local to the chunk
-        bool TryGetVoxelID(Vector3Int coords, out VoxelTypeID vox);
-        bool TryGetVoxelID(int x, int y, int z, out VoxelTypeID vox);
+        bool TryGetVoxel(Vector3Int coords, out VoxelTypeID vox);
+        bool TryGetVoxel(int x, int y, int z, out VoxelTypeID vox);
 
         NativeArray<VoxelTypeID> ToNative(Allocator allocator = Allocator.Persistent);
 

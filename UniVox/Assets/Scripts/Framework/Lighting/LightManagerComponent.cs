@@ -19,9 +19,9 @@ namespace UniVox.Framework.Lighting
             lightManager.Initialise(chunkManager,voxelTypeManager);            
         }
 
-        public void OnChunkFullyGenerated(ChunkNeighbourhood neighbourhood)
+        public void OnChunkFullyGenerated(ChunkNeighbourhood neighbourhood, int[] heightMap)
         {
-            lightManager.OnChunkFullyGenerated(neighbourhood);
+            lightManager.OnChunkFullyGenerated(neighbourhood, heightMap);
         }
 
         public List<Vector3Int> UpdateLightOnVoxelSet(ChunkNeighbourhood neighbourhood, Vector3Int localCoords, VoxelTypeID voxelType, VoxelTypeID previousType)

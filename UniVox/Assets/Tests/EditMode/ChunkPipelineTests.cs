@@ -66,6 +66,11 @@ namespace Tests
                 return new BasicFunctionJob<IChunkData>(() => ProvideChunkData(chunkID));
             }
 
+            public int[] GetHeightMapForColumn(Vector2Int columnId)
+            {
+                throw new NotImplementedException();
+            }
+
             public void Initialise(VoxelTypeManager voxelTypeManager, IChunkManager chunkManager, FrameworkEventManager eventManager)
             {
                 throw new NotImplementedException();

@@ -60,6 +60,6 @@ namespace UniVox.Framework
 
         public abstract AbstractPipelineJob<ChunkNeighbourhood> GenerateStructuresForNeighbourhood(Vector3Int centerChunkID, ChunkNeighbourhood neighbourhood);
 
-        
+        public abstract int[] GetHeightMapForColumn(Vector2Int columnId);
     }
 }

@@ -168,7 +168,8 @@ namespace UniVox.Framework
         {
             if (loadedChunks.TryGetValue(chunkId,out var chunkComponent))
             {
-                lightManager.OnChunkFullyGenerated(new ChunkNeighbourhood(chunkComponent.Data, GetChunkData));
+                lightManager.OnChunkFullyGenerated(new ChunkNeighbourhood(chunkComponent.Data, GetChunkData),
+                    chunkProvider.GetHeightMapForColumn(new Vector2Int(chunkId.x,chunkId.z)));
             }
             else
             {
@@ -303,7 +304,8 @@ namespace UniVox.Framework
                     //Chunks with saved data bypass the generation process.
                     ChunkComponent.Data = data;
                     //Re-generate/update lighting
-                    lightManager.OnChunkFullyGenerated(new ChunkNeighbourhood(ChunkComponent.Data, GetChunkData));
+                    lightManager.OnChunkFullyGenerated(new ChunkNeighbourhood(ChunkComponent.Data, GetChunkData),
+                        chunkProvider.GetHeightMapForColumn(new Vector2Int(chunkID.x,chunkID.z)));
                     pipeline.AddWithData(chunkID, targetStage);
                 }
                 else
@@ -562,6 +564,8 @@ namespace UniVox.Framework
             Assert.AreEqual(Vector3.zero, transform.position);
             Assert.AreEqual(Quaternion.Euler(0, 0, 0), transform.rotation);
 
+            //TODO replace body with call to Utils.Helpers.AdjustForBounds ?
+
             Vector3Int floor = new Vector3Int();
             floor.x = Mathf.FloorToInt(pos.x);
             floor.y = Mathf.FloorToInt(pos.y);
@@ -570,23 +574,9 @@ namespace UniVox.Framework
             //Result is elementwise integer division by the Chunk dimensions
             var result = floor.ElementWise((a, b) => Mathf.FloorToInt(a / (float)b), ChunkDimensions);
 
-            localVoxelIndex = LocalVoxelIndexOfPosition(floor);
+            localVoxelIndex = Utils.Helpers.ModuloChunkDimensions(floor,chunkDimensions);
 
             return result;
-        }
-
-        /// <summary>
-        /// Returns the local voxel index of some position, but not the chunk ID
-        /// of the chunk containing that position. Intended to be used when you 
-        /// already know the chunkID containing the position.
-        /// </summary>
-        /// <param name="position"></param>
-        /// <returns></returns>
-        public Vector3Int LocalVoxelIndexOfPosition(Vector3Int position)
-        {
-            var remainder = position.ElementWise((a, b) => a % b, ChunkDimensions);
-            //Local voxel index is the remainder, with negatives adjusted
-            return remainder.ElementWise((a, b) => a < 0 ? b + a : a, ChunkDimensions);
         }
 
         public Vector3 ChunkToWorldPosition(Vector3Int chunkID)

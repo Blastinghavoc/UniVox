@@ -361,5 +361,28 @@ namespace Utils
                 }
             }
         }
+
+        public static void AdjustForBounds(ref Vector3Int localPos,ref Vector3Int chunkId,Vector3Int chunkDimensions)
+        {
+            //Result is elementwise integer division by the Chunk dimensions
+            var offset = localPos.ElementWise((a, b) => Mathf.FloorToInt(a/(float)b), chunkDimensions);
+            chunkId += offset;
+
+            localPos = ModuloChunkDimensions(localPos,chunkDimensions);
+        }
+
+        public static Vector3Int ModuloChunkDimensions(Vector3Int position,Vector3Int chunkDimensions)
+        {
+            var remainder = position.ElementWise((a, b) => a % b, chunkDimensions);
+            //Local voxel index is the remainder, with negatives adjusted
+            return remainder.ElementWise((a, b) => a < 0 ? b + a : a, chunkDimensions);
+        }
+
+        public static bool IsInsideChunkId(Vector3Int worldPos, Vector3Int chunkId,Vector3Int chunkDimensions)
+        {
+            var chunkLB = chunkId * chunkDimensions;
+            var chunkUB = (chunkId + Vector3Int.one) * chunkDimensions;
+            return worldPos.All((a, b) => a >= b, chunkLB) && worldPos.All((a, b) => a < b, chunkUB);
+        }
     }
 }

@@ -5,6 +5,7 @@ using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Profiling;
 using UniVox.Framework.Lighting;
+using static Utils.Helpers;
 
 namespace UniVox.Framework
 {
@@ -136,42 +137,48 @@ namespace UniVox.Framework
             return data.Keys.ToList();
         }
 
-        public Vector3Int extendedIndexChunkId(ref int x, ref int y, ref int z)
+        private Vector3Int extendedIndexChunkId(ref int x, ref int y, ref int z)
         {
+            var localPos = new Vector3Int(x, y, z);
             var ChunkId = center.ChunkID;
-            var dimensions = center.Dimensions;
-            if (x < 0)
-            {
-                ChunkId.x--;
-                x += dimensions.x;
-            }
-            else if (x >= dimensions.x)
-            {
-                ChunkId.x++;
-                x -= dimensions.x;
-            }
+            AdjustForBounds(ref localPos, ref ChunkId, center.Dimensions);
+            x = localPos.x;
+            y = localPos.y;
+            z = localPos.z;
 
-            if (y < 0)
-            {
-                ChunkId.y--;
-                y += dimensions.y;
-            }
-            else if (y >= dimensions.y)
-            {
-                ChunkId.y++;
-                y -= dimensions.y;
-            }
+            //var dimensions = center.Dimensions;
+            //if (x < 0)
+            //{
+            //    ChunkId.x--;
+            //    x += dimensions.x;
+            //}
+            //else if (x >= dimensions.x)
+            //{
+            //    ChunkId.x++;
+            //    x -= dimensions.x;
+            //}
 
-            if (z < 0)
-            {
-                ChunkId.z--;
-                z += dimensions.z;
-            }
-            else if (z >= dimensions.z)
-            {
-                ChunkId.z++;
-                z -= dimensions.z;
-            }
+            //if (y < 0)
+            //{
+            //    ChunkId.y--;
+            //    y += dimensions.y;
+            //}
+            //else if (y >= dimensions.y)
+            //{
+            //    ChunkId.y++;
+            //    y -= dimensions.y;
+            //}
+
+            //if (z < 0)
+            //{
+            //    ChunkId.z--;
+            //    z += dimensions.z;
+            //}
+            //else if (z >= dimensions.z)
+            //{
+            //    ChunkId.z++;
+            //    z -= dimensions.z;
+            //}
 
             return ChunkId;
         }
@@ -194,7 +201,7 @@ namespace UniVox.Framework
             return center;
         }
 
-        public IChunkData extendedIndex(ref int x,ref int y,ref int z) 
+        private IChunkData extendedIndex(ref int x,ref int y,ref int z) 
         {
             var ChunkId = extendedIndexChunkId(ref x, ref y, ref z);
 
