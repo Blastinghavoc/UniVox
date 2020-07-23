@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Profiling;
 using UniVox.Framework.Common;
@@ -33,6 +34,7 @@ namespace UniVox.Framework.Lighting
 
             if (ChunkWritable(aboveChunkId, neighbourhood))
             {
+                Profiler.BeginSample("ReadFromAbove");
                 //Above chunk is available, get the sunlight levels from its bottom border
                 var aboveChunk = neighbourhood.GetChunkData(aboveChunkId);
                 int y = 0;
@@ -63,9 +65,11 @@ namespace UniVox.Framework.Lighting
                         }
                     }
                 }
+                Profiler.EndSample();
             }
             else
             {
+                Profiler.BeginSample("GuessFromHM");
                 //If above chunk not available, guess the sunlight level
                 var chunkPosition = chunkManager.ChunkToWorldPosition(neighbourhood.center.ChunkID);
                 var chunkTop = chunkPosition.y + dimensions.y;
@@ -98,10 +102,12 @@ namespace UniVox.Framework.Lighting
                         }
                     }
                 }
+                Profiler.EndSample();
             }
 
             PropagateSunlight(neighbourhood, sunlightQueue);
 
+            Profiler.BeginSample("CheckForDynamicSources");
             for (int z = 0; z < dimensions.z; z++)
             {
                 for (int y = 0; y < dimensions.y; y++)
@@ -126,6 +132,7 @@ namespace UniVox.Framework.Lighting
                     }
                 }
             }
+            Profiler.EndSample();
 
             CheckBoundaries(neighbourhood, propagateQueue);
 
@@ -137,6 +144,7 @@ namespace UniVox.Framework.Lighting
 
         private void CheckBoundaries(ChunkNeighbourhood neighbourhood, Queue<PropagationNode> propagateQueue)
         {
+            Profiler.BeginSample("CheckBoundaries");
             var dimensions = neighbourhood.center.Dimensions;
             for (int i = 0; i < DirectionExtensions.numDirections; i++)
             {
@@ -162,7 +170,7 @@ namespace UniVox.Framework.Lighting
                     }
                 }
             }
-
+            Profiler.EndSample();
         }
 
         public List<Vector3Int> UpdateLightOnVoxelSet(ChunkNeighbourhood neighbourhood, Vector3Int localCoords, VoxelTypeID voxelType, VoxelTypeID previousType)
@@ -236,6 +244,7 @@ namespace UniVox.Framework.Lighting
 
         private void RemovalDynamic(ChunkNeighbourhood neighbourhood, Vector3Int localCoords, out Queue<PropagationNode> propagateQueue)
         {
+            Profiler.BeginSample("RemoveDynamic");
             Queue<RemovalNode> removalQueue = new Queue<RemovalNode>();
             propagateQueue = new Queue<PropagationNode>();
             LightValue initialLightValue;
@@ -294,11 +303,12 @@ namespace UniVox.Framework.Lighting
             {
                 Debug.Log($"Removal processed {processed}");
             }
-
+            Profiler.EndSample();
         }
 
         private void RemovalSunlight(ChunkNeighbourhood neighbourhood, Vector3Int localCoords, out Queue<PropagationNode> propagateQueue)
         {
+            Profiler.BeginSample("RemoveSun");
             Queue<RemovalNode> removalQueue = new Queue<RemovalNode>();
             propagateQueue = new Queue<PropagationNode>();
             LightValue initialLightValue;
@@ -358,12 +368,14 @@ namespace UniVox.Framework.Lighting
             {
                 Debug.Log($"Remove Sunlight processed {processed}");
             }
-
+            Profiler.EndSample();
         }
 
         private void PropagateDynamic(ChunkNeighbourhood neighbourhood, Queue<PropagationNode> queue)
         {
             Profiler.BeginSample("PropagateDynamic");
+
+            HashSet<PropagationNode> visited = new HashSet<PropagationNode>();
 
             int processed = 0;//TODO remove DEBUG
             while (queue.Count > 0)
@@ -377,6 +389,10 @@ namespace UniVox.Framework.Lighting
                     var neighbourCoord = coords + offset;
                     if (TryGetPropagateNode(neighbourCoord, node.chunkData, neighbourhood, out var newNode))
                     {
+                        if (visited.Contains(newNode))
+                        {//skip nodes we've already seen
+                            continue;
+                        }
                         var neighbourLightValue = newNode.chunkData.GetLight(newNode.localPosition);
 
                         var (_, absorption) = voxelTypeManager.GetLightProperties(newNode.chunkData[newNode.localPosition]);
@@ -390,8 +406,10 @@ namespace UniVox.Framework.Lighting
                         }
                     }
 
+                    processed++;
                 }
-                processed++;
+
+                visited.Add(node);
             }
 
             if (processed > 0)
@@ -405,6 +423,8 @@ namespace UniVox.Framework.Lighting
         {
             Profiler.BeginSample("PropagateSun");
 
+            HashSet<Vector3> visited = new HashSet<Vector3>();
+
             int processed = 0;//TODO remove DEBUG
             while (queue.Count > 0)
             {
@@ -414,7 +434,13 @@ namespace UniVox.Framework.Lighting
 
                 foreach (var offset in DirectionExtensions.Vectors)
                 {
+                    var neighbourWorldPos = node.worldPos + offset;
+                    if (visited.Contains(neighbourWorldPos))
+                    {//skip nodes we've already seen
+                        continue;
+                    }
                     var neighbourCoord = coords + offset;
+
                     if (TryGetPropagateNode(neighbourCoord, node.chunkData, neighbourhood, out var newNode))
                     {
                         var neighbourLightValue = newNode.chunkData.GetLight(newNode.localPosition);
@@ -435,8 +461,10 @@ namespace UniVox.Framework.Lighting
                         }
                     }
 
+                    processed++;
                 }
-                processed++;
+
+                visited.Add(node.worldPos);
             }
 
             if (processed > 0)
@@ -462,6 +490,7 @@ namespace UniVox.Framework.Lighting
 
         private bool TryGetPropagateNode(Vector3Int localPosition, IChunkData chunkData, ChunkNeighbourhood neighbourhood, out PropagationNode node)
         {
+            Profiler.BeginSample("TryGetPropagateNode");
             var chunkId = chunkData.ChunkID;
             AdjustForBounds(ref localPosition, ref chunkId, chunkData.Dimensions);
             if (chunkId.Equals(chunkData.ChunkID))
@@ -469,8 +498,10 @@ namespace UniVox.Framework.Lighting
                 node = new PropagationNode()
                 {
                     localPosition = localPosition,
-                    chunkData = chunkData
+                    chunkData = chunkData,
+                    worldPos = chunkManager.ChunkToWorldPosition(chunkId) + localPosition
                 };
+                Profiler.EndSample();
                 return true;
             }
             else if (ChunkWritable(chunkId, neighbourhood))
@@ -478,12 +509,15 @@ namespace UniVox.Framework.Lighting
                 node = new PropagationNode()
                 {
                     localPosition = localPosition,
-                    chunkData = neighbourhood.GetChunkData(chunkId)
+                    chunkData = neighbourhood.GetChunkData(chunkId),
+                    worldPos = chunkManager.ChunkToWorldPosition(chunkId) + localPosition
                 };
+                Profiler.EndSample();
                 return true;
             }
             //Otherwise, this position is not valid         
             node = default;
+            Profiler.EndSample();
             return false;
         }
 
@@ -517,17 +551,53 @@ namespace UniVox.Framework.Lighting
             return false;
         }
 
-        private struct PropagationNode
+        private struct PropagationNode:IEquatable<PropagationNode>
         {
             public Vector3Int localPosition;
             public IChunkData chunkData;
+            public Vector3 worldPos;//TODO incorporate in equality, DEBUG
+
+            public bool Equals(PropagationNode other)
+            {
+                return chunkData == other.chunkData && localPosition.Equals(other.localPosition);
+            }
+            public override int GetHashCode()
+            {
+                //REF SRC: https://stackoverflow.com/questions/7813687/right-way-to-implement-gethashcode-for-this-struct
+                unchecked // Overflow is fine, just wrap
+                {
+                    int hash = 17;//prime numbers!
+                    hash = hash * 23 + localPosition.GetHashCode();
+                    hash = hash * 23 + chunkData.ChunkID.GetHashCode();
+                    return hash;
+                }
+            }
         }
 
-        private struct RemovalNode
+        private struct RemovalNode : IEquatable<RemovalNode>
         {
             public Vector3Int localPosition;
             public IChunkData chunkData;
             public LightValue lv;
+
+            public bool Equals(RemovalNode other)
+            {
+                return chunkData == other.chunkData && localPosition.Equals(other.localPosition)
+                    && lv.Equals(other.lv);
+            }
+
+            public override int GetHashCode()
+            {
+                //REF SRC: https://stackoverflow.com/questions/7813687/right-way-to-implement-gethashcode-for-this-struct
+                unchecked // Overflow is fine, just wrap
+                {
+                    int hash = 17;//prime numbers!
+                    hash = hash * 23 + localPosition.GetHashCode();
+                    hash = hash * 23 + chunkData.ChunkID.GetHashCode();
+                    hash = hash * 23 + lv.GetHashCode();
+                    return hash;
+                }
+            }
         }
     }
 }

@@ -36,5 +36,10 @@ namespace UniVox.Framework.Lighting
         {
             return other.bits == bits;
         }
+
+        public override int GetHashCode()
+        {
+            return bits.GetHashCode();
+        }
     }
 } 

@@ -1,8 +1,6 @@
-﻿using Castle.DynamicProxy.Generators;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Profiling;
@@ -10,12 +8,12 @@ using UniVox.Framework;
 
 namespace UniVox.Implementations.ChunkData
 {
-    public class OctreeVoxelStorage: IVoxelStorageImplementation,IEquatable<OctreeVoxelStorage>
+    public class OctreeVoxelStorage : IVoxelStorageImplementation, IEquatable<OctreeVoxelStorage>
     {
-        private interface INode:IEquatable<INode>
+        private interface INode : IEquatable<INode>
         {
             INode GetChild(int index);
-            INode MakeChild(int index,bool isLeaf);
+            INode MakeChild(int index, bool isLeaf);
             void RemoveChild(int index);
 
             void SetChild(int index, INode child);
@@ -61,10 +59,10 @@ namespace UniVox.Implementations.ChunkData
                 return null;
             }
 
-            public INode MakeChild(int index,bool isLeaf)
+            public INode MakeChild(int index, bool isLeaf)
             {
                 throw new NotImplementedException();
-            }            
+            }
 
             public void RemoveChild(int index)
             {
@@ -106,7 +104,7 @@ namespace UniVox.Implementations.ChunkData
                 throw new NotImplementedException();
             }
 
-            public INode Split(bool isTerminal) 
+            public INode Split(bool isTerminal)
             {
                 INode node;
                 if (isTerminal)
@@ -188,7 +186,7 @@ namespace UniVox.Implementations.ChunkData
                 return children[index];
             }
 
-            public INode MakeChild(int index,bool isLeaf)
+            public INode MakeChild(int index, bool isLeaf)
             {
                 INode child;
                 if (isLeaf)
@@ -210,20 +208,20 @@ namespace UniVox.Implementations.ChunkData
 
             public void SetChild(int index, INode child)
             {
-                children[index] = child;                
+                children[index] = child;
             }
         }
 
         private INode root;
         private Vector3Int rootDimensions;
-        private readonly Vector3Int dimensionsOfTerminalNodes = new Vector3Int(2,2,2);
+        private readonly Vector3Int dimensionsOfTerminalNodes = new Vector3Int(2, 2, 2);
         public bool IsEmpty { get => root.IsEmpty; }
         int dxdy;
 
         //Empty constructor requiring use of the Initialise functions to do anything useful
-        public OctreeVoxelStorage() 
-        { 
-        
+        public OctreeVoxelStorage()
+        {
+
         }
 
         public OctreeVoxelStorage(Vector3Int dimensions)
@@ -231,9 +229,9 @@ namespace UniVox.Implementations.ChunkData
             InitialiseEmpty(dimensions);
         }
 
-        public OctreeVoxelStorage(Vector3Int dimensions,VoxelTypeID[] initialData)
+        public OctreeVoxelStorage(Vector3Int dimensions, VoxelTypeID[] initialData)
         {
-            InitialiseWithData(dimensions, initialData);         
+            InitialiseWithData(dimensions, initialData);
         }
 
         public void InitialiseEmpty(Vector3Int dimensions)
@@ -250,7 +248,7 @@ namespace UniVox.Implementations.ChunkData
                 throw new ArgumentException("SVO does not currently support dimensions that are not a power of 2");
             }
 
-            this.rootDimensions = dimensions;
+            rootDimensions = dimensions;
             uint capacity = (uint)dimensions.x * (uint)dimensions.y * (uint)dimensions.z;
 
             if (capacity > 8)
@@ -275,7 +273,7 @@ namespace UniVox.Implementations.ChunkData
         /// initialise an SVO from an array of data.
         /// </summary>
         /// <param name="array"></param>
-        private void FromArray(VoxelTypeID[] array) 
+        private void FromArray(VoxelTypeID[] array)
         {
             Profiler.BeginSample("SVO FromArray");
             FromArrayRecursive(root, Vector3Int.zero, rootDimensions, array);
@@ -291,7 +289,7 @@ namespace UniVox.Implementations.ChunkData
         /// <param name="array"></param>
         /// <param name="dxdy"></param>
         /// <returns>IsEmpty,IsSolid</returns>
-        private (bool,bool) FromArrayRecursive(INode node, Vector3Int offset, Vector3Int nodeDimensions,VoxelTypeID[] array) 
+        private (bool, bool) FromArrayRecursive(INode node, Vector3Int offset, Vector3Int nodeDimensions, VoxelTypeID[] array)
         {
             bool empty = true;
             bool solid = true;
@@ -331,7 +329,7 @@ namespace UniVox.Implementations.ChunkData
                 }
             }
             else
-            {                
+            {
                 for (int i = 0; i < 8; i++)
                 {
                     var leafOffset = getLocalCoords(i) + offset;
@@ -346,7 +344,7 @@ namespace UniVox.Implementations.ChunkData
                 }
                 solid = leaf.children.All(_ => _ == leaf.children[0]);
             }
-            return (empty,solid);
+            return (empty, solid);
         }
 
         /// <summary>
@@ -359,7 +357,7 @@ namespace UniVox.Implementations.ChunkData
         /// of the framework.
         /// </summary>
         /// <returns></returns>
-        public VoxelTypeID[] ToArray() 
+        public VoxelTypeID[] ToArray()
         {
             Profiler.BeginSample("SVO ToArray");
 
@@ -398,14 +396,14 @@ namespace UniVox.Implementations.ChunkData
                         }
                     }
                 }
-                else 
+                else
                 {
                     if (current is TerminalLeafNode terminal)
                     {
                         for (int i = 0; i < 8; i++)
                         {
                             var childOffset = getLocalCoords(i) + offset;
-                            var flat = Utils.Helpers.MultiIndexToFlat(childOffset.x, childOffset.y, childOffset.z,rootDimensions.x,dxdy);
+                            var flat = Utils.Helpers.MultiIndexToFlat(childOffset.x, childOffset.y, childOffset.z, rootDimensions.x, dxdy);
                             array[flat] = terminal.children[i];
                         }
                     }
@@ -417,7 +415,7 @@ namespace UniVox.Implementations.ChunkData
                             {
                                 for (int x = 0; x < currentDimensions.x; x++)
                                 {
-                                    var flat = Utils.Helpers.MultiIndexToFlat(offset.x+x, offset.y+y, offset.z+z, rootDimensions.x, dxdy);
+                                    var flat = Utils.Helpers.MultiIndexToFlat(offset.x + x, offset.y + y, offset.z + z, rootDimensions.x, dxdy);
                                     array[flat] = meta.voxel;
                                 }
                             }
@@ -445,7 +443,7 @@ namespace UniVox.Implementations.ChunkData
         public void Set(int x, int y, int z, VoxelTypeID id)
         {
             PlaceVoxel_IsEmptyIsSolid(root, new Vector3Int(x, y, z), rootDimensions, id);
-        }      
+        }
 
 
         /// <summary>
@@ -456,7 +454,7 @@ namespace UniVox.Implementations.ChunkData
         /// <param name="nodeDimensions"></param>
         /// <param name="voxel"></param>
         ///<returns>IsEmpty,IsSolid</returns>
-        private (bool,bool) PlaceVoxel_IsEmptyIsSolid(INode node, Vector3Int nodeLocal, Vector3Int nodeDimensions, VoxelTypeID voxel)
+        private (bool, bool) PlaceVoxel_IsEmptyIsSolid(INode node, Vector3Int nodeLocal, Vector3Int nodeDimensions, VoxelTypeID voxel)
         {
             bool empty = true;
             bool solid = true;
@@ -485,11 +483,11 @@ namespace UniVox.Implementations.ChunkData
                     node.RemoveChild(index);
                 }
                 else
-                {                    
+                {
                     if (childSolid && !(child is MetaLeafNode))
                     {
                         //Swap previous child for a meta node
-                        node.SetChild(index,new MetaLeafNode() { voxel = voxel });                       
+                        node.SetChild(index, new MetaLeafNode() { voxel = voxel });
                     }
                 }
 
@@ -522,8 +520,8 @@ namespace UniVox.Implementations.ChunkData
             else
             {
                 if (node is TerminalLeafNode leaf)
-                {                    
-                    leaf.children[index] = voxel;            
+                {
+                    leaf.children[index] = voxel;
                     empty = leaf.IsEmpty;
                     solid = leaf.children.All(_ => _ == leaf.children[0]);
                 }
@@ -535,9 +533,9 @@ namespace UniVox.Implementations.ChunkData
                 else
                 {
                     throw new Exception("Unkown leaf type");
-                }                
+                }
             }
-            return (empty,solid);
+            return (empty, solid);
         }
 
         /// <summary>
@@ -548,17 +546,17 @@ namespace UniVox.Implementations.ChunkData
         /// <param name="z"></param>
         public VoxelTypeID Get(int x, int y, int z)
         {
-            Profiler.BeginSample("SVO Get");            
+            Profiler.BeginSample("SVO Get");
 
             var voxel = getRecursive(root, new Vector3Int(x, y, z), rootDimensions);
             Profiler.EndSample();
             return voxel;
         }
 
-        private VoxelTypeID getRecursive(INode node,Vector3Int nodeLocal,Vector3Int nodeDimensions) 
+        private VoxelTypeID getRecursive(INode node, Vector3Int nodeLocal, Vector3Int nodeDimensions)
         {
             Vector3Int childDimensions = nodeDimensions / 2;
-            var (index,childNodeLocal) = getIndexAndAdjustedNodeLocalCoords(nodeLocal, childDimensions);
+            var (index, childNodeLocal) = getIndexAndAdjustedNodeLocalCoords(nodeLocal, childDimensions);
             if (node == null)
             {
                 return (VoxelTypeID)VoxelTypeID.AIR_ID;
@@ -612,7 +610,7 @@ namespace UniVox.Implementations.ChunkData
             return index;
         }
 
-        public (int,Vector3Int) getIndexAndAdjustedNodeLocalCoords(Vector3Int nodeLocal, Vector3Int childDimensions)
+        public (int, Vector3Int) getIndexAndAdjustedNodeLocalCoords(Vector3Int nodeLocal, Vector3Int childDimensions)
         {
             int index = 0;
             if (nodeLocal.z >= childDimensions.z)
@@ -630,17 +628,17 @@ namespace UniVox.Implementations.ChunkData
                 index += 1;
                 nodeLocal.x -= childDimensions.x;
             }
-            return (index,nodeLocal);
+            return (index, nodeLocal);
         }
 
-        public Vector3Int getLocalCoords(int index) 
+        public Vector3Int getLocalCoords(int index)
         {
             return new Vector3Int(index % 2, (index / 2) % 2, (index / 4) % 2);
         }
 
         public bool Equals(OctreeVoxelStorage other)
         {
-            if (root==null)
+            if (root == null)
             {
                 return other.root == null;
             }
