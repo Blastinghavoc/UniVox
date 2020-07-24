@@ -384,5 +384,12 @@ namespace Utils
             var chunkUB = (chunkId + Vector3Int.one) * chunkDimensions;
             return worldPos.All((a, b) => a >= b, chunkLB) && worldPos.All((a, b) => a < b, chunkUB);
         }
+
+        public static bool LocalPositionInsideChunkBounds(Vector3Int localPos, Vector3Int chunkDimensions) 
+        {
+            var chunkLB = Vector3Int.zero;
+            var chunkUB = chunkDimensions;
+            return localPos.All((a, b) => a >= b, chunkLB) && localPos.All((a, b) => a < b, chunkUB);
+        }
     }
 }

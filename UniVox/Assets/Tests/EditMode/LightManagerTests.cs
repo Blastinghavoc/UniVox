@@ -66,6 +66,8 @@ namespace Tests
                     return chunkId * chunkDimensions;
                 });
 
+            chunkManager.ChunkDimensions.Returns(chunkDimensions);
+
             lightManager = new LightManager();
             lightManager.Initialise(chunkManager, voxelTypeManager);
         }
@@ -430,6 +432,12 @@ namespace Tests
             //Generate second chunk
             lightManager.OnChunkFullyGenerated(new ChunkNeighbourhood(ids[second], GetMockChunkData), heightmap);
             fullyGenerated.Add(ids[second]);
+
+            Debug.Log("TopSlice");
+            var bottomNeigh = new ChunkNeighbourhood(lowChunkData, GetMockChunkData);
+            PrintSlice(bottomNeigh, 15,false);
+            Debug.Log("BottomSlice");
+            PrintSlice(bottomNeigh, 0, false);
 
             expectedLv = new LightValue() { Sun = maxIntensity, Dynamic = 0 };
 
