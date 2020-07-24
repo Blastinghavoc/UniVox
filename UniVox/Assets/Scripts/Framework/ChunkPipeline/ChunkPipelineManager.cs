@@ -64,12 +64,15 @@ namespace UniVox.Framework.ChunkPipeline
             int maxMeshPerUpdate, 
             int maxCollisionPerUpdate, 
             bool structureGen = false,
-            int maxStructurePerUpdate = 200)
+            int maxStructurePerUpdate = 200,
+            bool lighting = false)
         {
             this.getChunkComponent = getChunkComponent;
             this.chunkProvider = chunkProvider;
             this.chunkMesher = chunkMesher;
             this.GenerateStructures = structureGen;
+
+            bool dependentOnNeighbours = chunkMesher.IsMeshDependentOnNeighbourChunks || lighting;
 
             int i = 0;
 
@@ -116,7 +119,7 @@ namespace UniVox.Framework.ChunkPipeline
 
             FullyGeneratedStage = i;
 
-            if (chunkMesher.IsMeshDependentOnNeighbourChunks)
+            if (dependentOnNeighbours)
             {
                 /// If mesh is dependent on neighbour chunks, add a waiting stage
                 /// to wait until the neighbours of a chunk have their data before

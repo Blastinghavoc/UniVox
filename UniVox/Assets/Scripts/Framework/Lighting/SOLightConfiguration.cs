@@ -13,5 +13,4 @@ namespace UniVox.Framework.Lighting
         [Tooltip("Amount by which light values are diminished when propagating through this voxel.")]
         public int DiminishLightAmount = LightValue.IntensityRange - 1;
     }
-
 }
