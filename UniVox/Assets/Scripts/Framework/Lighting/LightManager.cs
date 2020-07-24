@@ -381,8 +381,6 @@ namespace UniVox.Framework.Lighting
         {
             Profiler.BeginSample("PropagateDynamic");
 
-            HashSet<PropagationNode> visited = new HashSet<PropagationNode>();
-
             int processed = 0;//TODO remove DEBUG
             while (queue.Count > 0)
             {
@@ -395,10 +393,6 @@ namespace UniVox.Framework.Lighting
                     var neighbourCoord = coords + offset;
                     if (TryGetPropagateNode(neighbourCoord, node.chunkData, neighbourhood, out var newNode))
                     {
-                        if (visited.Contains(newNode))
-                        {//skip nodes we've already seen
-                            continue;
-                        }
                         var neighbourLightValue = newNode.chunkData.GetLight(newNode.localPosition);
 
                         var (_, absorption) = voxelTypeManager.GetLightProperties(newNode.chunkData[newNode.localPosition]);
@@ -414,8 +408,6 @@ namespace UniVox.Framework.Lighting
 
                     processed++;
                 }
-
-                visited.Add(node);
             }
 
             if (processed > 0)
@@ -425,11 +417,9 @@ namespace UniVox.Framework.Lighting
             Profiler.EndSample();
         }
 
-        private void PropagateSunlightBFS(ChunkNeighbourhood neighbourhood, Queue<PropagationNode> queue)
+        private void PropagateSunlight(ChunkNeighbourhood neighbourhood, Queue<PropagationNode> queue)
         {
             Profiler.BeginSample("PropagateSun");
-
-            HashSet<Vector3Int> visited = new HashSet<Vector3Int>();
 
             int processed = 0;//TODO remove DEBUG
             while (queue.Count > 0)
@@ -438,7 +428,8 @@ namespace UniVox.Framework.Lighting
                 var coords = node.localPosition;
                 var thisLightValue = node.chunkData.GetLight(coords);
 
-                foreach (var child in GetAllValidChildrenForPropagation(node, visited, neighbourhood))
+                //TODO use this technique in propagating dynamic light too?
+                foreach (var child in GetAllValidChildrenForPropagation(node, neighbourhood))
                 {
                     var neighbourLightValue = child.chunkData.GetLight(child.localPosition);
 
@@ -492,170 +483,12 @@ namespace UniVox.Framework.Lighting
                 //    processed++;
                 //}
 
-                //TODO remove visited set completely
-                //visited.Add(node.worldPos);
             }
 
             if (processed > 0)
             {
                 Debug.Log($"Sun Propagation processed {processed}");
             }
-            Profiler.EndSample();
-        }
-
-        //Attempt to be more efficient by means of scan-lining
-        private void PropagateSunlight(ChunkNeighbourhood neighbourhood, Queue<PropagationNode> queue) 
-        {
-            Profiler.BeginSample("PropagateSunlightSpecial");
-            Dictionary<IChunkData, HashSet<Vector3Int>> chunksToLocalPositionsDict = new Dictionary<IChunkData, HashSet<Vector3Int>>();
-            Dictionary<IChunkData, HashSet<Vector3Int>> gotFinalValue = new Dictionary<IChunkData, HashSet<Vector3Int>>();
-            var nonDownOffsets = new Vector3Int[] 
-            { 
-                DirectionExtensions.Vectors[(int)Direction.north],
-                DirectionExtensions.Vectors[(int)Direction.south],
-                DirectionExtensions.Vectors[(int)Direction.east],
-                DirectionExtensions.Vectors[(int)Direction.west],
-                DirectionExtensions.Vectors[(int)Direction.up],
-            };
-            while (queue.Count > 0)
-            {//propagate sunlight downwards
-                var node = queue.Dequeue();
-                var chunkData = node.chunkData;
-                var parentLocal = node.localPosition;
-                var parentLv = chunkData.GetLight(parentLocal);
-                var parentWorldPos = node.worldPos;
-
-                while (true) 
-                { 
-                    //Add all non-down neighbours to dict
-                    for (int i = 0; i < nonDownOffsets.Length; i++)
-                    {
-                        var offset = nonDownOffsets[i];
-                        var neighData = chunkData;
-                        var neighLocal = parentLocal + offset;
-                        var neighChunkId = chunkData.ChunkID;
-
-                        if (!LocalPositionInsideChunkBounds(neighLocal,chunkDimensions))
-                        {
-                            AdjustForBounds(ref neighLocal, ref neighChunkId, chunkDimensions);
-                            if (ChunkWritable(neighChunkId,neighbourhood))
-                            {
-                                neighData = neighbourhood.GetChunkData(neighChunkId);
-                            }
-                            else
-                            {
-                                continue;
-                            }
-                        }
-
-                        if (chunksToLocalPositionsDict.TryGetValue(neighData, out var set))
-                        {
-                            set.Add(neighLocal);
-                        }
-                        else
-                        {
-                            set = new HashSet<Vector3Int>();
-                            set.Add(neighLocal);
-                            chunksToLocalPositionsDict.Add(neighData, set);
-                        }
-                    }
-
-                    //propagate downwards
-                    var childLocal = parentLocal;
-                    childLocal.y -= 1;
-                    var childWorldPos = parentWorldPos;
-                    childWorldPos.y -= 1;
-
-                    bool stopHere = false;
-
-                    if (childLocal.y < 0)
-                    {
-                        stopHere = true;
-                        var belowChunkId = chunkData.ChunkID;
-                        belowChunkId.y -= 1;
-                        if (ChunkWritable(belowChunkId,neighbourhood))
-                        {
-                            var adjustedChildLocal = childLocal;
-                            adjustedChildLocal.y += chunkDimensions.y;
-                            var neighChunkData = neighbourhood.GetChunkData(belowChunkId);
-                            chunkData = neighChunkData;
-                            childLocal = adjustedChildLocal;
-
-                            //Add to queue
-                            queue.Enqueue(new PropagationNode()
-                            {
-                                chunkData = neighChunkData,
-                                localPosition = adjustedChildLocal,
-                                worldPos = childWorldPos
-                            }) ;
-                        }
-                        else
-                        {
-                            break;
-                        }
-                    }                
-
-                    var lv = chunkData.GetLight(childLocal);
-
-                    var (_, absorption) = voxelTypeManager.GetLightProperties(chunkData[childLocal]);
-                    var next = parentLv.Sun - absorption;
-
-                    //At this point we are always propagating downwards
-                    if (absorption == 1 && parentLv.Sun == LightValue.MaxIntensity)
-                    {
-                        next = LightValue.MaxIntensity;//Ignore normal light absorption when propagating sunlight down
-                        //The child has the max light value, it should not be visited again
-                        if (gotFinalValue.TryGetValue(chunkData,out var set))
-                        {
-                            set.Add(childLocal);
-                        }
-                        else
-                        {
-                            set = new HashSet<Vector3Int>();
-                            set.Add(childLocal);
-                            gotFinalValue.Add(chunkData, set);
-                        }
-                    }
-
-                    if (lv.Sun < next)
-                    {
-                        lv.Sun = next;
-                        chunkData.SetLight(childLocal, lv);
-                    }
-
-                    if (stopHere)
-                    {//We've gone as far down as we can in this chunk
-                        break;
-                    }
-
-                    //Set variables for next loop
-                    parentLv = lv;
-                    parentLocal = childLocal;
-                    parentWorldPos = childWorldPos;
-                }
-            }
-
-            //Process remaining positions by standard bfs. Queue is clear by now
-            Assert.IsTrue(queue.Count == 0);
-            foreach (var chunkData in chunksToLocalPositionsDict.Keys)
-            {
-                var chunkPos = chunkManager.ChunkToWorldPosition(chunkData.ChunkID).ToInt();
-                var processSet = chunksToLocalPositionsDict[chunkData];                
-                if (gotFinalValue.TryGetValue(chunkData,out var excludeSet))
-                {
-                    processSet.ExceptWith(excludeSet);
-                }
-                foreach (var item in processSet)
-                {
-                    queue.Enqueue(new PropagationNode()
-                    {
-                        chunkData = chunkData,
-                        localPosition = item,
-                        worldPos = chunkPos + item
-                    });
-                }
-            }
-            PropagateSunlightBFS(neighbourhood, queue);
             Profiler.EndSample();
         }
 
@@ -673,34 +506,33 @@ namespace UniVox.Framework.Lighting
             return chunkManager.IsChunkFullyGenerated(chunkId);// && InsideCuboid(chunkId,neighbourhood.center.ChunkID,Vector3Int.one);
         }
 
-        private IEnumerable<PropagationNode> GetAllValidChildrenForPropagation(PropagationNode parent, HashSet<Vector3Int> visited,ChunkNeighbourhood neighbourhood) 
+        //TODO decrease GC allocations in this method
+        private IEnumerable<PropagationNode> GetAllValidChildrenForPropagation(PropagationNode parent,ChunkNeighbourhood neighbourhood) 
         {
             foreach (var offset in DirectionExtensions.Vectors) 
             {
                 PropagationNode child = parent;
                 child.worldPos = parent.worldPos + offset;
-                if (!visited.Contains(child.worldPos))
+                
+                var chunkId = child.chunkData.ChunkID;
+                child.localPosition += offset;
+                if (LocalPositionInsideChunkBounds(child.localPosition, chunkDimensions))
                 {
-                    var chunkId = child.chunkData.ChunkID;
-                    child.localPosition += offset;
-                    if (LocalPositionInsideChunkBounds(child.localPosition, chunkDimensions))
+                    yield return child;
+                }
+                else
+                {
+                    AdjustForBounds(ref child.localPosition, ref chunkId, chunkDimensions);
+
+                    Profiler.BeginSample("ChunkWritable");
+                    var writable = ChunkWritable(chunkId, neighbourhood);
+                    Profiler.EndSample();
+                    if (writable)
                     {
+                        child.chunkData = neighbourhood.GetChunkData(chunkId);
                         yield return child;
                     }
-                    else
-                    {
-                        AdjustForBounds(ref child.localPosition, ref chunkId, chunkDimensions);
-
-                        Profiler.BeginSample("ChunkWritable");
-                        var writable = ChunkWritable(chunkId, neighbourhood);
-                        Profiler.EndSample();
-                        if (writable)
-                        {
-                            child.chunkData = neighbourhood.GetChunkData(chunkId);
-                            yield return child;
-                        }
-                    }
-                }
+                }                
             }
         }
 
