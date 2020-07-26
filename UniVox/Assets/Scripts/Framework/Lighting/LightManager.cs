@@ -59,13 +59,88 @@ namespace UniVox.Framework.Lighting
             directionVectors.SmartDispose();
         }
 
+        //TODO refactor to not use neighbourhood, but use chunkId instead
         public void OnChunkFullyGenerated(ChunkNeighbourhood neighbourhood, int[] heightMap)
         {
             Profiler.BeginSample("LightOnChunkGenerated");
 
             var chunkId = neighbourhood.center.ChunkID;
 
-            NativeArray<bool> directionsValid = new NativeArray<bool>(DirectionExtensions.numDirections,Allocator.Persistent);
+            var jobData = getJobData(chunkId);
+
+            var generationJob = new LightGenerationJob() { data = jobData,
+                dynamicPropagationQueue = new NativeQueue<int3>(Allocator.Persistent),
+                sunlightPropagationQueue = new NativeQueue<int3>(Allocator.Persistent),
+                heightmap = heightMap.ToNative()
+            };
+
+            //TODO support parallel execution (scheduling)
+            generationJob.Run();
+            generationJob.Dispose();
+
+            var propagationJob = new LightPropagationJob() { data = jobData,
+                sunlightPropagationQueue = generationJob.sunlightPropagationQueue,
+                dynamicPropagationQueue = generationJob.dynamicPropagationQueue,
+                sunlightNeighbourUpdates = new LightJobNeighbourUpdates(Allocator.Persistent),
+                dynamicNeighbourUpdates = new LightJobNeighbourUpdates(Allocator.Persistent)
+            };
+
+            propagationJob.Run();
+            neighbourhood.center.LightmapFromNative(jobData.lights);
+            propagationJob.Dispose();
+
+            ResolveUpdates(propagationJob, chunkId);
+
+            Profiler.EndSample();
+
+            //Update neighbours
+
+        }
+
+        private class UpdateListsPair : IDisposable
+        {
+            public NativeList<int3> sunlight;
+            public NativeList<int3> dynamic;
+
+            public void Dispose()
+            {
+                sunlight.Dispose();
+                dynamic.Dispose();
+            }
+        }
+
+        private void ResolveUpdates(LightPropagationJob propagationJob, Vector3Int chunkId) 
+        {
+            Queue<KeyValuePair<Vector3Int, UpdateListsPair>> pending = new Queue<KeyValuePair<Vector3Int, UpdateListsPair>>();
+           
+            for (Direction dir = 0; (int)dir < DirectionExtensions.numDirections; dir++)
+            {
+                UpdateListsPair pair = new UpdateListsPair();
+
+                pair.sunlight = propagationJob.sunlightNeighbourUpdates[dir];
+                pair.dynamic = propagationJob.dynamicNeighbourUpdates[dir];
+
+                if (pair.dynamic.Length > 0 || pair.sunlight.Length > 0)
+                {
+                    pending.Enqueue(new KeyValuePair<Vector3Int, UpdateListsPair>(chunkId + DirectionExtensions.Vectors[(int)dir],pair));
+                }
+                else
+                {
+                    pair.Dispose();
+                }
+            }
+
+            //TODO process the queue by issuing propagation jobs
+            while (pending.Count > 0)
+            {
+                var kvp = pending.Dequeue();
+                kvp.Value.Dispose();//TODO tmp
+            }
+        }
+
+        private LightJobData getJobData(Vector3Int chunkId) 
+        {
+            NativeArray<bool> directionsValid = new NativeArray<bool>(DirectionExtensions.numDirections, Allocator.Persistent);
             for (int i = 0; i < DirectionExtensions.numDirections; i++)
             {
                 var offset = DirectionExtensions.Vectors[i];
@@ -73,154 +148,20 @@ namespace UniVox.Framework.Lighting
                 directionsValid[i] = chunkManager.IsChunkFullyGenerated(neighId);
             }
 
+            var chunkData = chunkManager.GetChunkData(chunkId);
+
             LightJobData jobData = new LightJobData(chunkId.ToNative(),
-                chunkManager.ChunkToWorldPosition(neighbourhood.center.ChunkID).ToInt().ToNative(),
+                chunkManager.ChunkToWorldPosition(chunkId).ToInt().ToNative(),
                 chunkDimensions.ToNative(),
-                neighbourhood.center.ToNative(Allocator.Persistent),
-                neighbourhood.center.LightToNative(Allocator.Persistent),
-                JobUtils.CacheNeighbourData(neighbourhood.center, chunkManager),
+                chunkData.ToNative(Allocator.Persistent),
+                chunkData.LightToNative(Allocator.Persistent),
+                JobUtils.CacheNeighbourData(chunkId, chunkManager),
                 directionsValid,
-                heightMap.ToNative(Allocator.Persistent),
                 voxelTypeToEmissionMap,
                 voxelTypeToAbsorptionMap,
                 directionVectors
                 );
-
-            var job = new LightGenerationJob() { data = jobData,
-                dynamicPropagationQueue = new NativeQueue<int3>(Allocator.Persistent),
-                sunlightPropagationQueue = new NativeQueue<int3>(Allocator.Persistent)
-            };
-
-            //TODO support parallel execution (scheduling)
-            job.Run();
-
-            neighbourhood.center.LightmapFromNative(jobData.lights);
-            jobData.Dispose();
-            job.sunlightPropagationQueue.Dispose();
-            job.dynamicPropagationQueue.Dispose();
-
-            //Queue<PropagationNode> propagateQueue = new Queue<PropagationNode>();
-
-            ////TODO compute sunlight from above chunk if it's loaded
-
-            //Queue<PropagationNode> sunlightQueue = new Queue<PropagationNode>();
-
-            //var aboveChunkId = neighbourhood.center.ChunkID + Vector3Int.up;
-            //var yMax = chunkDimensions.y - 1;
-            //var centerWorldPos = chunkManager.ChunkToWorldPosition(neighbourhood.center.ChunkID).ToInt();
-
-            //if (ChunkWritable(aboveChunkId, neighbourhood))
-            //{
-            //    Profiler.BeginSample("ReadFromAbove");
-            //    //Above chunk is available, get the sunlight levels from its bottom border
-            //    var aboveChunk = neighbourhood.GetChunkData(aboveChunkId);
-            //    int y = 0;
-
-            //    for (int z = 0; z < chunkDimensions.z; z++)
-            //    {
-            //        for (int x = 0; x < chunkDimensions.x; x++)
-            //        {
-            //            var sunlight = aboveChunk.GetLight(x, y, z).Sun;
-            //            var voxelAtTop = neighbourhood.center[x, yMax, z];
-            //            var (_, absorption) = voxelTypeManager.GetLightProperties(voxelAtTop);
-            //            if (absorption < LightValue.MaxIntensity && sunlight > 1) 
-            //            {
-            //                if (absorption == 1 && sunlight == LightValue.MaxIntensity)
-            //                {
-            //                    //Do nothing, sunlight preserved
-            //                }
-            //                else
-            //                {
-            //                    sunlight -= absorption;
-            //                }
-            //                neighbourhood.center.SetLight(x, yMax, z, new LightValue() { Sun = sunlight });
-            //                var localPos = new Vector3Int(x, yMax, z);
-            //                sunlightQueue.Enqueue(new PropagationNode()
-            //                {
-            //                    localPosition = localPos,
-            //                    chunkData = neighbourhood.center,
-            //                    worldPos = centerWorldPos+ localPos
-            //                });;
-            //            }
-            //        }
-            //    }
-            //    Profiler.EndSample();
-            //}
-            //else
-            //{
-            //    Profiler.BeginSample("GuessFromHM");
-            //    //If above chunk not available, guess the sunlight level
-            //    var chunkPosition = chunkManager.ChunkToWorldPosition(neighbourhood.center.ChunkID);
-            //    var chunkTop = chunkPosition.y + chunkDimensions.y;
-            //    int mapIndex = 0;                
-
-            //    for (int z = 0; z < chunkDimensions.z; z++)
-            //    {
-            //        for (int x = 0; x < chunkDimensions.x; x++, mapIndex++)
-            //        {
-            //            var hm = heightMap[mapIndex];
-            //            if (hm < chunkTop)
-            //            {//Assume this column of voxels can see the sun, as it's above the height map
-            //                var voxelAtTop = neighbourhood.center[x, yMax, z];
-            //                var (_, absorption) = voxelTypeManager.GetLightProperties(voxelAtTop);
-            //                if (absorption < LightValue.MaxIntensity)
-            //                {
-            //                    var sunlight = LightValue.MaxIntensity;
-            //                    if (absorption > 1)
-            //                    {
-            //                        sunlight -= absorption;
-            //                    }
-
-            //                    neighbourhood.center.SetLight(x, yMax, z, new LightValue() { Sun = sunlight });
-            //                    var localPos = new Vector3Int(x, yMax, z);
-            //                    sunlightQueue.Enqueue(new PropagationNode()
-            //                    {
-            //                        localPosition = localPos,
-            //                        chunkData = neighbourhood.center,
-            //                        worldPos = centerWorldPos + localPos
-            //                    });
-            //                }
-            //            }
-            //        }
-            //    }
-            //    Profiler.EndSample();
-            //}
-
-            //PropagateSunlight(neighbourhood, sunlightQueue);
-
-            //Profiler.BeginSample("CheckForDynamicSources");
-            //for (int z = 0; z < chunkDimensions.z; z++)
-            //{
-            //    for (int y = 0; y < chunkDimensions.y; y++)
-            //    {
-            //        for (int x = 0; x < chunkDimensions.x; x++)
-            //        {
-            //            var pos = new Vector3Int(x, y, z);
-
-            //            var (emission, _) = voxelTypeManager.GetLightProperties(neighbourhood.center[x, y, z]);
-            //            //Check if voxel emits light, add to propagation queue if it does.
-            //            if (emission > 1)
-            //            {
-            //                var lv = neighbourhood.GetLight(x, y, z);
-            //                lv.Dynamic = emission;
-            //                neighbourhood.SetLight(x, y, z, lv);
-            //                propagateQueue.Enqueue(new PropagationNode()
-            //                {
-            //                    localPosition = pos,
-            //                    chunkData = neighbourhood.center
-            //                });
-            //            }
-            //        }
-            //    }
-            //}
-            //Profiler.EndSample();
-
-            //CheckBoundaries(neighbourhood, propagateQueue);
-
-            ////Run propagation, but only in FullyGenerated chunks
-            //PropagateDynamic(neighbourhood, propagateQueue);
-
-            Profiler.EndSample();
+            return jobData;
         }
 
         private void CheckBoundaries(ChunkNeighbourhood neighbourhood, Queue<PropagationNode> propagateQueue)

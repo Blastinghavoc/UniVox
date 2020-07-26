@@ -384,6 +384,25 @@ namespace Utils
             return remainder.ElementWise((a, b) => a < 0 ? b + a : a, chunkDimensions);
         }
 
+        [BurstCompile]
+        public static int3 ModuloChunkDimensions(int3 position, int3 chunkDimensions)
+        {
+            var remainder = position % chunkDimensions;
+
+            var lessThanZero = remainder < 0;
+
+            //Local voxel index is the remainder, with negatives adjusted
+            for (int i = 0; i < 3; i++)
+            {
+                if (lessThanZero[i])
+                {
+                    remainder[i] += chunkDimensions[i];
+                }
+            }
+
+            return remainder;
+        }
+
         public static bool IsInsideChunkId(Vector3Int worldPos, Vector3Int chunkId,Vector3Int chunkDimensions)
         {
             var chunkLB = chunkId * chunkDimensions;

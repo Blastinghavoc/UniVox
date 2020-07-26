@@ -68,10 +68,10 @@ namespace UniVox.Framework
             NeighbourData neighbourData = new NeighbourData();
             //Cache neighbour data if necessary
 
-            Profiler.BeginSample("CacheNeighbourData");
+            
             if (IsMeshDependentOnNeighbourChunks)
             {
-                neighbourData = JobUtils.CacheNeighbourData(chunkData, chunkManager);
+                neighbourData = JobUtils.CacheNeighbourData(chunkID, chunkManager);
             }
             else
             {
@@ -81,8 +81,7 @@ namespace UniVox.Framework
                     neighbourData.Add((Direction)i, new NativeArray<VoxelTypeID>(1, Allocator.Persistent));
                     neighbourData.Add((Direction)i, new NativeArray<LightValue>(1, Allocator.Persistent));
                 }
-            }
-            Profiler.EndSample();
+            }            
 
 
             var meshingJob = createMeshingJob(new MeshJobData(chunkDimensions.ToNative(),

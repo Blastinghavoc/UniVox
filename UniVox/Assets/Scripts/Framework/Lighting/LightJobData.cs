@@ -2,6 +2,7 @@
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Mathematics;
+using UniVox.Framework.Common;
 using UniVox.Framework.Jobified;
 
 namespace UniVox.Framework.Lighting
@@ -18,15 +19,14 @@ namespace UniVox.Framework.Lighting
 
         [ReadOnly] public NeighbourData neighbourData;//neighbour voxel and light data
         [ReadOnly] public NativeArray<bool> directionsValid;//for each neighbour direction, has that chunk been fully generated yet
-
-        [ReadOnly] public NativeArray<int> heightmap;
+               
 
         //Externally allocated and managed
         [ReadOnly] public NativeArray<int> voxelTypeToEmissionMap;
         [ReadOnly] public NativeArray<int> voxelTypeToAbsorptionMap;
         [ReadOnly] public NativeArray<int3> directionVectors;
 
-        public LightJobData(int3 chunkId, int3 chunkWorldPos, int3 dimensions, NativeArray<VoxelTypeID> voxels, NativeArray<LightValue> lights, NeighbourData neighbourData, NativeArray<bool> directionsValid, NativeArray<int> heightmap, NativeArray<int> voxelTypeToEmissionMap, NativeArray<int> voxelTypeToAbsorptionMap, NativeArray<int3> directionVectors)
+        public LightJobData(int3 chunkId, int3 chunkWorldPos, int3 dimensions, NativeArray<VoxelTypeID> voxels, NativeArray<LightValue> lights, NeighbourData neighbourData, NativeArray<bool> directionsValid, NativeArray<int> voxelTypeToEmissionMap, NativeArray<int> voxelTypeToAbsorptionMap, NativeArray<int3> directionVectors)
         {
             this.chunkId = chunkId;
             this.chunkWorldPos = chunkWorldPos;
@@ -35,7 +35,6 @@ namespace UniVox.Framework.Lighting
             this.lights = lights;
             this.neighbourData = neighbourData;
             this.directionsValid = directionsValid;
-            this.heightmap = heightmap;
             this.voxelTypeToEmissionMap = voxelTypeToEmissionMap;
             this.voxelTypeToAbsorptionMap = voxelTypeToAbsorptionMap;
             this.directionVectors = directionVectors;
@@ -47,7 +46,6 @@ namespace UniVox.Framework.Lighting
             lights.Dispose();
             neighbourData.Dispose();
             directionsValid.Dispose();
-            heightmap.Dispose();
             //The voxelTypeToX maps are externally owned, so not disposed here
         }
     }
@@ -61,6 +59,29 @@ namespace UniVox.Framework.Lighting
         public NativeList<int3> south;
         public NativeList<int3> east;
         public NativeList<int3> west;
+
+        public NativeList<int3> this[Direction dir] 
+        {
+            get {
+                switch (dir)
+                {
+                    case Direction.up:
+                        return up;
+                    case Direction.down:
+                        return down;
+                    case Direction.north:
+                        return north;
+                    case Direction.south:
+                        return south;
+                    case Direction.east:
+                        return east;
+                    case Direction.west:
+                        return west;
+                    default:
+                        throw new Exception($"Invalid direction {dir}");
+                }
+            }
+        }
 
         public LightJobNeighbourUpdates(Allocator allocator)
         {

@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Runtime;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Mathematics;
+using UnityEngine;
 using UniVox.Framework.Common;
 using UniVox.Framework.Lighting;
 
@@ -48,13 +50,14 @@ namespace UniVox.Framework.Jobified
             }
         }
 
-        public static NeighbourData CacheNeighbourData(IChunkData chunkData,IChunkManager chunkManager)         
+        public static NeighbourData CacheNeighbourData(Vector3Int chunkId,IChunkManager chunkManager)         
         {
-            var chunkId = chunkData.ChunkID;
+            UnityEngine.Profiling.Profiler.BeginSample("CacheNeighbourData");
+
             NeighbourData neighbourData = new NeighbourData();
             for (int i = 0; i < DirectionExtensions.numDirections; i++)
             {
-                var neighbourID = chunkData.ChunkID + DirectionExtensions.Vectors[i];
+                var neighbourID = chunkId + DirectionExtensions.Vectors[i];
                 try
                 {
                     var neighbour = chunkManager.GetReadOnlyChunkData(neighbourID);
@@ -70,6 +73,8 @@ namespace UniVox.Framework.Jobified
                         $"Cause: {e.Message}", e);
                 }
             }
+
+            UnityEngine.Profiling.Profiler.EndSample();
             return neighbourData;
         }
     }

@@ -15,15 +15,22 @@ namespace UniVox.Framework.Lighting
     /// based on its neighbours if applicable.
     /// </summary>
     [BurstCompile]
-    public struct LightGenerationJob : IJob
+    public struct LightGenerationJob : IJob, IDisposable
     {
         public LightJobData data;
 
-        public NativeQueue<int3> dynamicPropagationQueue;
-        public NativeQueue<int3> sunlightPropagationQueue;
+        [ReadOnly] public NativeArray<int> heightmap;
+
+        public NativeQueue<int3> dynamicPropagationQueue { get; set; }
+        public NativeQueue<int3> sunlightPropagationQueue { get; set; }
 
         private int dx;
         private int dxdy;
+
+        public void Dispose() 
+        {
+            heightmap.Dispose();
+        }
 
         public void Execute()
         {
@@ -51,7 +58,7 @@ namespace UniVox.Framework.Lighting
                 {
                     for (int x = 0; x < data.dimensions.x; x++, mapIndex++)
                     {
-                        var hm = data.heightmap[mapIndex];
+                        var hm = heightmap[mapIndex];
                         if (hm < chunkTop)
                         {//Assume this column of voxels can see the sun, as it's above the height map
                             var localPos = new int3(x, yMax, z);
@@ -77,9 +84,6 @@ namespace UniVox.Framework.Lighting
                 }
             }
 
-
-            PropagateSunlight();
-
             //Check all voxels in the chunk to see if they emit light
             int flat = 0;
             for (int z = 0; z < data.dimensions.z; z++)
@@ -104,8 +108,6 @@ namespace UniVox.Framework.Lighting
                     }
                 }
             }
-
-            PropagateDynamic();
 
         }
 
@@ -210,88 +212,6 @@ namespace UniVox.Framework.Lighting
             }
         }
 
-        private void PropagateSunlight()
-        {
-            while (sunlightPropagationQueue.Count > 0)
-            {
-                var parentCoords = sunlightPropagationQueue.Dequeue();
-                var parentFlat = MultiIndexToFlat(parentCoords, dx, dxdy);
-                var parentLV = data.lights[parentFlat];
-
-                for (int i = 0; i < data.directionVectors.Length; i++)
-                {
-                    var offset = data.directionVectors[i];
-
-                    var childCoords = parentCoords + offset;
-
-                    if (LocalPositionInsideChunkBounds(childCoords, data.dimensions))
-                    {
-                        //Propagate sunlight
-                        var childFlat = MultiIndexToFlat(childCoords, dx, dxdy);
-                        var childLV = data.lights[childFlat];
-
-                        var absorption = data.voxelTypeToAbsorptionMap[data.voxels[childFlat]];
-
-                        var next = parentLV.Sun - absorption;
-
-                        if ((offset.y == -1) && absorption == 1 && parentLV.Sun == LightValue.MaxIntensity)
-                        {
-                            next = LightValue.MaxIntensity;//Ignore normal light absorption when propagating sunlight down
-                        }
-
-                        if (childLV.Sun < next)
-                        {
-                            childLV.Sun = next;
-                            data.lights[childFlat] = childLV;
-                            sunlightPropagationQueue.Enqueue(childCoords);
-                        }
-                    }
-                    else
-                    {
-                        //TODO some way of signalling to adjacent chunk that it needs to propagate sunlight
-                    }
-                }
-            }
-
-        }
-
-        private void PropagateDynamic()
-        {
-            while (dynamicPropagationQueue.Count > 0)
-            {
-                var parentCoords = dynamicPropagationQueue.Dequeue();
-                var parentFlat = MultiIndexToFlat(parentCoords, dx, dxdy);
-                var parentLV = data.lights[parentFlat];
-
-                for (int i = 0; i < data.directionVectors.Length; i++)
-                {
-                    var offset = data.directionVectors[i];
-
-                    var childCoords = parentCoords + offset;
-
-                    if (LocalPositionInsideChunkBounds(childCoords, data.dimensions))
-                    {
-                        //Propagate dynamic light
-                        var childFlat = MultiIndexToFlat(childCoords, dx, dxdy);
-                        var childLV = data.lights[childFlat];
-
-                        var absorption = data.voxelTypeToAbsorptionMap[data.voxels[childFlat]];
-
-                        var next = parentLV.Dynamic - absorption;
-
-                        if (childLV.Dynamic < next)
-                        {
-                            childLV.Dynamic = next;
-                            data.lights[childFlat] = childLV;
-                            dynamicPropagationQueue.Enqueue(childCoords);
-                        }
-                    }
-                    else
-                    {
-                        //TODO some way of signalling to adjacent chunk that it needs to propagate dynamic light
-                    }
-                }
-            }
-        }
+       
     }
 }

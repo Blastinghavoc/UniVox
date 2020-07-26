@@ -73,6 +73,12 @@ namespace Tests
                     return new RestrictedChunkData(GetMockChunkData(chunkId));
                 });
 
+            chunkManager.GetChunkData(Arg.Any<Vector3Int>())
+                .Returns((args) => {
+                    var chunkId = (Vector3Int)args[0];
+                    return GetMockChunkData(chunkId);
+                });
+
             chunkManager.ChunkDimensions.Returns(chunkDimensions);
 
             lightManager = new LightManager();
