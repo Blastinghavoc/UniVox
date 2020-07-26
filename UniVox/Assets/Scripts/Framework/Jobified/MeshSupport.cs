@@ -378,6 +378,105 @@ namespace UniVox.Framework.Jobified
                     throw new ArgumentException($"direction {direction} was not recognised");
             }
         }
+
+        /// <summary>
+        /// Adjusts the given position to be relative to the
+        /// chunk that it's in. First return indicates whether
+        /// the pos is in the center chunk, if false the second
+        /// return gives the direction of the neighbour chunk.
+        /// It is assumed and required that the pos is in either
+        /// the center chunk or one of the 6 neighbours.
+        /// </summary>
+        /// <param name="pos"></param>
+        public void AdjustLocalPos(ref int3 pos, out bool isInChunk, out Direction directionOfNeighbour,int3 dimensions)
+        {
+            isInChunk = true;
+            directionOfNeighbour = new Direction();
+
+            if (pos.x < 0)
+            {
+                directionOfNeighbour = Direction.west;
+                pos.x += dimensions.x;
+                isInChunk = false;
+                return;
+            }
+            else if (pos.x >= dimensions.x)
+            {
+                directionOfNeighbour = Direction.east;
+                pos.x -= dimensions.x;
+                isInChunk = false;
+                return;
+            }
+
+            if (pos.y < 0)
+            {
+                directionOfNeighbour = Direction.down;
+                pos.y += dimensions.y;
+                isInChunk = false;
+                return;
+            }
+            else if (pos.y >= dimensions.y)
+            {
+                directionOfNeighbour = Direction.up;
+                pos.y -= dimensions.y;
+                isInChunk = false;
+                return;
+            }
+
+            if (pos.z < 0)
+            {
+                directionOfNeighbour = Direction.south;
+                pos.z += dimensions.z;
+                isInChunk = false;
+                return;
+            }
+            else if (pos.z >= dimensions.z)
+            {
+                directionOfNeighbour = Direction.north;
+                pos.z -= dimensions.z;
+                isInChunk = false;
+                return;
+            }
+            return;
+        }
+
+        /// <summary>
+        /// Project fullCoords to 2D in the relevant primary axis
+        /// </summary>
+        public int2 IndicesInNeighbour(int primaryAxis, int3 fullCoords)
+        {
+            switch (primaryAxis)
+            {
+                case 0:
+                    return new int2(fullCoords.y, fullCoords.z);
+                case 1:
+                    return new int2(fullCoords.x, fullCoords.z);
+                case 2:
+                    return new int2(fullCoords.x, fullCoords.y);
+                default:
+                    throw new Exception("Invalid axis given");
+            }
+        }
+
+        /// <summary>
+        /// As above, but for a direction
+        /// </summary>
+        /// <param name="direction"></param>
+        /// <param name="fullCoords"></param>
+        /// <returns></returns>
+        public int2 IndicesInNeighbour(Direction direction, int3 fullCoords)
+        {
+            if (direction == Direction.east || direction == Direction.west)
+            {
+                return new int2(fullCoords.y, fullCoords.z);
+            }
+            if (direction == Direction.up || direction == Direction.down)
+            {
+                return new int2(fullCoords.x, fullCoords.z);
+            }
+            //if (direction == Direction.north || direction == Direction.south)
+            return new int2(fullCoords.x, fullCoords.y);
+        }
     }
 
     /// <summary>
