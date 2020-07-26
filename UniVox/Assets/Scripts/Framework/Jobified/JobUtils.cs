@@ -1,6 +1,8 @@
-﻿using Unity.Burst;
+﻿using System;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Mathematics;
+using UniVox.Framework.Common;
 using UniVox.Framework.Lighting;
 
 namespace UniVox.Framework.Jobified
@@ -44,6 +46,31 @@ namespace UniVox.Framework.Jobified
                 var neighbourLightData = neighbourData.GetLightValues(DirectionOfNeighbour);
                 return neighbourLightData[flattenedIndex];
             }
+        }
+
+        public static NeighbourData CacheNeighbourData(IChunkData chunkData,IChunkManager chunkManager)         
+        {
+            var chunkId = chunkData.ChunkID;
+            NeighbourData neighbourData = new NeighbourData();
+            for (int i = 0; i < DirectionExtensions.numDirections; i++)
+            {
+                var neighbourID = chunkData.ChunkID + DirectionExtensions.Vectors[i];
+                try
+                {
+                    var neighbour = chunkManager.GetReadOnlyChunkData(neighbourID);
+                    var oppositeDir = DirectionExtensions.Opposite[i];
+                    neighbourData.Add((Direction)i, neighbour.BorderToNative(oppositeDir));
+                    neighbourData.Add((Direction)i, neighbour.BorderToNativeLight(oppositeDir));
+                }
+                catch (Exception e)
+                {
+                    var (managerHad, pipelinehad) = chunkManager.ContainsChunkID(chunkId);
+                    throw new Exception($"Failed to get neighbour data for chunk {chunkId}." +
+                        $"Manager had this chunk = {managerHad}, pipeline had it = {pipelinehad}." +
+                        $"Cause: {e.Message}", e);
+                }
+            }
+            return neighbourData;
         }
     }
 }

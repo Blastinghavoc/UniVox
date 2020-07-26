@@ -272,5 +272,10 @@ namespace UniVox.Framework
         {
             return lightChunk.ToNative(allocator);
         }
+
+        public void LightmapFromNative(NativeArray<LightValue> values) 
+        {
+            lightChunk = new LightChunkData(Dimensions, values.ToArray());
+        }
     }
 }

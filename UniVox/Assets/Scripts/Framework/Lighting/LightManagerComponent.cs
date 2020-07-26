@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace UniVox.Framework.Lighting
@@ -10,13 +11,24 @@ namespace UniVox.Framework.Lighting
         public float GlobalLightValue;
         public Light sunLight;
         public Material skyboxMaterial;
+        public bool parallel;
 
         private ILightManager lightManager;
 
         public void Initialise(IChunkManager chunkManager, IVoxelTypeManager voxelTypeManager)
         {
-            lightManager = new LightManager();
+            var lm = new LightManager();
+            lm.Parallel = parallel;
+            lightManager = lm;
             lightManager.Initialise(chunkManager,voxelTypeManager);            
+        }
+
+        private void OnDestroy()
+        {
+            if (lightManager is IDisposable disp)
+            {
+                disp.Dispose();
+            }
         }
 
         public void OnChunkFullyGenerated(ChunkNeighbourhood neighbourhood, int[] heightMap)

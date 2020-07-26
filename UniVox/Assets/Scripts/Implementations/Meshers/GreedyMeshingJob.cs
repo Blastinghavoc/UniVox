@@ -494,11 +494,11 @@ namespace UniVox.Implementations.Meshers
 
         private FaceDescriptor GetFaceInNeighbour(int3 position, Direction neighbourDirection, Direction faceDirection, int primaryAxis)
         {
-            var localIndexOfAdjacentVoxelInNeighbour = data.IndicesInNeighbour(primaryAxis, position);
+            var localIndexOfAdjacentVoxelInNeighbour = data.neighbourData.IndicesInNeighbour(primaryAxis, position);
 
             var neighbourChunkData = data.neighbourData.GetVoxels(neighbourDirection);
 
-            var neighbourDimensions = data.IndicesInNeighbour(primaryAxis, data.dimensions);
+            var neighbourDimensions = data.neighbourData.IndicesInNeighbour(primaryAxis, data.dimensions);
 
             var flattenedIndex = MultiIndexToFlat(localIndexOfAdjacentVoxelInNeighbour.x, localIndexOfAdjacentVoxelInNeighbour.y, neighbourDimensions);
 

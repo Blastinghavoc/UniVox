@@ -50,5 +50,6 @@ namespace UniVox.Framework
         void SetLight(int x, int y, int z, LightValue lightValue);
         void SetLight(Vector3Int pos,LightValue lightValue);
         NativeArray<LightValue> LightToNative(Allocator allocator = Allocator.Persistent);
+        void LightmapFromNative(NativeArray<LightValue> values);
     }
 }

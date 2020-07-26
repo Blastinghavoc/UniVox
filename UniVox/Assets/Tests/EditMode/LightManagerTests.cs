@@ -36,6 +36,7 @@ namespace Tests
             lampId = (VoxelTypeID)1;
             blockerId = (VoxelTypeID)2;
             voxelTypeManager = Substitute.For<IVoxelTypeManager>();
+            voxelTypeManager.LastVoxelID.Returns(blockerId);
             voxelTypeManager.GetLightProperties(Arg.Any<VoxelTypeID>())
                 .Returns((args) =>
                 {
@@ -66,10 +67,22 @@ namespace Tests
                     return chunkId * chunkDimensions;
                 });
 
+            chunkManager.GetReadOnlyChunkData(Arg.Any<Vector3Int>())
+                .Returns((args) => {
+                    var chunkId = (Vector3Int)args[0];
+                    return new RestrictedChunkData(GetMockChunkData(chunkId));
+                });
+
             chunkManager.ChunkDimensions.Returns(chunkDimensions);
 
             lightManager = new LightManager();
             lightManager.Initialise(chunkManager, voxelTypeManager);
+        }
+
+        [TearDown]
+        public void Cleanup() 
+        {
+            lightManager.Dispose();
         }
 
         private IChunkData GetMockChunkData(Vector3Int id)

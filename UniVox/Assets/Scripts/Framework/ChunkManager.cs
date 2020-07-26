@@ -160,7 +160,7 @@ namespace UniVox.Framework
             if (chunkProvider is IDisposable disposableChunkProvider)
             {
                 disposableChunkProvider.Dispose();
-            }
+            }           
 
         }
 

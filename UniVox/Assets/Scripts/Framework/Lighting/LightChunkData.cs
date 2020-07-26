@@ -23,11 +23,18 @@ namespace UniVox.Framework.Lighting
             set { lightValues[i] = value; }
         }
 
-        public LightChunkData(Vector3Int dimensions) 
+        public LightChunkData(Vector3Int dimensions, LightValue[] values = null) 
         {
             dx = dimensions.x;
             dxdy = dimensions.x * dimensions.y;
-            lightValues = new LightValue[dimensions.x * dimensions.y * dimensions.z];            
+            if (values == null)
+            {
+                lightValues = new LightValue[dimensions.x * dimensions.y * dimensions.z];           
+            }
+            else
+            {
+                lightValues = values;
+            }
         }
 
         public NativeArray<LightValue> ToNative(Allocator allocator= Allocator.Persistent) 

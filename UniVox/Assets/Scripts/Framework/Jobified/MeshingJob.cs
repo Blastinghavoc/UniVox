@@ -8,6 +8,7 @@ using Unity.Mathematics;
 using UniVox.Framework.Common;
 using UniVox.Framework.Lighting;
 using Utils;
+using static UniVox.Framework.Jobified.JobUtils;
 
 namespace UniVox.Framework.Jobified
 {
@@ -166,7 +167,7 @@ namespace UniVox.Framework.Jobified
         {
             //Lighting
             var directionVector = directionHelper.DirectionVectors[direction];
-            var lightForFace = data.GetLightValue(position + directionVector);
+            var lightForFace = GetLightValue(position + directionVector,data.lights,data.dimensions,data.neighbourData);
             var vertexColourValue = lightForFace.ToVertexColour();
 
             var meshRange = data.meshDatabase.meshTypeRanges[meshID];
@@ -208,7 +209,7 @@ namespace UniVox.Framework.Jobified
         {
             //Lighting
             var directionVector = directionHelper.DirectionVectors[direction];
-            var lightForFace = data.GetLightValue(position + directionVector);
+            var lightForFace = GetLightValue(position + directionVector, data.lights, data.dimensions, data.neighbourData);
             var vertexColourValue = lightForFace.ToVertexColour();
 
             var meshRange = data.meshDatabase.meshTypeRanges[meshID];
@@ -255,7 +256,7 @@ namespace UniVox.Framework.Jobified
             var directionVector = directionHelper.DirectionVectors[directionIndex];
             var adjacentVoxelIndex = position + directionVector;
 
-            var adjacentId = data.GetVoxel(adjacentVoxelIndex);
+            var adjacentId = GetVoxel(adjacentVoxelIndex,data.voxels,data.dimensions,data.neighbourData);
             return (voxelID!=adjacentId) && IncludeFaceOfAdjacentWithID(adjacentId, directionIndex);
         }
 

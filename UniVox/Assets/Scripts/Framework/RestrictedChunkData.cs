@@ -1,4 +1,5 @@
-﻿using Unity.Collections;
+﻿using System;
+using Unity.Collections;
 using UnityEngine;
 using UniVox.Framework.Common;
 using UniVox.Framework.Lighting;
@@ -68,6 +69,18 @@ namespace UniVox.Framework
         public LightValue GetLight(Vector3Int pos)
         {
             return realData.GetLight(pos);
+        }
+
+        public void LightmapFromNative(NativeArray<LightValue> values)
+        {
+            if (allowModifyLight)
+            {
+                realData.LightmapFromNative(values);
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
         }
 
         public NativeArray<LightValue> LightToNative(Allocator allocator = Allocator.Persistent)

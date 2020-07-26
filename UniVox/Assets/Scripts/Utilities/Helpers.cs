@@ -44,6 +44,12 @@ namespace Utils
             return x + dx*y + dxdy * z;
         }
 
+        [BurstCompile]
+        public static int MultiIndexToFlat(int3 multi, int dx, int dxdy)
+        {
+            return multi.x + dx * multi.y + dxdy * multi.z;
+        }
+
         public static void FlatIndexToMulti(int flat, int3 dimensions, out int x, out int y, out int z)
         {
             z = flat / (dimensions.x * dimensions.y);
@@ -390,6 +396,21 @@ namespace Utils
             var chunkLB = Vector3Int.zero;
             var chunkUB = chunkDimensions;
             return localPos.All((a, b) => a >= b, chunkLB) && localPos.All((a, b) => a < b, chunkUB);
+        }
+
+        [BurstCompile]
+        public static bool LocalPositionInsideChunkBounds(int3 localPos, int3 chunkDimensions)
+        {
+            var chunkLB = int3.zero;
+            var chunkUB = chunkDimensions;
+
+            var allWithinLowerBounds = localPos >= chunkLB;
+            if (math.all(allWithinLowerBounds))
+            {
+                var allWithinUpperBounds = localPos < chunkUB;
+                return math.all(allWithinUpperBounds);
+            }
+            return false;
         }
     }
 }

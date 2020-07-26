@@ -13,12 +13,6 @@ namespace UniVox.Framework
 {
     public class VoxelTypeManager : MonoBehaviour, IVoxelTypeManager
     {
-        public class VoxelTypeData
-        {
-            public SOVoxelTypeDefinition definition;
-            public float[] zIndicesPerFace;
-            public ushort materialID;
-        }
 
         [SerializeField] private SOVoxelTypeDefinition[] VoxelTypes = new SOVoxelTypeDefinition[1];
 
@@ -27,6 +21,8 @@ namespace UniVox.Framework
         private List<VoxelTypeData> typeData;
 
         private Material[] materialIdToMaterialMap;
+
+        public ushort LastVoxelID { get => (ushort)(typeData.Count-1); }
 
         #region Job Compatibility
         public NativeMeshDatabase nativeMeshDatabase;

@@ -71,24 +71,7 @@ namespace UniVox.Framework
             Profiler.BeginSample("CacheNeighbourData");
             if (IsMeshDependentOnNeighbourChunks)
             {
-                for (int i = 0; i < DirectionExtensions.numDirections; i++)
-                {
-                    var neighbourID = chunkData.ChunkID + DirectionExtensions.Vectors[i];
-                    try
-                    {
-                        var neighbour = chunkManager.GetReadOnlyChunkData(neighbourID);
-                        var oppositeDir = DirectionExtensions.Opposite[i];
-                        neighbourData.Add((Direction)i, neighbour.BorderToNative(oppositeDir));
-                        neighbourData.Add((Direction)i, neighbour.BorderToNativeLight(oppositeDir));
-                    }
-                    catch (Exception e)
-                    {
-                        var (managerHad, pipelinehad) = chunkManager.ContainsChunkID(chunkID);
-                        throw new Exception($"Failed to get neighbour data for chunk {chunkID}." +
-                            $"Manager had this chunk = {managerHad}, pipeline had it = {pipelinehad}." +
-                            $"Cause: {e.Message}", e);
-                    }
-                }
+                neighbourData = JobUtils.CacheNeighbourData(chunkData, chunkManager);
             }
             else
             {
