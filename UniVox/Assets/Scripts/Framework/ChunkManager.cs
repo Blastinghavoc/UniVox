@@ -143,6 +143,7 @@ namespace UniVox.Framework
             }
 
             playArea.Update();
+            lightManager.Update();
 
             pipeline.Update();
         }

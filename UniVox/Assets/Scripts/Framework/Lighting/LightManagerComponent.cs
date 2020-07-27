@@ -54,5 +54,10 @@ namespace UniVox.Framework.Lighting
             skyboxMaterial.SetFloat("_Exposure", GlobalLightValue);
             Shader.SetGlobalFloat(GlobalLightName, GlobalLightValue);
         }
+
+        void ILightManager.Update()
+        {
+            lightManager.Update();
+        }
     }
 }

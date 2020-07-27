@@ -7,6 +7,7 @@ namespace UniVox.Framework.Lighting
     {
         void Initialise(IChunkManager chunkManager, IVoxelTypeManager voxelTypeManager);
         void OnChunkFullyGenerated(ChunkNeighbourhood neighbourhood,int[] heightMap);
+        void Update();
         List<Vector3Int> UpdateLightOnVoxelSet(ChunkNeighbourhood neighbourhood, Vector3Int localCoords, VoxelTypeID voxelType, VoxelTypeID previousType);
     }
 }

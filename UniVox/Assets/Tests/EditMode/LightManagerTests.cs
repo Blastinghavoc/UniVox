@@ -405,7 +405,7 @@ namespace Tests
         }
 
         [Test(Description ="Tests whether sunlight is correctly propagated into chunks, irrespective of" +
-            " the order they were generated in")]
+            " the order they were generated in, for a pair of chunks")]
         [TestCase(true, TestName = "TopToBottom")]
         [TestCase(false, TestName = "BottomToTop")]
         public void OnChunksGeneratedSunlight(bool topToBottom)
@@ -452,11 +452,11 @@ namespace Tests
             lightManager.OnChunkFullyGenerated(new ChunkNeighbourhood(ids[second], GetMockChunkData), heightmap);
             fullyGenerated.Add(ids[second]);
 
-            Debug.Log("TopSlice");
             var bottomNeigh = new ChunkNeighbourhood(lowChunkData, GetMockChunkData);
-            PrintSlice(bottomNeigh, 15,false);
-            Debug.Log("BottomSlice");
-            PrintSlice(bottomNeigh, 0, false);
+            //Debug.Log("TopSlice");
+            //PrintSlice(bottomNeigh, 15,false);
+            //Debug.Log("BottomSlice");
+            //PrintSlice(bottomNeigh, 0, false);
 
             expectedLv = new LightValue() { Sun = maxIntensity, Dynamic = 0 };
 
@@ -473,6 +473,68 @@ namespace Tests
                     }
                 }
             }
+        }
+
+        [Test(Description = "Tests whether sunlight is correctly propagated into chunks, irrespective of" +
+            " the order they were generated in, for a column of three chunks")]
+        [TestCaseSource("ChunkOrdersTriple")]
+        public void OnChunksGeneratedSunlightTriple(int[] order)
+        {            
+
+            Vector3Int[] ids = new Vector3Int[] {
+                Vector3Int.zero,
+                Vector3Int.down,
+                Vector3Int.down * 2
+            };
+
+            IChunkData[] chunkDatas = new IChunkData[]
+            {
+                GetMockChunkData(ids[0]),
+                GetMockChunkData(ids[1]),
+                GetMockChunkData(ids[2]),
+            };
+
+            //Ground level is at 0, so the lower chunk will at first think it has no sunlight
+            var heightmap = getFlatHeightMap(0);
+
+            foreach (var index in order)
+            {
+                lightManager.OnChunkFullyGenerated(new ChunkNeighbourhood(ids[index], GetMockChunkData), heightmap);
+                fullyGenerated.Add(ids[index]);          
+            }                      
+
+            //var bottomNeigh = new ChunkNeighbourhood(lowChunkData, GetMockChunkData);
+            //Debug.Log("TopSlice");
+            //PrintSlice(bottomNeigh, 15,false);
+            //Debug.Log("BottomSlice");
+            //PrintSlice(bottomNeigh, 0, false);
+
+            var expectedLv = new LightValue() { Sun = maxIntensity, Dynamic = 0 };
+
+            for (int z = 0; z < chunkDimensions.z; z++)
+            {
+                for (int y = 0; y < chunkDimensions.y; y++)
+                {
+                    for (int x = 0; x < chunkDimensions.x; x++)
+                    {
+                        for (int i = 0; i < ids.Length; i++)
+                        {
+                            Assert.AreEqual(expectedLv, chunkDatas[i].GetLight(x, y, z),
+                                $"Light value not as expected for position {x},{y},{z} in chunk {i}");
+                        }
+                    }
+                }
+            }
+        }
+
+        private static IEnumerable<TestCaseData> ChunkOrdersTriple()
+        {
+            yield return new TestCaseData(new int[] { 0,1,2}).SetName("TopToBottom");
+            yield return new TestCaseData(new int[] { 2,1,0}).SetName("BottomToTop");
+            yield return new TestCaseData(new int[] { 0,2,1}).SetName("TopBottomMiddle");
+            yield return new TestCaseData(new int[] { 1,0,2}).SetName("MiddleTopBottom");
+            yield return new TestCaseData(new int[] { 1,2,0}).SetName("MiddleBottomTop");
+            yield return new TestCaseData(new int[] { 2,0,1}).SetName("BottomTopMiddle");
         }
 
         [Test]

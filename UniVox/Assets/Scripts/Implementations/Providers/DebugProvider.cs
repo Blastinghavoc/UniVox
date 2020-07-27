@@ -28,7 +28,7 @@ namespace UniVox.Implementations.Providers
 
         private AbstractChunkData FlatWorld(Vector3Int chunkID, Vector3Int chunkDimensions) 
         {
-            var ChunkData = new ArrayChunkData(chunkID, chunkDimensions);
+            var ChunkData = new FlatArrayChunkData(chunkID, chunkDimensions);
 
             int groundHeight = 0;
             int chunkYCuttoff = (groundHeight + chunkDimensions.y)/chunkDimensions.y;
@@ -62,7 +62,7 @@ namespace UniVox.Implementations.Providers
 
         private AbstractChunkData FlatWorldWithHoles(Vector3Int chunkID, Vector3Int chunkDimensions)
         {
-            var ChunkData = new ArrayChunkData(chunkID, chunkDimensions);
+            var ChunkData = new FlatArrayChunkData(chunkID, chunkDimensions);
 
             int groundHeight = 0;
             int chunkYCuttoff = (groundHeight + chunkDimensions.y) / chunkDimensions.y;
@@ -98,7 +98,7 @@ namespace UniVox.Implementations.Providers
 
         private AbstractChunkData SingleBlock(Vector3Int chunkID, Vector3Int chunkDimensions) 
         {
-            var ChunkData = new ArrayChunkData(chunkID, chunkDimensions);
+            var ChunkData = new FlatArrayChunkData(chunkID, chunkDimensions);
 
             ChunkData[0, 0, 0] = new VoxelTypeID(grassID);
 
@@ -107,7 +107,7 @@ namespace UniVox.Implementations.Providers
 
         private AbstractChunkData HalfHeight(Vector3Int chunkID, Vector3Int chunkDimensions)
         {
-            var ChunkData = new ArrayChunkData(chunkID, chunkDimensions);
+            var ChunkData = new FlatArrayChunkData(chunkID, chunkDimensions);
             var maxY = chunkDimensions.y / 2;
 
             for (int z = 0; z < chunkDimensions.z; z++)
@@ -133,7 +133,7 @@ namespace UniVox.Implementations.Providers
         private AbstractChunkData HalfLattice(Vector3Int chunkID, Vector3Int chunkDimensions)
         {
             bool b = true;
-            var ChunkData = new ArrayChunkData(chunkID, chunkDimensions);
+            var ChunkData = new FlatArrayChunkData(chunkID, chunkDimensions);
             for (int z = 0; z < chunkDimensions.z; z++)
             {
                 b = !b;

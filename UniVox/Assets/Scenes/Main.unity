@@ -1916,7 +1916,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1777791462
 Transform:
   m_ObjectHideFlags: 0
@@ -2419,11 +2419,12 @@ MonoBehaviour:
   voxelSize: 1
   playArea:
     collidableChunksRadii: {x: 1, y: 1, z: 1}
-    renderedChunksRadii: {x: 4, y: 4, z: 4}
+    renderedChunksRadii: {x: 10, y: 4, z: 10}
     updateRate: 40
   worldSizeLimits:
     limitWorldHeight: 1
     verticalChunkLimit: 8
+  IncludeLighting: 1
   player: {fileID: 1832009154}
   chunkPrefab: {fileID: 5697091069406414600, guid: 9bd18ceaff69a844299df4d590e1d694,
     type: 3}
@@ -2467,6 +2468,7 @@ MonoBehaviour:
   worldSizeLimits:
     limitWorldHeight: 1
     verticalChunkLimit: 8
+  IncludeLighting: 1
   player: {fileID: 1832009154}
   chunkPrefab: {fileID: 5697091069406414600, guid: 9bd18ceaff69a844299df4d590e1d694,
     type: 3}
@@ -2494,7 +2496,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &6061144535608697011
 Transform:
   m_ObjectHideFlags: 0
@@ -2604,6 +2606,7 @@ MonoBehaviour:
   worldSizeLimits:
     limitWorldHeight: 1
     verticalChunkLimit: 8
+  IncludeLighting: 1
   player: {fileID: 1832009154}
   chunkPrefab: {fileID: 5697091069406414600, guid: 9bd18ceaff69a844299df4d590e1d694,
     type: 3}

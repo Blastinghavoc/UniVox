@@ -21,16 +21,18 @@ namespace UniVox.Framework.Lighting
         private Vector3Int chunkDimensions;
         public bool Parallel { get; set; } = false;
 
-        public NativeArray<int> voxelTypeToEmissionMap;
-        public NativeArray<int> voxelTypeToAbsorptionMap;
-        public NativeArray<int3> directionVectors;
+        private NativeArray<int> voxelTypeToEmissionMap;
+        private NativeArray<int> voxelTypeToAbsorptionMap;
+        private NativeArray<int3> directionVectors;
+
+        private HashSet<Vector3Int> generatedLightsThisUpdate;
 
         public void Initialise(IChunkManager chunkManager, IVoxelTypeManager voxelTypeManager)
         {
             this.chunkManager = chunkManager;
             this.voxelTypeManager = voxelTypeManager;
             chunkDimensions = chunkManager.ChunkDimensions;
-
+            generatedLightsThisUpdate = new HashSet<Vector3Int>();
 
             List<int> emissions = new List<int>();
             List<int> absorptions = new List<int>();
@@ -59,6 +61,11 @@ namespace UniVox.Framework.Lighting
             directionVectors.SmartDispose();
         }
 
+        public void Update() 
+        {
+            generatedLightsThisUpdate.Clear();
+        }
+
         //TODO refactor to not use neighbourhood, but use chunkId instead
         public void OnChunkFullyGenerated(ChunkNeighbourhood neighbourhood, int[] heightMap)
         {
@@ -77,6 +84,8 @@ namespace UniVox.Framework.Lighting
             //TODO support parallel execution (scheduling)
             generationJob.Run();
             generationJob.Dispose();
+
+            generatedLightsThisUpdate.Add(chunkId);
 
             var propagationJob = new LightPropagationJob() { data = jobData,
                 sunlightPropagationQueue = generationJob.sunlightPropagationQueue,
@@ -186,11 +195,13 @@ namespace UniVox.Framework.Lighting
         private LightJobData getJobData(Vector3Int chunkId) 
         {
             NativeArray<bool> directionsValid = new NativeArray<bool>(DirectionExtensions.numDirections, Allocator.Persistent);
+
             for (int i = 0; i < DirectionExtensions.numDirections; i++)
             {
                 var offset = DirectionExtensions.Vectors[i];
                 var neighId = chunkId + offset;
-                directionsValid[i] = chunkManager.IsChunkFullyGenerated(neighId);
+                directionsValid[i] = chunkManager.IsChunkFullyGenerated(neighId)
+                    || generatedLightsThisUpdate.Contains(neighId);
             }
 
             var chunkData = chunkManager.GetReadOnlyChunkData(chunkId);
