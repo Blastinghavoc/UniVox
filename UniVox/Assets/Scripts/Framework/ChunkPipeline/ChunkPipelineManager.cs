@@ -116,6 +116,18 @@ namespace UniVox.Framework.ChunkPipeline
 
             }
 
+            if (!structureGen && lighting)
+            {
+                var waitingForNeighboursForLighting = new WaitForNeighboursStage(
+                    "WaitForNeighbourLights",i++,this,false
+                    );
+                waitingForNeighboursForLighting.OnWaitEnded = (id) =>
+                {                    
+                    FireChunkFinishedGeneratingEvent(id);    
+                };
+                stages.Add(waitingForNeighboursForLighting);
+            }
+
 
             FullyGeneratedStage = i;
 

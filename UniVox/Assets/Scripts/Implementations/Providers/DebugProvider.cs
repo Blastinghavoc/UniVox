@@ -23,7 +23,7 @@ namespace UniVox.Implementations.Providers
 
         public override AbstractPipelineJob<IChunkData> GenerateTerrainData(Vector3Int chunkID)
         {
-            return new BasicFunctionJob<IChunkData>(() => FlatWorld(chunkID, chunkManager.ChunkDimensions));
+            return new BasicFunctionJob<IChunkData>(() => FlatWorldWithHoles(chunkID, chunkManager.ChunkDimensions));
         }
 
         private AbstractChunkData FlatWorld(Vector3Int chunkID, Vector3Int chunkDimensions) 
@@ -36,6 +36,42 @@ namespace UniVox.Implementations.Providers
             var chunkPosition = chunkManager.ChunkToWorldPosition(chunkID);
 
             if (chunkID.y < chunkYCuttoff)//Chunks above the cuttof are just pure air
+            {
+                for (int z = 0; z < chunkDimensions.z; z++)
+                {
+                    for (int y = 0; y < chunkDimensions.y; y++)
+                    {
+                        for (int x = 0; x < chunkDimensions.x; x++)
+                        {
+                            var height = y + chunkPosition.y;
+                            if (height == groundHeight)
+                            {
+                                ChunkData[x, y, z] = new VoxelTypeID(grassID);
+                            }
+                            else if (height < groundHeight)
+                            {
+                                ChunkData[x, y, z] = new VoxelTypeID(dirtID);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return ChunkData;
+        }
+
+        private AbstractChunkData FlatWorldWithHoles(Vector3Int chunkID, Vector3Int chunkDimensions)
+        {
+            var ChunkData = new ArrayChunkData(chunkID, chunkDimensions);
+
+            int groundHeight = 0;
+            int chunkYCuttoff = (groundHeight + chunkDimensions.y) / chunkDimensions.y;
+
+            var chunkPosition = chunkManager.ChunkToWorldPosition(chunkID);
+
+            bool isHole = chunkID.x % 3 == 0;
+
+            if (chunkID.y < chunkYCuttoff && !isHole)//Chunks above the cuttof are just pure air
             {
                 for (int z = 0; z < chunkDimensions.z; z++)
                 {

@@ -785,6 +785,7 @@ MonoBehaviour:
   GlobalLightValue: 0.729
   sunLight: {fileID: 705507994}
   skyboxMaterial: {fileID: 2100000, guid: 9cd49762ce8f3194fbfece30821c1f93, type: 2}
+  parallel: 0
 --- !u!4 &1059055055
 Transform:
   m_ObjectHideFlags: 0
@@ -1915,7 +1916,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1777791462
 Transform:
   m_ObjectHideFlags: 0
@@ -2493,7 +2494,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &6061144535608697011
 Transform:
   m_ObjectHideFlags: 0

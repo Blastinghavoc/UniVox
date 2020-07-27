@@ -62,7 +62,7 @@ namespace UniVox.Framework.Lighting
                         if (hm < chunkTop)
                         {//Assume this column of voxels can see the sun, as it's above the height map
                             var localPos = new int3(x, yMax, z);
-                            var localFlat = Helpers.MultiIndexToFlat(localPos, dx, dxdy);
+                            var localFlat = MultiIndexToFlat(localPos, dx, dxdy);
 
                             var voxelAtTop = data.voxels[localFlat];
                             var absorption = data.voxelTypeToAbsorptionMap[voxelAtTop];

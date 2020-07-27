@@ -18,7 +18,7 @@ namespace UniVox.Framework.Lighting
         public NativeQueue<int3> sunlightPropagationQueue { get; set; }
 
         public LightJobNeighbourUpdates sunlightNeighbourUpdates { get; set; }
-        public LightJobNeighbourUpdates dynamicNeighbourUpdates { get; set; }
+        public LightJobNeighbourUpdates dynamicNeighbourUpdates { get; set; }        
 
         private int dx;
         private int dxdy;
@@ -138,7 +138,24 @@ namespace UniVox.Framework.Lighting
                     }
                     else
                     {
-                        //TODO some way of signalling to adjacent chunk that it needs to propagate dynamic light
+                        //Determine if dynamic light needs to be propagated into neighbour                    
+
+                        if (!data.directionsValid[i])
+                        {
+                            continue;//No need to signal a chunk that is not valid for updates
+                        }
+
+                        var childLV = GetLightValue(childCoords, data.lights, data.dimensions, data.neighbourData);
+
+                        var absorption = data.voxelTypeToAbsorptionMap[GetVoxel(childCoords, data.voxels, data.dimensions, data.neighbourData)];
+
+                        var next = parentLV.Dynamic - absorption;
+
+                        if (childLV.Dynamic < next)
+                        {
+                            //Signals the adjacent chunk that this position needs updating
+                            dynamicNeighbourUpdates[(Direction)i].Add(ModuloChunkDimensions(childCoords, data.dimensions));
+                        }
                     }
                 }
             }

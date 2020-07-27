@@ -29,6 +29,8 @@ namespace UniVox.Framework
 
         [SerializeField] protected WorldSizeLimits worldSizeLimits;
         public WorldSizeLimits WorldLimits { get => worldSizeLimits; }
+
+        [SerializeField] protected bool IncludeLighting = true;
         #endregion
 
         public GameObject player;
@@ -116,7 +118,8 @@ namespace UniVox.Framework
                 MaxMeshedPerUpdate,
                 MaxMeshedPerUpdate,
                 generateStructures,
-                MaxStructurePerUpdate);
+                MaxStructurePerUpdate,
+                IncludeLighting);
 
             pipeline.OnChunkFinishedGenerating += OnChunkFullyGenerated;
 

@@ -19,11 +19,7 @@ namespace UniVox.Framework.ChunkPipeline
             ///If structure generation is on, the chunk is not fully generated until after that.
             ///Otherwise the chunk is fully generated after the terrain stage.            
             result.FullyGenerated = !pipeline.GenerateStructures;
-            pipeline.getChunkComponent(chunkId).Data = result;
-            if (result.FullyGenerated)
-            {
-                pipeline.FireChunkFinishedGeneratingEvent(chunkId);
-            }
+            pipeline.getChunkComponent(chunkId).Data = result;            
         }
     }
 }
