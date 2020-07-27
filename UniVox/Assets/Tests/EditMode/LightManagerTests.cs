@@ -20,6 +20,7 @@ namespace Tests
         VoxelTypeID blockerId;
         int maxIntensity;
         Vector3Int chunkDimensions;
+        int heightMapYValue = 0;
 
         Dictionary<Vector3Int, IChunkData> chunkStorage;
         HashSet<Vector3Int> fullyGenerated;
@@ -30,6 +31,7 @@ namespace Tests
         public void Reset()
         {
             maxIntensity = LightValue.MaxIntensity;
+            heightMapYValue = 0;
             chunkDimensions = new Vector3Int(16, 16, 16);
             chunkStorage = new Dictionary<Vector3Int, IChunkData>();
 
@@ -81,8 +83,14 @@ namespace Tests
 
             chunkManager.ChunkDimensions.Returns(chunkDimensions);
 
+            IHeightMapProvider heightMapProvider = Substitute.For<IHeightMapProvider>();
+            heightMapProvider.GetHeightMapForColumn(Arg.Any<Vector2Int>())
+                .Returns((args) => {
+                    return getFlatHeightMap(heightMapYValue);
+                });
+
             lightManager = new LightManager();
-            lightManager.Initialise(chunkManager, voxelTypeManager);
+            lightManager.Initialise(voxelTypeManager, chunkManager,heightMapProvider);
         }
 
         [TearDown]
@@ -353,8 +361,9 @@ namespace Tests
         {
             var vp = Vector3Int.zero;
             var neighbourhood = neighbourhoodFor(ref vp);
-            
-            lightManager.OnChunkFullyGenerated(neighbourhood,getFlatHeightMap(hm));
+
+            heightMapYValue = hm;
+            lightManager.OnChunkFullyGenerated(neighbourhood.center.ChunkID);
 
             var expectedLv = new LightValue() { Sun = (hm<0)? maxIntensity:0, Dynamic = 0 };
 
@@ -379,12 +388,11 @@ namespace Tests
 
             var expectedLv = new LightValue() { Sun = 0, Dynamic = 0 };
 
-            //Ground level is at 0, so the chunk will think it has no sunlight
-            var heightmap = getFlatHeightMap(0);
-
             //Generate chunk
             var neighbourhood = new ChunkNeighbourhood(chunkId, GetMockChunkData);
-            lightManager.OnChunkFullyGenerated(neighbourhood, heightmap);
+            //Ground level is at 0, so the chunk will think it has no sunlight
+            heightMapYValue = 0;
+            lightManager.OnChunkFullyGenerated(neighbourhood.center.ChunkID);
             fullyGenerated.Add(chunkId);
 
             PrintSlice(neighbourhood, 0,false);
@@ -428,10 +436,10 @@ namespace Tests
             var expectedLv = new LightValue() { Sun = 0, Dynamic = 0 };
 
             //Ground level is at 0, so the lower chunk will at first think it has no sunlight
-            var heightmap = getFlatHeightMap(0);
+            heightMapYValue = 0;
 
             //Generate first chunk
-            lightManager.OnChunkFullyGenerated(new ChunkNeighbourhood(ids[first], GetMockChunkData), heightmap);
+            lightManager.OnChunkFullyGenerated(ids[first]);
             fullyGenerated.Add(ids[first]);
 
             //Second chunk should not have sunlight yet
@@ -449,7 +457,7 @@ namespace Tests
             }
 
             //Generate second chunk
-            lightManager.OnChunkFullyGenerated(new ChunkNeighbourhood(ids[second], GetMockChunkData), heightmap);
+            lightManager.OnChunkFullyGenerated(ids[second]);
             fullyGenerated.Add(ids[second]);
 
             var bottomNeigh = new ChunkNeighbourhood(lowChunkData, GetMockChunkData);
@@ -495,11 +503,11 @@ namespace Tests
             };
 
             //Ground level is at 0, so the lower chunk will at first think it has no sunlight
-            var heightmap = getFlatHeightMap(0);
+            heightMapYValue = 0;
 
             foreach (var index in order)
             {
-                lightManager.OnChunkFullyGenerated(new ChunkNeighbourhood(ids[index], GetMockChunkData), heightmap);
+                lightManager.OnChunkFullyGenerated(ids[index]);
                 fullyGenerated.Add(ids[index]);          
             }                      
 
@@ -548,7 +556,8 @@ namespace Tests
             //act as if this voxel was generated as part of the chunk
             neighbourhood.SetVoxel(vp.x, vp.y, vp.z, lampId);
 
-            lightManager.OnChunkFullyGenerated(neighbourhood, getFlatHeightMap(hm));
+            heightMapYValue = hm;
+            lightManager.OnChunkFullyGenerated(neighbourhood.center.ChunkID);
 
             //PrintSlice(neighbourhood, 0);
 
@@ -592,14 +601,13 @@ namespace Tests
             //act as if this voxel was generated as part of the chunk
             neighbourhood.SetVoxel(vp.x, vp.y, vp.z, lampId);
 
-            var heightmap = getFlatHeightMap(hm);
-
-            lightManager.OnChunkFullyGenerated(neighbourhood, heightmap);
+            heightMapYValue = hm;
+            lightManager.OnChunkFullyGenerated(neighbourhood.center.ChunkID);
             fullyGenerated.Add(neighbourhood.center.ChunkID);
 
             //generate another chunk next to this one, the light should spill in
             vp = new Vector3Int(-1, 0, 0);
-            lightManager.OnChunkFullyGenerated(neighbourhoodFor(ref vp), heightmap);
+            lightManager.OnChunkFullyGenerated(vp);
             var tstChunkId = new Vector3Int(-1, 0, 0);
 
             PrintSlice(neighbourhood, 0);
@@ -646,16 +654,16 @@ namespace Tests
             //act as if this voxel was generated as part of the chunk
             neighbourhood.SetVoxel(vp.x, vp.y, vp.z, lampId);
 
-            var heightmap = getFlatHeightMap(hm);
+            heightMapYValue = hm;
 
             //generate another chunk next to this one, the light should spill in from the zero chunk
             vp = new Vector3Int(-1, 0, 0);
-            lightManager.OnChunkFullyGenerated(neighbourhoodFor(ref vp), heightmap);
+            lightManager.OnChunkFullyGenerated(vp);
             var tstChunkId = new Vector3Int(-1, 0, 0);
             fullyGenerated.Add(tstChunkId);
 
             //run the generation action for the zero chunk
-            lightManager.OnChunkFullyGenerated(neighbourhood, heightmap);
+            lightManager.OnChunkFullyGenerated(neighbourhood.center.ChunkID);
             fullyGenerated.Add(neighbourhood.center.ChunkID);
 
             //PrintSlice(neighbourhood, 0);

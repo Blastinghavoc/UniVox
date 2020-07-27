@@ -20,11 +20,13 @@ namespace UniVox.Framework.ChunkPipeline
         event Action<Vector3Int, int> OnChunkTargetStageDecreased;
 
         IChunkProvider chunkProvider { get; }
+        IChunkMesher chunkMesher { get; }
         Func<Vector3Int, IChunkComponent> getChunkComponent { get; }
         bool GenerateStructures { get; }
-        IChunkMesher chunkMesher { get; }
+
         int TerrainDataStage { get; }
         int OwnStructuresStage { get; }
+        int PreLightGenStage { get; }
         int FullyGeneratedStage { get; }
         int RenderedStage { get; }
         int CompleteStage { get; }

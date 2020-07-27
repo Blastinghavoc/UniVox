@@ -10,6 +10,7 @@ using UniVox.Framework.ChunkPipeline.VirtualJobs;
 using UniVox.Framework.ChunkPipeline.WaitForNeighbours;
 using UniVox.Framework.Common;
 using UniVox.Framework.Jobified;
+using UniVox.Framework.Lighting;
 using UniVox.Implementations.ChunkData;
 
 namespace UniVox.Framework.ChunkPipeline
@@ -37,7 +38,11 @@ namespace UniVox.Framework.ChunkPipeline
         public int TerrainDataStage { get; private set; }
         //Indicates chunk has generated its own structures, but may not have received all incoming structures from neighbours
         public int OwnStructuresStage { get; private set; }
-        //This stage indicates the chunk has been fully generated, including structures from neighbours
+
+        //This stage indicactes the chunk has all the voxels generated, but does not yet have lights
+        public int PreLightGenStage { get; private set; }
+
+        //This stage indicates the chunk has been fully generated, including structures from neighbours and lighting
         public int FullyGeneratedStage { get; private set; }
         public int RenderedStage { get; private set; }
         public int CompleteStage { get; private set; }
@@ -65,12 +70,14 @@ namespace UniVox.Framework.ChunkPipeline
             int maxCollisionPerUpdate, 
             bool structureGen = false,
             int maxStructurePerUpdate = 200,
-            bool lighting = false)
+            ILightManager lightManager = null)
         {
             this.getChunkComponent = getChunkComponent;
             this.chunkProvider = chunkProvider;
             this.chunkMesher = chunkMesher;
             this.GenerateStructures = structureGen;
+
+            bool lighting = lightManager != null;
 
             bool dependentOnNeighbours = chunkMesher.IsMeshDependentOnNeighbourChunks || lighting;
 
@@ -109,25 +116,29 @@ namespace UniVox.Framework.ChunkPipeline
                 waitingForAllNeighboursToHaveStructures.OnWaitEnded = (id) => {
                         Assert.IsFalse(getChunkComponent(id).Data.FullyGenerated,$"Chunk data for {id} was listed as fully generated before all its neighbours had structures");
                         getChunkComponent(id).Data.FullyGenerated = true;
-                        FireChunkFinishedGeneratingEvent(id);
                 };
 
                 stages.Add(waitingForAllNeighboursToHaveStructures);
 
             }
 
-            if (!structureGen && lighting)
+            PreLightGenStage = i;
+
+            if (lighting)
             {
                 var waitingForNeighboursForLighting = new WaitForNeighboursStage(
-                    "WaitForNeighbourLights",i++,this,false
+                    "WaitForNeighboursPreLights",i++,this,false
                     );
-                waitingForNeighboursForLighting.OnWaitEnded = (id) =>
-                {                    
-                    FireChunkFinishedGeneratingEvent(id);    
-                };
                 stages.Add(waitingForNeighboursForLighting);
-            }
 
+                var scheduledForLighting = new PrioritizedBufferStage(
+                    "ScheduledForLights", i++, this, getPriorityOfChunk);
+                stages.Add(scheduledForLighting);
+
+                var generatingLights = new GenerateLightsStage("GeneratingLights",
+                    i++,this,maxStructurePerUpdate,lightManager);
+                stages.Add(generatingLights);
+            }
 
             FullyGeneratedStage = i;
 

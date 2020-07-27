@@ -71,18 +71,6 @@ namespace UniVox.Framework
             return realData.GetLight(pos);
         }
 
-        public void LightmapFromNative(NativeArray<LightValue> values)
-        {
-            if (allowModifyLight)
-            {
-                realData.LightmapFromNative(values);
-            }
-            else
-            {
-                throw new NotImplementedException();
-            }
-        }
-
         public NativeArray<LightValue> LightToNative(Allocator allocator = Allocator.Persistent)
         {
             return realData.LightToNative(allocator);
@@ -114,6 +102,18 @@ namespace UniVox.Framework
             else
             {
                 realData.SetLight(pos, lightValue);
+            }
+        }
+
+        public void SetLightMap(LightValue[] lights)
+        {
+            if (allowModifyLight)
+            {
+                realData.SetLightMap(lights);
+            }
+            else
+            {
+                throw new NotImplementedException();
             }
         }
 

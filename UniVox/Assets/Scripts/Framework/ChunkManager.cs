@@ -107,7 +107,9 @@ namespace UniVox.Framework
 
             chunkProvider.Initialise(VoxelTypeManager, this, eventManager);
             chunkMesher.Initialise(VoxelTypeManager, this, eventManager);
-            lightManager.Initialise(this,VoxelTypeManager);
+            lightManager.Initialise(VoxelTypeManager, this,chunkProvider);
+
+            var lm = IncludeLighting ? lightManager : null;
 
             pipeline = new ChunkPipelineManager(
                 chunkProvider,
@@ -119,7 +121,7 @@ namespace UniVox.Framework
                 MaxMeshedPerUpdate,
                 generateStructures,
                 MaxStructurePerUpdate,
-                IncludeLighting);
+                lm);
 
             pipeline.OnChunkFinishedGenerating += OnChunkFullyGenerated;
 
@@ -168,12 +170,12 @@ namespace UniVox.Framework
 
         }
 
+        //TODO remove in favour of pipeline
         private void OnChunkFullyGenerated(Vector3Int chunkId) 
         {
             if (loadedChunks.TryGetValue(chunkId,out var chunkComponent))
             {
-                lightManager.OnChunkFullyGenerated(new ChunkNeighbourhood(chunkComponent.Data, GetChunkData),
-                    chunkProvider.GetHeightMapForColumn(new Vector2Int(chunkId.x,chunkId.z)));
+                lightManager.OnChunkFullyGenerated(chunkId);
             }
             else
             {
@@ -308,8 +310,8 @@ namespace UniVox.Framework
                     //Chunks with saved data bypass the generation process.
                     ChunkComponent.Data = data;
                     //Re-generate/update lighting
-                    lightManager.OnChunkFullyGenerated(new ChunkNeighbourhood(ChunkComponent.Data, GetChunkData),
-                        chunkProvider.GetHeightMapForColumn(new Vector2Int(chunkID.x,chunkID.z)));
+                    //TODO remove in favour of pipeline
+                    lightManager.OnChunkFullyGenerated(chunkID);
                     pipeline.AddWithData(chunkID, targetStage);
                 }
                 else

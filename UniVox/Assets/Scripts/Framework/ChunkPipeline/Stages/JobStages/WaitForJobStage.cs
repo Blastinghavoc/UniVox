@@ -118,6 +118,7 @@ namespace UniVox.Framework.ChunkPipeline
         }
     }
 
+    //Symbolic interface
     public interface IWaitForJobStage 
     { 
     

@@ -7,6 +7,7 @@ using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Profiling;
+using UniVox.Framework.ChunkPipeline.VirtualJobs;
 using UniVox.Framework.Common;
 using UniVox.Framework.Jobified;
 using Utils;
@@ -18,6 +19,7 @@ namespace UniVox.Framework.Lighting
     {
         private IVoxelTypeManager voxelTypeManager;
         private IChunkManager chunkManager;
+        private IHeightMapProvider heightMapProvider;
         private Vector3Int chunkDimensions;
         public bool Parallel { get; set; } = false;
 
@@ -25,14 +27,12 @@ namespace UniVox.Framework.Lighting
         private NativeArray<int> voxelTypeToAbsorptionMap;
         private NativeArray<int3> directionVectors;
 
-        private HashSet<Vector3Int> generatedLightsThisUpdate;
-
-        public void Initialise(IChunkManager chunkManager, IVoxelTypeManager voxelTypeManager)
+        public void Initialise(IVoxelTypeManager voxelTypeManager, IChunkManager chunkManager, IHeightMapProvider heightMapProvider)
         {
             this.chunkManager = chunkManager;
             this.voxelTypeManager = voxelTypeManager;
+            this.heightMapProvider = heightMapProvider;
             chunkDimensions = chunkManager.ChunkDimensions;
-            generatedLightsThisUpdate = new HashSet<Vector3Int>();
 
             List<int> emissions = new List<int>();
             List<int> absorptions = new List<int>();
@@ -63,50 +63,94 @@ namespace UniVox.Framework.Lighting
 
         public void Update() 
         {
-            generatedLightsThisUpdate.Clear();
+            
         }
 
-        //TODO refactor to not use neighbourhood, but use chunkId instead
-        public void OnChunkFullyGenerated(ChunkNeighbourhood neighbourhood, int[] heightMap)
+        public AbstractPipelineJob<LightmapGenerationJobResult> CreateGenerationJob(Vector3Int chunkId) 
         {
-            Profiler.BeginSample("LightOnChunkGenerated");
-
-            var chunkId = neighbourhood.center.ChunkID;
+            int[] heightMap = heightMapProvider.GetHeightMapForColumn(new Vector2Int(chunkId.x, chunkId.z));
 
             var jobData = getJobData(chunkId);
 
-            var generationJob = new LightGenerationJob() { data = jobData,
+            var generationJob = new LightGenerationJob()
+            {
+                data = jobData,
                 dynamicPropagationQueue = new NativeQueue<int3>(Allocator.Persistent),
                 sunlightPropagationQueue = new NativeQueue<int3>(Allocator.Persistent),
                 heightmap = heightMap.ToNative()
             };
 
-            //TODO support parallel execution (scheduling)
-            generationJob.Run();
-            generationJob.Dispose();
-
-            generatedLightsThisUpdate.Add(chunkId);
-
-            var propagationJob = new LightPropagationJob() { data = jobData,
+            var propagationJob = new LightPropagationJob()
+            {
+                data = jobData,
                 sunlightPropagationQueue = generationJob.sunlightPropagationQueue,
                 dynamicPropagationQueue = generationJob.dynamicPropagationQueue,
                 sunlightNeighbourUpdates = new LightJobNeighbourUpdates(Allocator.Persistent),
                 dynamicNeighbourUpdates = new LightJobNeighbourUpdates(Allocator.Persistent)
             };
 
-            propagationJob.Run();
-            neighbourhood.center.LightmapFromNative(jobData.lights);
-            propagationJob.Dispose();
+            Func<LightmapGenerationJobResult> cleanup = () => {
+                var result = new LightmapGenerationJobResult();
 
-            ResolveUpdates(propagationJob, chunkId);
+                generationJob.Dispose();
 
-            Profiler.EndSample();
+                result.lights = jobData.lights.ToArray();
 
-            //Update neighbours
+                propagationJob.Dispose();
+
+                if (Parallel)
+                {
+                    //TODO queue propagation updates for later execution
+                }
+                else
+                {
+                    //TODO remove, use the same mechanism as above.
+                    ///This won't work because it relies on the result having been applied by this point.
+                    ResolveUpdates(propagationJob, chunkId);
+                }
+
+                return result;
+            };
+
+            if (!Parallel)
+            {
+                return new BasicFunctionJob<LightmapGenerationJobResult>(() =>
+                {
+                    generationJob.Run();
+                    propagationJob.Run();
+                    return cleanup();
+                });
+            }
+
+            var genHandle = generationJob.Schedule();
+            var propHandle = propagationJob.Schedule(genHandle);
+
+            return new PipelineUnityJob<LightmapGenerationJobResult>(propHandle, cleanup);
 
         }
 
-        private class UpdateData : IDisposable
+        private void QueuePropagationUpdates() 
+        { 
+        
+        }
+
+        public void ApplyGenerationResult(Vector3Int chunkId, LightmapGenerationJobResult result) 
+        {
+            var chunkData = chunkManager.GetChunkData(chunkId);
+            chunkData.SetLightMap(result.lights);
+        }
+
+        //TODO Deprecate in favour of CreateGenerationJob
+        public void OnChunkFullyGenerated(Vector3Int chunkId)
+        {
+            Assert.IsFalse(Parallel);
+            var job = CreateGenerationJob(chunkId);
+            ApplyGenerationResult(chunkId, job.Result);
+        }        
+
+        #region immeditate update propagation
+
+        private class ImmediateChunkUpdateRequest : IDisposable
         {
             public Direction fromDirection;
             public NativeList<int3> sunlight;
@@ -121,7 +165,7 @@ namespace UniVox.Framework.Lighting
 
         private void ResolveUpdates(LightPropagationJob inJob, Vector3Int inChunkId) 
         {
-            Queue<KeyValuePair<Vector3Int, UpdateData>> pending = new Queue<KeyValuePair<Vector3Int, UpdateData>>();
+            Queue<KeyValuePair<Vector3Int, ImmediateChunkUpdateRequest>> pending = new Queue<KeyValuePair<Vector3Int, ImmediateChunkUpdateRequest>>();
 
             EnqueueUpdates(inJob, inChunkId, pending);
 
@@ -157,7 +201,7 @@ namespace UniVox.Framework.Lighting
 
                 propJob.Run();
                 var chunkdata = chunkManager.GetChunkData(data.chunkId.ToBasic());
-                chunkdata.LightmapFromNative(data.lights);
+                chunkdata.SetLightMap(data.lights.ToArray());
                 propJob.Dispose();//This leaves just the propagation queues again
 
                 //Queued recursion
@@ -171,11 +215,11 @@ namespace UniVox.Framework.Lighting
             }
         }
 
-        private void EnqueueUpdates(LightPropagationJob propagationJob, Vector3Int chunkId, Queue<KeyValuePair<Vector3Int, UpdateData>> pending) 
+        private void EnqueueUpdates(LightPropagationJob propagationJob, Vector3Int chunkId, Queue<KeyValuePair<Vector3Int, ImmediateChunkUpdateRequest>> pending) 
         {
             for (Direction dir = 0; (int)dir < DirectionExtensions.numDirections; dir++)
             {
-                UpdateData update = new UpdateData();
+                ImmediateChunkUpdateRequest update = new ImmediateChunkUpdateRequest();
 
                 update.fromDirection = dir;
                 update.sunlight = propagationJob.sunlightNeighbourUpdates[dir];
@@ -183,7 +227,7 @@ namespace UniVox.Framework.Lighting
 
                 if (update.dynamic.Length > 0 || update.sunlight.Length > 0)
                 {
-                    pending.Enqueue(new KeyValuePair<Vector3Int, UpdateData>(chunkId + DirectionExtensions.Vectors[(int)dir], update));
+                    pending.Enqueue(new KeyValuePair<Vector3Int, ImmediateChunkUpdateRequest>(chunkId + DirectionExtensions.Vectors[(int)dir], update));
                 }
                 else
                 {
@@ -191,6 +235,8 @@ namespace UniVox.Framework.Lighting
                 }
             }
         }
+
+        #endregion
 
         private LightJobData getJobData(Vector3Int chunkId) 
         {
@@ -200,8 +246,7 @@ namespace UniVox.Framework.Lighting
             {
                 var offset = DirectionExtensions.Vectors[i];
                 var neighId = chunkId + offset;
-                directionsValid[i] = chunkManager.IsChunkFullyGenerated(neighId)
-                    || generatedLightsThisUpdate.Contains(neighId);
+                directionsValid[i] = chunkManager.IsChunkFullyGenerated(neighId);
             }
 
             var chunkData = chunkManager.GetReadOnlyChunkData(chunkId);
