@@ -10,6 +10,12 @@ namespace UniVox.Framework.Lighting
         public string GlobalLightName;
         [Range(0, 1)]
         public float GlobalLightValue;
+
+        [SerializeField] private ShaderVariable[] shaderVariables = new ShaderVariable[0];
+
+        [Range(-180,180)]
+        public float TimeOfDay;
+
         public Light sunLight;
         public Material skyboxMaterial;
         public bool parallel;
@@ -49,15 +55,23 @@ namespace UniVox.Framework.Lighting
         // Start is called before the first frame update
         void Start()
         {
-            //Shader.SetGlobalFloat(GlobalLightName, GlobalLightValue);
+
         }
 
         // Update is called once per frame
         void Update()
         {
-            sunLight.transform.rotation = Quaternion.Euler(Mathf.Lerp(-90, 90, GlobalLightValue),0,0);
+            sunLight.transform.rotation = Quaternion.Euler(TimeOfDay,0,0);
+            //GlobalLightValue = Mathf.InverseLerp(-1,1, Mathf.Sin(Mathf.Deg2Rad * TimeOfDay));
             skyboxMaterial.SetFloat("_Exposure", GlobalLightValue);
+
             Shader.SetGlobalFloat(GlobalLightName, GlobalLightValue);
+            for (int i = 0; i < shaderVariables.Length; i++)
+            {
+                var variable = shaderVariables[i];
+                Shader.SetGlobalFloat(variable.name, variable.value);
+            }
+
         }
 
         HashSet<Vector3Int> ILightManager.Update() 
@@ -74,5 +88,12 @@ namespace UniVox.Framework.Lighting
         {
             return lightManager.CreateGenerationJob(chunkId);
         }
+    }
+
+    [System.Serializable]
+    public class ShaderVariable 
+    {
+        public string name;
+        public float value;
     }
 }
