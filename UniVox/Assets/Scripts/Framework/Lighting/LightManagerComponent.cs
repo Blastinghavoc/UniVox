@@ -60,9 +60,9 @@ namespace UniVox.Framework.Lighting
             Shader.SetGlobalFloat(GlobalLightName, GlobalLightValue);
         }
 
-        void ILightManager.Update()
+        HashSet<Vector3Int> ILightManager.Update() 
         {
-            lightManager.Update();
+            return lightManager.Update();
         }
 
         public void ApplyGenerationResult(Vector3Int chunkId, LightmapGenerationJobResult result)

@@ -67,12 +67,19 @@ namespace UniVox.Framework.Lighting
             directionVectors.SmartDispose();
         }
 
-        public void Update() 
+        /// <summary>
+        /// Runs a fixed number of lighting propagation updates,
+        /// and returns a set of the chunk ids alterred by these updates.
+        /// </summary>
+        /// <returns></returns>
+        public HashSet<Vector3Int> Update() 
         {
             Profiler.BeginSample("LightManagerUpdate");
             //Process a finite number of the pending updates.
             int processedThisUpdate = 0;
             Queue<WipUpdateJob> jobsInProgress = new Queue<WipUpdateJob>();
+
+            var touchedByUpdate = new HashSet<Vector3Int>();
 
             while (processedThisUpdate < MaxLightUpdates && pendingLightUpdates.Count > 0)
             {
@@ -83,6 +90,8 @@ namespace UniVox.Framework.Lighting
                     //skip, as this chunk is no longer valid for updates
                     continue;
                 }
+
+                touchedByUpdate.Add(update.chunkId);
 
                 var data = getJobData(update.chunkId);
 
@@ -145,7 +154,9 @@ namespace UniVox.Framework.Lighting
                 QueuePropagationUpdates(wip.propJob);
                 wip.propJob.Dispose();
             }
+
             Profiler.EndSample();
+            return touchedByUpdate;
         }
 
         private struct WipUpdateJob

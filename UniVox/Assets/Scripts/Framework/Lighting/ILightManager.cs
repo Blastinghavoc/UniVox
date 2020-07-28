@@ -10,7 +10,7 @@ namespace UniVox.Framework.Lighting
         void ApplyGenerationResult(Vector3Int chunkId, LightmapGenerationJobResult result);
         AbstractPipelineJob<LightmapGenerationJobResult> CreateGenerationJob(Vector3Int chunkId);
         void Initialise(IVoxelTypeManager voxelTypeManager, IChunkManager chunkManager,IHeightMapProvider heightMapProvider);
-        void Update();
+        HashSet<Vector3Int> Update();
         List<Vector3Int> UpdateLightOnVoxelSet(ChunkNeighbourhood neighbourhood, Vector3Int localCoords, VoxelTypeID voxelType, VoxelTypeID previousType);
     }
 }

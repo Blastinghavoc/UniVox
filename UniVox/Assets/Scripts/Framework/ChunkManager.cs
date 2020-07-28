@@ -143,7 +143,15 @@ namespace UniVox.Framework
             }
 
             playArea.Update();
-            lightManager.Update();
+            var chunksTouchedByLightingUpdate = lightManager.Update();
+            foreach (var id in chunksTouchedByLightingUpdate)
+            {
+                if (pipeline.GetTargetStage(id) >= pipeline.RenderedStage)
+                {
+                    RedoChunkFromStage(id, pipeline.FullyGeneratedStage);
+                }
+            }
+
 
             pipeline.Update();
         }
@@ -382,14 +390,17 @@ namespace UniVox.Framework
                 }
             }
 
-            var chunksTouchedByLightingUpdate = lightManager.UpdateLightOnVoxelSet(new ChunkNeighbourhood(chunkID, GetChunkData),
-                localVoxelIndex, newTypeID, previousTypeID);
-
-            foreach (var id in chunksTouchedByLightingUpdate)
+            if (IncludeLighting)
             {
-                if (pipeline.GetTargetStage(id) >= pipeline.RenderedStage) 
+                var chunksTouchedByLightingUpdate = lightManager.UpdateLightOnVoxelSet(new ChunkNeighbourhood(chunkID, GetChunkData),
+                    localVoxelIndex, newTypeID, previousTypeID);
+
+                foreach (var id in chunksTouchedByLightingUpdate)
                 {
-                    RedoChunkFromStage(id, pipeline.FullyGeneratedStage);
+                    if (pipeline.GetTargetStage(id) >= pipeline.RenderedStage) 
+                    {
+                        RedoChunkFromStage(id, pipeline.FullyGeneratedStage);
+                    }
                 }
             }
 
