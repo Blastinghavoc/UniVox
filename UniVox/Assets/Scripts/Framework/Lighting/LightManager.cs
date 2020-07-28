@@ -238,15 +238,7 @@ namespace UniVox.Framework.Lighting
         {
             var chunkData = chunkManager.GetChunkData(chunkId);
             chunkData.SetLightMap(result.lights);
-        }
-
-        //TODO Deprecate in favour of CreateGenerationJob
-        //public void OnChunkFullyGenerated(Vector3Int chunkId)
-        //{
-        //    Assert.IsFalse(Parallel);
-        //    var job = CreateGenerationJob(chunkId);
-        //    ApplyGenerationResult(chunkId, job.Result);
-        //}        
+        }    
 
         private LightJobData getJobData(Vector3Int chunkId) 
         {
@@ -545,39 +537,7 @@ namespace UniVox.Framework.Lighting
                     }
 
                     processed++;
-                }
-
-                //foreach (var offset in DirectionExtensions.Vectors)
-                //{
-                //    var neighbourWorldPos = node.worldPos + offset;
-                //    if (visited.Contains(neighbourWorldPos))
-                //    {//skip nodes we've already seen
-                //        continue;
-                //    }
-                //    var neighbourCoord = coords + offset;
-
-                //    if (TryGetPropagateNode(neighbourCoord, node.chunkData, neighbourhood, out var newNode))
-                //    {
-                //        var neighbourLightValue = newNode.chunkData.GetLight(newNode.localPosition);
-
-                //        var (_, absorption) = voxelTypeManager.GetLightProperties(newNode.chunkData[newNode.localPosition]);
-                //        var next = thisLightValue.Sun - absorption;
-
-                //        if (offset.y == -1 && absorption == 1 && thisLightValue.Sun == LightValue.MaxIntensity)
-                //        {
-                //            next = LightValue.MaxIntensity;//Ignore normal light absorption when propagating sunlight down
-                //        }
-
-                //        if (neighbourLightValue.Sun < next)
-                //        {
-                //            neighbourLightValue.Sun = next;
-                //            newNode.chunkData.SetLight(newNode.localPosition, neighbourLightValue);
-                //            queue.Enqueue(newNode);
-                //        }
-                //    }
-
-                //    processed++;
-                //}
+                }                
 
             }
 
@@ -605,8 +565,10 @@ namespace UniVox.Framework.Lighting
         //TODO decrease GC allocations in this method
         private IEnumerable<PropagationNode> GetAllValidChildrenForPropagation(PropagationNode parent,ChunkNeighbourhood neighbourhood) 
         {
-            foreach (var offset in DirectionExtensions.Vectors) 
+            for (int i = 0; i < DirectionExtensions.Vectors.Length; i++)
             {
+                var offset = DirectionExtensions.Vectors[i];
+
                 PropagationNode child = parent;
                 child.worldPos = parent.worldPos + offset;
                 
