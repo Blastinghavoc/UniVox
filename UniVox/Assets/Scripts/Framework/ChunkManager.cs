@@ -123,8 +123,6 @@ namespace UniVox.Framework
                 MaxStructurePerUpdate,
                 lm);
 
-            pipeline.OnChunkFinishedGenerating += OnChunkFullyGenerated;
-
             //Initialise play area manager
             var voxelPlayer = player.GetComponent<IVoxelPlayer>();
             Assert.IsNotNull(voxelPlayer, "Chunk manager must have a reference to a player with a component" +
@@ -155,7 +153,6 @@ namespace UniVox.Framework
         /// </summary>
         private void OnDestroy()
         {
-            pipeline.OnChunkFinishedGenerating -= OnChunkFullyGenerated;
             pipeline.Dispose();
             VoxelTypeManager.Dispose();
             if (chunkMesher is IDisposable disposableChunkMesher)
@@ -168,19 +165,6 @@ namespace UniVox.Framework
                 disposableChunkProvider.Dispose();
             }           
 
-        }
-
-        //TODO remove in favour of pipeline
-        private void OnChunkFullyGenerated(Vector3Int chunkId) 
-        {
-            if (loadedChunks.TryGetValue(chunkId,out var chunkComponent))
-            {
-                lightManager.OnChunkFullyGenerated(chunkId);
-            }
-            else
-            {
-                throw new Exception($"Chunk with id {chunkId} does not exist");
-            }
         }
 
         public bool IsChunkComplete(Vector3Int chunkId)
@@ -309,10 +293,7 @@ namespace UniVox.Framework
                 {
                     //Chunks with saved data bypass the generation process.
                     ChunkComponent.Data = data;
-                    //Re-generate/update lighting
-                    //TODO remove in favour of pipeline
-                    lightManager.OnChunkFullyGenerated(chunkID);
-                    pipeline.AddWithData(chunkID, targetStage);
+                    pipeline.AddWithData(chunkID, targetStage,IncludeLighting);//Add with voxel data, but re-generate light data
                 }
                 else
                 {

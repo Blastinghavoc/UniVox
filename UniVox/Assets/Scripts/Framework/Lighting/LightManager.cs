@@ -22,10 +22,15 @@ namespace UniVox.Framework.Lighting
         private IHeightMapProvider heightMapProvider;
         private Vector3Int chunkDimensions;
         public bool Parallel { get; set; } = false;
+        public int MaxLightUpdates { get; set; } = 48;
+
+        public int MaxChunksGeneratedPerUpdate { get; set; } = 24;
 
         private NativeArray<int> voxelTypeToEmissionMap;
         private NativeArray<int> voxelTypeToAbsorptionMap;
         private NativeArray<int3> directionVectors;
+
+        private Queue<ChunkUpdateRequest> pendingLightUpdates;
 
         public void Initialise(IVoxelTypeManager voxelTypeManager, IChunkManager chunkManager, IHeightMapProvider heightMapProvider)
         {
@@ -33,6 +38,7 @@ namespace UniVox.Framework.Lighting
             this.voxelTypeManager = voxelTypeManager;
             this.heightMapProvider = heightMapProvider;
             chunkDimensions = chunkManager.ChunkDimensions;
+            pendingLightUpdates = new Queue<ChunkUpdateRequest>();
 
             List<int> emissions = new List<int>();
             List<int> absorptions = new List<int>();
@@ -63,7 +69,90 @@ namespace UniVox.Framework.Lighting
 
         public void Update() 
         {
-            
+            Profiler.BeginSample("LightManagerUpdate");
+            //Process a finite number of the pending updates.
+            int processedThisUpdate = 0;
+            Queue<WipUpdateJob> jobsInProgress = new Queue<WipUpdateJob>();
+
+            while (processedThisUpdate < MaxLightUpdates && pendingLightUpdates.Count > 0)
+            {
+                var update = pendingLightUpdates.Dequeue();
+
+                if (!chunkManager.IsChunkFullyGenerated(update.chunkId))
+                {
+                    //skip, as this chunk is no longer valid for updates
+                    continue;
+                }
+
+                var data = getJobData(update.chunkId);
+
+                BorderResolutionJob borderJob = new BorderResolutionJob()
+                {
+                    data = data,
+                    dynamicPropagationQueue = new NativeQueue<int3>(Allocator.Persistent),
+                    sunlightPropagationQueue = new NativeQueue<int3>(Allocator.Persistent),
+                    dynamicFromBorder = update.dynamic.ToNative(Allocator.Persistent),
+                    sunlightFromBorder = update.sunlight.ToNative(Allocator.Persistent),
+                    toDirection = DirectionExtensions.Opposite[(int)update.fromDirection]
+                };
+
+
+                LightPropagationJob propJob = new LightPropagationJob()
+                {
+                    data = data,
+                    sunlightNeighbourUpdates = new LightJobNeighbourUpdates(Allocator.Persistent),
+                    dynamicNeighbourUpdates = new LightJobNeighbourUpdates(Allocator.Persistent),
+                    sunlightPropagationQueue = borderJob.sunlightPropagationQueue,
+                    dynamicPropagationQueue = borderJob.dynamicPropagationQueue
+                };
+
+                if (Parallel)
+                {
+                    WipUpdateJob updateJob = new WipUpdateJob()
+                    {
+                        borderJob = borderJob,
+                        propJob = propJob
+                    };
+
+                    var h1 = borderJob.Schedule();
+                    var h2 = propJob.Schedule(h1);
+                    updateJob.handle = h2;
+                    jobsInProgress.Enqueue(updateJob);
+                }
+                else
+                {
+                    borderJob.Run();
+                    borderJob.Dispose();
+                    propJob.Run();
+                    var chunkdata = chunkManager.GetChunkData(data.chunkId.ToBasic());
+                    chunkdata.SetLightMap(data.lights.ToArray());
+                    QueuePropagationUpdates(propJob);
+                    propJob.Dispose();
+                }
+
+                processedThisUpdate++;
+            }
+
+            //Complete the jobs
+            while (jobsInProgress.Count > 0)
+            {
+                var wip = jobsInProgress.Dequeue();
+                wip.handle.Complete();
+
+                wip.borderJob.Dispose();
+                var chunkdata = chunkManager.GetChunkData(wip.propJob.data.chunkId.ToBasic());
+                chunkdata.SetLightMap(wip.propJob.data.lights.ToArray());
+                QueuePropagationUpdates(wip.propJob);
+                wip.propJob.Dispose();
+            }
+            Profiler.EndSample();
+        }
+
+        private struct WipUpdateJob
+        {
+            public BorderResolutionJob borderJob;
+            public LightPropagationJob propJob;
+            public JobHandle handle;
         }
 
         public AbstractPipelineJob<LightmapGenerationJobResult> CreateGenerationJob(Vector3Int chunkId) 
@@ -92,22 +181,12 @@ namespace UniVox.Framework.Lighting
             Func<LightmapGenerationJobResult> cleanup = () => {
                 var result = new LightmapGenerationJobResult();
 
+                result.lights = jobData.lights.ToArray();
                 generationJob.Dispose();
 
-                result.lights = jobData.lights.ToArray();
+                QueuePropagationUpdates(propagationJob);
 
-                propagationJob.Dispose();
-
-                if (Parallel)
-                {
-                    //TODO queue propagation updates for later execution
-                }
-                else
-                {
-                    //TODO remove, use the same mechanism as above.
-                    ///This won't work because it relies on the result having been applied by this point.
-                    ResolveUpdates(propagationJob, chunkId);
-                }
+                propagationJob.Dispose();                
 
                 return result;
             };
@@ -129,10 +208,31 @@ namespace UniVox.Framework.Lighting
 
         }
 
-        private void QueuePropagationUpdates() 
-        { 
-        
+        private void QueuePropagationUpdates(LightPropagationJob propJob) 
+        {
+            var chunkId = propJob.data.chunkId.ToBasic();
+            for (Direction dir = 0; (int)dir < DirectionExtensions.numDirections; dir++)
+            {
+                ChunkUpdateRequest update = new ChunkUpdateRequest();
+                update.chunkId = chunkId + DirectionExtensions.Vectors[(int)dir];
+                update.fromDirection = dir;
+                update.sunlight = propJob.sunlightNeighbourUpdates[dir].ToArray();
+                update.dynamic = propJob.dynamicNeighbourUpdates[dir].ToArray();
+
+                if (update.dynamic.Length > 0 || update.sunlight.Length > 0)
+                {
+                    pendingLightUpdates.Enqueue(update);
+                }
+            }
         }
+
+        private struct ChunkUpdateRequest 
+        {
+            public Vector3Int chunkId;
+            public Direction fromDirection;
+            public int3[] sunlight;
+            public int3[] dynamic;
+        }        
 
         public void ApplyGenerationResult(Vector3Int chunkId, LightmapGenerationJobResult result) 
         {
@@ -141,102 +241,12 @@ namespace UniVox.Framework.Lighting
         }
 
         //TODO Deprecate in favour of CreateGenerationJob
-        public void OnChunkFullyGenerated(Vector3Int chunkId)
-        {
-            Assert.IsFalse(Parallel);
-            var job = CreateGenerationJob(chunkId);
-            ApplyGenerationResult(chunkId, job.Result);
-        }        
-
-        #region immeditate update propagation
-
-        private class ImmediateChunkUpdateRequest : IDisposable
-        {
-            public Direction fromDirection;
-            public NativeList<int3> sunlight;
-            public NativeList<int3> dynamic;
-
-            public void Dispose()
-            {
-                sunlight.Dispose();
-                dynamic.Dispose();
-            }
-        }
-
-        private void ResolveUpdates(LightPropagationJob inJob, Vector3Int inChunkId) 
-        {
-            Queue<KeyValuePair<Vector3Int, ImmediateChunkUpdateRequest>> pending = new Queue<KeyValuePair<Vector3Int, ImmediateChunkUpdateRequest>>();
-
-            EnqueueUpdates(inJob, inChunkId, pending);
-
-            int numUpdates = 0;
-            while (pending.Count > 0)
-            {
-                var kvp = pending.Dequeue();
-                var cId = kvp.Key;
-                var update = kvp.Value;
-
-                var data = getJobData(cId);
-
-                BorderResolutionJob borderJob = new BorderResolutionJob()
-                {
-                    data = data,
-                    dynamicPropagationQueue = new NativeQueue<int3>(Allocator.Persistent),
-                    sunlightPropagationQueue = new NativeQueue<int3>(Allocator.Persistent),
-                    dynamicFromBorder = update.dynamic,
-                    sunlightFromBorder = update.sunlight,
-                    toDirection = DirectionExtensions.Opposite[(int)update.fromDirection]
-                };
-
-                borderJob.Run();
-                borderJob.Dispose();
-
-                LightPropagationJob propJob = new LightPropagationJob() {
-                    data = data,
-                    sunlightNeighbourUpdates = new LightJobNeighbourUpdates(Allocator.Persistent),
-                    dynamicNeighbourUpdates = new LightJobNeighbourUpdates(Allocator.Persistent),
-                    sunlightPropagationQueue = borderJob.sunlightPropagationQueue,
-                    dynamicPropagationQueue = borderJob.dynamicPropagationQueue
-                };
-
-                propJob.Run();
-                var chunkdata = chunkManager.GetChunkData(data.chunkId.ToBasic());
-                chunkdata.SetLightMap(data.lights.ToArray());
-                propJob.Dispose();//This leaves just the propagation queues again
-
-                //Queued recursion
-                EnqueueUpdates(propJob, chunkdata.ChunkID, pending);
-                numUpdates++;
-            }
-
-            if (numUpdates > 1)
-            {
-                Debug.Log($"Update resolution took {numUpdates} updates");
-            }
-        }
-
-        private void EnqueueUpdates(LightPropagationJob propagationJob, Vector3Int chunkId, Queue<KeyValuePair<Vector3Int, ImmediateChunkUpdateRequest>> pending) 
-        {
-            for (Direction dir = 0; (int)dir < DirectionExtensions.numDirections; dir++)
-            {
-                ImmediateChunkUpdateRequest update = new ImmediateChunkUpdateRequest();
-
-                update.fromDirection = dir;
-                update.sunlight = propagationJob.sunlightNeighbourUpdates[dir];
-                update.dynamic = propagationJob.dynamicNeighbourUpdates[dir];
-
-                if (update.dynamic.Length > 0 || update.sunlight.Length > 0)
-                {
-                    pending.Enqueue(new KeyValuePair<Vector3Int, ImmediateChunkUpdateRequest>(chunkId + DirectionExtensions.Vectors[(int)dir], update));
-                }
-                else
-                {
-                    update.Dispose();
-                }
-            }
-        }
-
-        #endregion
+        //public void OnChunkFullyGenerated(Vector3Int chunkId)
+        //{
+        //    Assert.IsFalse(Parallel);
+        //    var job = CreateGenerationJob(chunkId);
+        //    ApplyGenerationResult(chunkId, job.Result);
+        //}        
 
         private LightJobData getJobData(Vector3Int chunkId) 
         {

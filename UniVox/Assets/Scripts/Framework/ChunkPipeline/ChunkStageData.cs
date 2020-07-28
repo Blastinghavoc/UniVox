@@ -8,5 +8,10 @@
         public int targetStage;
 
         public bool WorkInProgress { get => minStage < targetStage || minStage < maxStage; }
+
+        public override string ToString()
+        {
+            return $"min {minStage}, max {maxStage}, targ {targetStage}, wip {WorkInProgress}";
+        }
     }    
 }

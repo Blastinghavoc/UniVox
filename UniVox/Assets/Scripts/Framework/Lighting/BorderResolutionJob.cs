@@ -14,8 +14,8 @@ namespace UniVox.Framework.Lighting
     {
         public LightJobData data;
 
-        public NativeList<int3> sunlightFromBorder;
-        public NativeList<int3> dynamicFromBorder;
+        public NativeArray<int3> sunlightFromBorder;
+        public NativeArray<int3> dynamicFromBorder;
 
         //Direction relative to this chunk to the border that was updated
         public Direction toDirection;

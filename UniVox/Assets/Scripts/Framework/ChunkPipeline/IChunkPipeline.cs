@@ -5,12 +5,6 @@ namespace UniVox.Framework.ChunkPipeline
 {
     public interface IChunkPipeline 
     {
-        /// <summary>
-        /// Event for when a chunk finishes generation
-        /// </summary>
-        event Action<Vector3Int> OnChunkFinishedGenerating;
-        void FireChunkFinishedGeneratingEvent(Vector3Int chunkId);
-
         event Action<Vector3Int> OnChunkRemovedFromPipeline;
         //args: id, added at stage
         event Action<Vector3Int,int> OnChunkAddedToPipeline;
@@ -26,7 +20,7 @@ namespace UniVox.Framework.ChunkPipeline
 
         int TerrainDataStage { get; }
         int OwnStructuresStage { get; }
-        int PreLightGenStage { get; }
+        int AllVoxelsNeedLightGenStage { get; }
         int FullyGeneratedStage { get; }
         int RenderedStage { get; }
         int CompleteStage { get; }

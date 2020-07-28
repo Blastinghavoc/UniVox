@@ -785,7 +785,9 @@ MonoBehaviour:
   GlobalLightValue: 0.729
   sunLight: {fileID: 705507994}
   skyboxMaterial: {fileID: 2100000, guid: 9cd49762ce8f3194fbfece30821c1f93, type: 2}
-  parallel: 0
+  parallel: 1
+  MaxGenPerUpdate: 12
+  MaxPropPerUpdate: 48
 --- !u!4 &1059055055
 Transform:
   m_ObjectHideFlags: 0

@@ -21,9 +21,9 @@ namespace UniVox.Framework.ChunkPipeline
         /// <summary>
         /// Note that these are only valid after Update has been called each frame.
         /// </summary>
-        public List<Vector3Int> MovingOnThisUpdate { get; protected set; }
+        public HashSet<Vector3Int> MovingOnThisUpdate { get; protected set; }
         //Items who must return to the previous stage
-        public List<Vector3Int> GoingBackwardsThisUpdate { get; protected set; }
+        public HashSet<Vector3Int> GoingBackwardsThisUpdate { get; protected set; }
 
         #endregion
 
@@ -33,8 +33,8 @@ namespace UniVox.Framework.ChunkPipeline
         {
             Name = name;
             StageID = stageId;
-            MovingOnThisUpdate = new List<Vector3Int>();
-            GoingBackwardsThisUpdate = new List<Vector3Int>();
+            MovingOnThisUpdate = new HashSet<Vector3Int>();
+            GoingBackwardsThisUpdate = new HashSet<Vector3Int>();
             this.pipeline = pipeline;
         }
 
@@ -82,9 +82,9 @@ namespace UniVox.Framework.ChunkPipeline
         /// </summary>
         /// <param name="chunkId"></param>
         /// <returns></returns>
-        public virtual bool FreeFor(Vector3Int chunkId)
+        public virtual bool FreeFor(Vector3Int chunkId, HashSet<Vector3Int> pendingEntry)
         {
-            return !Contains(chunkId);
+            return !Contains(chunkId) && !pendingEntry.Contains(chunkId);
         }
 
         public abstract void Add(Vector3Int incoming, ChunkStageData stageData);

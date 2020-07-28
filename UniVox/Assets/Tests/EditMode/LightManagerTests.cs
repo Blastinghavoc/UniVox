@@ -336,7 +336,7 @@ namespace Tests
             //remove the second one
             lightManager.UpdateLightOnVoxelSet(neighbourhood, testPos, (VoxelTypeID)VoxelTypeID.AIR_ID, lampId);
 
-            PrintSlice(neighbourhood,0);
+            //PrintSlice(neighbourhood,0);
 
             //The remaining light should be that of the first light only
             for (int z = -maxIntensity; z <= maxIntensity; z++)
@@ -363,7 +363,8 @@ namespace Tests
             var neighbourhood = neighbourhoodFor(ref vp);
 
             heightMapYValue = hm;
-            lightManager.OnChunkFullyGenerated(neighbourhood.center.ChunkID);
+            RunLightingGeneration(neighbourhood.center.ChunkID);
+
 
             var expectedLv = new LightValue() { Sun = (hm<0)? maxIntensity:0, Dynamic = 0 };
 
@@ -392,10 +393,9 @@ namespace Tests
             var neighbourhood = new ChunkNeighbourhood(chunkId, GetMockChunkData);
             //Ground level is at 0, so the chunk will think it has no sunlight
             heightMapYValue = 0;
-            lightManager.OnChunkFullyGenerated(neighbourhood.center.ChunkID);
-            fullyGenerated.Add(chunkId);
+            RunLightingGeneration(neighbourhood.center.ChunkID);
 
-            PrintSlice(neighbourhood, 0,false);
+            //PrintSlice(neighbourhood, 0,false);
 
             var chunkData = GetMockChunkData(chunkId);
 
@@ -439,8 +439,8 @@ namespace Tests
             heightMapYValue = 0;
 
             //Generate first chunk
-            lightManager.OnChunkFullyGenerated(ids[first]);
-            fullyGenerated.Add(ids[first]);
+            RunLightingGeneration(ids[first]);
+            lightManager.Update();
 
             //Second chunk should not have sunlight yet
             var secondChunkData = GetMockChunkData(ids[second]);
@@ -457,8 +457,8 @@ namespace Tests
             }
 
             //Generate second chunk
-            lightManager.OnChunkFullyGenerated(ids[second]);
-            fullyGenerated.Add(ids[second]);
+            RunLightingGeneration(ids[second]);
+            lightManager.Update();
 
             var bottomNeigh = new ChunkNeighbourhood(lowChunkData, GetMockChunkData);
             //Debug.Log("TopSlice");
@@ -507,8 +507,8 @@ namespace Tests
 
             foreach (var index in order)
             {
-                lightManager.OnChunkFullyGenerated(ids[index]);
-                fullyGenerated.Add(ids[index]);          
+                RunLightingGeneration(ids[index]);
+                lightManager.Update();
             }                      
 
             //var bottomNeigh = new ChunkNeighbourhood(lowChunkData, GetMockChunkData);
@@ -557,7 +557,7 @@ namespace Tests
             neighbourhood.SetVoxel(vp.x, vp.y, vp.z, lampId);
 
             heightMapYValue = hm;
-            lightManager.OnChunkFullyGenerated(neighbourhood.center.ChunkID);
+            RunLightingGeneration(neighbourhood.center.ChunkID);
 
             //PrintSlice(neighbourhood, 0);
 
@@ -602,15 +602,14 @@ namespace Tests
             neighbourhood.SetVoxel(vp.x, vp.y, vp.z, lampId);
 
             heightMapYValue = hm;
-            lightManager.OnChunkFullyGenerated(neighbourhood.center.ChunkID);
-            fullyGenerated.Add(neighbourhood.center.ChunkID);
+            RunLightingGeneration(neighbourhood.center.ChunkID);
 
             //generate another chunk next to this one, the light should spill in
             vp = new Vector3Int(-1, 0, 0);
-            lightManager.OnChunkFullyGenerated(vp);
+            RunLightingGeneration(vp);
             var tstChunkId = new Vector3Int(-1, 0, 0);
 
-            PrintSlice(neighbourhood, 0);
+            //PrintSlice(neighbourhood, 0);
             //PrintSlice(neighbourhood, 0,false);
 
             ///Should have propagated the lamp light only within the center chunk
@@ -657,14 +656,13 @@ namespace Tests
             heightMapYValue = hm;
 
             //generate another chunk next to this one, the light should spill in from the zero chunk
-            vp = new Vector3Int(-1, 0, 0);
-            lightManager.OnChunkFullyGenerated(vp);
             var tstChunkId = new Vector3Int(-1, 0, 0);
-            fullyGenerated.Add(tstChunkId);
+            RunLightingGeneration(tstChunkId);
+            lightManager.Update();
 
             //run the generation action for the zero chunk
-            lightManager.OnChunkFullyGenerated(neighbourhood.center.ChunkID);
-            fullyGenerated.Add(neighbourhood.center.ChunkID);
+            RunLightingGeneration(neighbourhood.center.ChunkID);
+            lightManager.Update();
 
             //PrintSlice(neighbourhood, 0);
 
@@ -696,6 +694,14 @@ namespace Tests
                     }
                 }
             }
+        }
+
+        private void RunLightingGeneration(Vector3Int chunkId) 
+        {
+            var job = lightManager.CreateGenerationJob(chunkId);
+            Assert.IsTrue(job.Done,"Job not done after creation");
+            lightManager.ApplyGenerationResult(chunkId, job.Result);
+            fullyGenerated.Add(chunkId);
         }
 
         private int[] getFlatHeightMap(int yValue) 

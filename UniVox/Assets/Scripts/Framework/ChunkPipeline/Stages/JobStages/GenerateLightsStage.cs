@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UniVox.Framework.ChunkPipeline.VirtualJobs;
 using UniVox.Framework.Lighting;
@@ -29,9 +30,9 @@ namespace UniVox.Framework.ChunkPipeline
         /// </summary>
         /// <param name="chunkId"></param>
         /// <returns></returns>
-        public override bool FreeFor(Vector3Int chunkId)
+        public override bool FreeFor(Vector3Int chunkId, HashSet<Vector3Int> pendingEntry)
         {
-            return !Utils.Helpers.GetNeighboursDirectOnly(chunkId).Any((neigh) => Contains(neigh));
+            return !Utils.Helpers.GetNeighboursDirectOnly(chunkId).Any((neigh) => Contains(neigh)||pendingEntry.Contains(neigh));
         }
     }
 }

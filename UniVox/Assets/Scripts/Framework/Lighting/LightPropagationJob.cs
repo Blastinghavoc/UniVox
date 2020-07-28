@@ -28,6 +28,9 @@ namespace UniVox.Framework.Lighting
             data.Dispose();
             dynamicPropagationQueue.Dispose();
             sunlightPropagationQueue.Dispose();
+
+            sunlightNeighbourUpdates.Dispose();
+            dynamicNeighbourUpdates.Dispose();
         }
 
         public void Execute()

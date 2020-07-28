@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using NSubstitute;
+using NUnit.Framework;
 using NUnit.Framework.Internal;
 using System;
 using System.Collections.Generic;
@@ -8,6 +9,7 @@ using UniVox.Framework;
 using UniVox.Framework.ChunkPipeline;
 using UniVox.Framework.ChunkPipeline.VirtualJobs;
 using UniVox.Framework.Common;
+using UniVox.Framework.Lighting;
 using UniVox.Implementations.ChunkData;
 
 namespace Tests
@@ -141,6 +143,8 @@ namespace Tests
         MockMesher mockMesher;
         MockProvider mockProvider;
         Vector3Int mockPlayChunkID;
+        ILightManager mockLightManager;
+        private bool lighting;
 
         Dictionary<Vector3Int, MockChunkComponent> mockComponentStorage;
 
@@ -179,10 +183,21 @@ namespace Tests
             mockProvider = new MockProvider();
             mockComponentStorage = new Dictionary<Vector3Int, MockChunkComponent>();
             mockPlayChunkID = Vector3Int.zero;
+            mockLightManager = Substitute.For<ILightManager>();
+            mockLightManager.CreateGenerationJob(Arg.Any<Vector3Int>())
+                .Returns(args =>
+                {
+                    return new BasicFunctionJob<LightmapGenerationJobResult>(() => new LightmapGenerationJobResult());
+                });
         }
 
-        private void MakePipeline(int numData, int numMesh, int numCollision, bool makeStructures = false, int numStructures = 200)
+        private void MakePipeline(int numData, int numMesh, int numCollision, bool makeStructures = false, int numStructures = 200,bool includeLighting = false)
         {
+            mockLightManager.MaxChunksGeneratedPerUpdate.Returns(numStructures);
+
+            lighting = includeLighting;
+            var lm = includeLighting ? mockLightManager : null;
+
             pipeline = new ChunkPipelineManager(
                 mockProvider,
                 mockMesher,
@@ -192,8 +207,8 @@ namespace Tests
                 numMesh,
                 numCollision,
                 makeStructures,
-                numStructures
-                );
+                numStructures,
+                lm);
         }
 
         private void AddOrUpdateTarget(Vector3Int chunkId, int targetStage, bool increaseOnly = false)
@@ -244,7 +259,7 @@ namespace Tests
                     structureRadius++;
                 }
                 fullyGeneratedRadius++;
-            }
+            }            
 
             Func<Vector3Int, int, bool> radiusTest = (offset, radius) => offset.All((v) => Math.Abs(v) <= radius);
 
@@ -469,6 +484,52 @@ namespace Tests
 
             //Max stage and target should have been decreased, min stage should have decreased to max
             AssertChunkStages(testChunkID, pipeline.FullyGeneratedStage);
+        }
+
+        [Test(Description ="Ensures that a chunk cannot be downgraded past the fully generated stage" +
+            " if it has previously surpassed it.")]
+        [TestCase(false,TestName ="NoLights")]
+        [TestCase(true,TestName ="Lights")]
+        public void SetTargetLowerThanMaxWhenPassedFullyGenerated(bool withLighting)
+        {
+            MakePipeline(1000, 1, 1,true,includeLighting:withLighting);
+
+            var testChunkID = new Vector3Int(0, 0, 0);
+
+            mockAddNewChunkWithTarget(testChunkID, pipeline.RenderedStage);
+            AddAllDependenciesNecessaryForChunkToGetToStage(testChunkID, pipeline.RenderedStage);
+
+            pipeline.Update();
+            AssertChunkStages(testChunkID, pipeline.RenderedStage);
+
+            //Set target to before the fully generated stage
+            pipeline.SetTarget(testChunkID, pipeline.OwnStructuresStage);
+
+            //Render mesh should have been removed
+            Assert.IsNull(mockComponentStorage[testChunkID].RenderMesh);
+
+            //Everything should have decreased to FullyGenerated, not OwnStructures as that is too low.
+            AssertChunkStages(testChunkID, pipeline.FullyGeneratedStage);
+        }
+
+        [Test(Description = "Ensures that a chunk cannot be downgraded past the lighting stage" +
+            " if it has previously surpassed it.")]
+        public void SetTargetLowerThanMaxWhenPassedLighting()
+        {
+            MakePipeline(1000, 1, 1, true);
+
+            var testChunkID = new Vector3Int(0, 0, 0);
+
+            mockAddNewChunkWithTarget(testChunkID, pipeline.AllVoxelsNeedLightGenStage+1);
+            AddAllDependenciesNecessaryForChunkToGetToStage(testChunkID, pipeline.AllVoxelsNeedLightGenStage);
+
+            pipeline.Update();
+
+            //Set target to before the lighting stage
+            pipeline.SetTarget(testChunkID, pipeline.OwnStructuresStage);
+
+            //Everything should have decreased to AllVoxelsNeedLightGenStage, not OwnStructures as that is too low.
+            AssertChunkStages(testChunkID, pipeline.AllVoxelsNeedLightGenStage);
         }
 
         [Test]

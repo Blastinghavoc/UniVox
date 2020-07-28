@@ -14,13 +14,22 @@ namespace UniVox.Framework.ChunkPipeline
         /// </summary>
         int EntryLimit { get; }
 
-        List<Vector3Int> GoingBackwardsThisUpdate { get; }
-        List<Vector3Int> MovingOnThisUpdate { get; }
+        HashSet<Vector3Int> GoingBackwardsThisUpdate { get; }
+        HashSet<Vector3Int> MovingOnThisUpdate { get; }
 
         void Add(Vector3Int incoming, ChunkStageData stageData);
 
         bool Contains(Vector3Int chunkID);
-        bool FreeFor(Vector3Int chunkId);
+
+        /// <summary>
+        /// Returns a value indicating whether the current stage can accept the given chunk id,
+        /// based on what's currently in the stage, and the set of ids that are pending
+        /// entry to the stage.
+        /// </summary>
+        /// <param name="chunkId"></param>
+        /// <param name="pendingEntry"></param>
+        /// <returns></returns>
+        bool FreeFor(Vector3Int chunkId,HashSet<Vector3Int> pendingEntry);
 
         void Update();
 

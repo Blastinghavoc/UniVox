@@ -13,13 +13,22 @@ namespace UniVox.Framework.Lighting
         public Light sunLight;
         public Material skyboxMaterial;
         public bool parallel;
+        [Range(0,100)]
+        public int MaxGenPerUpdate = 24;
+        [Range(0, 400)]
+        public int MaxPropPerUpdate = 48;
+
 
         private ILightManager lightManager;
+
+        public int MaxChunksGeneratedPerUpdate => MaxGenPerUpdate;
 
         public void Initialise(IVoxelTypeManager voxelTypeManager, IChunkManager chunkManager,IHeightMapProvider heightMapProvider)
         {
             var lm = new LightManager();
             lm.Parallel = parallel;
+            lm.MaxChunksGeneratedPerUpdate = MaxChunksGeneratedPerUpdate;
+            lm.MaxLightUpdates = MaxPropPerUpdate;
             lightManager = lm;
             lightManager.Initialise(voxelTypeManager, chunkManager,heightMapProvider);            
         }
@@ -54,11 +63,6 @@ namespace UniVox.Framework.Lighting
         void ILightManager.Update()
         {
             lightManager.Update();
-        }
-
-        public void OnChunkFullyGenerated(Vector3Int chunkId)
-        {
-            lightManager.OnChunkFullyGenerated(chunkId);
         }
 
         public void ApplyGenerationResult(Vector3Int chunkId, LightmapGenerationJobResult result)
