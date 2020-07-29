@@ -42,6 +42,8 @@
             UNITY_DECLARE_TEX2DARRAY(_MainTex);
             //float4 _MainTex_ST;
             float GlobalLightLevel;
+            float GlobalLightMinIntensity;
+            float GlobalLightMaxIntensity;
 
             v2f vert (appdata v)
             {
@@ -59,11 +61,10 @@
                 // sample the texture
                 fixed4 col = UNITY_SAMPLE_TEX2DARRAY(_MainTex, i.uv);
                 
-                float localSunLight = GlobalLightLevel * i.color.a;
-                float3 sunColour = float3(localSunLight,localSunLight,localSunLight) * col.xyz;
-                float3 dynamicColour = i.color.xyz * col.xyz;
-                float3 combinedColour = clamp(sunColour+dynamicColour,0,1);
-                col.xyz = combinedColour;
+                float localSunIntensity = lerp(GlobalLightMinIntensity,GlobalLightMaxIntensity, GlobalLightLevel *i.color.a);
+                float3 sunLight = float3(localSunIntensity,localSunIntensity,localSunIntensity);
+                float3 dynamicLight = i.color.xyz;
+                col.xyz = clamp(sunLight+dynamicLight,0,1)*col.xyz;
 
                 // apply fog
                 UNITY_APPLY_FOG(i.fogCoord, col);

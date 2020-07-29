@@ -787,12 +787,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   GlobalLightName: GlobalLightLevel
+  GlobalLightValue: 0
   shaderVariables:
   - name: GlobalLightMinIntensity
     value: 0.1
   - name: GlobalLightMaxIntensity
     value: 1
-  TimeOfDay: 0
+  TimeOfDay: 90
   sunLight: {fileID: 705507994}
   skyboxMaterial: {fileID: 2100000, guid: 9cd49762ce8f3194fbfece30821c1f93, type: 2}
   parallel: 1

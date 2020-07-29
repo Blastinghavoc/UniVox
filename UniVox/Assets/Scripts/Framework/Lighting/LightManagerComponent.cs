@@ -7,9 +7,9 @@ namespace UniVox.Framework.Lighting
 {
     public class LightManagerComponent : MonoBehaviour, ILightManager
     {
-        public string GlobalLightName;
+        [SerializeField] private string GlobalLightName = "";
         [Range(0, 1)]
-        public float GlobalLightValue;
+        [SerializeField] private float GlobalLightValue = 1;
 
         [SerializeField] private ShaderVariable[] shaderVariables = new ShaderVariable[0];
 
@@ -62,7 +62,7 @@ namespace UniVox.Framework.Lighting
         void Update()
         {
             sunLight.transform.rotation = Quaternion.Euler(TimeOfDay,0,0);
-            //GlobalLightValue = Mathf.InverseLerp(-1,1, Mathf.Sin(Mathf.Deg2Rad * TimeOfDay));
+            GlobalLightValue = Mathf.InverseLerp(-1,1, Mathf.Sin(Mathf.Deg2Rad * TimeOfDay));
             skyboxMaterial.SetFloat("_Exposure", GlobalLightValue);
 
             Shader.SetGlobalFloat(GlobalLightName, GlobalLightValue);
