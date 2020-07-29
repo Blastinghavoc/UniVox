@@ -7,9 +7,13 @@ namespace UniVox.Framework.Lighting
 {
     public class LightManagerComponent : MonoBehaviour, ILightManager
     {
-        [SerializeField] private string GlobalLightName = "";
+        [SerializeField] private string LightLevelVariable = "GlobalLightLevel";
         [Range(0, 1)]
         [SerializeField] private float GlobalLightValue = 1;
+
+        [SerializeField] private string LightDirectionVariable = "GlobalLightDirection";
+        [SerializeField] private Vector3 LightDirection = Vector3.up;
+
 
         [SerializeField] private ShaderVariable[] shaderVariables = new ShaderVariable[0];
 
@@ -61,11 +65,16 @@ namespace UniVox.Framework.Lighting
         // Update is called once per frame
         void Update()
         {
-            sunLight.transform.rotation = Quaternion.Euler(TimeOfDay,0,0);
+            sunLight.transform.rotation = Quaternion.Euler(TimeOfDay, 0, 0);
             GlobalLightValue = Mathf.InverseLerp(-1,1, Mathf.Sin(Mathf.Deg2Rad * TimeOfDay));
             skyboxMaterial.SetFloat("_Exposure", GlobalLightValue);
 
-            Shader.SetGlobalFloat(GlobalLightName, GlobalLightValue);
+            Shader.SetGlobalFloat(LightLevelVariable, GlobalLightValue);
+
+            LightDirection =  (-1*sunLight.transform.forward).normalized;
+
+            Shader.SetGlobalVector(LightDirectionVariable, LightDirection);
+
             for (int i = 0; i < shaderVariables.Length; i++)
             {
                 var variable = shaderVariables[i];
