@@ -171,8 +171,9 @@ namespace UniVox.Framework
             if (chunkProvider is IDisposable disposableChunkProvider)
             {
                 disposableChunkProvider.Dispose();
-            }           
+            }
 
+            lightManager.Dispose();
         }
 
         public bool IsChunkComplete(Vector3Int chunkId)

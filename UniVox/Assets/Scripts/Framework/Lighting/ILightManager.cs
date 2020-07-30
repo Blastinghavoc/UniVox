@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UniVox.Framework.ChunkPipeline.VirtualJobs;
 
 namespace UniVox.Framework.Lighting
 {
-    public interface ILightManager
+    public interface ILightManager:IDisposable
     {
         int MaxChunksGeneratedPerUpdate { get; }
         void ApplyGenerationResult(Vector3Int chunkId, LightmapGenerationJobResult result);

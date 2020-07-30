@@ -30,6 +30,7 @@ namespace UniVox.Framework.Lighting
 
 
         private ILightManager lightManager;
+        private bool disposed = false;
 
         public int MaxChunksGeneratedPerUpdate => MaxGenPerUpdate;
 
@@ -43,11 +44,12 @@ namespace UniVox.Framework.Lighting
             lightManager.Initialise(voxelTypeManager, chunkManager,heightMapProvider);            
         }
 
-        private void OnDestroy()
+        public void Dispose() 
         {
-            if (lightManager is IDisposable disp)
+            if (!disposed)
             {
-                disp.Dispose();
+                lightManager.Dispose();
+                disposed = true;
             }
         }
 
