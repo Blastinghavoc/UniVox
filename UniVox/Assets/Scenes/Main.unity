@@ -2081,6 +2081,18 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 149472974}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1832009156 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 18740858033875789, guid: 5b1c90c2d322bbf48890283c565b2b7f,
+    type: 3}
+  m_PrefabInstance: {fileID: 149472974}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1832009154}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: be5049919f4729849b15364b55787089, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1998389610
 GameObject:
   m_ObjectHideFlags: 0
@@ -2338,6 +2350,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e871d13d7e546d4db0d0337166b95bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  blockPlacer: {fileID: 1832009156}
   textPrefab: {fileID: 2632865896696172478, guid: d89c09d703981604cadd12680cc0f0db,
     type: 3}
   fontSize: 25

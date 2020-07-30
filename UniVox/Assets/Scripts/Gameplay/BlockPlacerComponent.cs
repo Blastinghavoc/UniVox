@@ -16,6 +16,9 @@ namespace UniVox.Gameplay
         public GameObject IndicatorPrefab;
         public SOVoxelTypeDefinition blockToPlace;
 
+        public Vector3 LocationToPlaceBlock { get; private set; }
+        public Vector3 LocationToDeleteBlock { get; private set; }
+
         [Range(0,3)]
         public int rotationX;
         [Range(0, 3)]
@@ -64,6 +67,9 @@ namespace UniVox.Gameplay
                 Indicator.SetActive(true);
                 Indicator.transform.position = WorldInterface.CenterOfVoxelAt(raycastHit.point + -0.1f * raycastHit.normal);
                 Indicator.transform.rotation = Quaternion.Euler(0, 0, 0);
+
+                LocationToPlaceBlock = raycastHit.point + 0.1f * raycastHit.normal;
+                LocationToDeleteBlock = raycastHit.point + -0.1f * raycastHit.normal;
             }
             else
             {
@@ -76,7 +82,7 @@ namespace UniVox.Gameplay
             {
                 if (hitAnything)
                 {
-                    WorldInterface.RemoveVoxel(raycastHit.point + -0.1f * raycastHit.normal);
+                    WorldInterface.RemoveVoxel(LocationToDeleteBlock);
                 }
             }
 
@@ -86,7 +92,7 @@ namespace UniVox.Gameplay
             {
                 if (hitAnything)
                 {
-                    WorldInterface.PlaceVoxel(raycastHit.point + 0.1f * raycastHit.normal, blockToPlace,
+                    WorldInterface.PlaceVoxel(LocationToPlaceBlock, blockToPlace,
                         new VoxelRotation() { x=rotationX,y = rotationY,z=rotationZ});
                 }
             }
@@ -95,7 +101,7 @@ namespace UniVox.Gameplay
             {
                 if (hitAnything)
                 {
-                    if (WorldInterface.TryGetVoxelType(raycastHit.point + -0.1f * raycastHit.normal,out var voxelType))
+                    if (WorldInterface.TryGetVoxelType(LocationToDeleteBlock, out var voxelType))
                     {
                         blockToPlace = voxelType;
                     }

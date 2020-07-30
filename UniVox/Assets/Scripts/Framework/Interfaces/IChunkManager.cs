@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using UniVox.Framework.ChunkPipeline;
+using UniVox.Framework.Lighting;
 using UniVox.Framework.PlayAreaManagement;
 
 namespace UniVox.Framework
@@ -23,6 +24,9 @@ namespace UniVox.Framework
         bool TrySetVoxel(Vector3 worldPos, VoxelTypeID voxelTypeID,VoxelRotation voxelRotation = default, bool overrideExisting = false);
         bool TryGetVoxel(Vector3 worldPos,out VoxelTypeID voxelTypeID);
         bool TryGetVoxel(Vector3Int chunkID, Vector3Int localVoxelIndex, out VoxelTypeID voxelTypeID);
+
+        bool TryGetLightLevel(Vector3 worldPos, out LightValue lightValue);
+
         RestrictedChunkData GetReadOnlyChunkData(Vector3Int chunkID);
 
         IChunkData GetChunkData(Vector3Int chunkId);

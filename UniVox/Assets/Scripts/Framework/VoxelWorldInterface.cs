@@ -4,6 +4,7 @@ using System;
 using UnityEngine.UIElements;
 using PerformanceTesting;
 using UniVox.UI;
+using UniVox.Framework.Lighting;
 
 namespace UniVox.Framework
 {
@@ -69,6 +70,11 @@ namespace UniVox.Framework
                 return true;
             }
             return false;
+        }
+
+        public bool TryGetLightLevel(Vector3 position,out LightValue lightValue) 
+        {
+            return chunkManager.TryGetLightLevel(position, out lightValue);
         }
 
         public Vector3Int WorldToChunkPosition(Vector3 pos) 

@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UniVox.Framework;
+using UniVox.Gameplay;
 
 namespace UniVox.UI
 {
@@ -9,6 +10,7 @@ namespace UniVox.UI
     {
         private VoxelWorldInterface world = null;
         private Transform player = null;
+        [SerializeField] private BlockPlacerComponent blockPlacer = null;
         [SerializeField] private GameObject textPrefab = null;
         [SerializeField] private int fontSize = 25;
 
@@ -54,6 +56,7 @@ namespace UniVox.UI
                 new DebugItem("FPS"),
                 new DebugItem("Coords"),
                 new DebugItem("ChunkID"),
+                new DebugItem("LookingAtLightLevel"),
                 new DebugItem("WaitingForUpdateCheck"),
                 new DebugItem("Pipeline Status")
                 
@@ -83,6 +86,10 @@ namespace UniVox.UI
             {                
                 debugItems["Coords"].Update(player.position.ToString());
                 debugItems["ChunkID"].Update(world.WorldToChunkPosition(player.position).ToString());
+
+                world.TryGetLightLevel(blockPlacer.LocationToPlaceBlock, out var lightValue);
+                debugItems["LookingAtLightLevel"].Update(lightValue.ToString());
+
                 debugItems["Pipeline Status"].Update(world.GetPipelineStatus());
                 world.GetPlayAreaProcessingStatus(out var updateStatus);
                 debugItems["WaitingForUpdateCheck"].Update(updateStatus.ToString());

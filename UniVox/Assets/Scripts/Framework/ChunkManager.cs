@@ -537,6 +537,27 @@ namespace UniVox.Framework
             return false;
         }
 
+        public bool TryGetLightLevel(Vector3 worldPos, out LightValue lightValue) 
+        {
+            Vector3Int localVoxelIndex;
+            var chunkID = WorldToChunkPosition(worldPos, out localVoxelIndex);
+            lightValue = default;
+
+            if (loadedChunks.TryGetValue(chunkID, out var chunkComponent))
+            {
+                if (!pipeline.ChunkDataReadable(chunkID))
+                {
+                    //Data is not valid to be read
+                    return false;
+                }
+
+                lightValue = chunkComponent.Data.GetLight(localVoxelIndex);
+
+                return true;
+            }
+            return false;
+        }
+
         #endregion
 
         #region position conversion methods
