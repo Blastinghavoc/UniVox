@@ -35,9 +35,6 @@ namespace UniVox.Framework.Lighting
         private Queue<Vector3Int> pendingLightUpdatesOrder;
         private HashSet<Vector3Int> chunksWhereLightChangedOnBorderSinceLastUpdate;
 
-        //TODO remove DEBUG
-        private Vector3Int debugId = new Vector3Int(-6, 0, 7);
-
         public void Initialise(IVoxelTypeManager voxelTypeManager, IChunkManager chunkManager, IHeightMapProvider heightMapProvider)
         {
             this.chunkManager = chunkManager;
@@ -97,11 +94,7 @@ namespace UniVox.Framework.Lighting
                 pendingLightUpdatesByChunk.Remove(chunkId);
 
                 if (!chunkManager.IsChunkFullyGenerated(chunkId))
-                {
-                    if (chunkId.Equals(debugId))
-                    {
-                        Debug.Log($"Skipped for propagation for chunk {chunkId}");
-                    }
+                {                    
                     //skip, as this chunk is no longer valid for updates
                     continue;
                 }
@@ -121,17 +114,7 @@ namespace UniVox.Framework.Lighting
  
                 for (int i = 0; i < chunkUpdate.borderUpdateRequests.Count; i++)
                 {
-                    var borderUpdate = chunkUpdate.borderUpdateRequests[i];                    
-
-                    if (chunkId.Equals(debugId))
-                    {
-                        Debug.Log($"Propagating for the {borderUpdate.borderDirection} face," +
-                            $" direction validity: {data.directionsValid.ToArray().ArrayToString()}");
-
-                        var dbgChunkManager = chunkManager as ITestableChunkManager;
-                        var minPipelineStage = dbgChunkManager.GetMinPipelineStageOfChunkByName(chunkId);
-                        Debug.Log($"Chunk propagating from is in stage {minPipelineStage}");
-                    }
+                    var borderUpdate = chunkUpdate.borderUpdateRequests[i];      
 
                     BorderResolutionJob borderJob = new BorderResolutionJob()
                     {
@@ -256,12 +239,7 @@ namespace UniVox.Framework.Lighting
         {
             int[] heightMap = heightMapProvider.GetHeightMapForColumn(new Vector2Int(chunkId.x, chunkId.z));
 
-            var jobData = getJobData(chunkId);
-
-            if (chunkId.Equals(debugId))
-            {
-                Debug.Log($"generating, neighbour validity: {jobData.directionsValid.ToArray().ArrayToString()}");
-            }
+            var jobData = getJobData(chunkId);           
 
             var generationJob = new LightGenerationJob()
             {
@@ -334,16 +312,7 @@ namespace UniVox.Framework.Lighting
                 borderUpdate.dynamic = propJob.dynamicNeighbourUpdates[dir].ToArray();
 
                 if (borderUpdate.dynamic.Length > 0 || borderUpdate.sunlight.Length > 0)
-                {
-                    if (UpdateChunkId.Equals(debugId))
-                    {
-                        Debug.Log($"Queuing propagation for the {borderUpdate.borderDirection} face");
-                    }
-
-                    if (chunkId.Equals(debugId))
-                    {
-                        Debug.Log($"Queuing propagation into chunk {UpdateChunkId}, direction {dir}");
-                    }
+                {                   
 
                     if (pendingLightUpdatesByChunk.TryGetValue(UpdateChunkId,out var chunkUpdateRequest))
                     {
@@ -808,11 +777,11 @@ namespace UniVox.Framework.Lighting
         {
             public Vector3Int localPosition;
             public IChunkData chunkData;
-            public Vector3Int worldPos;//TODO incorporate in equality, DEBUG
+            public Vector3Int worldPos;
 
             public bool Equals(PropagationNode other)
             {
-                return chunkData == other.chunkData && localPosition.Equals(other.localPosition);
+                return chunkData == other.chunkData && localPosition.Equals(other.localPosition) && worldPos.Equals(other.worldPos);
             }
             public override int GetHashCode()
             {
@@ -822,6 +791,7 @@ namespace UniVox.Framework.Lighting
                     int hash = 17;//prime numbers!
                     hash = hash * 23 + localPosition.GetHashCode();
                     hash = hash * 23 + chunkData.ChunkID.GetHashCode();
+                    hash = hash * 23 + worldPos.GetHashCode();
                     return hash;
                 }
             }

@@ -107,7 +107,7 @@ namespace UniVox.Framework
 
             chunkProvider.Initialise(VoxelTypeManager, this, eventManager);
             chunkMesher.Initialise(VoxelTypeManager, this, eventManager);
-            lightManager.Initialise(VoxelTypeManager, this,chunkProvider);
+            lightManager.Initialise(VoxelTypeManager, this, chunkProvider);
 
             var lm = IncludeLighting ? lightManager : null;
 
@@ -144,20 +144,13 @@ namespace UniVox.Framework
 
             playArea.Update();
             var chunksTouchedByLightingUpdate = lightManager.Update();
-            var testId = new Vector3Int(-6, 0, 7);//TODO remove DEBUG
+
             foreach (var id in chunksTouchedByLightingUpdate)
             {
-                if (id.Equals(testId))
-                {
-                    Debug.Log("Considering regeneration");
-                }
+
                 if (pipeline.GetTargetStage(id) >= pipeline.RenderedStage)
                 {
                     RedoChunkFromStage(id, pipeline.FullyGeneratedStage);
-                    if (id.Equals(testId))
-                    {
-                        Debug.Log("Regenerated");
-                    }
                 }
             }
 
@@ -190,7 +183,7 @@ namespace UniVox.Framework
             return loadedChunks.ContainsKey(chunkId) && pipeline.GetMaxStage(chunkId).Equals(pipeline.CompleteStage);
         }
 
-        public bool IsChunkFullyGenerated(Vector3Int chunkId) 
+        public bool IsChunkFullyGenerated(Vector3Int chunkId)
         {
             return loadedChunks.ContainsKey(chunkId) && pipeline.GetMaxStage(chunkId) >= (pipeline.FullyGeneratedStage);
         }
@@ -263,14 +256,14 @@ namespace UniVox.Framework
         /// </summary>
         /// <param name="chunkID"></param>
         /// <param name="targetStage"></param>
-        public void SetTargetStageOfChunk(Vector3Int chunkID, int targetStage,TargetUpdateMode updateMode = TargetUpdateMode.any)
+        public void SetTargetStageOfChunk(Vector3Int chunkID, int targetStage, TargetUpdateMode updateMode = TargetUpdateMode.any)
         {
             Profiler.BeginSample("SetTargetStageOfChunk");
             bool outOfWorld = false;
             if (chunkID.y > WorldLimits.MaxChunkY || chunkID.y < WorldLimits.MinChunkY)
             {
                 outOfWorld = true;
-                var absDistanceOutisedWorld = (chunkID.y > WorldLimits.MaxChunkY) ? chunkID.y - WorldLimits.MaxChunkY 
+                var absDistanceOutisedWorld = (chunkID.y > WorldLimits.MaxChunkY) ? chunkID.y - WorldLimits.MaxChunkY
                     : WorldLimits.MinChunkY - chunkID.y;
 
                 Assert.IsTrue(absDistanceOutisedWorld > 0);
@@ -311,7 +304,7 @@ namespace UniVox.Framework
                 {
                     //Chunks with saved data bypass the generation process.
                     ChunkComponent.Data = data;
-                    pipeline.AddWithData(chunkID, targetStage,IncludeLighting);//Add with voxel data, but re-generate light data
+                    pipeline.AddWithData(chunkID, targetStage, IncludeLighting);//Add with voxel data, but re-generate light data
                 }
                 else
                 {
@@ -326,7 +319,7 @@ namespace UniVox.Framework
                 return;
             }
 
-            pipeline.SetTarget(chunkID, targetStage,updateMode);
+            pipeline.SetTarget(chunkID, targetStage, updateMode);
             Profiler.EndSample();
         }
 
@@ -407,7 +400,7 @@ namespace UniVox.Framework
 
                 foreach (var id in chunksTouchedByLightingUpdate)
                 {
-                    if (pipeline.GetTargetStage(id) >= pipeline.RenderedStage) 
+                    if (pipeline.GetTargetStage(id) >= pipeline.RenderedStage)
                     {
                         RedoChunkFromStage(id, pipeline.FullyGeneratedStage);
                     }
@@ -468,7 +461,7 @@ namespace UniVox.Framework
                 $" Did the pipeline contain the chunk? {pipeline.Contains(chunkID)}");
         }
 
-        public IChunkData GetChunkData(Vector3Int chunkId) 
+        public IChunkData GetChunkData(Vector3Int chunkId)
         {
             if (loadedChunks.TryGetValue(chunkId, out var chunkComponent))
             {
@@ -546,7 +539,7 @@ namespace UniVox.Framework
             return false;
         }
 
-        public bool TryGetLightLevel(Vector3 worldPos, out LightValue lightValue) 
+        public bool TryGetLightLevel(Vector3 worldPos, out LightValue lightValue)
         {
             Vector3Int localVoxelIndex;
             var chunkID = WorldToChunkPosition(worldPos, out localVoxelIndex);
@@ -603,7 +596,7 @@ namespace UniVox.Framework
             //Result is elementwise integer division by the Chunk dimensions
             var result = floor.ElementWise((a, b) => Mathf.FloorToInt(a / (float)b), ChunkDimensions);
 
-            localVoxelIndex = Utils.Helpers.ModuloChunkDimensions(floor,chunkDimensions);
+            localVoxelIndex = Utils.Helpers.ModuloChunkDimensions(floor, chunkDimensions);
 
             return result;
         }
@@ -648,7 +641,7 @@ namespace UniVox.Framework
             return new Tuple<bool, bool>(loadedChunks.ContainsKey(chunkID), pipeline.Contains(chunkID));
         }
 
-        public int GetMinPipelineStageOfChunk(Vector3Int chunkId) 
+        public int GetMinPipelineStageOfChunk(Vector3Int chunkId)
         {
             return pipeline.GetMinStage(chunkId);
         }

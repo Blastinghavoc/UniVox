@@ -25,8 +25,6 @@ namespace Tests
         Dictionary<Vector3Int, IChunkData> chunkStorage;
         HashSet<Vector3Int> fullyGenerated;
 
-        //TODO add mock chunk data for light values
-
         [SetUp]
         public void Reset()
         {
