@@ -53,4 +53,19 @@ namespace UniVox.Framework.ChunkPipeline
         }
 
     }
+
+    public class PassThroughApplyFunctionStage : PassThroughStage
+    {
+        Action<Vector3Int> func;
+        public PassThroughApplyFunctionStage(string name, int stageId, IChunkPipeline pipeline,Action<Vector3Int> func) : base(name, stageId, pipeline)
+        {
+            this.func = func;
+        }
+
+        public override void Add(Vector3Int incoming, ChunkStageData stageData)
+        {
+            base.Add(incoming, stageData);
+            func(incoming);//Apply the function to anything entering this stage, even if it terminates here.
+        }
+    }
 }

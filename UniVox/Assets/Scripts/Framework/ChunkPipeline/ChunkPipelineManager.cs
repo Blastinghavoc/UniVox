@@ -77,7 +77,7 @@ namespace UniVox.Framework.ChunkPipeline
 
             bool lighting = lightManager != null;
 
-            bool dependentOnNeighbours = chunkMesher.IsMeshDependentOnNeighbourChunks || lighting;
+            bool meshDependentOnNeighbours = chunkMesher.IsMeshDependentOnNeighbourChunks || lighting;
 
             int i = 0;
 
@@ -111,16 +111,6 @@ namespace UniVox.Framework.ChunkPipeline
                 OwnStructuresStage = i;
                 var waitingForAllNeighboursToHaveStructures = new WaitForNeighboursStage(
                     "WaitForNeighbourStructures", i++, this,true);
-                waitingForAllNeighboursToHaveStructures.OnWaitEnded = (id) => {
-                    var chunkData = getChunkComponent(id).Data;
-                    if (chunkData.FullyGenerated)
-                    {
-                        var stageData = chunkStageMap.TryGetValue(id, out var tmp) ? tmp : null;
-                        Debug.LogError($"Chunk data for {id} was listed as fully generated before all its neighbours had structures");
-                    }
-                    
-                    chunkData.FullyGenerated = true;
-                };
 
                 stages.Add(waitingForAllNeighboursToHaveStructures);
 
@@ -149,9 +139,23 @@ namespace UniVox.Framework.ChunkPipeline
                 stages.Add(generatingLights);
             }
 
+            ///Passthrough stage to set chunkdata fully generated flag
+            var preFullyGeneratedStage = new PassThroughApplyFunctionStage("PreFullGenerated", i++, this,
+                (chunkId)=> {
+                    var chunkData = getChunkComponent(chunkId).Data;
+                    if (chunkData.FullyGenerated)
+                    {
+                        var stageData = chunkStageMap.TryGetValue(chunkId, out var tmp) ? tmp : null;
+                        Debug.LogError($"Chunk data for {chunkId} was listed as fully generated before reaching the fully generated stage!");
+                    }
+                    //The chunk is now fully generated, after having received both voxels and lighting.
+                    chunkData.FullyGenerated = true;
+                });
+            stages.Add(preFullyGeneratedStage);
+
             FullyGeneratedStage = i;
 
-            if (dependentOnNeighbours)
+            if (meshDependentOnNeighbours)
             {
                 /// If mesh is dependent on neighbour chunks, add a waiting stage
                 /// to wait until the neighbours of a chunk have their data before
@@ -621,43 +625,8 @@ namespace UniVox.Framework.ChunkPipeline
         private bool ChunkDataReadable(ChunkStageData stageData)
         {
             return stageData.minStage >= FullyGeneratedStage;
-        }
-            
+        }         
 
-        /// <summary>
-        /// Checks that the minimum stage is greater than stageId for all neighbours of the
-        /// given chunkId. Optionally includes diagonal neighbours.
-        /// </summary>
-        /// <param name="chunkId"></param>
-        /// <param name="stageId"></param>
-        /// <param name="includeDiagonals"></param>
-        /// <returns></returns>
-        public bool AllNeighboursMinStageGreaterThan(Vector3Int chunkId, int stageId,bool includeDiagonals = false) 
-        {
-            if (includeDiagonals)
-            {
-                for (int i = 0; i < DiagonalDirectionExtensions.numDirections; i++)
-                {
-                    var neighbourId = chunkId + DiagonalDirectionExtensions.Vectors[i];
-                    if (!ChunkMinStageGreaterThan(neighbourId, stageId))
-                    {
-                        return false;
-                    }
-                }
-            }
-            else
-            {
-                for (int i = 0; i < DirectionExtensions.numDirections; i++)
-                {
-                    var neighbourId = chunkId + DirectionExtensions.Vectors[i];
-                    if (!ChunkMinStageGreaterThan(neighbourId, stageId))
-                    {
-                        return false;
-                    }
-                }
-            }
-            return true;
-        }
 
         /// <summary>
         /// Returns true if the min stage of the given chunk id is strictly greater than
@@ -697,17 +666,6 @@ namespace UniVox.Framework.ChunkPipeline
             return stages[currentStage + 1].FreeFor(chunkID,currentStagePending);
         }
 
-        public bool NextStageContainsChunk(Vector3Int chunkID, int currentStage)
-        {
-            if (currentStage >= stages.Count)
-            {
-                return false;
-            }
-
-            return stages[currentStage + 1].Contains(chunkID);
-        }
-
-
         public bool TargetStageGreaterThanCurrent(Vector3Int chunkID, int currentStage)
         {
             if (chunkStageMap.TryGetValue(chunkID, out var stageData))
@@ -739,7 +697,10 @@ namespace UniVox.Framework.ChunkPipeline
             StringBuilder sb = new StringBuilder();
             foreach (var stage in stages)
             {
-                sb.AppendLine($"{stage.Name}:{stage.Count}");
+                if (!(stage is PassThroughStage))
+                {
+                    sb.AppendLine($"{stage.Name}:{stage.Count}");
+                }
             }
             return sb.ToString();
         }
