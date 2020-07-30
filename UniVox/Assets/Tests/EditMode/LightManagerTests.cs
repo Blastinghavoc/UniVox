@@ -64,19 +64,22 @@ namespace Tests
                 });
 
             chunkManager.ChunkToWorldPosition(Arg.Any<Vector3Int>())
-                .Returns((args) => {
+                .Returns((args) =>
+                {
                     var chunkId = (Vector3Int)args[0];
                     return chunkId * chunkDimensions;
                 });
 
             chunkManager.GetReadOnlyChunkData(Arg.Any<Vector3Int>())
-                .Returns((args) => {
+                .Returns((args) =>
+                {
                     var chunkId = (Vector3Int)args[0];
                     return new RestrictedChunkData(GetMockChunkData(chunkId));
                 });
 
             chunkManager.GetChunkData(Arg.Any<Vector3Int>())
-                .Returns((args) => {
+                .Returns((args) =>
+                {
                     var chunkId = (Vector3Int)args[0];
                     return GetMockChunkData(chunkId);
                 });
@@ -85,16 +88,17 @@ namespace Tests
 
             IHeightMapProvider heightMapProvider = Substitute.For<IHeightMapProvider>();
             heightMapProvider.GetHeightMapForColumn(Arg.Any<Vector2Int>())
-                .Returns((args) => {
+                .Returns((args) =>
+                {
                     return getFlatHeightMap(heightMapYValue);
                 });
 
             lightManager = new LightManager();
-            lightManager.Initialise(voxelTypeManager, chunkManager,heightMapProvider);
+            lightManager.Initialise(voxelTypeManager, chunkManager, heightMapProvider);
         }
 
         [TearDown]
-        public void Cleanup() 
+        public void Cleanup()
         {
             lightManager.Dispose();
         }
@@ -300,7 +304,7 @@ namespace Tests
             lightManager.UpdateLightOnVoxelSet(neighbourhood, Vector3Int.zero, lampId, (VoxelTypeID)VoxelTypeID.AIR_ID);
             //Remove
             lightManager.UpdateLightOnVoxelSet(neighbourhood, Vector3Int.zero, (VoxelTypeID)VoxelTypeID.AIR_ID, lampId);
-            
+
             //PrintSlice(neighbourhood,0);
 
             for (int z = -maxIntensity; z <= maxIntensity; z++)
@@ -366,7 +370,7 @@ namespace Tests
             RunLightingGeneration(neighbourhood.center.ChunkID);
 
 
-            var expectedLv = new LightValue() { Sun = (hm<0)? maxIntensity:0, Dynamic = 0 };
+            var expectedLv = new LightValue() { Sun = (hm < 0) ? maxIntensity : 0, Dynamic = 0 };
 
             for (int z = 0; z < chunkDimensions.z; z++)
             {
@@ -412,7 +416,7 @@ namespace Tests
             }
         }
 
-        [Test(Description ="Tests whether sunlight is correctly propagated into chunks, irrespective of" +
+        [Test(Description = "Tests whether sunlight is correctly propagated into chunks, irrespective of" +
             " the order they were generated in, for a pair of chunks")]
         [TestCase(true, TestName = "TopToBottom")]
         [TestCase(false, TestName = "BottomToTop")]
@@ -425,7 +429,7 @@ namespace Tests
                 Utils.Helpers.Swap(ref first, ref second);
             }
 
-            Vector3Int[] ids = new Vector3Int[] { 
+            Vector3Int[] ids = new Vector3Int[] {
                 Vector3Int.zero,
                 Vector3Int.down
             };
@@ -487,7 +491,7 @@ namespace Tests
             " the order they were generated in, for a column of three chunks")]
         [TestCaseSource("ChunkOrdersTriple")]
         public void OnChunksGeneratedSunlightTriple(int[] order)
-        {            
+        {
 
             Vector3Int[] ids = new Vector3Int[] {
                 Vector3Int.zero,
@@ -509,7 +513,7 @@ namespace Tests
             {
                 RunLightingGeneration(ids[index]);
                 lightManager.Update();
-            }                      
+            }
 
             //var bottomNeigh = new ChunkNeighbourhood(lowChunkData, GetMockChunkData);
             //Debug.Log("TopSlice");
@@ -535,19 +539,72 @@ namespace Tests
             }
         }
 
+        /// <summary>
+        /// Regression test for a race condition that was found and fixed on day 60
+        /// </summary>
+        [Test]
+        public void MultiplePropagationsIntoSameChunkInOneUpdate()
+        {
+            lightManager.Parallel = true;//Parallel execution
+
+            //Ground level is at 0, so the lower chunk will at first think it has no sunlight
+            heightMapYValue = 0;
+            Vector3Int testChunkId = Vector3Int.down;
+            var upId = testChunkId + Vector3Int.up;
+            var adjacentId = testChunkId + Vector3Int.left;
+
+            var neighbourhood = new ChunkNeighbourhood(testChunkId, GetMockChunkData);
+            //The lamp in the adjacent chunk should cause a propagation update in the test chunk
+            var lampPos = new Vector3Int(-1, 0, 0);
+            neighbourhood.SetVoxel(lampPos.x,lampPos.y,lampPos.z,lampId);
+
+            //generate test chunk
+            RunLightingGeneration(testChunkId);
+            lightManager.Update();
+
+            //generate up chunk, then adjacent chunk.
+            RunLightingGeneration(upId);            
+            RunLightingGeneration(adjacentId);
+            lightManager.Update();//Run propagations in the same update
+
+            ///This order could result in no sunlight in the test chunk if race conditions are present,
+            ///we are testing that there isn't a race condition.
+
+            var expectedSunlight = LightValue.MaxIntensity;
+
+            var testChunkData = GetMockChunkData(testChunkId);
+
+            for (int z = 0; z < chunkDimensions.z; z++)
+            {
+                for (int y = 0; y < chunkDimensions.y; y++)
+                {
+                    for (int x = 0; x < chunkDimensions.x; x++)
+                    {
+                        var pos = new Vector3Int(x, y, z);
+                        var expectedDynamic = math.max(maxIntensity - (pos - lampPos).ManhattanMagnitude(), 0);
+                        var expectedLv = new LightValue() { Dynamic = expectedDynamic, Sun = expectedSunlight };
+
+                        Assert.AreEqual(expectedLv, testChunkData.GetLight(x, y, z),
+                            $"Light value not as expected for position {x},{y},{z}");
+                    }
+                }
+            }
+
+        }
+
         private static IEnumerable<TestCaseData> ChunkOrdersTriple()
         {
-            yield return new TestCaseData(new int[] { 0,1,2}).SetName("TopToBottom");
-            yield return new TestCaseData(new int[] { 2,1,0}).SetName("BottomToTop");
-            yield return new TestCaseData(new int[] { 0,2,1}).SetName("TopBottomMiddle");
-            yield return new TestCaseData(new int[] { 1,0,2}).SetName("MiddleTopBottom");
-            yield return new TestCaseData(new int[] { 1,2,0}).SetName("MiddleBottomTop");
-            yield return new TestCaseData(new int[] { 2,0,1}).SetName("BottomTopMiddle");
+            yield return new TestCaseData(new int[] { 0, 1, 2 }).SetName("TopToBottom");
+            yield return new TestCaseData(new int[] { 2, 1, 0 }).SetName("BottomToTop");
+            yield return new TestCaseData(new int[] { 0, 2, 1 }).SetName("TopBottomMiddle");
+            yield return new TestCaseData(new int[] { 1, 0, 2 }).SetName("MiddleTopBottom");
+            yield return new TestCaseData(new int[] { 1, 2, 0 }).SetName("MiddleBottomTop");
+            yield return new TestCaseData(new int[] { 2, 0, 1 }).SetName("BottomTopMiddle");
         }
 
         [Test]
-        [TestCase(1000,TestName ="NoSun")]
-        [TestCase(-1000,TestName ="Sun")]
+        [TestCase(1000, TestName = "NoSun")]
+        [TestCase(-1000, TestName = "Sun")]
         public void OnChunkGeneratedWithLightNoNeighbours(int hm)
         {
             var vp = Vector3Int.zero;
@@ -572,7 +629,7 @@ namespace Tests
                         var expectedLv = new LightValue() { Sun = (hm < 0) ? maxIntensity : 0 };
                         expectedLv.Dynamic = math.max(maxIntensity - pos.ManhattanMagnitude(), 0);
 
-                        if (!insideChunkId(pos,Vector3Int.zero))
+                        if (!insideChunkId(pos, Vector3Int.zero))
                         {
                             expectedLv.Dynamic = 0;
                             expectedLv.Sun = 0;
@@ -624,7 +681,7 @@ namespace Tests
                         var expectedLv = new LightValue() { Sun = (hm < 0) ? maxIntensity : 0 };
                         expectedLv.Dynamic = math.max(maxIntensity - pos.ManhattanMagnitude(), 0);
 
-                        if (!insideChunkId(pos,Vector3Int.zero) && !insideChunkId(pos,tstChunkId))
+                        if (!insideChunkId(pos, Vector3Int.zero) && !insideChunkId(pos, tstChunkId))
                         {
                             expectedLv.Dynamic = 0;
                             expectedLv.Sun = 0;
@@ -696,15 +753,25 @@ namespace Tests
             }
         }
 
-        private void RunLightingGeneration(Vector3Int chunkId) 
+        private void RunLightingGeneration(Vector3Int chunkId)
         {
             var job = lightManager.CreateGenerationJob(chunkId);
-            Assert.IsTrue(job.Done,"Job not done after creation");
+            if (lightManager.Parallel)
+            {
+                while (!job.Done)
+                {
+                    //busy wait
+                }
+            }
+            else
+            {
+                Assert.IsTrue(job.Done, "Job not done after creation");
+            }
             lightManager.ApplyGenerationResult(chunkId, job.Result);
             fullyGenerated.Add(chunkId);
         }
 
-        private int[] getFlatHeightMap(int yValue) 
+        private int[] getFlatHeightMap(int yValue)
         {
             int[] hm = new int[chunkDimensions.x * chunkDimensions.z];
             for (int i = 0; i < hm.Length; i++)
@@ -723,7 +790,7 @@ namespace Tests
             lightManager.UpdateLightOnVoxelSet(centeredNeigh, localPos, setTo, prevVoxel);
         }
 
-        private bool insideChunkId(Vector3Int pos, Vector3Int chunkId) 
+        private bool insideChunkId(Vector3Int pos, Vector3Int chunkId)
         {
             return Utils.Helpers.IsInsideChunkId(pos, chunkId, chunkDimensions);
         }
@@ -748,7 +815,7 @@ namespace Tests
             return new ChunkNeighbourhood(chunkId, GetMockChunkData);
         }
 
-        private void FakeGenerationOfNeighbours(Vector3Int chunkId) 
+        private void FakeGenerationOfNeighbours(Vector3Int chunkId)
         {
             //Act as if all nearby chunks are fully generated
             for (int z = -1; z <= 1; z++)
@@ -757,7 +824,7 @@ namespace Tests
                 {
                     for (int x = -1; x <= 1; x++)
                     {
-                        fullyGenerated.Add(new Vector3Int(x, y, z)+chunkId);
+                        fullyGenerated.Add(new Vector3Int(x, y, z) + chunkId);
                     }
                 }
             }

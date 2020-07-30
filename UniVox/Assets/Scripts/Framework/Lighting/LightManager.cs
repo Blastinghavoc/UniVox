@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json.Bson;
+using PerformanceTesting;
 using System;
 using System.Collections.Generic;
 using Unity.Collections;
@@ -30,7 +31,11 @@ namespace UniVox.Framework.Lighting
         private NativeArray<int> voxelTypeToAbsorptionMap;
         private NativeArray<int3> directionVectors;
 
-        private Queue<ChunkUpdateRequest> pendingLightUpdates;
+        private Dictionary<Vector3Int, ChunkUpdateRequest> pendingLightUpdatesByChunk;
+        private Queue<Vector3Int> pendingLightUpdatesOrder;
+
+        //TODO remove DEBUG
+        private Vector3Int debugId = new Vector3Int(-7, 0, 8);
 
         public void Initialise(IVoxelTypeManager voxelTypeManager, IChunkManager chunkManager, IHeightMapProvider heightMapProvider)
         {
@@ -38,7 +43,8 @@ namespace UniVox.Framework.Lighting
             this.voxelTypeManager = voxelTypeManager;
             this.heightMapProvider = heightMapProvider;
             chunkDimensions = chunkManager.ChunkDimensions;
-            pendingLightUpdates = new Queue<ChunkUpdateRequest>();
+            pendingLightUpdatesByChunk = new Dictionary<Vector3Int, ChunkUpdateRequest>();
+            pendingLightUpdatesOrder = new Queue<Vector3Int>();
 
             List<int> emissions = new List<int>();
             List<int> absorptions = new List<int>();
@@ -77,61 +83,104 @@ namespace UniVox.Framework.Lighting
             Profiler.BeginSample("LightManagerUpdate");
             //Process a finite number of the pending updates.
             int processedThisUpdate = 0;
-            Queue<WipUpdateJob> jobsInProgress = new Queue<WipUpdateJob>();
+            Queue<WipPropagationUpdate> jobsInProgress = new Queue<WipPropagationUpdate>();
 
             var touchedByUpdate = new HashSet<Vector3Int>();
 
-            while (processedThisUpdate < MaxLightUpdates && pendingLightUpdates.Count > 0)
+            while (processedThisUpdate < MaxLightUpdates && pendingLightUpdatesOrder.Count > 0)
             {
-                var update = pendingLightUpdates.Dequeue();
+                var chunkId = pendingLightUpdatesOrder.Dequeue();
+                var chunkUpdate = pendingLightUpdatesByChunk[chunkId];
+                pendingLightUpdatesByChunk.Remove(chunkId);
 
-                if (!chunkManager.IsChunkFullyGenerated(update.chunkId))
+                if (!chunkManager.IsChunkFullyGenerated(chunkId))
                 {
+                    if (chunkId.Equals(debugId))
+                    {
+                        Debug.Log($"Skipped for propagation for chunk {chunkId}");
+                    }
                     //skip, as this chunk is no longer valid for updates
                     continue;
                 }
 
-                touchedByUpdate.Add(update.chunkId);
+                touchedByUpdate.Add(chunkId);
+                var data = getJobData(chunkId);
 
-                var data = getJobData(update.chunkId);
+                Assert.IsTrue(chunkUpdate.borderUpdateRequests.Count > 0);
 
-                BorderResolutionJob borderJob = new BorderResolutionJob()
+                //Run border resolution jobs for each face update request
+
+                //common queues
+                var dynamicPropagationQueue = new NativeQueue<int3>(Allocator.Persistent);
+                var sunlightPropagationQueue = new NativeQueue<int3>(Allocator.Persistent);
+
+                BorderResolutionJob[] borderResolutionJobs = new BorderResolutionJob[chunkUpdate.borderUpdateRequests.Count];
+ 
+                for (int i = 0; i < chunkUpdate.borderUpdateRequests.Count; i++)
                 {
-                    data = data,
-                    dynamicPropagationQueue = new NativeQueue<int3>(Allocator.Persistent),
-                    sunlightPropagationQueue = new NativeQueue<int3>(Allocator.Persistent),
-                    dynamicFromBorder = update.dynamic.ToNative(Allocator.Persistent),
-                    sunlightFromBorder = update.sunlight.ToNative(Allocator.Persistent),
-                    toDirection = DirectionExtensions.Opposite[(int)update.fromDirection]
-                };
+                    var borderUpdate = chunkUpdate.borderUpdateRequests[i];
 
+                    if (chunkId.Equals(debugId))
+                    {
+                        Debug.Log($"Propagating for the {borderUpdate.borderDirection} face," +
+                            $" direction validity: {data.directionsValid.ToArray().ArrayToString()}");
 
+                        var dbgChunkManager = chunkManager as ITestableChunkManager;
+                        var minPipelineStage = dbgChunkManager.GetMinPipelineStageOfChunkByName(chunkId);
+                        Debug.Log($"Chunk propagating from is in stage {minPipelineStage}");
+                    }
+
+                    BorderResolutionJob borderJob = new BorderResolutionJob()
+                    {
+                        data = data,
+                        dynamicPropagationQueue = dynamicPropagationQueue,
+                        sunlightPropagationQueue = sunlightPropagationQueue,
+                        dynamicFromBorder = borderUpdate.dynamic.ToNative(Allocator.Persistent),
+                        sunlightFromBorder = borderUpdate.sunlight.ToNative(Allocator.Persistent),
+                        toDirection = borderUpdate.borderDirection
+                    };
+
+                    borderResolutionJobs[i] = borderJob;
+                }
+
+                ///Just one propagation job will be run, with propagation queues
+                ///derived from all the border update requests
                 LightPropagationJob propJob = new LightPropagationJob()
                 {
                     data = data,
                     sunlightNeighbourUpdates = new LightJobNeighbourUpdates(Allocator.Persistent),
                     dynamicNeighbourUpdates = new LightJobNeighbourUpdates(Allocator.Persistent),
-                    sunlightPropagationQueue = borderJob.sunlightPropagationQueue,
-                    dynamicPropagationQueue = borderJob.dynamicPropagationQueue
+                    sunlightPropagationQueue = sunlightPropagationQueue,
+                    dynamicPropagationQueue = dynamicPropagationQueue
                 };
 
                 if (Parallel)
                 {
-                    WipUpdateJob updateJob = new WipUpdateJob()
+                    WipPropagationUpdate updateJob = new WipPropagationUpdate()
                     {
-                        borderJob = borderJob,
+                        borderJobs = borderResolutionJobs,
                         propJob = propJob
                     };
 
-                    var h1 = borderJob.Schedule();
-                    var h2 = propJob.Schedule(h1);
-                    updateJob.handle = h2;
-                    jobsInProgress.Enqueue(updateJob);
+                    JobHandle handle = new JobHandle();
+                    //Chain dependencies of border resolution jobs
+                    for (int i = 0; i < borderResolutionJobs.Length; i++)
+                    {
+                        handle = borderResolutionJobs[i].Schedule(handle);
+                    }
+                    
+                    handle = propJob.Schedule(handle);
+                    updateJob.handle = handle;
+                    jobsInProgress.Enqueue(updateJob); 
                 }
                 else
                 {
-                    borderJob.Run();
-                    borderJob.Dispose();
+                    for (int i = 0; i < borderResolutionJobs.Length; i++)
+                    {
+                        borderResolutionJobs[i].Run();
+                        borderResolutionJobs[i].Dispose();
+                    }
+
                     propJob.Run();
                     var chunkdata = chunkManager.GetChunkData(data.chunkId.ToBasic());
                     chunkdata.SetLightMap(data.lights.ToArray());
@@ -139,8 +188,12 @@ namespace UniVox.Framework.Lighting
                     propJob.Dispose();
                 }
 
+
+
                 processedThisUpdate++;
             }
+
+            Assert.AreEqual(pendingLightUpdatesOrder.Count,pendingLightUpdatesByChunk.Count);
 
             //Complete the jobs
             while (jobsInProgress.Count > 0)
@@ -148,7 +201,11 @@ namespace UniVox.Framework.Lighting
                 var wip = jobsInProgress.Dequeue();
                 wip.handle.Complete();
 
-                wip.borderJob.Dispose();
+                for (int i = 0; i < wip.borderJobs.Length; i++)
+                {
+                    wip.borderJobs[i].Dispose();
+                }
+
                 var chunkdata = chunkManager.GetChunkData(wip.propJob.data.chunkId.ToBasic());
                 chunkdata.SetLightMap(wip.propJob.data.lights.ToArray());
                 QueuePropagationUpdates(wip.propJob);
@@ -159,9 +216,9 @@ namespace UniVox.Framework.Lighting
             return touchedByUpdate;
         }
 
-        private struct WipUpdateJob
+        private struct WipPropagationUpdate
         {
-            public BorderResolutionJob borderJob;
+            public BorderResolutionJob[] borderJobs;
             public LightPropagationJob propJob;
             public JobHandle handle;
         }
@@ -171,6 +228,11 @@ namespace UniVox.Framework.Lighting
             int[] heightMap = heightMapProvider.GetHeightMapForColumn(new Vector2Int(chunkId.x, chunkId.z));
 
             var jobData = getJobData(chunkId);
+
+            if (chunkId.Equals(debugId))
+            {
+                Debug.Log($"generating, neighbour validity: {jobData.directionsValid.ToArray().ArrayToString()}");
+            }
 
             var generationJob = new LightGenerationJob()
             {
@@ -224,23 +286,48 @@ namespace UniVox.Framework.Lighting
             var chunkId = propJob.data.chunkId.ToBasic();
             for (Direction dir = 0; (int)dir < DirectionExtensions.numDirections; dir++)
             {
-                ChunkUpdateRequest update = new ChunkUpdateRequest();
-                update.chunkId = chunkId + DirectionExtensions.Vectors[(int)dir];
-                update.fromDirection = dir;
-                update.sunlight = propJob.sunlightNeighbourUpdates[dir].ToArray();
-                update.dynamic = propJob.dynamicNeighbourUpdates[dir].ToArray();
+                BorderUpdateRequest borderUpdate = new BorderUpdateRequest();
+                var UpdateChunkId = chunkId + DirectionExtensions.Vectors[(int)dir];
+                borderUpdate.borderDirection = DirectionExtensions.Opposite[(int)dir];
+                borderUpdate.sunlight = propJob.sunlightNeighbourUpdates[dir].ToArray();
+                borderUpdate.dynamic = propJob.dynamicNeighbourUpdates[dir].ToArray();
 
-                if (update.dynamic.Length > 0 || update.sunlight.Length > 0)
+                if (borderUpdate.dynamic.Length > 0 || borderUpdate.sunlight.Length > 0)
                 {
-                    pendingLightUpdates.Enqueue(update);
+                    if (UpdateChunkId.Equals(debugId))
+                    {
+                        Debug.Log($"Queuing propagation for the {borderUpdate.borderDirection} face");
+                    }
+
+                    if (chunkId.Equals(debugId))
+                    {
+                        Debug.Log($"Queuing propagation into chunk {UpdateChunkId}, direction {dir}");
+                    }
+
+                    if (pendingLightUpdatesByChunk.TryGetValue(UpdateChunkId,out var chunkUpdateRequest))
+                    {
+                        chunkUpdateRequest.borderUpdateRequests.Add(borderUpdate);
+                    }
+                    else
+                    {
+                        chunkUpdateRequest = new ChunkUpdateRequest() { borderUpdateRequests = new List<BorderUpdateRequest>() };
+                        chunkUpdateRequest.borderUpdateRequests.Add(borderUpdate);
+
+                        pendingLightUpdatesByChunk.Add(UpdateChunkId, chunkUpdateRequest);
+                        pendingLightUpdatesOrder.Enqueue(UpdateChunkId);
+                    }
                 }
             }
         }
 
-        private struct ChunkUpdateRequest 
+        private class ChunkUpdateRequest 
         {
-            public Vector3Int chunkId;
-            public Direction fromDirection;
+            public List<BorderUpdateRequest> borderUpdateRequests;
+        }
+
+        private class BorderUpdateRequest 
+        {            
+            public Direction borderDirection;
             public int3[] sunlight;
             public int3[] dynamic;
         }        

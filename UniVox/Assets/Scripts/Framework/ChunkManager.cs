@@ -643,6 +643,11 @@ namespace UniVox.Framework
         {
             return pipeline.GetMinStage(chunkId);
         }
+
+        public string GetMinPipelineStageOfChunkByName(Vector3Int chunkId)
+        {
+            return pipeline.GetStage(pipeline.GetMinStage(chunkId)).Name;
+        }
         #endregion
     }
 }
