@@ -33,9 +33,10 @@ namespace UniVox.Framework.Lighting
 
         private Dictionary<Vector3Int, ChunkUpdateRequest> pendingLightUpdatesByChunk;
         private Queue<Vector3Int> pendingLightUpdatesOrder;
+        private HashSet<Vector3Int> chunksWhereLightChangedOnBorderSinceLastUpdate;
 
         //TODO remove DEBUG
-        private Vector3Int debugId = new Vector3Int(-7, 0, 8);
+        private Vector3Int debugId = new Vector3Int(-6, 0, 7);
 
         public void Initialise(IVoxelTypeManager voxelTypeManager, IChunkManager chunkManager, IHeightMapProvider heightMapProvider)
         {
@@ -45,6 +46,7 @@ namespace UniVox.Framework.Lighting
             chunkDimensions = chunkManager.ChunkDimensions;
             pendingLightUpdatesByChunk = new Dictionary<Vector3Int, ChunkUpdateRequest>();
             pendingLightUpdatesOrder = new Queue<Vector3Int>();
+            chunksWhereLightChangedOnBorderSinceLastUpdate = new HashSet<Vector3Int>();
 
             List<int> emissions = new List<int>();
             List<int> absorptions = new List<int>();
@@ -85,7 +87,8 @@ namespace UniVox.Framework.Lighting
             int processedThisUpdate = 0;
             Queue<WipPropagationUpdate> jobsInProgress = new Queue<WipPropagationUpdate>();
 
-            var touchedByUpdate = new HashSet<Vector3Int>();
+            var touchedByUpdate = new HashSet<Vector3Int>(chunksWhereLightChangedOnBorderSinceLastUpdate);
+            chunksWhereLightChangedOnBorderSinceLastUpdate.Clear();
 
             while (processedThisUpdate < MaxLightUpdates && pendingLightUpdatesOrder.Count > 0)
             {
@@ -118,7 +121,7 @@ namespace UniVox.Framework.Lighting
  
                 for (int i = 0; i < chunkUpdate.borderUpdateRequests.Count; i++)
                 {
-                    var borderUpdate = chunkUpdate.borderUpdateRequests[i];
+                    var borderUpdate = chunkUpdate.borderUpdateRequests[i];                    
 
                     if (chunkId.Equals(debugId))
                     {
@@ -151,7 +154,8 @@ namespace UniVox.Framework.Lighting
                     sunlightNeighbourUpdates = new LightJobNeighbourUpdates(Allocator.Persistent),
                     dynamicNeighbourUpdates = new LightJobNeighbourUpdates(Allocator.Persistent),
                     sunlightPropagationQueue = sunlightPropagationQueue,
-                    dynamicPropagationQueue = dynamicPropagationQueue
+                    dynamicPropagationQueue = dynamicPropagationQueue,
+                    lightsChangedOnBorder = new NativeArray<bool>(DirectionExtensions.numDirections, Allocator.Persistent)
                 };
 
                 if (Parallel)
@@ -184,6 +188,18 @@ namespace UniVox.Framework.Lighting
                     propJob.Run();
                     var chunkdata = chunkManager.GetChunkData(data.chunkId.ToBasic());
                     chunkdata.SetLightMap(data.lights.ToArray());
+
+                    ///If any light value changes on any of the borders (not just the ones from which
+                    ///propagation started), the corresponding neighbour will need to be re-meshed.
+                    for (int i = 0; i < propJob.lightsChangedOnBorder.Length; i++)
+                    {
+                        var neighbourChunkId = chunkId + DirectionExtensions.Vectors[i];
+                        if (propJob.lightsChangedOnBorder[i])
+                        {
+                            touchedByUpdate.Add(neighbourChunkId);
+                        }
+                    }
+
                     QueuePropagationUpdates(propJob);
                     propJob.Dispose();
                 }
@@ -206,8 +222,21 @@ namespace UniVox.Framework.Lighting
                     wip.borderJobs[i].Dispose();
                 }
 
-                var chunkdata = chunkManager.GetChunkData(wip.propJob.data.chunkId.ToBasic());
+                var chunkId = wip.propJob.data.chunkId.ToBasic();
+                var chunkdata = chunkManager.GetChunkData(chunkId);
                 chunkdata.SetLightMap(wip.propJob.data.lights.ToArray());
+
+                ///If any light value changes on any of the borders (not just the ones from which
+                ///propagation started), the corresponding neighbour will need to be re-meshed.
+                for (int i = 0; i < wip.propJob.lightsChangedOnBorder.Length; i++)
+                {
+                    var neighbourChunkId = chunkId + DirectionExtensions.Vectors[i];
+                    if (wip.propJob.lightsChangedOnBorder[i])
+                    {
+                        touchedByUpdate.Add(neighbourChunkId);                        
+                    }
+                }
+
                 QueuePropagationUpdates(wip.propJob);
                 wip.propJob.Dispose();
             }
@@ -248,7 +277,8 @@ namespace UniVox.Framework.Lighting
                 sunlightPropagationQueue = generationJob.sunlightPropagationQueue,
                 dynamicPropagationQueue = generationJob.dynamicPropagationQueue,
                 sunlightNeighbourUpdates = new LightJobNeighbourUpdates(Allocator.Persistent),
-                dynamicNeighbourUpdates = new LightJobNeighbourUpdates(Allocator.Persistent)
+                dynamicNeighbourUpdates = new LightJobNeighbourUpdates(Allocator.Persistent),
+                lightsChangedOnBorder = new NativeArray<bool>(DirectionExtensions.numDirections,Allocator.Persistent)
             };
 
             Func<LightmapGenerationJobResult> cleanup = () => {
@@ -258,6 +288,17 @@ namespace UniVox.Framework.Lighting
                 generationJob.Dispose();
 
                 QueuePropagationUpdates(propagationJob);
+
+                ///If any light value changes on any of the borders 
+                ///the corresponding neighbour will need to be re-meshed.
+                for (int i = 0; i < propagationJob.lightsChangedOnBorder.Length; i++)
+                {
+                    var neighbourChunkId = chunkId + DirectionExtensions.Vectors[i];
+                    if (propagationJob.lightsChangedOnBorder[i])
+                    {
+                        chunksWhereLightChangedOnBorderSinceLastUpdate.Add(neighbourChunkId);
+                    }
+                }
 
                 propagationJob.Dispose();                
 

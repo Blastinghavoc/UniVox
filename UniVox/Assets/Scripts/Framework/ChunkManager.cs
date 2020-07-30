@@ -144,11 +144,20 @@ namespace UniVox.Framework
 
             playArea.Update();
             var chunksTouchedByLightingUpdate = lightManager.Update();
+            var testId = new Vector3Int(-6, 0, 7);//TODO remove DEBUG
             foreach (var id in chunksTouchedByLightingUpdate)
             {
+                if (id.Equals(testId))
+                {
+                    Debug.Log("Considering regeneration");
+                }
                 if (pipeline.GetTargetStage(id) >= pipeline.RenderedStage)
                 {
                     RedoChunkFromStage(id, pipeline.FullyGeneratedStage);
+                    if (id.Equals(testId))
+                    {
+                        Debug.Log("Regenerated");
+                    }
                 }
             }
 

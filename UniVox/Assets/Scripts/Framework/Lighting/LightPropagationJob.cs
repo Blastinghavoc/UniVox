@@ -18,10 +18,17 @@ namespace UniVox.Framework.Lighting
         public NativeQueue<int3> sunlightPropagationQueue { get; set; }
 
         public LightJobNeighbourUpdates sunlightNeighbourUpdates { get; set; }
-        public LightJobNeighbourUpdates dynamicNeighbourUpdates { get; set; }        
+        public LightJobNeighbourUpdates dynamicNeighbourUpdates { get; set; }
+
+        /// <summary>
+        /// Holds one entry for each of the 6 cardinal directions,
+        /// used to determine if neighbour chunks need remeshing.
+        /// </summary>
+        public NativeArray<bool> lightsChangedOnBorder;
 
         private int dx;
         private int dxdy;
+        private int3 maxIndices;
 
         public void Dispose()
         {
@@ -31,12 +38,16 @@ namespace UniVox.Framework.Lighting
 
             sunlightNeighbourUpdates.Dispose();
             dynamicNeighbourUpdates.Dispose();
+
+            lightsChangedOnBorder.Dispose();
         }
 
         public void Execute()
         {
             dx = data.dimensions.x;
             dxdy = data.dimensions.x * data.dimensions.y;
+            maxIndices = data.dimensions - 1;
+
             PropagateSunlight();
             PropagateDynamic();
         }
@@ -74,6 +85,7 @@ namespace UniVox.Framework.Lighting
                         {
                             childLV.Sun = next;
                             data.lights[childFlat] = childLV;
+                            NotifyBordersOfUpdatedValue(childCoords);
                             sunlightPropagationQueue.Enqueue(childCoords);
                         }
                     }
@@ -136,6 +148,7 @@ namespace UniVox.Framework.Lighting
                         {
                             childLV.Dynamic = next;
                             data.lights[childFlat] = childLV;
+                            NotifyBordersOfUpdatedValue(childCoords);
                             dynamicPropagationQueue.Enqueue(childCoords);
                         }
                     }
@@ -162,6 +175,46 @@ namespace UniVox.Framework.Lighting
                     }
                 }
             }
-        }        
+        }
+
+        /// <summary>
+        /// Checks whether the coords are on any of the chunk borders,
+        /// and notifies those borders that a value has changed.
+        /// Does not bother to notify borders for directions which are not valid,
+        /// these chunks will pick up the information later if and when they become valid.
+        /// </summary>
+        /// <param name="coords"></param>
+        private void NotifyBordersOfUpdatedValue(int3 coords) 
+        {
+            for (int axis = 0; axis < 3; axis++)
+            {
+                Direction positiveAxisDirection;
+                Direction negativeAxisDirection;
+                if (axis == 0)
+                {
+                    positiveAxisDirection = Direction.east;
+                    negativeAxisDirection = Direction.west;
+                }
+                else if (axis == 1)
+                {
+                    positiveAxisDirection = Direction.up;
+                    negativeAxisDirection = Direction.down;
+                }
+                else
+                {
+                    positiveAxisDirection = Direction.north;
+                    negativeAxisDirection = Direction.south;
+                }
+
+                if (coords[axis] == 0 && data.directionsValid[(int)negativeAxisDirection])
+                {
+                    lightsChangedOnBorder[(int)negativeAxisDirection] = true;
+                }
+                else if(coords[axis] == maxIndices[axis] && data.directionsValid[(int)positiveAxisDirection])
+                {
+                    lightsChangedOnBorder[(int)positiveAxisDirection] = true;
+                }
+            }
+        }
     }
 }

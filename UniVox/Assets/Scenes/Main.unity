@@ -914,7 +914,7 @@ MonoBehaviour:
   skyboxMaterial: {fileID: 2100000, guid: 9cd49762ce8f3194fbfece30821c1f93, type: 2}
   parallel: 1
   MaxGenPerUpdate: 12
-  MaxPropPerUpdate: 48
+  MaxPropPerUpdate: 12
 --- !u!4 &1059055055
 Transform:
   m_ObjectHideFlags: 0
