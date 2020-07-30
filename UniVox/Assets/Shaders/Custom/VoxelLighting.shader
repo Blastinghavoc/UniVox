@@ -91,4 +91,7 @@
             ENDCG
         }
     }
+
+    //for SSAO
+    Fallback "Diffuse"
 }
