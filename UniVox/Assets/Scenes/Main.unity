@@ -692,7 +692,7 @@ MonoBehaviour:
     m_Bits: 512
   stopNaNPropagation: 1
   finalBlitToCameraTarget: 0
-  antialiasingMode: 0
+  antialiasingMode: 3
   temporalAntialiasing:
     jitterSpread: 0.75
     sharpness: 0.25
@@ -949,17 +949,17 @@ PrefabInstance:
     - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: playArea.renderedChunksRadii.x
-      value: 4
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: playArea.renderedChunksRadii.z
-      value: 4
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: playArea.renderedChunksRadii.y
-      value: 4
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
@@ -1039,7 +1039,7 @@ PrefabInstance:
     - target: {fileID: 6061144537135917622, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 37b9cc2f16198bf4c84ddc72031aedb3, type: 3}
@@ -1291,7 +1291,7 @@ PrefabInstance:
     - target: {fileID: 6061144537135917622, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 6061144537135917626, guid: 37b9cc2f16198bf4c84ddc72031aedb3, type: 3}
@@ -2566,7 +2566,7 @@ MonoBehaviour:
   worldSizeLimits:
     limitWorldHeight: 1
     verticalChunkLimit: 8
-  IncludeLighting: 1
+  includeLighting: 1
   player: {fileID: 1832009154}
   chunkPrefab: {fileID: 5697091069406414600, guid: 9bd18ceaff69a844299df4d590e1d694,
     type: 3}
@@ -2610,7 +2610,7 @@ MonoBehaviour:
   worldSizeLimits:
     limitWorldHeight: 1
     verticalChunkLimit: 8
-  IncludeLighting: 1
+  includeLighting: 1
   player: {fileID: 1832009154}
   chunkPrefab: {fileID: 5697091069406414600, guid: 9bd18ceaff69a844299df4d590e1d694,
     type: 3}
@@ -2748,7 +2748,7 @@ MonoBehaviour:
   worldSizeLimits:
     limitWorldHeight: 1
     verticalChunkLimit: 8
-  IncludeLighting: 1
+  includeLighting: 1
   player: {fileID: 1832009154}
   chunkPrefab: {fileID: 5697091069406414600, guid: 9bd18ceaff69a844299df4d590e1d694,
     type: 3}
