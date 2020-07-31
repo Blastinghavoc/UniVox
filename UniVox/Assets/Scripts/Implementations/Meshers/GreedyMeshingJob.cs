@@ -7,6 +7,7 @@ using UnityEngine;
 using UniVox.Framework;
 using UniVox.Framework.Common;
 using UniVox.Framework.Jobified;
+using UniVox.Framework.Lighting;
 using static Utils.Helpers;
 
 namespace UniVox.Implementations.Meshers
@@ -141,18 +142,21 @@ namespace UniVox.Implementations.Meshers
                         {
 
                             //Face in the positive axis direction
-                            FaceDescriptor positiveFace = (workingCoordinates[axis] >= 0) ? maskData(workingCoordinates, positiveAxisDirection)
-                                : GetFaceInNeighbour(workingCoordinates, negativeAxisDirection, positiveAxisDirection, axis);
+                            bool positiveFaceInThisChunk = (workingCoordinates[axis] >= 0);
+                            FaceDescriptor positiveFace = positiveFaceInThisChunk ? maskData(workingCoordinates, positiveAxisDirection, workingCoordinates + axisVector)
+                                : GetFaceInNeighbour(workingCoordinates, negativeAxisDirection, positiveAxisDirection, axis, workingCoordinates + axisVector);
+                            
                             //Face in the negative axis direction
-                            FaceDescriptor negativeFace = (workingCoordinates[axis] < size - 1) ? maskData(workingCoordinates + axisVector, negativeAxisDirection)
-                                : GetFaceInNeighbour(workingCoordinates, positiveAxisDirection, negativeAxisDirection, axis);
+                            bool negativeFaceInThisChunk = (workingCoordinates[axis] < size - 1);
+                            FaceDescriptor negativeFace = negativeFaceInThisChunk ? maskData(workingCoordinates + axisVector, negativeAxisDirection, workingCoordinates)
+                                : GetFaceInNeighbour(workingCoordinates + axisVector, positiveAxisDirection, negativeAxisDirection, axis,workingCoordinates);
 
-                            if (IncludeFace(positiveFace, negativeFace))
+                            if (positiveFaceInThisChunk && IncludeFace(positiveFace, negativeFace))
                             {
                                 maskPositive[maskIndex] = positiveFace;
                             }
 
-                            if (IncludeFace(negativeFace, positiveFace))
+                            if (negativeFaceInThisChunk && IncludeFace(negativeFace, positiveFace))
                             {
                                 maskNegative[maskIndex] = negativeFace;
                             }
@@ -413,7 +417,7 @@ namespace UniVox.Implementations.Meshers
 
             var secondaryDif = math.lengthsq(nodetl.vertex - nodebl.vertex);
             var tertiaryDif = math.lengthsq(nodebr.vertex - nodebl.vertex);
-            int2 uvScale = new int2(width,height);
+            int2 uvScale = new int2(width, height);
             ///Calculate the correct uv scale based on which axis is longer 
             ///(if they are equal it doesn't matter).
             ///This is needed because it is difficult to track the correct orientation
@@ -444,7 +448,9 @@ namespace UniVox.Implementations.Meshers
 
             bool makeBackface = data.meshDatabase.meshIdToIncludeBackfacesMap[meshID];
 
-            AddQuad(nodebl, nodetr, nodebr, nodetl, uvZ, makeBackface);
+            var lightForFace = currentMaskValue.lightValue.ToVertexColour();
+
+            AddQuad(nodebl, nodetr, nodebr, nodetl, uvZ,lightForFace, makeBackface);
         }
 
         private Node adjustForRotation(Node node, quaternion quat)
@@ -454,7 +460,7 @@ namespace UniVox.Implementations.Meshers
             return node;
         }
 
-        private void AddQuad(Node v0, Node v1, Node v2, Node v3, float uvZ, bool makeBackface = false)
+        private void AddQuad(Node v0, Node v1, Node v2, Node v3, float uvZ,Color color, bool makeBackface = false)
         {
             int index = data.vertices.Length;
 
@@ -462,6 +468,11 @@ namespace UniVox.Implementations.Meshers
             data.vertices.Add(v1.vertex);
             data.vertices.Add(v2.vertex);
             data.vertices.Add(v3.vertex);
+
+            data.vertexColours.Add(color);
+            data.vertexColours.Add(color);
+            data.vertexColours.Add(color);
+            data.vertexColours.Add(color);
 
             data.uvs.Add(new float3(v0.uv, uvZ));
             data.uvs.Add(new float3(v1.uv, uvZ));
@@ -492,7 +503,7 @@ namespace UniVox.Implementations.Meshers
 
         }
 
-        private FaceDescriptor GetFaceInNeighbour(int3 position, Direction neighbourDirection, Direction faceDirection, int primaryAxis)
+        private FaceDescriptor GetFaceInNeighbour(int3 position, Direction neighbourDirection, Direction faceDirection, int primaryAxis,int3 lightPosition)
         {
             var localIndexOfAdjacentVoxelInNeighbour = data.neighbourData.IndicesInNeighbour(primaryAxis, position);
 
@@ -504,8 +515,10 @@ namespace UniVox.Implementations.Meshers
 
             var id = neighbourChunkData[flattenedIndex];
 
+            var lv = JobUtils.GetLightValue(lightPosition, data.lights, data.dimensions, data.neighbourData);
+
             //NOTE currently the rotation data is not fetched for neighbours, so this can't be incorporated.
-            return makeFaceDescriptor(id, faceDirection);
+            return makeFaceDescriptor(id, faceDirection, lv);
         }
 
         private bool IncludeFace(FaceDescriptor thisFace, FaceDescriptor oppositeFace)
@@ -530,18 +543,19 @@ namespace UniVox.Implementations.Meshers
 
         }
 
-        private FaceDescriptor maskData(int3 position, Direction direction)
+        private FaceDescriptor maskData(int3 position, Direction direction,int3 lightPosition)
         {
             var flatIndex = MultiIndexToFlat(position.x, position.y, position.z, data.dimensions.x, dxdy);
             var typeId = data.voxels[flatIndex];
+            var lv = JobUtils.GetLightValue(lightPosition,data.lights,data.dimensions,data.neighbourData);
             if (rotatedVoxelsMap.TryGetValue(flatIndex, out var rotation))
             {
-                return makeFaceDescriptor(typeId, direction, rotation);
+                return makeFaceDescriptor(typeId, direction, lv, rotation);
             }
-            return makeFaceDescriptor(typeId, direction);
+            return makeFaceDescriptor(typeId, direction, lv);
         }
 
-        private FaceDescriptor makeFaceDescriptor(VoxelTypeID typeId, Direction originalDirection, VoxelRotation rotation = default)
+        private FaceDescriptor makeFaceDescriptor(VoxelTypeID typeId, Direction originalDirection,LightValue lightValue, VoxelRotation rotation = default)
         {
             if (typeId == VoxelTypeID.AIR_ID)
             {
@@ -562,6 +576,7 @@ namespace UniVox.Implementations.Meshers
                 typeId = typeId,
                 faceDirection = faceDirection,
                 rotation = rotation,
+                lightValue = lightValue
             };
             return faceDescriptor;
         }
@@ -572,12 +587,14 @@ namespace UniVox.Implementations.Meshers
             //The direction of the face, accounting for any rotation
             public Direction faceDirection;
             public VoxelRotation rotation;
+            public LightValue lightValue;
 
             public bool Equals(FaceDescriptor other)
             {
                 return typeId == other.typeId &&
                     faceDirection == other.faceDirection &&
-                    rotation.Equals(other.rotation);
+                    rotation.Equals(other.rotation) &&
+                    lightValue.Equals(other.lightValue);
             }
         }
     }

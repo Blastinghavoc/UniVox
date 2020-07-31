@@ -366,7 +366,7 @@ namespace UniVox.Framework.ChunkPipeline
                 targetStage != TerrainDataStage)
             {
                 throw new ArgumentOutOfRangeException("Target stage was not one of the valid target stages");
-            }            
+            }
 
             var stageData = GetStageData(chunkId);            
 

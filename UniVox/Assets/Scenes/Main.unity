@@ -949,17 +949,17 @@ PrefabInstance:
     - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: playArea.renderedChunksRadii.x
-      value: 1
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: playArea.renderedChunksRadii.z
-      value: 1
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: playArea.renderedChunksRadii.y
-      value: 1
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
@@ -1039,7 +1039,7 @@ PrefabInstance:
     - target: {fileID: 6061144537135917622, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 37b9cc2f16198bf4c84ddc72031aedb3, type: 3}
@@ -2638,7 +2638,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &6061144535608697011
 Transform:
   m_ObjectHideFlags: 0

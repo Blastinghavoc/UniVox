@@ -30,7 +30,8 @@ namespace UniVox.Framework
         [SerializeField] protected WorldSizeLimits worldSizeLimits;
         public WorldSizeLimits WorldLimits { get => worldSizeLimits; }
 
-        [SerializeField] protected bool IncludeLighting = true;
+        [SerializeField] protected bool includeLighting = true;
+        public bool IncludeLighting { get => includeLighting; }
         #endregion
 
         public GameObject player;
@@ -109,7 +110,7 @@ namespace UniVox.Framework
             chunkMesher.Initialise(VoxelTypeManager, this, eventManager);
             lightManager.Initialise(VoxelTypeManager, this, chunkProvider);
 
-            var lm = IncludeLighting ? lightManager : null;
+            var lm = includeLighting ? lightManager : null;
 
             pipeline = new ChunkPipelineManager(
                 chunkProvider,
@@ -304,7 +305,7 @@ namespace UniVox.Framework
                 {
                     //Chunks with saved data bypass the generation process.
                     ChunkComponent.Data = data;
-                    pipeline.AddWithData(chunkID, targetStage, IncludeLighting);//Add with voxel data, but re-generate light data
+                    pipeline.AddWithData(chunkID, targetStage, includeLighting);//Add with voxel data, but re-generate light data
                 }
                 else
                 {
@@ -393,7 +394,7 @@ namespace UniVox.Framework
                 }
             }
 
-            if (IncludeLighting)
+            if (includeLighting)
             {
                 var chunksTouchedByLightingUpdate = lightManager.UpdateLightOnVoxelSet(new ChunkNeighbourhood(chunkID, GetChunkData),
                     localVoxelIndex, newTypeID, previousTypeID);

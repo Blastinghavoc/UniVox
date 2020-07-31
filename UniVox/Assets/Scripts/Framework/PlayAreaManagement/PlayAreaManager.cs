@@ -98,6 +98,10 @@ namespace UniVox.Framework.PlayAreaManagement
                 //Extra radius for just terrain data.
                 MaximumActiveRadii = StructureChunksRadii + new Vector3Int(1, 1, 1);
             }
+            else if (chunkManager.IncludeLighting)
+            {
+                numRadii = 4;
+            }
 
             processQueuesByRadii = new Queue<IEnumerator>[numRadii];
             for (int i = 0; i < processQueuesByRadii.Length; i++)
@@ -116,7 +120,11 @@ namespace UniVox.Framework.PlayAreaManagement
             {
                 radiiSequence[3] = new ChunkStage(StructureChunksRadii, pipeline.OwnStructuresStage);
                 radiiSequence[4] = new ChunkStage(MaximumActiveRadii, pipeline.TerrainDataStage);
-
+            }
+            else if (chunkManager.IncludeLighting)//Extra radii if lighting is included
+            {
+                //Lighting is dependent on neighbour chunk data.
+                radiiSequence[3] = new ChunkStage(FullyGeneratedRadii + new Vector3Int(1, 1, 1), pipeline.AllVoxelsNeedLightGenStage);
             }
 
             playerChunkID = chunkManager.WorldToChunkPosition(Player.Position);

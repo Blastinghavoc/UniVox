@@ -23,7 +23,7 @@ namespace UniVox.Implementations.Providers
 
         public override AbstractPipelineJob<IChunkData> GenerateTerrainData(Vector3Int chunkID)
         {
-            return new BasicFunctionJob<IChunkData>(() => FlatWorldWithHoles(chunkID, chunkManager.ChunkDimensions));
+            return new BasicFunctionJob<IChunkData>(() => FlatWorld(chunkID, chunkManager.ChunkDimensions));
         }
 
         private AbstractChunkData FlatWorld(Vector3Int chunkID, Vector3Int chunkDimensions) 
