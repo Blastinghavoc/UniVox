@@ -431,6 +431,10 @@ namespace UniVox.Framework.ChunkPipeline
                     {
                         chunkComponent.RemoveRenderMesh();
                     }
+                    if (stageData.maxStage < FullyGeneratedStage)
+                    {
+                        chunkComponent.Data.FullyGenerated = false;
+                    }
 
                     //Ensure min stage isn't greater than max
                     SetNewMinimumIfSmallerThanCurrent(chunkId, stageData, stageData.maxStage);
@@ -458,15 +462,17 @@ namespace UniVox.Framework.ChunkPipeline
         private void clampTarget(ref int targetStage,int currentMax) 
         {
             var minimumAcceptableTarget = 0;
+            ///Disallow going further back than this, because doing so could result
+            ///in user-modified voxel data being wiped by re-generation.
             if (currentMax >= AllVoxelsNeedLightGenStage)
             {
                 minimumAcceptableTarget = AllVoxelsNeedLightGenStage;
             }
 
-            if (currentMax >= FullyGeneratedStage)
-            {
-                minimumAcceptableTarget = FullyGeneratedStage;
-            }
+            //if (currentMax >= FullyGeneratedStage)
+            //{
+            //    minimumAcceptableTarget = FullyGeneratedStage;
+            //}
 
             targetStage = Math.Max(targetStage, minimumAcceptableTarget);
         }

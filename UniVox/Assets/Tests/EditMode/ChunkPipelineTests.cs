@@ -191,7 +191,7 @@ namespace Tests
                 });
         }
 
-        private void MakePipeline(int numData, int numMesh, int numCollision, bool makeStructures = false, int numStructures = 200,bool includeLighting = false)
+        private void MakePipeline(int numData, int numMesh, int numCollision, bool makeStructures = false, int numStructures = 200, bool includeLighting = false)
         {
             mockLightManager.MaxChunksGeneratedPerUpdate.Returns(numStructures);
 
@@ -246,11 +246,21 @@ namespace Tests
             {
                 terrainRadius++;
             }
-            if (targetStage > pipeline.OwnStructuresStage && pipeline.GenerateStructures)
+            if (targetStage > pipeline.OwnStructuresStage)
             {
-                terrainRadius++;
-                structureRadius++;
+                if (pipeline.GenerateStructures)
+                {
+
+                    terrainRadius++;
+                    structureRadius++;
+                }
+                else if(lighting)
+                {
+                    //Lighting without structures requires an extra radius of terrain data.
+                    terrainRadius++;
+                }
             }
+
             if (targetStage > pipeline.FullyGeneratedStage)
             {
                 if (pipeline.GenerateStructures)
@@ -259,7 +269,7 @@ namespace Tests
                     structureRadius++;
                 }
                 fullyGeneratedRadius++;
-            }            
+            }
 
             Func<Vector3Int, int, bool> radiusTest = (offset, radius) => offset.All((v) => Math.Abs(v) <= radius);
 
@@ -326,18 +336,24 @@ namespace Tests
         }
 
         [Test]
-        public void CompletePassNoStructures()
+        [TestCase(false,false,TestName ="NoStructures,NoLights")]
+        [TestCase(false,true,TestName ="NoStructures,YesLights")]
+        [TestCase(true,false,TestName ="YesStructures,NoLights")]
+        [TestCase(true,true,TestName ="YesStructures,YesLights")]
+        public void CompletePass(bool structures, bool lighting)
         {
-            MakePipeline(20, 1, 1);
+            MakePipeline(1000, 1, 1, structures,includeLighting:lighting);
 
             var testChunkID = new Vector3Int(0, 0, 0);
+
+            var getsStuckStage = (!structures && !lighting) ? pipeline.FullyGeneratedStage : pipeline.TerrainDataStage;
 
             mockAddNewChunkWithTarget(testChunkID, pipeline.CompleteStage);
 
             pipeline.Update();
 
-            //Chunk gets stuck at the Data stage, as it has to wait for dependencies
-            AssertChunkStages(testChunkID, pipeline.FullyGeneratedStage, pipeline.FullyGeneratedStage, pipeline.CompleteStage);
+            //Chunk gets stuck, as it has to wait for dependencies
+            AssertChunkStages(testChunkID, getsStuckStage, getsStuckStage, pipeline.CompleteStage);
 
             //Add all neighbours necessary for chunk to get to complete stage
             AddAllDependenciesNecessaryForChunkToGetToStage(testChunkID, pipeline.CompleteStage);
@@ -345,29 +361,16 @@ namespace Tests
             //Second update allows data to be generated for neighbours
             pipeline.Update();
 
-            //Chunk passes the whole way through
-            AssertChunkStages(testChunkID, pipeline.CompleteStage, pipeline.CompleteStage, pipeline.CompleteStage);
-        }
-
-        [Test]
-        public void CompletePass()
-        {
-            MakePipeline(1000, 1, 1, true);
-
-            var testChunkID = new Vector3Int(0, 0, 0);
-
-            mockAddNewChunkWithTarget(testChunkID, pipeline.CompleteStage);
-
-            pipeline.Update();
-
-            //Chunk gets stuck at the terrain data stage, as it has to wait for dependencies
-            AssertChunkStages(testChunkID, pipeline.TerrainDataStage, pipeline.TerrainDataStage, pipeline.CompleteStage);
-
-            //Add all neighbours necessary for chunk to get to complete stage
-            AddAllDependenciesNecessaryForChunkToGetToStage(testChunkID, pipeline.CompleteStage);
-
-            //Second update allows data to be generated for neighbours
-            pipeline.Update();
+            ///Another update is necessary, because structure/lighting gen 
+            ///cannot run for two directly adjacent chunks in the same update.
+            if (structures)
+            {
+                pipeline.Update();                
+            }
+            if (lighting)
+            {
+                pipeline.Update();
+            }
 
             //Chunk passes the whole way through
             AssertChunkStages(testChunkID, pipeline.CompleteStage, pipeline.CompleteStage, pipeline.CompleteStage);
@@ -424,7 +427,7 @@ namespace Tests
             AssertChunkStages(testChunkID, pipeline.RenderedStage);
 
             //Try to update the target, but using the downgrade mode
-            pipeline.SetTarget(testChunkID, pipeline.CompleteStage,TargetUpdateMode.downgradeOnly);
+            pipeline.SetTarget(testChunkID, pipeline.CompleteStage, TargetUpdateMode.downgradeOnly);
 
             //Target and other attributes should be unchanged
             AssertChunkStages(testChunkID, pipeline.RenderedStage);
@@ -486,31 +489,39 @@ namespace Tests
             AssertChunkStages(testChunkID, pipeline.FullyGeneratedStage);
         }
 
-        [Test(Description ="Ensures that a chunk cannot be downgraded past the fully generated stage" +
-            " if it has previously surpassed it.")]
-        [TestCase(false,TestName ="NoLights")]
-        [TestCase(true,TestName ="Lights")]
-        public void SetTargetLowerThanMaxWhenPassedFullyGenerated(bool withLighting)
-        {
-            MakePipeline(1000, 1, 1,true,includeLighting:withLighting);
+        /// <summary>
+        /// DEPRECATED. This test was used when chunks were prevented from downgrading below 
+        /// FullyGenerated, but this restriction has been lifted as it could cause issues
+        /// with light generation. The actually pertinent restriction is that chunks cannot
+        /// downgrade to a state where they would have voxel data regenerated, which is tested for
+        /// by "SetTargetLowerThanMaxWhenPassedLighting"
+        /// </summary>
+        /// <param name="withLighting"></param>
+        //[Test(Description = "Ensures that a chunk cannot be downgraded past the fully generated stage" +
+        //    " if it has previously surpassed it.")]
+        //[TestCase(false, TestName = "NoLights")]
+        //[TestCase(true, TestName = "Lights")]
+        //public void SetTargetLowerThanMaxWhenPassedFullyGenerated(bool withLighting)
+        //{
+        //    MakePipeline(1000, 1, 1, true, includeLighting: withLighting);
 
-            var testChunkID = new Vector3Int(0, 0, 0);
+        //    var testChunkID = new Vector3Int(0, 0, 0);
 
-            mockAddNewChunkWithTarget(testChunkID, pipeline.RenderedStage);
-            AddAllDependenciesNecessaryForChunkToGetToStage(testChunkID, pipeline.RenderedStage);
+        //    mockAddNewChunkWithTarget(testChunkID, pipeline.RenderedStage);
+        //    AddAllDependenciesNecessaryForChunkToGetToStage(testChunkID, pipeline.RenderedStage);
 
-            pipeline.Update();
-            AssertChunkStages(testChunkID, pipeline.RenderedStage);
+        //    pipeline.Update();
+        //    AssertChunkStages(testChunkID, pipeline.RenderedStage);
 
-            //Set target to before the fully generated stage
-            pipeline.SetTarget(testChunkID, pipeline.OwnStructuresStage);
+        //    //Set target to before the fully generated stage
+        //    pipeline.SetTarget(testChunkID, pipeline.OwnStructuresStage);
 
-            //Render mesh should have been removed
-            Assert.IsNull(mockComponentStorage[testChunkID].RenderMesh);
+        //    //Render mesh should have been removed
+        //    Assert.IsNull(mockComponentStorage[testChunkID].RenderMesh);
 
-            //Everything should have decreased to FullyGenerated, not OwnStructures as that is too low.
-            AssertChunkStages(testChunkID, pipeline.FullyGeneratedStage);
-        }
+        //    //Everything should have decreased to FullyGenerated, not OwnStructures as that is too low.
+        //    AssertChunkStages(testChunkID, pipeline.FullyGeneratedStage);
+        //}
 
         [Test(Description = "Ensures that a chunk cannot be downgraded past the lighting stage" +
             " if it has previously surpassed it.")]
@@ -520,10 +531,14 @@ namespace Tests
 
             var testChunkID = new Vector3Int(0, 0, 0);
 
-            mockAddNewChunkWithTarget(testChunkID, pipeline.AllVoxelsNeedLightGenStage+1);
+            mockAddNewChunkWithTarget(testChunkID, pipeline.AllVoxelsNeedLightGenStage + 1);
             AddAllDependenciesNecessaryForChunkToGetToStage(testChunkID, pipeline.AllVoxelsNeedLightGenStage);
 
             pipeline.Update();
+            //Extra update required because light generation can't do all dependencies in same update
+            pipeline.Update();
+
+            AssertChunkStages(testChunkID, pipeline.AllVoxelsNeedLightGenStage + 1);
 
             //Set target to before the lighting stage
             pipeline.SetTarget(testChunkID, pipeline.OwnStructuresStage);
@@ -547,7 +562,7 @@ namespace Tests
             AssertChunkStages(testChunkID, pipeline.RenderedStage);
 
             //Set target lower than the current target, and lower than the current max stage
-            pipeline.SetTarget(testChunkID, pipeline.FullyGeneratedStage,TargetUpdateMode.upgradeOnly);
+            pipeline.SetTarget(testChunkID, pipeline.FullyGeneratedStage, TargetUpdateMode.upgradeOnly);
 
             //Render mesh should NOT have been removed
             Assert.IsNotNull(mockComponentStorage[testChunkID].RenderMesh);
@@ -922,9 +937,9 @@ namespace Tests
         /// <param name="target"></param>
         private void AssertChunkStages(Vector3Int id, int all)
         {
-            Assert.AreEqual(all, pipeline.GetMinStage(id));
-            Assert.AreEqual(all, pipeline.GetMaxStage(id));
-            Assert.AreEqual(all, pipeline.GetTargetStage(id));
+            Assert.AreEqual(all, pipeline.GetMinStage(id), "Min stage not as expected");
+            Assert.AreEqual(all, pipeline.GetMaxStage(id), "Max stage not as expected");
+            Assert.AreEqual(all, pipeline.GetTargetStage(id), "Target stage not as expected");
         }
     }
 }

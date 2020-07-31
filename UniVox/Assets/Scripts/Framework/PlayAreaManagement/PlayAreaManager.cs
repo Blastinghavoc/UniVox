@@ -90,6 +90,7 @@ namespace UniVox.Framework.PlayAreaManagement
             //Chunks can exist as just data one chunk further away than the rendered chunks
             FullyGeneratedRadii = RenderedChunksRadii + new Vector3Int(1, 1, 1);
             MaximumActiveRadii = FullyGeneratedRadii;
+            var lightBufferRadii = Vector3Int.zero;
             int numRadii = 3;
             if (chunkManager.GenerateStructures)
             {
@@ -101,6 +102,8 @@ namespace UniVox.Framework.PlayAreaManagement
             else if (chunkManager.IncludeLighting)
             {
                 numRadii = 4;
+                lightBufferRadii = FullyGeneratedRadii + Vector3Int.one;
+                MaximumActiveRadii = lightBufferRadii;
             }
 
             processQueuesByRadii = new Queue<IEnumerator>[numRadii];
@@ -124,7 +127,7 @@ namespace UniVox.Framework.PlayAreaManagement
             else if (chunkManager.IncludeLighting)//Extra radii if lighting is included
             {
                 //Lighting is dependent on neighbour chunk data.
-                radiiSequence[3] = new ChunkStage(FullyGeneratedRadii + new Vector3Int(1, 1, 1), pipeline.AllVoxelsNeedLightGenStage);
+                radiiSequence[3] = new ChunkStage(lightBufferRadii, pipeline.AllVoxelsNeedLightGenStage);
             }
 
             playerChunkID = chunkManager.WorldToChunkPosition(Player.Position);
