@@ -185,9 +185,7 @@ namespace UniVox.Implementations.Meshers
                         {
                             for (int i = 0; i < size;)
                             {
-                                var currentMaskValue = currentMask[maskIndex];
-
-                                //TODO check for non-quad faces, set width and height to 1 in that case
+                                var currentMaskValue = currentMask[maskIndex];                                
 
                                 // Compute width as maximal width such that the mask value does not change
                                 int width;

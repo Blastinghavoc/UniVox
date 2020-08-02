@@ -43,7 +43,7 @@ namespace UniVox.Framework.PlayAreaManagement
 
         protected bool IncrementalDone = true;
         protected Queue<IEnumerator>[] processQueuesByRadii;
-        private int incrementalProcessCount;//TODO remove DEBUG
+        private int incrementalProcessCount;
         #endregion        
 
         public IVoxelPlayer Player { get; protected set; }
@@ -127,7 +127,7 @@ namespace UniVox.Framework.PlayAreaManagement
             else if (chunkManager.IncludeLighting)//Extra radii if lighting is included
             {
                 //Lighting is dependent on neighbour chunk data.
-                radiiSequence[3] = new ChunkStage(lightBufferRadii, pipeline.AllVoxelsNeedLightGenStage);
+                radiiSequence[3] = new ChunkStage(lightBufferRadii, pipeline.PreLightGenWaitStage);
             }
 
             playerChunkID = chunkManager.WorldToChunkPosition(Player.Position);

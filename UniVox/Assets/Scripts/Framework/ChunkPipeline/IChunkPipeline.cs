@@ -20,7 +20,7 @@ namespace UniVox.Framework.ChunkPipeline
 
         int TerrainDataStage { get; }
         int OwnStructuresStage { get; }
-        int AllVoxelsNeedLightGenStage { get; }
+        int PreLightGenWaitStage { get; }
         int FullyGeneratedStage { get; }
         int RenderedStage { get; }
         int CompleteStage { get; }

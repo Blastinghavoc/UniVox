@@ -101,6 +101,7 @@ namespace UniVox.Framework.ChunkPipeline.WaitForNeighbours
         {
             neighbourStatuses.Remove(chunkId);
             waitEndedSet.Remove(chunkId);
+
             UpdateStatusOfNeighbours(chunkId, false);
         }
 

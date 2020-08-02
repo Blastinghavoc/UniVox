@@ -547,24 +547,24 @@ namespace Tests
             " if it has previously surpassed it.")]
         public void SetTargetLowerThanMaxWhenPassedLighting()
         {
-            MakePipeline(1000, 1, 1, true);
+            MakePipeline(1000, 1, 1, true,includeLighting:true);
 
             var testChunkID = new Vector3Int(0, 0, 0);
 
-            mockAddNewChunkWithTarget(testChunkID, pipeline.AllVoxelsNeedLightGenStage + 1);
-            AddAllDependenciesNecessaryForChunkToGetToStage(testChunkID, pipeline.AllVoxelsNeedLightGenStage);
+            mockAddNewChunkWithTarget(testChunkID, pipeline.PreLightGenWaitStage + 1);
+            AddAllDependenciesNecessaryForChunkToGetToStage(testChunkID, pipeline.PreLightGenWaitStage+1);
 
             pipeline.Update();
             //Extra update required because light generation can't do all dependencies in same update
             pipeline.Update();
 
-            AssertChunkStages(testChunkID, pipeline.AllVoxelsNeedLightGenStage + 1);
+            AssertChunkStages(testChunkID, pipeline.PreLightGenWaitStage + 1);
 
             //Set target to before the lighting stage
-            pipeline.SetTarget(testChunkID, pipeline.OwnStructuresStage);
+            pipeline.SetTarget(testChunkID, pipeline.TerrainDataStage);
 
-            //Everything should have decreased to AllVoxelsNeedLightGenStage, not OwnStructures as that is too low.
-            AssertChunkStages(testChunkID, pipeline.AllVoxelsNeedLightGenStage);
+            //Everything should have decreased no lower than the pre-lighting stage
+            AssertChunkStages(testChunkID, pipeline.PreLightGenWaitStage);
         }
 
         [Test]

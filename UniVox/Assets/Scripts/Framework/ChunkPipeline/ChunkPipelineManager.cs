@@ -38,8 +38,8 @@ namespace UniVox.Framework.ChunkPipeline
         //Indicates chunk has generated its own structures, but may not have received all incoming structures from neighbours
         public int OwnStructuresStage { get; private set; }
 
-        //This stage indicactes the chunk has all the voxels generated (including structures), but does not yet have lights
-        public int AllVoxelsNeedLightGenStage { get; private set; }
+        //This is the waiting stage before light generation. A chunk will only pass this if it has all of its voxel data (including structures)
+        public int PreLightGenWaitStage { get; private set; }
 
         //This stage indicates the chunk has been fully generated, including structures and lighting
         public int FullyGeneratedStage { get; private set; }
@@ -114,6 +114,10 @@ namespace UniVox.Framework.ChunkPipeline
 
                 ///At this point the chunk has generated all of its own structures.
                 OwnStructuresStage = i;
+                if (lighting)
+                {
+                    PreLightGenWaitStage = i;//This is the wait stage before lighting
+                }
                 var waitingForAllNeighboursToHaveStructures = new WaitForNeighboursStage(
                     "WaitForNeighbourStructures", i++, this,true);
 
@@ -121,12 +125,12 @@ namespace UniVox.Framework.ChunkPipeline
 
             }
 
-            AllVoxelsNeedLightGenStage = i;
 
             if (lighting)
             {
                 if (!structureGen)
                 {
+                    PreLightGenWaitStage = i;
                     ///If structures are not generated, need a separate wait for neighbours.
                     ///Otherwise, the wait at the end of the structure generation is sufficient.
                     var waitingForNeighboursForLighting = new WaitForNeighboursStage(
@@ -340,7 +344,7 @@ namespace UniVox.Framework.ChunkPipeline
 
             Assert.IsFalse(chunkStageMap.ContainsKey(chunkId));
 
-            var EnterAtStageId = generateLights? AllVoxelsNeedLightGenStage: FullyGeneratedStage;
+            var EnterAtStageId = generateLights? PreLightGenWaitStage: FullyGeneratedStage;
 
             var stageData = new ChunkStageData()
             {
@@ -476,9 +480,9 @@ namespace UniVox.Framework.ChunkPipeline
             {
                 ///Disallow going further back than this, because doing so could result
                 ///in user-modified voxel data being wiped by re-generation.
-                if (currentMax >= AllVoxelsNeedLightGenStage)
+                if (currentMax >= PreLightGenWaitStage)
                 {
-                    minimumAcceptableTarget = AllVoxelsNeedLightGenStage;
+                    minimumAcceptableTarget = PreLightGenWaitStage;
                 }
             }
 
