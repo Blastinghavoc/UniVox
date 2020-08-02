@@ -15,6 +15,6 @@ namespace PerformanceTesting
         IVoxelPlayer GetPlayer();
 
         string GetPipelineStatus();
-        string GetMinPipelineStageOfChunkByName(Vector3Int chunkId);
+
     }
 }

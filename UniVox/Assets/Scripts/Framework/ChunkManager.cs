@@ -115,8 +115,7 @@ namespace UniVox.Framework
             pipeline = new ChunkPipelineManager(
                 chunkProvider,
                 chunkMesher,
-                GetChunkComponent,
-                GetPriorityOfChunk,
+                this,
                 MaxGeneratedPerUpdate,
                 MaxMeshedPerUpdate,
                 MaxMeshedPerUpdate,
@@ -196,7 +195,7 @@ namespace UniVox.Framework
             return keys;
         }
 
-        private ChunkComponent GetChunkComponent(Vector3Int chunkID)
+        public IChunkComponent GetChunkComponent(Vector3Int chunkID)
         {
             if (loadedChunks.TryGetValue(chunkID, out var chunkComponent))
             {
@@ -261,7 +260,7 @@ namespace UniVox.Framework
         {
             Profiler.BeginSample("SetTargetStageOfChunk");
             bool outOfWorld = false;
-            if (chunkID.y > WorldLimits.MaxChunkY || chunkID.y < WorldLimits.MinChunkY)
+            if (WorldLimits.ChunkOutsideVerticalLimits(chunkID))
             {
                 outOfWorld = true;
                 var absDistanceOutisedWorld = (chunkID.y > WorldLimits.MaxChunkY) ? chunkID.y - WorldLimits.MaxChunkY
@@ -282,7 +281,6 @@ namespace UniVox.Framework
                     return;
                 }
             }
-
 
             if (!loadedChunks.TryGetValue(chunkID, out var ChunkComponent))
             {
@@ -347,15 +345,15 @@ namespace UniVox.Framework
         }
 
         /// <summary>
-        /// Get a priority for a chunk, that is equal to the manhattan distance 
-        /// from the player to the chunk
+        /// Get the Manhattan distance from the player for a particular chunk id.
+        /// Useful for assigning priority to chunk ids based on distance to player.
         /// </summary>
         /// <param name="chunkID"></param>
         /// <returns></returns>
-        private float GetPriorityOfChunk(Vector3Int chunkID)
+        public float GetManhattanDistanceFromPlayer(Vector3Int chunkID)
         {
-            var absDisplacement = (playArea.playerChunkID - chunkID).ElementWise(Mathf.Abs);
-            return absDisplacement.x + absDisplacement.y + absDisplacement.z;
+            var displacement = playArea.playerChunkID-chunkID;
+            return displacement.ManhattanMagnitude();
         }
 
         #region Get/Set voxels
@@ -458,8 +456,9 @@ namespace UniVox.Framework
                 }
                 return new RestrictedChunkData(chunkComponent.Data);
             }
+            bool outsideWorld = WorldLimits.ChunkOutsideVerticalLimits(chunkID);
             throw new ArgumentException($"It is not valid to get read-only data for chunk ID {chunkID}, as it is not in the loaded chunks." +
-                $" Did the pipeline contain the chunk? {pipeline.Contains(chunkID)}");
+             $" Did the pipeline contain the chunk? {pipeline.Contains(chunkID)}. Was outside world {outsideWorld}");
         }
 
         public IChunkData GetChunkData(Vector3Int chunkId)
@@ -650,6 +649,11 @@ namespace UniVox.Framework
         public string GetMinPipelineStageOfChunkByName(Vector3Int chunkId)
         {
             return pipeline.GetStage(pipeline.GetMinStage(chunkId)).Name;
+        }
+
+        public string GetMaxPipelineStageOfChunkByName(Vector3Int chunkId)
+        {
+            return pipeline.GetStage(pipeline.GetMaxStage(chunkId)).Name;
         }
         #endregion
     }

@@ -7,6 +7,7 @@ namespace UniVox.Framework
     {
         Vector3Int ChunkID { get; }
         IChunkData Data { get; set; }
+        MeshDescriptor meshDescriptor { get; }
 
         Mesh GetRenderMesh();
 

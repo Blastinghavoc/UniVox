@@ -11,6 +11,7 @@ using UniVox.Framework.ChunkPipeline.WaitForNeighbours;
 using UniVox.Framework.Common;
 using UniVox.Framework.Jobified;
 using UniVox.Framework.Lighting;
+using UniVox.Framework.PlayAreaManagement;
 using UniVox.Implementations.ChunkData;
 
 namespace UniVox.Framework.ChunkPipeline
@@ -51,6 +52,8 @@ namespace UniVox.Framework.ChunkPipeline
         public IChunkProvider chunkProvider { get; private set; }
         public IChunkMesher chunkMesher{ get; private set; }
 
+        private WorldSizeLimits worldLimits;
+
         public bool GenerateStructures { get; private set; }
 
         /// <summary>
@@ -61,28 +64,30 @@ namespace UniVox.Framework.ChunkPipeline
 
         public ChunkPipelineManager(IChunkProvider chunkProvider,
             IChunkMesher chunkMesher,
-            Func<Vector3Int, IChunkComponent> getChunkComponent,
-            Func<Vector3Int, float> getPriorityOfChunk,
+            IChunkManager chunkManager,
             int maxDataPerUpdate,
-            int maxMeshPerUpdate, 
-            int maxCollisionPerUpdate, 
+            int maxMeshPerUpdate,
+            int maxCollisionPerUpdate,
             bool structureGen = false,
             int maxStructurePerUpdate = 200,
             ILightManager lightManager = null)
         {
-            this.getChunkComponent = getChunkComponent;
+            this.getChunkComponent = chunkManager.GetChunkComponent;
             this.chunkProvider = chunkProvider;
             this.chunkMesher = chunkMesher;
             this.GenerateStructures = structureGen;
+            this.worldLimits = chunkManager.WorldLimits;
 
             bool lighting = lightManager != null;
 
             bool meshDependentOnNeighbours = chunkMesher.IsMeshDependentOnNeighbourChunks || lighting;
 
+            Func<Vector3Int,float> priorityFunc = chunkManager.GetManhattanDistanceFromPlayer;
+
             int i = 0;
 
             var ScheduledForData = new PrioritizedBufferStage("ScheduledForData", i++,
-                this, getPriorityOfChunk);
+                this, chunkManager.GetManhattanDistanceFromPlayer);
             stages.Add(ScheduledForData);
 
             var GeneratingData = new GenerateTerrainStage(
@@ -100,7 +105,7 @@ namespace UniVox.Framework.ChunkPipeline
                 stages.Add(waitForNeighbourTerrain);
 
                 var scheduledForStructures = new PrioritizedBufferStage(
-                    "ScheduledForStructures", i++, this, getPriorityOfChunk);
+                    "ScheduledForStructures", i++, this, priorityFunc);
                 stages.Add(scheduledForStructures);
 
                 var generatingStructures = new GenerateStructuresStage(
@@ -131,7 +136,7 @@ namespace UniVox.Framework.ChunkPipeline
                 }
 
                 var scheduledForLighting = new PrioritizedBufferStage(
-                    "ScheduledForLights", i++, this, getPriorityOfChunk);
+                    "ScheduledForLights", i++, this, priorityFunc);
                 stages.Add(scheduledForLighting);
 
                 var generatingLights = new GenerateLightsStage("GeneratingLights",
@@ -172,7 +177,7 @@ namespace UniVox.Framework.ChunkPipeline
 
 
             var ScheduledForMesh = new PrioritizedBufferStage("ScheduledForMesh", i++,
-                this, getPriorityOfChunk);
+                this, priorityFunc);
             stages.Add(ScheduledForMesh);
 
             var GeneratingMesh = new GenerateMeshStage("GeneratingMesh", i++,
@@ -184,7 +189,7 @@ namespace UniVox.Framework.ChunkPipeline
             stages.Add(new PassThroughStage("GotMesh", i++, this));
 
             var ScheduledForCollisionMesh = new PrioritizedBufferStage(
-                "ScheduledForCollisionMesh", i++, this, getPriorityOfChunk);
+                "ScheduledForCollisionMesh", i++, this, priorityFunc);
             stages.Add(ScheduledForCollisionMesh);
 
             var ApplyingCollisionMesh = new ApplyCollisionMeshStage(
@@ -373,7 +378,7 @@ namespace UniVox.Framework.ChunkPipeline
             var prevTarget = stageData.targetStage;
 
             //Clamp the target stage
-            clampTarget(ref targetStage, stageData.maxStage);
+            clampTarget(ref targetStage, stageData.maxStage,chunkId);
 
             if (prevTarget == targetStage)
             {
@@ -459,20 +464,23 @@ namespace UniVox.Framework.ChunkPipeline
         /// </summary>
         /// <param name="targetStage"></param>
         /// <param name="currentMax"></param>
-        private void clampTarget(ref int targetStage,int currentMax) 
+        private void clampTarget(ref int targetStage,int currentMax,Vector3Int chunkId) 
         {
             var minimumAcceptableTarget = 0;
-            ///Disallow going further back than this, because doing so could result
-            ///in user-modified voxel data being wiped by re-generation.
-            if (currentMax >= AllVoxelsNeedLightGenStage)
-            {
-                minimumAcceptableTarget = AllVoxelsNeedLightGenStage;
-            }
 
-            //if (currentMax >= FullyGeneratedStage)
-            //{
-            //    minimumAcceptableTarget = FullyGeneratedStage;
-            //}
+            if (worldLimits.ChunkOutsideVerticalLimits(chunkId))
+            {
+                minimumAcceptableTarget = FullyGeneratedStage;
+            }
+            else
+            {
+                ///Disallow going further back than this, because doing so could result
+                ///in user-modified voxel data being wiped by re-generation.
+                if (currentMax >= AllVoxelsNeedLightGenStage)
+                {
+                    minimumAcceptableTarget = AllVoxelsNeedLightGenStage;
+                }
+            }
 
             targetStage = Math.Max(targetStage, minimumAcceptableTarget);
         }

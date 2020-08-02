@@ -26,5 +26,10 @@ namespace UniVox.Framework.PlayAreaManagement
             MaxChunkY = limitWorldHeight ? verticalChunkLimit - 1 : int.MaxValue;
             MinChunkY = limitWorldHeight ? -verticalChunkLimit : int.MinValue;
         }
+
+        public bool ChunkOutsideVerticalLimits(Vector3Int chunkID) 
+        {
+            return chunkID.y > MaxChunkY || chunkID.y < MinChunkY;
+        }
     }
 }

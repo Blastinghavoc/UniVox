@@ -10,6 +10,7 @@ using UniVox.Framework.ChunkPipeline;
 using UniVox.Framework.ChunkPipeline.VirtualJobs;
 using UniVox.Framework.Common;
 using UniVox.Framework.Lighting;
+using UniVox.Framework.PlayAreaManagement;
 using UniVox.Implementations.ChunkData;
 
 namespace Tests
@@ -104,6 +105,8 @@ namespace Tests
 
             public Mesh CollisionMesh { get; set; }
 
+            public MeshDescriptor meshDescriptor => throw new NotImplementedException();
+
             public Mesh GetRenderMesh()
             {
                 return RenderMesh;
@@ -145,6 +148,8 @@ namespace Tests
         Vector3Int mockPlayChunkID;
         ILightManager mockLightManager;
         private bool lighting;
+        IChunkManager mockManager;
+        WorldSizeLimits worldLimits;
 
         Dictionary<Vector3Int, MockChunkComponent> mockComponentStorage;
 
@@ -189,6 +194,22 @@ namespace Tests
                 {
                     return new BasicFunctionJob<LightmapGenerationJobResult>(() => new LightmapGenerationJobResult());
                 });
+
+            mockManager = Substitute.For<IChunkManager>();
+            mockManager.GetChunkComponent(Arg.Any<Vector3Int>())
+                .Returns(args =>
+                {
+                    var chunkId = (Vector3Int)args[0];
+                    return mockGetComponent(chunkId);
+                });
+            mockManager.GetManhattanDistanceFromPlayer(Arg.Any<Vector3Int>())
+                .Returns(args => {
+                    var chunkId = (Vector3Int)args[0];
+                    return MockGetPriorityOfChunk(chunkId);
+                });
+            worldLimits = new WorldSizeLimits(false, 0);
+            worldLimits.Initalise();
+            mockManager.WorldLimits.Returns(worldLimits);
         }
 
         private void MakePipeline(int numData, int numMesh, int numCollision, bool makeStructures = false, int numStructures = 200, bool includeLighting = false)
@@ -201,8 +222,7 @@ namespace Tests
             pipeline = new ChunkPipelineManager(
                 mockProvider,
                 mockMesher,
-                mockGetComponent,
-                MockGetPriorityOfChunk,
+                mockManager,
                 numData,
                 numMesh,
                 numCollision,
@@ -876,6 +896,30 @@ namespace Tests
             //The waiting stage should no longe be tracking the id
             var stage = pipeline.GetStage(pipeline.FullyGeneratedStage);
             Assert.AreEqual(0, stage.Count, "Waiting stage still tracking id whose target is that stage");
+        }
+
+        [Test(Description ="Tests that a chunk that is out of bounds cannot have its target reduce below the " +
+            "FullyGenerated stage.")]
+        public void SetTargetOfOutOfBoundsChunk() 
+        {
+            worldLimits = new WorldSizeLimits(true, 8);
+            worldLimits.Initalise();
+            mockManager.WorldLimits.Returns(worldLimits);
+            MakePipeline(1000, 1, 1, true,includeLighting: true);
+
+            var testChunkID = new Vector3Int(0, 8, 0);//This chunk is outside the vertical limits
+
+            mockComponentStorage.Add(testChunkID, new MockChunkComponent() { ChunkID = testChunkID,Data = Substitute.For<IChunkData>() });
+            pipeline.AddWithData(testChunkID, pipeline.FullyGeneratedStage);
+
+            AssertChunkStages(testChunkID, pipeline.FullyGeneratedStage);
+
+            pipeline.SetTarget(testChunkID, pipeline.OwnStructuresStage);
+
+            pipeline.Update();
+
+            //Nothing should have been downgraded, as the chunk is outside the vertical limits
+            AssertChunkStages(testChunkID, pipeline.FullyGeneratedStage);
         }
 
         /// <summary>

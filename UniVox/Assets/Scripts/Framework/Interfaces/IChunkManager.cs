@@ -48,10 +48,18 @@ namespace UniVox.Framework
         //TODO remove DEBUG
         int GetMinPipelineStageOfChunk(Vector3Int chunkId);
 
+
         bool IsChunkComplete(Vector3Int chunkId);
         void SetTargetStageOfChunk(Vector3Int chunkID, int targetStage,TargetUpdateMode updateMode = TargetUpdateMode.any);
         bool TryDeactivateChunk(Vector3Int chunkID);
         Vector3Int[] GetAllLoadedChunkIds();
         bool IsChunkFullyGenerated(Vector3Int chunkId);
+
+        //TODO remove DEBUG
+        string GetMinPipelineStageOfChunkByName(Vector3Int chunkId);
+        //TODO remove DEBUG
+        string GetMaxPipelineStageOfChunkByName(Vector3Int chunkId);
+        float GetManhattanDistanceFromPlayer(Vector3Int chunkID);
+        IChunkComponent GetChunkComponent(Vector3Int chunkID);
     }
 }

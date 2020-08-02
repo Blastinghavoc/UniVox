@@ -68,8 +68,16 @@ namespace UniVox.Framework.Jobified
                 catch (Exception e)
                 {
                     var (managerHad, pipelinehad) = chunkManager.ContainsChunkID(chunkId);
+                    string minStage = "";
+                    string maxStage = "";
+                    if (pipelinehad)
+                    {
+                        minStage = chunkManager.GetMinPipelineStageOfChunkByName(chunkId);
+                        maxStage = chunkManager.GetMaxPipelineStageOfChunkByName(chunkId);
+                    }
                     throw new Exception($"Failed to get neighbour data for chunk {chunkId}." +
                         $"Manager had this chunk = {managerHad}, pipeline had it = {pipelinehad}." +
+                        $" Min pipeline stage {minStage}, max {maxStage} ."+
                         $"Cause: {e.Message}", e);
                 }
             }

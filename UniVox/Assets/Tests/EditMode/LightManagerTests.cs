@@ -7,6 +7,7 @@ using Unity.Mathematics;
 using UnityEngine;
 using UniVox.Framework;
 using UniVox.Framework.Lighting;
+using UniVox.Framework.PlayAreaManagement;
 using UniVox.Implementations.ChunkData;
 
 namespace Tests
@@ -60,6 +61,10 @@ namespace Tests
                     var id = (Vector3Int)args[0];
                     return fullyGenerated.Contains(id);
                 });
+
+            var worldLimits = new WorldSizeLimits(false, 0);
+            worldLimits.Initalise();
+            chunkManager.WorldLimits.Returns(worldLimits);
 
             chunkManager.ChunkToWorldPosition(Arg.Any<Vector3Int>())
                 .Returns((args) =>

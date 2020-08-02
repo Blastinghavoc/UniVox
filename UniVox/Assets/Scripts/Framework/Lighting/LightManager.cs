@@ -356,7 +356,8 @@ namespace UniVox.Framework.Lighting
             {
                 var offset = DirectionExtensions.Vectors[i];
                 var neighId = chunkId + offset;
-                directionsValid[i] = chunkManager.IsChunkFullyGenerated(neighId);
+                //Chunk only valid (for propagation etc) if it's fully generated and not outside the world limits
+                directionsValid[i] = chunkManager.IsChunkFullyGenerated(neighId) && !chunkManager.WorldLimits.ChunkOutsideVerticalLimits(neighId);
             }
 
             var chunkData = chunkManager.GetReadOnlyChunkData(chunkId);
@@ -667,7 +668,8 @@ namespace UniVox.Framework.Lighting
             {
                 return true;
             }
-            return chunkManager.IsChunkFullyGenerated(chunkId);// && InsideCuboid(chunkId,neighbourhood.center.ChunkID,Vector3Int.one);
+            //Only writable if fully generated and not outside world limits
+            return chunkManager.IsChunkFullyGenerated(chunkId) && !chunkManager.WorldLimits.ChunkOutsideVerticalLimits(chunkId);
         }
 
         //TODO decrease GC allocations in this method
