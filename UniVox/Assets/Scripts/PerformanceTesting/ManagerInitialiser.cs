@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UniVox.Framework;
+using UniVox.Framework.Serialisation;
 
 namespace PerformanceTesting
 {
@@ -38,6 +39,8 @@ namespace PerformanceTesting
                         var chunkManager = child.GetComponent<IChunkManager>();
                         if (chunkManager != null)
                         {
+                            //Initialise save manager
+                            SaveManager.Initialise(child.name);
                             //Initialise the first active chunk manager found
                             chunkManager.Initialise();
                             return;

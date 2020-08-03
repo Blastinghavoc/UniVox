@@ -8,6 +8,7 @@ namespace UniVox.Framework
     /// 4 angles of rotation about the Y and X planes, or 16 total rotations.
     /// </summary>
     [BurstCompile]
+    [Serializable]
     public struct VoxelRotation: IEquatable<VoxelRotation> 
     {
         //first 6 bits encode values 00xxyyzz

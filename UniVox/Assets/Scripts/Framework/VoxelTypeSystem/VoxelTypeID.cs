@@ -1,12 +1,11 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System;
 using Unity.Burst;
-using System;
 
 namespace UniVox.Framework
 {
     [BurstCompile]
-    public struct VoxelTypeID: IEquatable<VoxelTypeID>
+    [Serializable]
+    public struct VoxelTypeID : IEquatable<VoxelTypeID>
     {
         public const ushort AIR_ID = 0;
 

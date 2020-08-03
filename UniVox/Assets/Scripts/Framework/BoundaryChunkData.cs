@@ -14,6 +14,11 @@ namespace UniVox.Framework
         {
         }
 
+        protected override VoxelTypeID[] GetVoxelArray()
+        {
+            throw new NotImplementedException();
+        }
+
         protected override VoxelTypeID GetVoxelID(int x, int y, int z)
         {
             return new VoxelTypeID(VoxelTypeID.AIR_ID);

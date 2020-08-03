@@ -31,6 +31,11 @@ namespace UniVox.Implementations.ChunkData
             octree.Set(x, y, z, voxel);
         }
 
+        protected override VoxelTypeID[] GetVoxelArray()
+        {
+            return octree.ToArray();
+        }
+
         public override NativeArray<VoxelTypeID> ToNative(Allocator allocator = Allocator.Persistent)
         {
             return octree.ToArray().ToNative(allocator);

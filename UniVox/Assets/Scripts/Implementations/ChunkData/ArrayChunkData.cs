@@ -27,6 +27,11 @@ namespace UniVox.Implementations.ChunkData
             }
         }
 
+        protected override VoxelTypeID[] GetVoxelArray()
+        {
+            return storage.ToArray();
+        }
+
         protected override VoxelTypeID GetVoxelID(int x, int y, int z)
         {
             return storage.Get(x, y, z);

@@ -3,6 +3,7 @@ using Unity.Collections;
 using UnityEngine;
 using UniVox.Framework.Common;
 using UniVox.Framework.Lighting;
+using UniVox.Framework.Serialisation;
 
 namespace UniVox.Framework
 {
@@ -71,6 +72,11 @@ namespace UniVox.Framework
             return realData.GetLight(pos);
         }
 
+        public ISaveData GetSaveData()
+        {
+            return realData.GetSaveData();
+        }
+
         public NativeArray<LightValue> LightToNative(Allocator allocator = Allocator.Persistent)
         {
             return realData.LightToNative(allocator);
@@ -126,6 +132,18 @@ namespace UniVox.Framework
             else
             {
                 realData.SetRotation(coords, rotation);
+            }
+        }
+
+        public void SetRotationsFromArray(RotatedVoxelEntry[] entries)
+        {
+            if (!allowModifyVoxels)
+            {
+                throw new System.NotImplementedException();
+            }
+            else
+            {
+                realData.SetRotationsFromArray(entries);
             }
         }
 

@@ -5,6 +5,7 @@ using Unity.Collections;
 using UnityEngine;
 using UniVox.Framework.Common;
 using UniVox.Framework.Lighting;
+using UniVox.Framework.Serialisation;
 
 namespace UniVox.Framework
 {
@@ -276,6 +277,21 @@ namespace UniVox.Framework
         public void SetLightMap(LightValue[] lights)
         {
             lightChunk = new LightChunkData(Dimensions, lights);
+        }
+
+        protected abstract VoxelTypeID[] GetVoxelArray();
+
+        public ISaveData GetSaveData()
+        {
+            return new ChunkSaveData() { voxels = GetVoxelArray(), rotatedEntries = rotatedVoxels.Values.ToArray() };
+        }
+
+        public void SetRotationsFromArray(RotatedVoxelEntry[] entries)
+        {
+            for (int i = 0; i < entries.Length; i++)
+            {
+                rotatedVoxels.Add(entries[i].flatIndex, entries[i]);
+            }
         }
     }
 }

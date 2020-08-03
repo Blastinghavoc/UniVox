@@ -10,6 +10,7 @@ using UnityEngine.Profiling;
 using UniVox.Framework;
 using UniVox.Framework.ChunkPipeline.VirtualJobs;
 using UniVox.Framework.Jobified;
+using UniVox.Framework.Serialisation;
 using UniVox.Implementations.ChunkData;
 using UniVox.Implementations.ProcGen;
 using Utils;
@@ -378,6 +379,13 @@ namespace UniVox.Implementations.Providers
                 }
                 return array;
             }
+        }
+
+        protected override IChunkData InitialiseChunkDataFromSaved(ChunkSaveData chunkSaveData, Vector3Int chunkId)
+        {
+            var data = chunkDataFactory.Create(chunkId, chunkManager.ChunkDimensions, chunkSaveData.voxels);
+            data.SetRotationsFromArray(chunkSaveData.rotatedEntries);
+            return data;
         }
     }
 }

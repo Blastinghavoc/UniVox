@@ -3,6 +3,7 @@
 namespace UniVox.Framework
 {
     [BurstCompile]
+    [System.Serializable]
     public struct RotatedVoxelEntry 
     {
         public int flatIndex;

@@ -34,6 +34,11 @@ namespace UniVox.Implementations.ChunkData
             rle.Set(MultiIndexToFlat(x, y, z, Dimensions.x, dxdy), voxel);
         }
 
+        protected override VoxelTypeID[] GetVoxelArray()
+        {
+            return rle.ToArray();
+        }
+
         public override NativeArray<VoxelTypeID> ToNative(Allocator allocator = Allocator.Persistent)
         {
             return rle.ToArray().ToNative(allocator);

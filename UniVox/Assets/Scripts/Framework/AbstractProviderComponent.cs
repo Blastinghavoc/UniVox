@@ -6,6 +6,7 @@ using UniVox.Framework.ChunkPipeline.VirtualJobs;
 using System;
 using UnityEngine.Profiling;
 using UniVox.Framework.Jobified;
+using UniVox.Framework.Serialisation;
 
 namespace UniVox.Framework
 {
@@ -13,6 +14,8 @@ namespace UniVox.Framework
     {
         protected VoxelTypeManager voxelTypeManager;
         protected IChunkManager chunkManager;
+
+        protected BinarySerialiser serialiser;
 
         //TODO remove, testing only
         public bool Parrallel = true;
@@ -31,24 +34,37 @@ namespace UniVox.Framework
             this.voxelTypeManager = voxelTypeManager;
             this.chunkManager = chunkManager;
             this.eventManager = eventManager;
+            serialiser = new BinarySerialiser("chunks/",".chnk");
         }
 
         //Add or replace modified data for the given chunk
         public void StoreModifiedChunkData(Vector3Int chunkID, IChunkData data) 
         {
-            ModifiedChunkData[chunkID] = data;
+            //ModifiedChunkData[chunkID] = data;
+            serialiser.Save(data.GetSaveData(), data.ChunkID.ToString());
         }
 
         public bool TryGetStoredDataForChunk(Vector3Int chunkID, out IChunkData storedData)
         {
-            if (ModifiedChunkData.TryGetValue(chunkID, out var data))
+            //if (ModifiedChunkData.TryGetValue(chunkID, out var data))
+            //{
+            //    storedData = data;
+            //    return true;
+            //}
+            Profiler.BeginSample("LoadingSavedChunkData");
+            if (serialiser.TryLoad(chunkID.ToString(),out var data))
             {
-                storedData = data;
+                storedData = InitialiseChunkDataFromSaved((ChunkSaveData)data, chunkID);
+                storedData.FullyGenerated = false;//This prevents saving it again if nothing changes.
                 return true;
             }
+            Profiler.EndSample();
+
             storedData = null;
             return false;
         }
+
+        protected abstract IChunkData InitialiseChunkDataFromSaved(ChunkSaveData chunkSaveData,Vector3Int chunkId);
 
         /// <summary>
         /// To be implemented by derived classes, returning a pipeline job to generatie the chunk data.

@@ -39,6 +39,11 @@ namespace UniVox.Implementations.ChunkData
             storage.Set(x, y, z, voxel);
         }
 
+        protected override VoxelTypeID[] GetVoxelArray()
+        {
+            return storage.ToArray();
+        }
+
         public override NativeArray<VoxelTypeID> ToNative(Allocator allocator = Allocator.Persistent)
         {
             return storage.ToArray().ToNative(allocator);

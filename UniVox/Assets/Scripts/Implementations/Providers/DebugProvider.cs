@@ -4,6 +4,7 @@ using UniVox.Framework;
 using UniVox.Implementations.ChunkData;
 using UniVox.Framework.ChunkPipeline.VirtualJobs;
 using UniVox.Framework.Jobified;
+using UniVox.Framework.Serialisation;
 
 namespace UniVox.Implementations.Providers
 {
@@ -163,6 +164,13 @@ namespace UniVox.Implementations.Providers
         {
             //Ground height assumed to be 0.
             return new int[chunkManager.ChunkDimensions.x * chunkManager.ChunkDimensions.z];            
+        }
+
+        protected override IChunkData InitialiseChunkDataFromSaved(ChunkSaveData chunkSaveData, Vector3Int chunkId)
+        {
+            var data = new FlatArrayChunkData(chunkId, chunkManager.ChunkDimensions, chunkSaveData.voxels);
+            data.SetRotationsFromArray(chunkSaveData.rotatedEntries);
+            return data;
         }
     }
 }

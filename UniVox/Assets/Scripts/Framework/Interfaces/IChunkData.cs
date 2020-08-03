@@ -5,6 +5,7 @@ using Unity.Collections;
 using System.Collections.Generic;
 using UniVox.Framework.Common;
 using UniVox.Framework.Lighting;
+using UniVox.Framework.Serialisation;
 
 namespace UniVox.Framework
 {
@@ -12,7 +13,7 @@ namespace UniVox.Framework
     /// <summary>
     /// The data representation of a Chunk
     /// </summary>
-    public interface IChunkData
+    public interface IChunkData: ISaveable
     {
         Vector3Int ChunkID { get; set; }
 
@@ -32,7 +33,7 @@ namespace UniVox.Framework
         NativeArray<VoxelTypeID> ToNative(Allocator allocator = Allocator.Persistent);
 
         void SetRotation(Vector3Int coords, VoxelRotation rotation);
-
+        void SetRotationsFromArray(RotatedVoxelEntry[] entries);
         NativeArray<RotatedVoxelEntry> NativeRotations(Allocator allocator = Allocator.Persistent);
 
         /// <summary>
