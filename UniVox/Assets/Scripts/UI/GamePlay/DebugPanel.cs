@@ -77,11 +77,6 @@ namespace UniVox.UI
 
         private void Update()
         {
-            if (Input.GetKeyDown(KeyCode.F1))
-            {
-                Toggle();
-            }
-
             if (show)
             {                
                 debugItems["Coords"].Update(player.position.ToString());
@@ -106,7 +101,7 @@ namespace UniVox.UI
 
         }
 
-        private void Toggle() 
+        public void Toggle() 
         {
             show = !show;
             foreach (var item in debugItems.Values)

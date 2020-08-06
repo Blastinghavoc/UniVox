@@ -34,31 +34,48 @@ namespace UniVox.Framework
             this.voxelTypeManager = voxelTypeManager;
             this.chunkManager = chunkManager;
             this.eventManager = eventManager;
-            serialiser = new BinarySerialiser("chunks/",".chnk");
+            if (SaveUtils.DoSave)
+            {
+                serialiser = new BinarySerialiser(SaveUtils.CurrentWorldSaveDirectory+"chunks/",".chnk");
+            }
         }
 
         //Add or replace modified data for the given chunk
         public void StoreModifiedChunkData(Vector3Int chunkID, IChunkData data) 
         {
-            //ModifiedChunkData[chunkID] = data;
-            serialiser.Save(data.GetSaveData(), data.ChunkID.ToString());
+            if (SaveUtils.DoSave)
+            {
+                //Save to file
+                serialiser.Save(data.GetSaveData(), data.ChunkID.ToString());
+            }
+            else
+            {
+                //Store in RAM
+                ModifiedChunkData[chunkID] = data;
+            }
         }
 
         public bool TryGetStoredDataForChunk(Vector3Int chunkID, out IChunkData storedData)
         {
-            //if (ModifiedChunkData.TryGetValue(chunkID, out var data))
-            //{
-            //    storedData = data;
-            //    return true;
-            //}
-            Profiler.BeginSample("LoadingSavedChunkData");
-            if (serialiser.TryLoad(chunkID.ToString(),out var data))
+            if (SaveUtils.DoSave)
             {
-                storedData = InitialiseChunkDataFromSaved((ChunkSaveData)data, chunkID);
-                storedData.FullyGenerated = false;//This prevents saving it again if nothing changes.
-                return true;
+                Profiler.BeginSample("LoadingSavedChunkData");
+                if (serialiser.TryLoad(chunkID.ToString(),out var data))
+                {
+                    storedData = InitialiseChunkDataFromSaved((ChunkSaveData)data, chunkID);
+                    storedData.FullyGenerated = false;//This prevents saving it again if nothing changes.
+                    return true;
+                }
+                Profiler.EndSample();
             }
-            Profiler.EndSample();
+            else
+            {
+                if (ModifiedChunkData.TryGetValue(chunkID, out var data))
+                {
+                    storedData = data;
+                    return true;
+                }
+            }
 
             storedData = null;
             return false;

@@ -140,6 +140,10 @@ namespace UniVox.Gameplay
             mouseLook.Init(transform, cam.transform);
         }
 
+        public void SetCursorLock(bool value) 
+        {
+            mouseLook.SetCursorLock(value);
+        }
 
         private void Update()
         {

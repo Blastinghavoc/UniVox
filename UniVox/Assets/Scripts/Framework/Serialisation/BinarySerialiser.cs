@@ -10,33 +10,31 @@ namespace UniVox.Framework.Serialisation
     /// </summary>
     public class BinarySerialiser
     {
-        private string subDirectory;
+        private string directory;
         private string saveFileExtension;
         private bool compressed;
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="subDirectory">Sub directory path, with trailing "/" </param>
+        /// <param name="directory">Full directory path, with trailing "/" </param>
         /// <param name="saveFileExtension">File extension, with preceding "." </param>
         /// <param name="compressed"></param>
-        public BinarySerialiser(string subDirectory, string saveFileExtension, bool compressed = true)
+        public BinarySerialiser(string directory, string saveFileExtension, bool compressed = true)
         {
-            this.subDirectory = subDirectory;
+            this.directory = directory;
             this.saveFileExtension = saveFileExtension;
             this.compressed = compressed;
         }
 
         public void Save(object obj, string fileName)
         {
-            string directoryPath = SaveManager.Instance.BaseSaveDirectory + subDirectory;
-
-            if (!Directory.Exists(directoryPath))
+            if (!Directory.Exists(directory))
             {
-                Directory.CreateDirectory(directoryPath);
+                Directory.CreateDirectory(directory);
             }
 
-            string fullPath = directoryPath+ fileName + saveFileExtension;
+            string fullPath = directory + fileName + saveFileExtension;
 
             using (var file = File.Create(fullPath))
             {
@@ -62,7 +60,7 @@ namespace UniVox.Framework.Serialisation
 
         public bool TryLoad(string fileName, out object data)
         {
-            string fullPath = SaveManager.Instance.BaseSaveDirectory + subDirectory + fileName + saveFileExtension;
+            string fullPath = directory + fileName + saveFileExtension;
 
             data = null;
 

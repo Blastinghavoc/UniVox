@@ -13,8 +13,11 @@ namespace PerformanceTesting
     public class ManagerInitialiser : MonoBehaviour
     {
         public bool TestMode;
+        public bool DoSave;
         void Awake()
         {
+
+            SaveUtils.DoSave = DoSave && !TestMode;//Test mode never saves
 
             if (TestMode)
             {
@@ -39,8 +42,12 @@ namespace PerformanceTesting
                         var chunkManager = child.GetComponent<IChunkManager>();
                         if (chunkManager != null)
                         {
-                            //Initialise save manager
-                            SaveManager.Initialise(child.name);
+                            if (SaveUtils.DoSave && SaveUtils.WorldName == null)
+                            {
+                                //Set the world name to the chunk manager name by default
+                                SaveUtils.WorldName = child.name;
+                            }
+
                             //Initialise the first active chunk manager found
                             chunkManager.Initialise();
                             return;

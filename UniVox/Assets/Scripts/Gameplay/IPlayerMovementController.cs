@@ -9,5 +9,7 @@ namespace UniVox.Gameplay
         bool Grounded { get; }
         bool Jumping { get; }
         bool Running { get; }
+
+        void SetCursorLock(bool value);
     }
 }
