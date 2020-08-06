@@ -25,7 +25,9 @@ namespace UniVox.Implementations.ProcGen
 
         public void Execute()
         {
-            Random random = new Random(seed);
+            var adjustedSeed = (uint)seed;
+            adjustedSeed = adjustedSeed == 0 ? adjustedSeed + 1 : adjustedSeed;
+            Random random = new Random(adjustedSeed);
 
             NativeArray<float3> offsets = new NativeArray<float3>(oreSettings.Length, Allocator.Temp);
             for (int i = 0; i < offsets.Length; i++)

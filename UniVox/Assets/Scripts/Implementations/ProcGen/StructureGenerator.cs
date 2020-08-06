@@ -1,52 +1,54 @@
-﻿using System;
-using Unity.Mathematics;
+﻿using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Profiling;
 using UniVox.Framework;
-using UniVox.Framework.Jobified;
+using Random = Unity.Mathematics.Random;
 
 namespace UniVox.Implementations.ProcGen
 {
-    public class StructureGenerator 
+    public class StructureGenerator
     {
 
 
         private float treeThreshold;
         private BiomeDatabaseComponent biomeDatabase;
         private VoxelTypeManager typeManager;
-        private Unity.Mathematics.Random random;
+        private Random random;
 
-        public void Initalise(VoxelTypeManager voxelTypeManager,BiomeDatabaseComponent biomeDatabase,float treeThreshold,int seed) 
+        public void Initalise(VoxelTypeManager voxelTypeManager, BiomeDatabaseComponent biomeDatabase, float treeThreshold, int seed)
         {
             this.treeThreshold = treeThreshold;
             this.biomeDatabase = biomeDatabase;
-            this.typeManager = voxelTypeManager;
-            random = new Unity.Mathematics.Random((uint)seed);
+            typeManager = voxelTypeManager;
+
+            var adjustedSeed = (uint)seed;
+            adjustedSeed = adjustedSeed == 0 ? adjustedSeed + 1 : adjustedSeed;
+            random = new Random(adjustedSeed);
         }
 
-        public ChunkNeighbourhood generateTrees(Vector3 chunkPosition,Vector3Int dimensions,ChunkNeighbourhood neighbourhood,ChunkColumnNoiseMaps chunkColumnNoise) 
+        public ChunkNeighbourhood generateTrees(Vector3 chunkPosition, Vector3Int dimensions, ChunkNeighbourhood neighbourhood, ChunkColumnNoiseMaps chunkColumnNoise)
         {
             Profiler.BeginSample("GeneratingTrees");
             int mapIndex = 0;
             var chunkTop = chunkPosition.y + dimensions.y;
             for (int z = 0; z < dimensions.z; z++)
             {
-                for (int x = 0; x < dimensions.x; x++,mapIndex++)
+                for (int x = 0; x < dimensions.x; x++, mapIndex++)
                 {
                     var hm = chunkColumnNoise.heightMap[mapIndex];
                     if (hm >= chunkPosition.y && hm < chunkTop)
                     {
                         var groundY = (int)math.floor(hm - chunkPosition.y);
                         //Check ground is still there (not been removed by cave)
-                        if (neighbourhood[x,groundY,z] != VoxelTypeID.AIR_ID)
+                        if (neighbourhood[x, groundY, z] != VoxelTypeID.AIR_ID)
                         {
                             if (chunkColumnNoise.treeMap[mapIndex] > treeThreshold)
                             {
                                 //Put a tree here
                                 var y = groundY + 1;
 
-                                MakeTree(neighbourhood, x, y, z,chunkColumnNoise.biomeMap[mapIndex]);
-                            
+                                MakeTree(neighbourhood, x, y, z, chunkColumnNoise.biomeMap[mapIndex]);
+
                             }
                         }
 
@@ -57,7 +59,7 @@ namespace UniVox.Implementations.ProcGen
             return neighbourhood;
         }
 
-        private void MakeTree(ChunkNeighbourhood neighbourhood, int x, int y, int z, int biomeID) 
+        private void MakeTree(ChunkNeighbourhood neighbourhood, int x, int y, int z, int biomeID)
         {
             var SOtreeDef = biomeDatabase.GetBiomeDefinition(biomeID).treeType;
             if (SOtreeDef == null)
@@ -81,13 +83,13 @@ namespace UniVox.Implementations.ProcGen
             }
         }
 
-        private void MakeOak(ChunkNeighbourhood neighbourhood, int x, int y, int z,NativeTreeDefinition treeDef) 
+        private void MakeOak(ChunkNeighbourhood neighbourhood, int x, int y, int z, NativeTreeDefinition treeDef)
         {
             int numLeavesOnTop = 2;
-            int minCanopyHeight = numLeavesOnTop+2;
+            int minCanopyHeight = numLeavesOnTop + 2;
             var height = random.NextInt(treeDef.minHeight, treeDef.maxHeight);
             var leafStart = random.NextInt(treeDef.minLeafClearance, height - minCanopyHeight);
-            for (int i = 0; i < height- numLeavesOnTop; i++, y++)
+            for (int i = 0; i < height - numLeavesOnTop; i++, y++)
             {
                 neighbourhood[x, y, z] = treeDef.logID;
 
@@ -166,8 +168,8 @@ namespace UniVox.Implementations.ProcGen
             var height = random.NextInt(treeDef.minHeight, treeDef.maxHeight);
             for (int i = 0; i < height; i++, y++)
             {
-                neighbourhood[x, y, z] = treeDef.logID;                
-            }            
+                neighbourhood[x, y, z] = treeDef.logID;
+            }
         }
 
     }

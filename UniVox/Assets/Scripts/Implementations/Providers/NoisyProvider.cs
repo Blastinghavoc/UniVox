@@ -1,5 +1,4 @@
-﻿using NSubstitute;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Jobs;
@@ -13,6 +12,7 @@ using UniVox.Framework.Jobified;
 using UniVox.Framework.Serialisation;
 using UniVox.Implementations.ChunkData;
 using UniVox.Implementations.ProcGen;
+using UniVox.MessagePassing;
 using Utils;
 using Utils.Noise;
 using static UniVox.Framework.FrameworkEventManager;
@@ -61,10 +61,18 @@ namespace UniVox.Implementations.Providers
         {
             base.Initialise(voxelTypeManager, chunkManager, eventManager);
 
+
             Assert.IsNotNull(bedrockType, $"{typeof(NoisyProvider)} must have a valid reference to a bedrock block type");
             Assert.IsNotNull(waterType, $"{typeof(NoisyProvider)} must have a valid reference to a water block type");
             Assert.IsNotNull(oceanBiome, $"{typeof(NoisyProvider)} must have a valid reference to an ocean biome");
             Assert.IsNotNull(biomeDatabaseComponent, $"{typeof(NoisyProvider)} must have a valid reference to a biome database component");
+
+            if (SceneMessagePasser.TryConsumeMessage<SeedMessage>(out var message))
+            {
+                worldSettings.seed = GetSeedAsFloat(message.seed);
+                Debug.Log($"Int seed: {message.seed}, derived seed: {worldSettings.seed}");
+            }
+            InitialiseSeeds();
 
             bedrockID = voxelTypeManager.GetId(bedrockType);
             waterID = voxelTypeManager.GetId(waterType);
@@ -98,6 +106,7 @@ namespace UniVox.Implementations.Providers
             eventManager.OnChunkDeactivated += OnChunkDeactivated;
         }
 
+
         public void Dispose()
         {
             eventManager.OnChunkActivated -= OnChunkActivated;
@@ -106,10 +115,10 @@ namespace UniVox.Implementations.Providers
             biomeDatabaseComponent.Dispose();
         }
 
-        private void OnChunkActivated(object sender, ChunkActivatedArgs args) 
+        private void OnChunkActivated(object sender, ChunkActivatedArgs args)
         {
             var columnId = new Vector2Int(args.chunkId.x, args.chunkId.z);
-            if (!numActiveChunksInColumn.TryGetValue(columnId,out var count))
+            if (!numActiveChunksInColumn.TryGetValue(columnId, out var count))
             {
                 count = 0;
             }
@@ -125,9 +134,9 @@ namespace UniVox.Implementations.Providers
         {
             var columnId = new Vector2Int(args.chunkID.x, args.chunkID.z);
 
-            if (numActiveChunksInColumn.TryGetValue(columnId,out var count))
+            if (numActiveChunksInColumn.TryGetValue(columnId, out var count))
             {
-                count--;                
+                count--;
             }
             else
             {
@@ -146,11 +155,29 @@ namespace UniVox.Implementations.Providers
                     $" manager should have removed the corresponding id {args.chunkID}." +
                     $"Manager had it = {managerHas}, pipeline had it = {pipelineHas}");
             }
-            else 
+            else
             {
                 //Update stored count
                 numActiveChunksInColumn[columnId] = count;
             }
+        }
+        /// <summary>
+        /// Convert integer seed to a float.
+        /// Separated as a method, as there's more than one way this could be done.
+        /// </summary>
+        /// <param name="seed"></param>
+        /// <returns></returns>
+        private float GetSeedAsFloat(int seed)
+        {
+            UnityEngine.Random.InitState(seed);
+            return UnityEngine.Random.Range(-100000, 100000);
+        }
+
+        private void InitialiseSeeds()
+        {
+            heightmapNoise.Seed = worldSettings.seed;
+            moisturemapNoise.Seed = worldSettings.seed;
+            treemapNoise.Seed = worldSettings.seed;
         }
 
         public override AbstractPipelineJob<IChunkData> GenerateTerrainData(Vector3Int chunkID)
@@ -233,7 +260,7 @@ namespace UniVox.Implementations.Providers
                     }
                 }
 
-                
+
                 IChunkData ChunkData;
                 if (checkIfEmptyJob.isEmpty[0])
                 {
@@ -292,9 +319,9 @@ namespace UniVox.Implementations.Providers
                     return cleanup();
                 });
             }
-        
-            var mainGenHandle = mainGenJob.Schedule(noiseGenHandle);       
- 
+
+            var mainGenHandle = mainGenJob.Schedule(noiseGenHandle);
+
             var oreHandle = oreGenJob.Schedule(mainGenHandle);
             var oceanHandle = oceanGenJob.Schedule(oreHandle);
             var checkIfEmptyHandle = checkIfEmptyJob.Schedule(oceanHandle);
@@ -303,9 +330,9 @@ namespace UniVox.Implementations.Providers
             return new PipelineUnityJob<IChunkData>(finalHandle, cleanup);
         }
 
-        private JobReferenceCounter<Vector2Int, NativeChunkColumnNoiseMaps>.JobResultPair MakeNoiseJob(Vector2Int columnId) 
+        private JobReferenceCounter<Vector2Int, NativeChunkColumnNoiseMaps>.JobResultPair MakeNoiseJob(Vector2Int columnId)
         {
-            float3 worldPos = chunkManager.ChunkToWorldPosition(new Vector3Int(columnId.x,0,columnId.y));
+            float3 worldPos = chunkManager.ChunkToWorldPosition(new Vector3Int(columnId.x, 0, columnId.y));
 
             var noiseGenJob = new JobWrapper<NoiseMapGenerationJob>();
             noiseGenJob.job.worldSettings = worldSettings;
@@ -329,7 +356,7 @@ namespace UniVox.Implementations.Providers
             }
 
             return new JobReferenceCounter<Vector2Int, NativeChunkColumnNoiseMaps>.JobResultPair() { handle = handle, result = nativeNoiseMaps };
-        } 
+        }
 
         public override AbstractPipelineJob<ChunkNeighbourhood> GenerateStructuresForNeighbourhood(Vector3Int centerChunkID, ChunkNeighbourhood neighbourhood)
         {
@@ -363,7 +390,7 @@ namespace UniVox.Implementations.Providers
 
         public override int[] GetHeightMapForColumn(Vector2Int columnId)
         {
-            if (noiseMaps.TryGetValue(columnId,out var columnNoiseMaps))
+            if (noiseMaps.TryGetValue(columnId, out var columnNoiseMaps))
             {
                 return columnNoiseMaps.heightMap;
             }

@@ -651,6 +651,7 @@ MonoBehaviour:
     typeToCreate: 2
     lazy: 1
   worldSettings:
+    seed: 0
     HeightmapScale: 125
     MoistureMapScale: 1000
     MaxHeightmapHeight: 96
@@ -667,17 +668,14 @@ MonoBehaviour:
     Octaves: 1
     Persistence: 0.5
     Lacunarity: 2
-    Seed: 1337
   heightmapNoise:
     Octaves: 3
     Persistence: 0.5
     Lacunarity: 2
-    Seed: 1337
   moisturemapNoise:
     Octaves: 3
     Persistence: 0.5
     Lacunarity: 2
-    Seed: 1337
   bedrockType: {fileID: 11400000, guid: 3b5947e841c3a4845b8c9cbf0efbbebc, type: 2}
   waterType: {fileID: 11400000, guid: 29a81a7c3885cee43ad6f88a9ba44766, type: 2}
   oceanBiome: {fileID: 11400000, guid: bc7732a614701f04ca9c506c02132cc4, type: 2}
@@ -1521,6 +1519,7 @@ MonoBehaviour:
     typeToCreate: 0
     lazy: 1
   worldSettings:
+    seed: 1337
     HeightmapScale: 125
     MoistureMapScale: 1000
     MaxHeightmapHeight: 96
@@ -1537,17 +1536,14 @@ MonoBehaviour:
     Octaves: 1
     Persistence: 0.5
     Lacunarity: 2
-    Seed: 1337
   heightmapNoise:
     Octaves: 3
     Persistence: 0.5
     Lacunarity: 2
-    Seed: 1337
   moisturemapNoise:
     Octaves: 3
     Persistence: 0.5
     Lacunarity: 2
-    Seed: 1337
   bedrockType: {fileID: 11400000, guid: 3b5947e841c3a4845b8c9cbf0efbbebc, type: 2}
   waterType: {fileID: 11400000, guid: 29a81a7c3885cee43ad6f88a9ba44766, type: 2}
   oceanBiome: {fileID: 11400000, guid: bc7732a614701f04ca9c506c02132cc4, type: 2}
@@ -2414,6 +2410,7 @@ MonoBehaviour:
     typeToCreate: 3
     lazy: 1
   worldSettings:
+    seed: 0
     HeightmapScale: 125
     MoistureMapScale: 1000
     MaxHeightmapHeight: 96
@@ -2430,17 +2427,14 @@ MonoBehaviour:
     Octaves: 1
     Persistence: 0.5
     Lacunarity: 2
-    Seed: 1337
   heightmapNoise:
     Octaves: 3
     Persistence: 0.5
     Lacunarity: 2
-    Seed: 1337
   moisturemapNoise:
     Octaves: 3
     Persistence: 0.5
     Lacunarity: 2
-    Seed: 1337
   bedrockType: {fileID: 11400000, guid: 3b5947e841c3a4845b8c9cbf0efbbebc, type: 2}
   waterType: {fileID: 11400000, guid: 29a81a7c3885cee43ad6f88a9ba44766, type: 2}
   oceanBiome: {fileID: 11400000, guid: bc7732a614701f04ca9c506c02132cc4, type: 2}
@@ -2589,6 +2583,7 @@ MonoBehaviour:
     typeToCreate: 0
     lazy: 1
   worldSettings:
+    seed: 0
     HeightmapScale: 125
     MoistureMapScale: 1000
     MaxHeightmapHeight: 96
@@ -2605,17 +2600,14 @@ MonoBehaviour:
     Octaves: 1
     Persistence: 0.5
     Lacunarity: 2
-    Seed: 1337
   heightmapNoise:
     Octaves: 3
     Persistence: 0.5
     Lacunarity: 2
-    Seed: 1337
   moisturemapNoise:
     Octaves: 3
     Persistence: 0.5
     Lacunarity: 2
-    Seed: 1337
   bedrockType: {fileID: 11400000, guid: 3b5947e841c3a4845b8c9cbf0efbbebc, type: 2}
   waterType: {fileID: 11400000, guid: 29a81a7c3885cee43ad6f88a9ba44766, type: 2}
   oceanBiome: {fileID: 11400000, guid: bc7732a614701f04ca9c506c02132cc4, type: 2}

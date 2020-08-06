@@ -1,9 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UniVox.Framework.Serialisation;
+using UniVox.MessagePassing;
 
 namespace UniVox.UI
 {
@@ -18,7 +17,7 @@ namespace UniVox.UI
         public string worldName;
         public bool worldNameEmpty;
 
-        public uint seed;
+        public int seed;
         public bool seedEmpty;
 
         public void Clear()
@@ -56,7 +55,7 @@ namespace UniVox.UI
             }
             else
             {
-                seed = (uint)int.Parse(seedString);
+                seed = int.Parse(seedString);
             }
 
             UpdatePlayButtonState();
@@ -70,6 +69,7 @@ namespace UniVox.UI
         public void OnPlayClicked()
         {
             SaveUtils.WorldName = worldName;
+            SceneMessagePasser.SetMessage(new SeedMessage() { seed = seed });
             SceneManager.LoadScene(mainMenu.gameScene);
         }
 

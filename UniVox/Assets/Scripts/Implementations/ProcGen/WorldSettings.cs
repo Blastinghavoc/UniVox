@@ -6,6 +6,7 @@ namespace UniVox.Implementations.ProcGen
     [Serializable]
     public struct WorldSettings
     {
+        public float seed;
         public float HeightmapScale;
         public float MoistureMapScale;
         public float MaxHeightmapHeight;

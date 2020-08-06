@@ -13,7 +13,7 @@ namespace Utils.Noise
         public int Octaves;
         public float Persistence;//power multiplier per octave
         public float Lacunarity;//frequency multiplier per octave
-        public float Seed;
+        [NonSerialized] public float Seed;
         [NonSerialized] private float MaxAmplitudeCache;
 
         public void Initialise() 
