@@ -61,5 +61,6 @@ namespace UniVox.Framework
         string GetMaxPipelineStageOfChunkByName(Vector3Int chunkId);
         float GetManhattanDistanceFromPlayer(Vector3Int chunkID);
         IChunkComponent GetChunkComponent(Vector3Int chunkID);
+        void StoreAllModifiedChunks();
     }
 }

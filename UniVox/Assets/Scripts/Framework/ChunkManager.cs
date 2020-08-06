@@ -176,7 +176,7 @@ namespace UniVox.Framework
             }
 
             lightManager.Dispose();
-        }
+        }        
 
         public bool IsChunkComplete(Vector3Int chunkId)
         {
@@ -249,6 +249,24 @@ namespace UniVox.Framework
             }
             Profiler.EndSample();
             return wasPresent;
+        }
+
+        /// <summary>
+        /// Forcibly store the data for any/all modified chunks.
+        /// This is for saving the game.
+        /// </summary>
+        public void StoreAllModifiedChunks()
+        {
+            foreach (var chunkComponent in loadedChunks.Values)
+            {
+                if (chunkComponent.Data != null)
+                {
+                    if (chunkComponent.Data.ModifiedSinceGeneration)
+                    {
+                        chunkProvider.StoreModifiedChunkData(chunkComponent.ChunkID, chunkComponent.Data);
+                    }
+                }
+            }
         }
 
         /// <summary>

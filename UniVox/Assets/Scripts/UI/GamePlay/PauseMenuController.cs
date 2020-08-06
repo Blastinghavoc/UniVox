@@ -1,6 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UniVox.Framework;
+using UniVox.Framework.Serialisation;
 
 namespace UniVox.UI
 {
@@ -43,7 +46,12 @@ namespace UniVox.UI
 
         public void OnSaveAndExitButtonClicked()
         {
-
+            if (SaveUtils.DoSave)
+            {
+                var chunkManager = FindObjectOfType<ChunkManager>();
+                chunkManager.StoreAllModifiedChunks();
+            }
+            SceneManager.LoadScene("MainMenu");
         }
     }
 }
