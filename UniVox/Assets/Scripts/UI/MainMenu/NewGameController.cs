@@ -14,11 +14,11 @@ namespace UniVox.UI
         public InputField worldNameInput;
         public InputField seedInput;
 
-        public string worldName;
-        public bool worldNameEmpty;
+        private string worldName;
+        private bool worldNameEmpty;
 
-        public int seed;
-        public bool seedEmpty;
+        private int seed;
+        private bool seedEmpty;
 
         public void Clear()
         {
@@ -33,9 +33,8 @@ namespace UniVox.UI
             UpdatePlayButtonState();
         }
 
-        public void OnWorldNameChanged(string _)
+        public void OnWorldNameChanged(string name)
         {
-            var name = worldNameInput.text;
             worldNameEmpty = string.IsNullOrEmpty(name);
 
             worldName = name;
@@ -43,10 +42,8 @@ namespace UniVox.UI
             UpdatePlayButtonState();
         }
 
-        public void OnWorldSeedChanged(string _)
+        public void OnWorldSeedChanged(string seedString)
         {
-            var seedString = seedInput.text;
-
             seedEmpty = string.IsNullOrEmpty(seedString);
 
             if (seedEmpty)

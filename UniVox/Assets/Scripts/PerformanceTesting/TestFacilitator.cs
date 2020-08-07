@@ -9,6 +9,7 @@ using UnityEngine.Assertions;
 using UnityEngine.SceneManagement;
 using UnityStandardAssets.CrossPlatformInput;
 using UniVox.Gameplay;
+using UniVox.MessagePassing;
 
 namespace PerformanceTesting
 {
@@ -19,7 +20,7 @@ namespace PerformanceTesting
     {
         private static TestFacilitator instance;
 
-        public string TestResultPath;
+        public string TestResultPath;//Directory path, including final \
         public string LogFileName;
         public string FileExtension = ".csv";
         public uint NumRepeats = 0;
@@ -43,6 +44,11 @@ namespace PerformanceTesting
             }
 
             DontDestroyOnLoad(gameObject);
+
+            if (SceneMessagePasser.TryConsumeMessage<PerformanceTestFilepathMessage>(out var message))
+            {
+                TestResultPath = message.filepath;
+            }
 
             if (Worlds == null)
             {
@@ -73,7 +79,7 @@ namespace PerformanceTesting
                 //For each test
                 foreach (var test in GetComponents<IPerformanceTest>())
                 {
-                    var testDirectory = $@"{@TestResultPath}\{@test.TestName}\";
+                    var testDirectory = $@"{@TestResultPath}{@test.TestName}\";
                     EnsureDirectoryExists(testDirectory);
 
                     for (int repeatIndex = 0; repeatIndex <= NumRepeats; repeatIndex++)

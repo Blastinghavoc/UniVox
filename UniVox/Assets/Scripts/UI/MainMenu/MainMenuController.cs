@@ -8,10 +8,11 @@ namespace UniVox.UI
     public class MainMenuController : MonoBehaviour
     {
         public string gameScene;
-        public string perfTestSceneName;
+        public string performanceTestScene;
 
         public GameObject loadGamePanel;
         public NewGameController newGameController;
+        public PerformanceTestsController perfTestsController;
 
         // Start is called before the first frame update
         void Start()
@@ -43,7 +44,8 @@ namespace UniVox.UI
 
         public void OnPerfTestClicked()
         {
-            SceneManager.LoadScene(perfTestSceneName);
+            perfTestsController.gameObject.SetActive(true);
+            gameObject.SetActive(false);
         }
 
         public void OnLoadGameClicked()
