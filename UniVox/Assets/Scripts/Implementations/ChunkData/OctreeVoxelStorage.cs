@@ -8,7 +8,7 @@ using UniVox.Framework;
 
 namespace UniVox.Implementations.ChunkData
 {
-    public class OctreeVoxelStorage : IVoxelStorageImplementation, IEquatable<OctreeVoxelStorage>
+    public class OctreeVoxelStorage : IChunkStorageImplementation<VoxelTypeID>, IEquatable<OctreeVoxelStorage>
     {
         private interface INode : IEquatable<INode>
         {

@@ -27,7 +27,7 @@ namespace UniVox.Implementations.ChunkData
                 case ChunkDataType.FlatArray:
                     if (lazy)
                     {
-                        return new LazyChunkData<FlatArrayVoxelStorage>(chunkID, chunkDimensions, initialData);
+                        return new LazyChunkData<FlatArrayStorage<VoxelTypeID>>(chunkID, chunkDimensions, initialData);
                     }
                     return new FlatArrayChunkData(chunkID, chunkDimensions, initialData);
                 case ChunkDataType.MultiArray:

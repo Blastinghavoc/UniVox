@@ -3,7 +3,7 @@ using UniVox.Framework;
 
 namespace UniVox.Implementations.ChunkData
 {
-    public class RLEVoxelStorage : RLEArray<VoxelTypeID>, IVoxelStorageImplementation
+    public class RLEVoxelStorage : RLEArray<VoxelTypeID>, IChunkStorageImplementation<VoxelTypeID>
     {
         private int dx;
         private int dxdy;

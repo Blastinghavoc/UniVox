@@ -4,7 +4,7 @@ using Utils;
 
 namespace UniVox.Implementations.ChunkData
 {
-    public class MultiDimensionalArrayVoxelStorage : IVoxelStorageImplementation
+    public class MultiDimensionalArrayVoxelStorage : IChunkStorageImplementation<VoxelTypeID>
     {
         private VoxelTypeID[,,] voxels;
         public VoxelTypeID Get(int x, int y, int z)

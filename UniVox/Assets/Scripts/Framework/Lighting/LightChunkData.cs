@@ -1,45 +1,50 @@
 ﻿using Unity.Collections;
 using UnityEngine;
+using UniVox.Implementations.ChunkData;
 using Utils;
-using static Utils.Helpers;
 
 namespace UniVox.Framework.Lighting
 {
-    public class LightChunkData 
-    { 
-        private LightValue[] lightValues;
-        private int dx;
-        private int dxdy;
+    public class LightChunkData : IChunkStorageOwner<LightValue>
+    {
+        private IChunkStorageImplementation<LightValue> storage;
+        public Vector3Int Dimensions { get; set; }
 
-        public LightValue this[int x, int y, int z] 
+        public LightValue this[int x, int y, int z]
         {
-            get { return lightValues[MultiIndexToFlat(x, y, z, dx, dxdy)]; }
-            set { lightValues[MultiIndexToFlat(x, y, z, dx, dxdy)] = value; }
+            get { return storage.Get(x, y, z); }
+            set { storage.Set(x, y, z, value); }
         }
 
-        public LightValue this[int i]
+        public LightChunkData(Vector3Int dimensions, LightValue[] initialData = null)
         {
-            get { return lightValues[i]; }
-            set { lightValues[i] = value; }
-        }
-
-        public LightChunkData(Vector3Int dimensions, LightValue[] values = null) 
-        {
-            dx = dimensions.x;
-            dxdy = dimensions.x * dimensions.y;
-            if (values == null)
+            Dimensions = dimensions;
+            if (initialData != null)
             {
-                lightValues = new LightValue[dimensions.x * dimensions.y * dimensions.z];           
+                storage = new FlatArrayStorage<LightValue>();
+                storage.InitialiseWithData(dimensions, initialData);
             }
             else
             {
-                lightValues = values;
+                //Lazy storage implementation for reduce memory usage
+                storage = new LazyStorageImplementation<LightChunkData, LightValue>(this);
             }
         }
 
-        public NativeArray<LightValue> ToNative(Allocator allocator= Allocator.Persistent) 
+        public NativeArray<LightValue> ToNative(Allocator allocator = Allocator.Persistent)
         {
-            return lightValues.ToNative(allocator);
+            return storage.ToArray().ToNative(allocator);
+        }
+
+        public void InitialiseEmptyStorage()
+        {
+            storage = new FlatArrayStorage<LightValue>();
+            storage.InitialiseEmpty(Dimensions);
+        }
+
+        public void Set(int x, int y, int z, LightValue item)
+        {
+            storage.Set(x, y, z, item);
         }
     }
 }
