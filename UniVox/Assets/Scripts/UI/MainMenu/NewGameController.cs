@@ -69,6 +69,10 @@ namespace UniVox.UI
         public void OnPlayClicked()
         {
             SaveUtils.WorldName = worldName;
+
+            BinarySerialiser serialiser = new BinarySerialiser(SaveUtils.CurrentWorldSaveDirectory, ".seed");
+            serialiser.Save(seed, "worldSeed");
+
             SceneMessagePasser.SetMessage(new SeedMessage() { seed = seed });
             SceneManager.LoadScene(mainMenu.gameScene);
         }

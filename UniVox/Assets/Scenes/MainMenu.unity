@@ -3513,7 +3513,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1747879b10cdce24baec4d14ea4402ce, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mainMenuController: {fileID: 600601458}
+  mainMenu: {fileID: 600601458}
   saveGameList: {fileID: 1060450555}
 --- !u!1 &2046794022
 GameObject:
