@@ -9,10 +9,15 @@ namespace UniVox.Framework.Serialisation
         public static string WorldName { get; set; } = null;
 
 
-        public static string CurrentWorldSaveDirectory { get => AllWorldsSaveDirectory + $"{WorldName}/"; }
+        public static string CurrentWorldSaveDirectory { get => SaveDirectoryForWorldName(WorldName); }
 
         public static string AllWorldsSaveDirectory { get => Application.persistentDataPath + $"/worlds/"; }
         public static string BasePath { get => Application.persistentDataPath; }
+
+        public static string SaveDirectoryForWorldName(string worldName) 
+        { 
+            return AllWorldsSaveDirectory + $"{worldName}/";
+        }
 
         public static string[] GetAllWorldNames() 
         {

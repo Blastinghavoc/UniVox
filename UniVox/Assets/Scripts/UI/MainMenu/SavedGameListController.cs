@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UniVox.Framework.Serialisation;
@@ -46,6 +45,31 @@ namespace UniVox.UI
                 }
             }
             return false;
+        }
+
+        public void DeleteSelected()
+        {
+            for (int i = 0; i < toggles.Count; i++)
+            {
+                if (toggles[i].isOn)
+                {
+                    labels.RemoveAt(i);
+                    toggles.RemoveAt(i);
+                    var item = items[i];
+                    items.RemoveAt(i);
+
+                    Destroy(item);
+                    break;
+                }
+            }
+        }
+
+        public void SetInteractable(bool value) 
+        {
+            for (int i = 0; i < toggles.Count; i++)
+            {
+                toggles[i].interactable = value;
+            }
         }
     }
 }
