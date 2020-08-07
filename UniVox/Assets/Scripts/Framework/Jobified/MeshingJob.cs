@@ -5,6 +5,7 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
+using UnityEngine;
 using UniVox.Framework.Common;
 using UniVox.Framework.Lighting;
 using Utils;
@@ -166,9 +167,13 @@ namespace UniVox.Framework.Jobified
         private void AddFaceRotated(int meshID, float uvZ, int direction, int3 position, VoxelRotation rotation) 
         {
             //Lighting
-            var directionVector = directionHelper.DirectionVectors[direction];
-            var lightForFace = GetLightValue(position + directionVector,data.lights,data.dimensions,data.neighbourData);
-            var vertexColourValue = lightForFace.ToVertexColour();
+            Color vertexColourValue = new Color();
+            if (data.includeLighting)
+            {
+                var directionVector = directionHelper.DirectionVectors[direction];
+                var lightForFace = GetLightValue(position + directionVector,data.lights,data.dimensions,data.neighbourData);
+                vertexColourValue = lightForFace.ToVertexColour();
+            }
 
             var meshRange = data.meshDatabase.meshTypeRanges[meshID];
 
@@ -188,7 +193,12 @@ namespace UniVox.Framework.Jobified
                 var rotatedVert = math.mul(rotationQuat, node.vertex-rotationOffset)+rotationOffset;
                 var adjustedVert = rotatedVert + position;
                 data.vertices.Add(adjustedVert);
-                data.vertexColours.Add(vertexColourValue);
+
+                if (data.includeLighting)
+                {
+                    data.vertexColours.Add(vertexColourValue);
+                }
+
                 data.uvs.Add(new float3(node.uv, uvZ));
                 var adjustedNorm = math.mul(rotationQuat, node.normal);
                 data.normals.Add(adjustedNorm);
@@ -208,9 +218,13 @@ namespace UniVox.Framework.Jobified
         private void AddFace(int meshID, float uvZ, int direction, int3 position)
         {
             //Lighting
-            var directionVector = directionHelper.DirectionVectors[direction];
-            var lightForFace = GetLightValue(position + directionVector, data.lights, data.dimensions, data.neighbourData);
-            var vertexColourValue = lightForFace.ToVertexColour();
+            Color vertexColourValue = new Color();
+            if (data.includeLighting)
+            {
+                var directionVector = directionHelper.DirectionVectors[direction];
+                var lightForFace = GetLightValue(position + directionVector, data.lights, data.dimensions, data.neighbourData);
+                vertexColourValue = lightForFace.ToVertexColour();
+            }
 
             var meshRange = data.meshDatabase.meshTypeRanges[meshID];
 
@@ -223,7 +237,12 @@ namespace UniVox.Framework.Jobified
             {
                 var node = data.meshDatabase.allMeshNodes[i];
                 data.vertices.Add(node.vertex + position);
-                data.vertexColours.Add(vertexColourValue);
+
+                if (data.includeLighting)
+                {
+                    data.vertexColours.Add(vertexColourValue);
+                }
+
                 data.uvs.Add(new float3(node.uv, uvZ));
                 data.normals.Add(node.normal);
             }

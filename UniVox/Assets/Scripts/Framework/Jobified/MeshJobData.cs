@@ -16,6 +16,7 @@ namespace UniVox.Framework.Jobified
     public struct MeshJobData : IDisposable
     {
         [ReadOnly] public int3 dimensions;//Dimensions of chunk
+        [ReadOnly] public bool includeLighting;
 
         [ReadOnly] public NativeArray<VoxelTypeID> voxels;//Voxel data
         public NativeArray<RotatedVoxelEntry> rotatedVoxels;
@@ -41,6 +42,7 @@ namespace UniVox.Framework.Jobified
         public CollisionSubmeshDescriptor collisionSubmesh;
 
         public MeshJobData(int3 dimensions,
+                           bool includeLighting,
                            NativeArray<VoxelTypeID> voxels,
                            NativeArray<RotatedVoxelEntry> rotatedVoxels,
                            NativeArray<LightValue> lights,
@@ -50,6 +52,7 @@ namespace UniVox.Framework.Jobified
                            Allocator allocator)
         {
             this.dimensions = dimensions;
+            this.includeLighting = includeLighting;
             this.voxels = voxels;
             this.rotatedVoxels = rotatedVoxels;
             this.lights = lights;

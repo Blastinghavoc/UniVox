@@ -446,7 +446,11 @@ namespace UniVox.Implementations.Meshers
 
             bool makeBackface = data.meshDatabase.meshIdToIncludeBackfacesMap[meshID];
 
-            var lightForFace = currentMaskValue.lightValue.ToVertexColour();
+            Color lightForFace = new Color();
+            if (data.includeLighting)
+            {
+                lightForFace = currentMaskValue.lightValue.ToVertexColour();
+            }
 
             AddQuad(nodebl, nodetr, nodebr, nodetl, uvZ,lightForFace, makeBackface);
         }
@@ -467,10 +471,13 @@ namespace UniVox.Implementations.Meshers
             data.vertices.Add(v2.vertex);
             data.vertices.Add(v3.vertex);
 
-            data.vertexColours.Add(color);
-            data.vertexColours.Add(color);
-            data.vertexColours.Add(color);
-            data.vertexColours.Add(color);
+            if (data.includeLighting)
+            {
+                data.vertexColours.Add(color);
+                data.vertexColours.Add(color);
+                data.vertexColours.Add(color);
+                data.vertexColours.Add(color);
+            }
 
             data.uvs.Add(new float3(v0.uv, uvZ));
             data.uvs.Add(new float3(v1.uv, uvZ));
