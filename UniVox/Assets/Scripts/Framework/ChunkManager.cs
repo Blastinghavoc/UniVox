@@ -176,6 +176,8 @@ namespace UniVox.Framework
             }
 
             lightManager.Dispose();
+
+            VoxelTypeManager.Dispose();
         }        
 
         public bool IsChunkComplete(Vector3Int chunkId)

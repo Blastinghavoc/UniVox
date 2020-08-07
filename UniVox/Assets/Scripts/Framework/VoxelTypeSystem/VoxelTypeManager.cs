@@ -138,11 +138,6 @@ namespace UniVox.Framework
             }
         }
 
-        private void OnDestroy()
-        {
-            Dispose();
-        }
-
         /// <summary>
         /// 
         /// </summary>
