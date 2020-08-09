@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityStandardAssets.Characters.FirstPerson;
 using UnityStandardAssets.CrossPlatformInput;
-
+using UniVox.UI;
 
 namespace UniVox.Gameplay
 {
@@ -132,12 +132,14 @@ namespace UniVox.Gameplay
             }
         }
 
-
+        private UIManager UImanager;
+        
         private void Start()
         {
             m_RigidBody = GetComponent<Rigidbody>();
             m_Capsule = GetComponent<CapsuleCollider>();
             mouseLook.Init(transform, cam.transform);
+            UImanager = FindObjectOfType<UIManager>();
         }
 
         public void SetCursorLock(bool value) 
@@ -147,6 +149,11 @@ namespace UniVox.Gameplay
 
         private void Update()
         {
+            if (UImanager.CursorInUseByUI)
+            {
+                return;//Don't run movment logic when UI is using the cursor.
+            }
+
             RotateView();
 
             if (CrossPlatformInputManager.GetButtonDown("Jump") && !m_Jump)

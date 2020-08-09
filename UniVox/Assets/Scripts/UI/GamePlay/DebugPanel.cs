@@ -6,7 +6,7 @@ using UniVox.Gameplay;
 
 namespace UniVox.UI
 {
-    public class DebugPanel : MonoBehaviour
+    public class DebugPanel : AbstractUIController
     {
         private VoxelWorldInterface world = null;
         private Transform player = null;
@@ -45,7 +45,6 @@ namespace UniVox.UI
         }
 
         private Dictionary<string, DebugItem> debugItems = new Dictionary<string, DebugItem>();
-        private bool show = true;
 
         private void Start()
         {
@@ -71,13 +70,13 @@ namespace UniVox.UI
                 debugItems.Add(item.name, item);
             }
 
-            Toggle();
+            SetVisibility(false);
 
         }
 
         private void Update()
         {
-            if (show)
+            if (IsVisible)
             {                
                 debugItems["Coords"].Update(player.position.ToString());
                 debugItems["ChunkID"].Update(world.WorldToChunkPosition(player.position).ToString());
@@ -101,12 +100,12 @@ namespace UniVox.UI
 
         }
 
-        public void Toggle() 
+        public override void SetVisibility(bool visible)
         {
-            show = !show;
+            IsVisible = visible;
             foreach (var item in debugItems.Values)
             {
-                item.display.gameObject.SetActive(show);
+                item.display.gameObject.SetActive(IsVisible);
             }
         }
     }

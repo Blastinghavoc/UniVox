@@ -3,6 +3,7 @@ using System.Collections;
 using UnityEngine.Assertions;
 using UnityEngine.UIElements;
 using UniVox.Framework;
+using UniVox.UI;
 
 namespace UniVox.Gameplay
 {
@@ -19,20 +20,24 @@ namespace UniVox.Gameplay
         public Vector3 LocationToPlaceBlock { get; private set; }
         public Vector3 LocationToDeleteBlock { get; private set; }
 
-        [Range(0,3)]
+        [Range(0, 3)]
         public int rotationX;
         [Range(0, 3)]
         public int rotationY;
         [Range(0, 3)]
         public int rotationZ;
 
-        private VoxelWorldInterface WorldInterface;
+        public VoxelWorldInterface WorldInterface { get; private set; }
         private GameObject Indicator;
+        private UIManager UImanager;
 
         private void Start()
         {
 
             WorldInterface = FindObjectOfType<VoxelWorldInterface>();
+            Assert.IsNotNull(WorldInterface, "A BlockPlacer must have a reference to a VoxelWorldInterface to operate");
+            UImanager = FindObjectOfType<UIManager>();
+            Assert.IsNotNull(UImanager, "Block placer could not find a UI manager");
 
             Indicator = Instantiate(IndicatorPrefab);
             Indicator.transform.parent = transform;
@@ -41,12 +46,16 @@ namespace UniVox.Gameplay
             //Ensure the indicator is rendered after other transparent materials
             Indicator.GetComponent<MeshRenderer>().material.renderQueue++;
 
-            Assert.IsNotNull(WorldInterface, "A BlockPlacer must have a reference to a VoxelWorldInterface to operate");
 
         }
 
         private void Update()
         {
+            if (UImanager.CursorInUseByUI)
+            {
+                return;//Don't run block placement logic when UI is using the cursor.
+            }
+
             Ray ray = Camera.main.ViewportPointToRay(new Vector3(.5f, .5f, 0));
             //Ray ray = new Ray(transform.position, Camera.main.transform.forward);
             RaycastHit raycastHit;
@@ -93,7 +102,7 @@ namespace UniVox.Gameplay
                 if (hitAnything)
                 {
                     WorldInterface.PlaceVoxel(LocationToPlaceBlock, blockToPlace,
-                        new VoxelRotation() { x=rotationX,y = rotationY,z=rotationZ});
+                        new VoxelRotation() { x = rotationX, y = rotationY, z = rotationZ });
                 }
             }
 
@@ -106,7 +115,7 @@ namespace UniVox.Gameplay
                         blockToPlace = voxelType;
                     }
                 }
-            }            
+            }
 
         }
 

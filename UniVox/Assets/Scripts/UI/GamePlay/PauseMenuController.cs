@@ -7,36 +7,31 @@ using UniVox.Framework.Serialisation;
 
 namespace UniVox.UI
 {
-    public class PauseMenuController : MonoBehaviour
+    public class PauseMenuController : AbstractUIController
     {
-        public void Toggle()
+        public override void SetVisibility(bool visible)
         {
-            if (gameObject.activeSelf)
+            IsVisible = visible;
+            if (visible)
             {
-                Close();
+                Open();
             }
             else
             {
-                Open();
+                Close();
             }
         }
 
         public void Open()
         {
             gameObject.SetActive(true);
-            Time.timeScale = 0;
-
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
+            Time.timeScale = 0;            
         }
 
         public void Close()
         {
             gameObject.SetActive(false);
-            Time.timeScale = 1;
-
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
+            Time.timeScale = 1;            
         }
 
         public void OnResumeButtonClicked()
