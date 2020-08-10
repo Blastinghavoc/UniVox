@@ -30,6 +30,14 @@ namespace UniVox.Framework
             {
                 return;
             }
+
+            bool replaceExisting = false;
+            SOVoxelTypeDefinition existingVoxelType;
+            if (TryGetVoxelType(position, out existingVoxelType) && existingVoxelType != null) 
+            {
+                replaceExisting = existingVoxelType.isReplaceable;
+            }
+
             if (voxelType.rotationConfiguration == null)
             {
                 if (rotation.x != 0 || rotation.y != 0 || rotation.z != 0)
@@ -38,7 +46,7 @@ namespace UniVox.Framework
                 }
                 else
                 {
-                    chunkManager.TrySetVoxel(position, voxelTypeManager.GetId(voxelType));
+                    chunkManager.TrySetVoxel(position, voxelTypeManager.GetId(voxelType),overrideExisting:replaceExisting);
                 }
             }
             else
@@ -47,7 +55,7 @@ namespace UniVox.Framework
                 {
                     Debug.Log($"Placed voxel {voxelType.DisplayName} with rotation x:{rotation.x}, y:{rotation.y}, z{rotation.z}");
 
-                    chunkManager.TrySetVoxel(position, voxelTypeManager.GetId(voxelType),rotation);
+                    chunkManager.TrySetVoxel(position, voxelTypeManager.GetId(voxelType),rotation,replaceExisting);
                 }
                 else
                 {

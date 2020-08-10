@@ -23,5 +23,6 @@ MonoBehaviour:
   meshDefinition: {fileID: 11400000, guid: b41add13406e0b548a9ff0606880d3dc, type: 2}
   material: {fileID: 2100000, guid: 2b40641d357875449a01958e36c0f6ba, type: 2}
   isPassable: 1
+  isReplaceable: 1
   rotationConfiguration: {fileID: 0}
   lightConfiguration: {fileID: 11400000, guid: da2475bc2d3d8b840b5ba5ba6f8031dc, type: 2}

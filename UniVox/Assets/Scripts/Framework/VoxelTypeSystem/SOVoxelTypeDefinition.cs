@@ -13,6 +13,8 @@ namespace UniVox.Framework
         public Material material;
         //Can the voxel type be moved through (examples where true would include liquids and decorative plants)
         public bool isPassable;
+        //Can the voxel type be replaced by trying to build another voxel in its position (e.g, for water this is True)
+        public bool isReplaceable = false;
         public SORotationConfiguration rotationConfiguration = null;
         public SOLightConfiguration lightConfiguration = null;
     }
