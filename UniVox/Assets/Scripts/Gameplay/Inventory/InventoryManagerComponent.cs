@@ -1,5 +1,4 @@
 ﻿using Boo.Lang;
-using System;
 using UnityEngine;
 using UniVox.Framework;
 using UniVox.Framework.Common;
@@ -16,14 +15,20 @@ namespace UniVox.Gameplay.Inventory
         [SerializeField] private GameObject InventoryPanel = null;
         [SerializeField] private Transform Content = null;
         [SerializeField] private GameObject InventoryRowPrefab = null;
+        [SerializeField] private Tooltip tooltip = null;
 
         private InventoryItem _itemOnCursor;
-        public InventoryItem ItemOnCursor { get => _itemOnCursor; 
-            set { 
+        public InventoryItem ItemOnCursor
+        {
+            get => _itemOnCursor;
+            set
+            {
                 _itemOnCursor = value;
                 UpdateCursorIcon();
-            } 
+            }
         }
+
+        public string Tooltip { get => tooltip.Value; set => tooltip.Value = value; }
 
         public Sprite[] IconSprites { get; private set; }
 
@@ -47,19 +52,25 @@ namespace UniVox.Gameplay.Inventory
 
         private void Update()
         {
-            if (Input.GetKeyDown(KeyCode.Q))
+            if (IsVisible)
             {
-                ItemOnCursor = null;
+                if (Input.GetKeyDown(KeyCode.Q))
+                {
+                    ItemOnCursor = null;
+                }
+                CursorIconFollowCursor();
+
+                UpdateTooltip();
             }
-            CursorIconFollowCursor();
+
         }
 
-        private void InitialiseCreativeMode() 
+        private void InitialiseCreativeMode()
         {
             if (typeManager.LastVoxelID == 0)
             {
                 return;
-            }            
+            }
 
             int totalCapacity = 0;
             while (totalCapacity < typeManager.LastVoxelID)
@@ -72,7 +83,7 @@ namespace UniVox.Gameplay.Inventory
             var currentRow = inventoryRows[0];
             var currentRowIndex = 0;
             var localIndex = 0;
-            for (int i = 1; i <= typeManager.LastVoxelID; i++,localIndex++)
+            for (int i = 1; i <= typeManager.LastVoxelID; i++, localIndex++)
             {
                 if (localIndex >= currentRow.NumSlots)
                 {
@@ -81,10 +92,12 @@ namespace UniVox.Gameplay.Inventory
                     currentRow = inventoryRows[currentRowIndex];
                 }
 
-                currentRow.Slots[localIndex].Item = new InventoryItem() { 
+                currentRow.Slots[localIndex].Item = new InventoryItem()
+                {
                     ID = (VoxelTypeID)i,
                     typeDefinition = typeManager.GetDefinition((VoxelTypeID)i),
-                    Count = 1 };
+                    Count = 1
+                };
                 currentRow.Slots[localIndex].InfiniteMode = true;
             }
 
@@ -96,7 +109,7 @@ namespace UniVox.Gameplay.Inventory
             }
         }
 
-        private void ComputeIconSprites() 
+        private void ComputeIconSprites()
         {
             IconSprites = new Sprite[typeManager.LastVoxelID + 1];
             IconSprites[0] = null;
@@ -109,12 +122,24 @@ namespace UniVox.Gameplay.Inventory
             }
         }
 
-        private void CursorIconFollowCursor() 
+        private void CursorIconFollowCursor()
         {
             CursorItemIcon.gameObject.transform.position = Input.mousePosition;
         }
 
-        private void UpdateCursorIcon() 
+        private void UpdateTooltip()
+        {
+            if (string.IsNullOrEmpty(tooltip.Value) || !IsVisible)
+            {
+                tooltip.gameObject.SetActive(false);
+            }
+            else
+            {
+                tooltip.gameObject.SetActive(true);
+            }
+        }
+
+        private void UpdateCursorIcon()
         {
             if (ItemOnCursor == null || !IsVisible)
             {
@@ -127,7 +152,7 @@ namespace UniVox.Gameplay.Inventory
             }
         }
 
-        public Sprite IconSpriteFor(VoxelTypeID id) 
+        public Sprite IconSpriteFor(VoxelTypeID id)
         {
             return IconSprites[id];
         }
@@ -137,8 +162,8 @@ namespace UniVox.Gameplay.Inventory
             IsVisible = visible;
 
             InventoryPanel.SetActive(visible);
-            enabled = visible;//Prevent update being called too
             UpdateCursorIcon();
+            UpdateTooltip();
         }
     }
 }

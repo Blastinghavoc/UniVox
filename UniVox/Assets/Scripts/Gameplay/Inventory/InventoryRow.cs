@@ -13,8 +13,7 @@ namespace UniVox.Gameplay.Inventory
 
         void Awake()
         {
-            Slots = GetComponentsInChildren<InventorySlot>();
-        }
-        
+            Slots = GetComponentsInChildren<InventorySlot>(true);
+        }        
     }
 }

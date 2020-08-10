@@ -7,7 +7,7 @@ using UniVox.Gameplay.Inventory;
 namespace UniVox.UI
 {
     [RequireComponent(typeof(Image))]
-    public class InventorySlot : MonoBehaviour, IPointerClickHandler
+    public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler,IPointerExitHandler
     {
         [SerializeField] private Image image;
         private IInventorySystem inventorySystem;
@@ -73,6 +73,19 @@ namespace UniVox.UI
                 Item = inventorySystem.ItemOnCursor;
                 inventorySystem.ItemOnCursor = tmp;
             }
+        }
+
+        public void OnPointerEnter(PointerEventData eventData)
+        {
+            if (Item != null)
+            {
+                inventorySystem.Tooltip = Item.typeDefinition.DisplayName;
+            }
+        }
+
+        public void OnPointerExit(PointerEventData eventData)
+        {
+            inventorySystem.Tooltip = string.Empty;
         }
     }
 }
