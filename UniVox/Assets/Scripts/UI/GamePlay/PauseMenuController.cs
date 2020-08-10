@@ -10,8 +10,7 @@ namespace UniVox.UI
     public class PauseMenuController : AbstractUIController
     {
         public override void SetVisibility(bool visible)
-        {
-            IsVisible = visible;
+        {            
             if (visible)
             {
                 Open();
@@ -24,12 +23,14 @@ namespace UniVox.UI
 
         public void Open()
         {
+            IsVisible = true;
             gameObject.SetActive(true);
             Time.timeScale = 0;            
         }
 
         public void Close()
         {
+            IsVisible = false;
             gameObject.SetActive(false);
             Time.timeScale = 1;            
         }
