@@ -4,6 +4,7 @@ using UnityEngine.Assertions;
 using UnityEngine.UIElements;
 using UniVox.Framework;
 using UniVox.UI;
+using UniVox.Gameplay.Inventory;
 
 namespace UniVox.Gameplay
 {
@@ -28,6 +29,9 @@ namespace UniVox.Gameplay
         public int rotationZ;
 
         public VoxelWorldInterface WorldInterface { get; private set; }
+
+        public HotbarController hotbar;
+
         private GameObject Indicator;
         private UIManager UImanager;
 
@@ -55,6 +59,8 @@ namespace UniVox.Gameplay
             {
                 return;//Don't run block placement logic when UI is using the cursor.
             }
+
+            blockToPlace = hotbar.Selected;
 
             Ray ray = Camera.main.ViewportPointToRay(new Vector3(.5f, .5f, 0));
             //Ray ray = new Ray(transform.position, Camera.main.transform.forward);
@@ -110,9 +116,9 @@ namespace UniVox.Gameplay
             {
                 if (hitAnything)
                 {
-                    if (WorldInterface.TryGetVoxelType(LocationToDeleteBlock, out var voxelType))
+                    if (WorldInterface.TryGetVoxelTypeAndID(LocationToDeleteBlock, out var voxelType,out var ID))
                     {
-                        blockToPlace = voxelType;
+                        hotbar.SetCurrentItem(new InventoryItem() { ID = ID, typeDefinition = voxelType });
                     }
                 }
             }

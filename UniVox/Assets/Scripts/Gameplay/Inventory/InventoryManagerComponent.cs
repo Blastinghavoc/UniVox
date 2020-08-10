@@ -81,7 +81,10 @@ namespace UniVox.Gameplay.Inventory
                     currentRow = inventoryRows[currentRowIndex];
                 }
 
-                currentRow.Slots[localIndex].Item = new InventoryItem() { ID = (VoxelTypeID)i, Count = 1 };
+                currentRow.Slots[localIndex].Item = new InventoryItem() { 
+                    ID = (VoxelTypeID)i,
+                    typeDefinition = typeManager.GetDefinition((VoxelTypeID)i),
+                    Count = 1 };
                 currentRow.Slots[localIndex].InfiniteMode = true;
             }
 
@@ -113,7 +116,7 @@ namespace UniVox.Gameplay.Inventory
 
         private void UpdateCursorIcon() 
         {
-            if (ItemOnCursor == null)
+            if (ItemOnCursor == null || !IsVisible)
             {
                 CursorItemIcon.gameObject.SetActive(false);
             }
@@ -135,7 +138,7 @@ namespace UniVox.Gameplay.Inventory
 
             InventoryPanel.SetActive(visible);
             enabled = visible;//Prevent update being called too
-            CursorItemIcon.gameObject.SetActive(visible);
+            UpdateCursorIcon();
         }
     }
 }

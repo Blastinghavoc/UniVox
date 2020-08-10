@@ -10,7 +10,6 @@ namespace UniVox.UI
     public class InventorySlot : MonoBehaviour, IPointerClickHandler
     {
         [SerializeField] private Image image;
-        public Color highlightColor = Color.yellow;
         private IInventorySystem inventorySystem;
 
         [SerializeField] private InventoryIcon icon;
@@ -42,16 +41,9 @@ namespace UniVox.UI
             Item = null;
         }
 
-        public void SetHighlight(bool value)
-        {
-            if (value)
-            {
-                image.color = highlightColor;
-            }
-            else
-            {
-                image.color = Color.white;
-            }
+        public void SetHighlight(Color color)
+        {            
+            image.color = color;            
         }
 
         private void UpdateIconImage()

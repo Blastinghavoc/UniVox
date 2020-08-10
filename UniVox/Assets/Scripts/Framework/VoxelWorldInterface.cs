@@ -5,6 +5,7 @@ using UnityEngine.UIElements;
 using PerformanceTesting;
 using UniVox.UI;
 using UniVox.Framework.Lighting;
+using UniVox.Gameplay.Inventory;
 
 namespace UniVox.Framework
 {
@@ -25,6 +26,10 @@ namespace UniVox.Framework
 
         public void PlaceVoxel(Vector3 position, SOVoxelTypeDefinition voxelType,VoxelRotation rotation = default)
         {
+            if (voxelType == null)
+            {
+                return;
+            }
             if (voxelType.rotationConfiguration == null)
             {
                 if (rotation.x != 0 || rotation.y != 0 || rotation.z != 0)
@@ -69,6 +74,18 @@ namespace UniVox.Framework
                 voxelType = voxelTypeManager.GetDefinition(voxelID);
                 return true;
             }
+            return false;
+        }
+
+        public bool TryGetVoxelTypeAndID(Vector3 position, out SOVoxelTypeDefinition voxelType,out VoxelTypeID voxelID) 
+        {
+            if (chunkManager.TryGetVoxel(position, out voxelID))
+            {
+                voxelType = voxelTypeManager.GetDefinition(voxelID);
+                return true;
+            }
+            voxelID = default;
+            voxelType = null;
             return false;
         }
 
