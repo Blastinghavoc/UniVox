@@ -104,7 +104,7 @@ namespace UniVox.Framework.ChunkPipeline
         /// </summary>
         public void Dispose() 
         {
-            Debug.Log($"Disposing of {Count} unfinished jobs in stage {Name}");
+            //Debug.Log($"Disposing of {Count} unfinished jobs in stage {Name}");
             foreach (var job in jobs.Values)
             {
                 job.Dispose();

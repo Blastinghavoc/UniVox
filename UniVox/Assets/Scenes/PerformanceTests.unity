@@ -837,6 +837,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   SuiteName: FlatWorld
+  renderedChunksRadii: {x: 4, y: 4, z: 4}
 --- !u!4 &744646604
 Transform:
   m_ObjectHideFlags: 0
@@ -3242,7 +3243,7 @@ MonoBehaviour:
   TestResultPath: C:\Users\Jacob Taylor.MSI\source\repos\Masters Project\UniVox\TestResults\
   LogFileName: Log
   FileExtension: .csv
-  NumRepeats: 2
+  NumRepeats: 1
 --- !u!1 &1891284304056896728
 GameObject:
   m_ObjectHideFlags: 0

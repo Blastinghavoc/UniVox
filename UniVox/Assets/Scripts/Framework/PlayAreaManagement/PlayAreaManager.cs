@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PerformanceTesting;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -9,13 +10,12 @@ using static Utils.Helpers;
 
 namespace UniVox.Framework.PlayAreaManagement
 {
-
     /// <summary>
     /// Class responsible for managing the state of the play area as the 
     /// player moves
     /// </summary>
     [System.Serializable]
-    public class PlayAreaManager
+    public class PlayAreaManager: ITestablePlayAreaManager
     {
         [SerializeField] private Vector3Int collidableChunksRadii;
         [SerializeField] private Vector3Int renderedChunksRadii;
@@ -247,7 +247,7 @@ namespace UniVox.Framework.PlayAreaManagement
             IncrementalDone = true;
             ProcessesQueued = 0;
 
-            Debug.Log($"ProcessChunksIncrementally did {incrementalProcessCount} updates");
+            //Debug.Log($"ProcessChunksIncrementally did {incrementalProcessCount} updates");
         }
 
         /// <summary>
@@ -260,7 +260,7 @@ namespace UniVox.Framework.PlayAreaManagement
             //Do the whole update at once
             var iterator = SetAllTargetsProcess(playerChunkID, prevPlayerChunkID);
 
-            //DEBUG
+            //TODO remove DEBUG
             int count = 0;
 
             while (iterator.MoveNext())
@@ -268,7 +268,7 @@ namespace UniVox.Framework.PlayAreaManagement
                 count++;
             }
 
-            Debug.Log($"UpdateWholePlayArea did {count} updates");
+            //Debug.Log($"UpdateWholePlayArea did {count} updates");
 
             Profiler.EndSample();
         }
@@ -450,5 +450,12 @@ namespace UniVox.Framework.PlayAreaManagement
             //Inside if all elements of the absolute displacement are less than or equal to the chunk radius
             return absDisplacement.All((a, b) => a <= b, Radii);
         }
+
+        #region testing
+        public void SetRenderedChunkRadii(Vector3Int radii)
+        {
+            renderedChunksRadii = radii;
+        }
+        #endregion
     }
 }

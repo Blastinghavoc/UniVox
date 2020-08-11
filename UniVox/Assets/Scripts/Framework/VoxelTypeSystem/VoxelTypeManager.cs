@@ -42,7 +42,7 @@ namespace UniVox.Framework
             typeData = new List<VoxelTypeData>();
             typeData.Add(new VoxelTypeData());//Add empty entry for air
 
-            Debug.Log($"Generating texture array for {VoxelTypes.Length} voxel types");
+            //Debug.Log($"Generating texture array for {VoxelTypes.Length} voxel types");
 
             Assert.IsTrue(VoxelTypes.Length < ushort.MaxValue - 1, $"Can only have a maximum of {ushort.MaxValue - 1} voxel types");
 

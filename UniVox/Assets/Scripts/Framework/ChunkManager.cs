@@ -92,8 +92,7 @@ namespace UniVox.Framework
             chunkPool = new PrefabPool() { prefab = chunkPrefab };
 
             VoxelTypeManager = FindObjectOfType<VoxelTypeManager>();
-            Assert.IsNotNull(VoxelTypeManager, "Chunk Manager must have a reference to a Voxel Type Manager");
-            VoxelTypeManager.Initialise();
+            Assert.IsNotNull(VoxelTypeManager, "Chunk Manager must have a reference to a Voxel Type Manager");            
 
             //Initialise VoxelWorldInterface
             var worldInterface = FindObjectOfType<VoxelWorldInterface>();
@@ -164,7 +163,6 @@ namespace UniVox.Framework
         private void OnDestroy()
         {
             pipeline.Dispose();
-            VoxelTypeManager.Dispose();
             if (chunkMesher is IDisposable disposableChunkMesher)
             {
                 disposableChunkMesher.Dispose();
@@ -639,6 +637,11 @@ namespace UniVox.Framework
         #endregion
 
         #region Test and debug facilitating methods
+
+        public void SetRenderedRadii(Vector3Int radii) 
+        {
+            playArea.SetRenderedChunkRadii(radii);
+        }
 
         public void SetIncludeLighting(bool include) 
         {

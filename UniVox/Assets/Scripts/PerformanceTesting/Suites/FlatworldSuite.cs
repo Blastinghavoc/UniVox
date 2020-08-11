@@ -3,11 +3,16 @@ using UniVox.Framework;
 using UniVox.Implementations.Meshers;
 using UniVox.Implementations.Providers;
 using UniVox.Implementations.ChunkData;
+using UnityEngine;
+using UnityEngine.Assertions;
+using UnityEditor.VersionControl;
 
 namespace PerformanceTesting
 {
     public class FlatworldSuite : AbstractTestSuite
     {
+        public Vector3Int renderedChunksRadii;
+
         /// <summary>
         /// Expects the chunk manager to be kept up to date externally.
         /// </summary>
@@ -17,51 +22,53 @@ namespace PerformanceTesting
             ///For each mesh algorithm, with fixed storage type (flat array)
             
             //Naive
-            RemoveComponentsOfTypeThatAreNotSubtype<AbstractMesherComponent, NaiveMesher>();
+            mesher = RemoveComponentsOfTypeExceptSubtype<AbstractMesherComponent, NaiveMesher>();
             CommonForMeshTests();
-            yield return new PassDetails() { GroupName = "MeshingComparisons", TechniqueName = GetTechniqueName()};
+            yield return EndPass("MeshingComparisons");
 
             //Culling
-            RemoveComponentsOfTypeThatAreNotSubtype<AbstractMesherComponent, CullingMesher>();
+            mesher = RemoveComponentsOfTypeExceptSubtype<AbstractMesherComponent, CullingMesher>();
             CommonForMeshTests();
-            yield return new PassDetails() { GroupName = "MeshingComparisons", TechniqueName = GetTechniqueName()};
+            yield return EndPass("MeshingComparisons");
 
             //Greedy
-            RemoveComponentsOfTypeThatAreNotSubtype<AbstractMesherComponent, GreedyMesher>();
+            mesher = RemoveComponentsOfTypeExceptSubtype<AbstractMesherComponent, GreedyMesher>();
             CommonForMeshTests();
-            yield return new PassDetails() { GroupName = "MeshingComparisons", TechniqueName = GetTechniqueName()};
+            yield return EndPass("MeshingComparisons");
 
             ///Then, for each storage type, but with fixed meshing algorithm
 
             //Flat array
             CommonForStorageTests();
             chunkManager.gameObject.GetComponent<DebugProvider>().chunkDataFactory.typeToCreate = ChunkDataFactory.ChunkDataType.FlatArray;
-            yield return new PassDetails() { GroupName = "StorageComparisons", TechniqueName = GetTechniqueName() };
+            yield return EndPass("StorageComparisons");
 
             //Octree
             CommonForStorageTests();
             chunkManager.gameObject.GetComponent<DebugProvider>().chunkDataFactory.typeToCreate = ChunkDataFactory.ChunkDataType.Octree;
-            yield return new PassDetails() { GroupName = "StorageComparisons", TechniqueName = GetTechniqueName() };
+            yield return EndPass("StorageComparisons");
 
             //RLE
             CommonForStorageTests();
             chunkManager.gameObject.GetComponent<DebugProvider>().chunkDataFactory.typeToCreate = ChunkDataFactory.ChunkDataType.RLE;
-            yield return new PassDetails() { GroupName = "StorageComparisons", TechniqueName = GetTechniqueName() };
+            yield return EndPass("StorageComparisons");
         }
 
         private void CommonForStorageTests() 
         {
             //Use the greedy mesher for storage tests
-            RemoveComponentsOfTypeThatAreNotSubtype<AbstractMesherComponent, GreedyMesher>();
+            mesher = RemoveComponentsOfTypeExceptSubtype<AbstractMesherComponent, GreedyMesher>();
             CommonForMeshTests();            
         }
 
         private void CommonForMeshTests() 
         {
-            RemoveComponentsOfTypeThatAreNotSubtype<AbstractProviderComponent, DebugProvider>();
-            var provider = chunkManager.gameObject.GetComponent<DebugProvider>();
-            provider.worldType = DebugProvider.WorldType.flat;
-            provider.chunkDataFactory.typeToCreate = ChunkDataFactory.ChunkDataType.FlatArray;
+            provider = RemoveComponentsOfTypeExceptSubtype<AbstractProviderComponent, DebugProvider>();
+            var debugProvider = provider as DebugProvider;
+            debugProvider.worldType = DebugProvider.WorldType.flat;
+            debugProvider.chunkDataFactory.typeToCreate = ChunkDataFactory.ChunkDataType.FlatArray;
+
+            chunkManager.SetRenderedRadii(renderedChunksRadii);
         }
     }
 }

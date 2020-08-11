@@ -700,7 +700,7 @@ namespace UniVox.Framework.ChunkPipeline
 
         public void Dispose()
         {
-            Debug.Log(GetPipelineStatus());
+            //Debug.Log(GetPipelineStatus());
             foreach (var stage in stages)
             {
                 if (stage is IDisposable disposable)

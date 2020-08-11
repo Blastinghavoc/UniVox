@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using UnityEngine.Assertions;
 using UnityEngine.SceneManagement;
 using UnityStandardAssets.CrossPlatformInput;
 using UniVox.Framework;
@@ -75,57 +74,57 @@ namespace PerformanceTesting
         {
             VoxelPlayer player = FindObjectOfType<VoxelPlayer>();
             player.enabled = false;
-            using (StreamWriter log = new StreamWriter(@TestResultPath + @LogFileName + @FileExtension))
+            foreach (var testSuite in GetComponentsInChildren<AbstractTestSuite>())
             {
-                foreach (var testSuite in GetComponentsInChildren<AbstractTestSuite>())
+                testSuite.Initialise();
+                var suiteName = testSuite.SuiteName;
+                //For each repeat
+                for (int repeatIndex = 0; repeatIndex <= NumRepeats; repeatIndex++)
                 {
-                    testSuite.Initialise();
-                    var suiteName = testSuite.SuiteName;
-                    //For each repeat
-                    for (int repeatIndex = 0; repeatIndex <= NumRepeats; repeatIndex++)
+
+                    //Run all tests in the suite
+                    for (int testIndex = 0; testIndex < testSuite.Tests.Length; testIndex++)
                     {
+                        var managerObj = Worlds.Find(chunkManagerName).gameObject;
+                        var manager = managerObj.GetComponent<ChunkManager>();
+                        testSuite.SetManagerForNextPass(manager);
 
-                        //Run all tests in the suite
-                        for (int testIndex = 0; testIndex < testSuite.Tests.Length; testIndex++)
+                        //Run all passes in the suite
+                        foreach (var passDetails in testSuite.Passes())
                         {
-                            var managerObj = Worlds.Find(chunkManagerName).gameObject;
-                            var manager = managerObj.GetComponent<ChunkManager>();
-                            testSuite.SetManagerForNextPass(manager);
+                            float startTime = Time.unscaledTime;
 
-                            //Run all passes in the suite
-                            foreach (var passDetails in testSuite.Passes())
+                            var groupName = passDetails.GroupName;
+                            var test = testSuite.Tests[testIndex];
+                            var testDirectory = $@"{@TestResultPath}{@suiteName}\{groupName}\";
+                            EnsureDirectoryExists(testDirectory);
+
+                            var fileName = $"{test.TestName}";
+                            var completeFilePath = @testDirectory + @fileName + @FileExtension;
+                            using (StreamWriter log = new StreamWriter(@TestResultPath + @LogFileName + @FileExtension,true))
                             {
-                                float startTime = Time.unscaledTime;
 
-                                var groupName = passDetails.GroupName;
-                                var test = testSuite.Tests[testIndex];
-                                var testDirectory = $@"{@TestResultPath}{@suiteName}\{groupName}\";
-                                EnsureDirectoryExists(testDirectory);
+                                var testRunIdentifier = $"{suiteName}\\{groupName}\\{fileName}\\{passDetails.TechniqueName}\\R{repeatIndex}";
+                                log.WriteLine($"\n\n\nTest {testRunIdentifier}:");
+                                Debug.Log($"Starting test for {testRunIdentifier}");
 
-                                var fileName = $"{test.TestName}";
-                                var completeFilePath = @testDirectory + @fileName + @FileExtension;
+                                //Reset virtual input
+                                virtualPlayer = new VirtualPlayerInput();
+                                CrossPlatformInputManager.SetActiveInputMethod(virtualPlayer);
 
-                                using (StreamWriter testResults = new StreamWriter(completeFilePath))
+                                managerObj.SetActive(true);
+                                player.enabled = true;
+
+                                //Run the test
+                                yield return StartCoroutine(test.Run(manager));
+
+                                //Write outputs
+                                using (StreamWriter testResults = new StreamWriter(completeFilePath,true))
                                 {
-                                    log.WriteLine($"\n\n\nTest {suiteName}\\{groupName}\\{fileName}:");
-
-                                    Debug.Log($"Starting test for {suiteName}\\{groupName}\\{fileName}");
-
-                                    //Reset virtual input
-                                    virtualPlayer = new VirtualPlayerInput();
-                                    CrossPlatformInputManager.SetActiveInputMethod(virtualPlayer);
-
-                                    managerObj.SetActive(true);
-                                    player.enabled = true;
-
-                                    //Run the test
-                                    yield return StartCoroutine(test.Run(manager));
-
-                                    
-                                    //Write outputs
                                     WriteTestLog(log, test);
                                     WriteTestResults(testResults, test, repeatIndex == 0 && testIndex == 0, passDetails.TechniqueName, repeatIndex);
                                 }
+
                                 //Cleanup
                                 //reload the scene
                                 yield return SceneManager.LoadSceneAsync(SceneManager.GetActiveScene().buildIndex);
@@ -147,10 +146,10 @@ namespace PerformanceTesting
                             }
                         }
                     }
-
                 }
 
             }
+
 
             Debug.Log("All tests done");
 #if UNITY_EDITOR
@@ -163,7 +162,7 @@ namespace PerformanceTesting
 
         }
 
-        private void WriteTestLog(StreamWriter log,IPerformanceTest test) 
+        private void WriteTestLog(StreamWriter log, IPerformanceTest test)
         {
             foreach (var line in test.GetLogLines())
             {
@@ -171,7 +170,7 @@ namespace PerformanceTesting
             }
         }
 
-        private void WriteTestResults(StreamWriter testResults, IPerformanceTest test, bool withHeader, string techniqueName,int repeatNumber)
+        private void WriteTestResults(StreamWriter testResults, IPerformanceTest test, bool withHeader, string techniqueName, int repeatNumber)
         {
             var data = test.GetPerFrameData();
             if (data.Count < 1)

@@ -5,6 +5,7 @@ using UnityEngine.Events;
 
 namespace PerformanceTesting
 {
+
     public abstract class AbstractPerformanceTest : MonoBehaviour, IPerformanceTest
     {
         [SerializeField] private string testName = "";

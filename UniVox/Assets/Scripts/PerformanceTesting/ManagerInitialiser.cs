@@ -19,6 +19,10 @@ namespace PerformanceTesting
 
             SaveUtils.DoSave = DoSave && !TestMode;//Test mode never saves in the normal way
 
+            var voxelTypeManager = FindObjectOfType<VoxelTypeManager>();
+            //Ensure voxel type manager is initialised
+            voxelTypeManager.Initialise();
+
             if (TestMode)
             {
 
