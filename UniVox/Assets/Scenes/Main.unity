@@ -933,7 +933,7 @@ PrefabInstance:
     - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: playArea.updateRate
-      value: 40
+      value: 80
       objectReference: {fileID: 0}
     - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
@@ -1814,6 +1814,11 @@ PrefabInstance:
       propertyPath: LightManagerGO
       value: 
       objectReference: {fileID: 1059055053}
+    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: playArea.updateRate
+      value: 80
+      objectReference: {fileID: 0}
     - target: {fileID: 6061144537135917621, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -1878,6 +1883,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6061144537135917626, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: chunkDataFactory.lazy
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 37b9cc2f16198bf4c84ddc72031aedb3, type: 3}
@@ -3010,7 +3020,7 @@ PrefabInstance:
     - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: playArea.updateRate
-      value: 40
+      value: 80
       objectReference: {fileID: 0}
     - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
@@ -3163,6 +3173,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6061144537135917626, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: chunkDataFactory.lazy
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6061144537135917626, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
+        type: 3}
+      propertyPath: chunkDataFactory.typeToCreate
+      value: 2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 37b9cc2f16198bf4c84ddc72031aedb3, type: 3}
@@ -3376,7 +3396,7 @@ PrefabInstance:
     - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: playArea.updateRate
-      value: 40
+      value: 80
       objectReference: {fileID: 0}
     - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
@@ -3643,8 +3663,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Parrallel: 1
+  worldType: 0
   dirtType: {fileID: 11400000, guid: a03c76065d9f24749ae1e10da8247535, type: 2}
   grassType: {fileID: 11400000, guid: da8f3cdeb3374df40a2e8e80b40a9e01, type: 2}
+  chunkDataFactory:
+    typeToCreate: 0
+    lazy: 1
 --- !u!1 &1832009154 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3599045744009403571, guid: 5b1c90c2d322bbf48890283c565b2b7f,
@@ -4426,8 +4450,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Parrallel: 1
+  worldType: 0
   dirtType: {fileID: 11400000, guid: a03c76065d9f24749ae1e10da8247535, type: 2}
   grassType: {fileID: 11400000, guid: da8f3cdeb3374df40a2e8e80b40a9e01, type: 2}
+  chunkDataFactory:
+    typeToCreate: 0
+    lazy: 1
 --- !u!114 &2981057895866662355
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4516,11 +4544,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   chunkDimensions: {x: 16, y: 16, z: 16}
-  voxelSize: 1
   playArea:
     collidableChunksRadii: {x: 1, y: 1, z: 1}
     renderedChunksRadii: {x: 10, y: 8, z: 10}
-    updateRate: 40
+    updateRate: 80
   worldSizeLimits:
     limitWorldHeight: 1
     verticalChunkLimit: 8
@@ -4560,11 +4587,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   chunkDimensions: {x: 16, y: 16, z: 16}
-  voxelSize: 1
   playArea:
     collidableChunksRadii: {x: 1, y: 1, z: 1}
     renderedChunksRadii: {x: 10, y: 8, z: 10}
-    updateRate: 40
+    updateRate: 80
   worldSizeLimits:
     limitWorldHeight: 1
     verticalChunkLimit: 8
@@ -4698,11 +4724,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   chunkDimensions: {x: 16, y: 16, z: 16}
-  voxelSize: 1
   playArea:
     collidableChunksRadii: {x: 1, y: 1, z: 1}
     renderedChunksRadii: {x: 4, y: 4, z: 4}
-    updateRate: 40
+    updateRate: 80
   worldSizeLimits:
     limitWorldHeight: 1
     verticalChunkLimit: 8

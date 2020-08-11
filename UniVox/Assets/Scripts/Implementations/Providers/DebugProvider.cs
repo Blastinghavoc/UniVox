@@ -10,10 +10,18 @@ namespace UniVox.Implementations.Providers
 {
     public class DebugProvider : AbstractProviderComponent
     {
+        public enum WorldType 
+        { 
+            flat,
+            flatWithHoles,
+            singleBlock
+        }
+        public WorldType worldType = WorldType.flat;
         public SOVoxelTypeDefinition dirtType;
         private ushort dirtID;
         public SOVoxelTypeDefinition grassType;
         private ushort grassID;
+        [SerializeField] private ChunkDataFactory chunkDataFactory = null;
 
         public override void Initialise(VoxelTypeManager voxelTypeManager,IChunkManager chunkManager, FrameworkEventManager eventManager)
         {
@@ -24,12 +32,22 @@ namespace UniVox.Implementations.Providers
 
         public override AbstractPipelineJob<IChunkData> GenerateTerrainData(Vector3Int chunkID)
         {
-            return new BasicFunctionJob<IChunkData>(() => FlatWorld(chunkID, chunkManager.ChunkDimensions));
+            switch (worldType)
+            {
+                case WorldType.flat:
+                    return new BasicFunctionJob<IChunkData>(() => FlatWorld(chunkID, chunkManager.ChunkDimensions));
+                case WorldType.flatWithHoles:
+                    return new BasicFunctionJob<IChunkData>(() => FlatWorldWithHoles(chunkID, chunkManager.ChunkDimensions));
+                case WorldType.singleBlock:
+                    return new BasicFunctionJob<IChunkData>(() => SingleBlock(chunkID, chunkManager.ChunkDimensions));
+                default:
+                    throw new System.Exception("Invalid world type");
+            }            
         }
 
-        private AbstractChunkData FlatWorld(Vector3Int chunkID, Vector3Int chunkDimensions) 
+        private IChunkData FlatWorld(Vector3Int chunkID, Vector3Int chunkDimensions) 
         {
-            var ChunkData = new FlatArrayChunkData(chunkID, chunkDimensions);
+            var ChunkData = chunkDataFactory.Create(chunkID, chunkDimensions);
 
             int groundHeight = 0;
             int chunkYCuttoff = (groundHeight + chunkDimensions.y)/chunkDimensions.y;
@@ -61,9 +79,9 @@ namespace UniVox.Implementations.Providers
             return ChunkData;
         }
 
-        private AbstractChunkData FlatWorldWithHoles(Vector3Int chunkID, Vector3Int chunkDimensions)
+        private IChunkData FlatWorldWithHoles(Vector3Int chunkID, Vector3Int chunkDimensions)
         {
-            var ChunkData = new FlatArrayChunkData(chunkID, chunkDimensions);
+            var ChunkData = chunkDataFactory.Create(chunkID, chunkDimensions);
 
             int groundHeight = 0;
             int chunkYCuttoff = (groundHeight + chunkDimensions.y) / chunkDimensions.y;
@@ -97,18 +115,18 @@ namespace UniVox.Implementations.Providers
             return ChunkData;
         }
 
-        private AbstractChunkData SingleBlock(Vector3Int chunkID, Vector3Int chunkDimensions) 
+        private IChunkData SingleBlock(Vector3Int chunkID, Vector3Int chunkDimensions) 
         {
-            var ChunkData = new FlatArrayChunkData(chunkID, chunkDimensions);
+            var ChunkData = chunkDataFactory.Create(chunkID, chunkDimensions);
 
             ChunkData[0, 0, 0] = new VoxelTypeID(grassID);
 
             return ChunkData;
         }
 
-        private AbstractChunkData HalfHeight(Vector3Int chunkID, Vector3Int chunkDimensions)
+        private IChunkData HalfHeight(Vector3Int chunkID, Vector3Int chunkDimensions)
         {
-            var ChunkData = new FlatArrayChunkData(chunkID, chunkDimensions);
+            var ChunkData = chunkDataFactory.Create(chunkID, chunkDimensions);
             var maxY = chunkDimensions.y / 2;
 
             for (int z = 0; z < chunkDimensions.z; z++)
@@ -131,10 +149,10 @@ namespace UniVox.Implementations.Providers
             return ChunkData;
         }
 
-        private AbstractChunkData HalfLattice(Vector3Int chunkID, Vector3Int chunkDimensions)
+        private IChunkData HalfLattice(Vector3Int chunkID, Vector3Int chunkDimensions)
         {
             bool b = true;
-            var ChunkData = new FlatArrayChunkData(chunkID, chunkDimensions);
+            var ChunkData = chunkDataFactory.Create(chunkID, chunkDimensions);
             for (int z = 0; z < chunkDimensions.z; z++)
             {
                 b = !b;

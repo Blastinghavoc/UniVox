@@ -14,14 +14,14 @@ namespace UniVox.Framework
 {
     public class ChunkManager : MonoBehaviour, IChunkManager, ITestableChunkManager
     {
+        private const int voxelSize = 1;
+        protected int VoxelSize { get => voxelSize; }
         #region Shown in inspector
 
         #region Runtime Constants
         [SerializeField] private Vector3Int chunkDimensions = new Vector3Int(32, 32, 32);
         public Vector3Int ChunkDimensions { get => chunkDimensions; }
 
-        [SerializeField] private int voxelSize = 1;
-        protected int VoxelSize { get => voxelSize; }
 
         [SerializeField] protected PlayAreaManager playArea;
         public PlayAreaManager PlayArea { get => playArea; }
@@ -640,6 +640,10 @@ namespace UniVox.Framework
 
         #region Test and debug facilitating methods
 
+        public void SetIncludeLighting(bool include) 
+        {
+            includeLighting = include;
+        }
 
         public bool PipelineIsSettled()
         {

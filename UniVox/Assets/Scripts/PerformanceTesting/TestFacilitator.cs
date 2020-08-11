@@ -20,7 +20,7 @@ namespace PerformanceTesting
     {
         private static TestFacilitator instance;
 
-        public string TestResultPath;//Directory path, including final \
+        public string TestResultPath;//Directory path, including final "\"
         public string LogFileName;
         public string FileExtension = ".csv";
         public uint NumRepeats = 0;
@@ -77,7 +77,7 @@ namespace PerformanceTesting
             {
 
                 //For each test
-                foreach (var test in GetComponents<IPerformanceTest>())
+                foreach (var test in GetComponentsInChildren<IPerformanceTest>())
                 {
                     var testDirectory = $@"{@TestResultPath}{@test.TestName}\";
                     EnsureDirectoryExists(testDirectory);

@@ -15,6 +15,6 @@ namespace PerformanceTesting
         IVoxelPlayer GetPlayer();
 
         string GetPipelineStatus();
-
+        void SetIncludeLighting(bool include);
     }
 }
