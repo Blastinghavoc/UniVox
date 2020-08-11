@@ -5,6 +5,7 @@ using UnityEngine;
 using UniVox.Framework;
 using UniVox.Implementations.Meshers;
 using UniVox.Implementations.Providers;
+using UniVox.Implementations.ChunkData;
 
 namespace PerformanceTesting
 {
@@ -16,14 +17,30 @@ namespace PerformanceTesting
     /// </summary>
     public abstract class AbstractTestSuite : MonoBehaviour 
     {
-        public ChunkManager chunkManager;
+
+        public string SuiteName;
+
+        public IPerformanceTest[] Tests;
+
+        protected ChunkManager chunkManager;
+        public void Initialise()
+        {
+            Tests = GetComponentsInChildren<IPerformanceTest>();
+        }
 
         /// <summary>
         /// Runs setup for multiple passes over all tests
         /// in the suite, with different configurations.
+        /// 
+        /// Returned values are pass details
         /// </summary>
         /// <returns></returns>
-        public abstract IEnumerator Passes();
+        public abstract IEnumerable<PassDetails> Passes();
+
+        public void SetManagerForNextPass(ChunkManager managerForNextPass) 
+        {
+            chunkManager = managerForNextPass;
+        }
 
         protected void RemoveComponentsOfTypeThatAreNotSubtype<Type,SubType>()
             where Type: UnityEngine.Object
@@ -39,34 +56,51 @@ namespace PerformanceTesting
             }
         }
 
-
-    }
-
-    public class FlatworldSuite : AbstractTestSuite
-    {
-        /// <summary>
-        /// Expects the chunk manager to be kept up to date externally.
-        /// </summary>
-        /// <returns></returns>
-        public override IEnumerator Passes()
+        protected string GetTechniqueName() 
         {
-            ///For each mesh algorithm, with fixed storage type (flat array)
-            
-            //Naive
-            RemoveComponentsOfTypeThatAreNotSubtype<AbstractMesherComponent, NaiveMesher>();
-            Common();
-            yield return null;
+            string prefix = "";
+            var mesher = chunkManager.gameObject.GetComponent<AbstractMesherComponent>();
+            switch (mesher)
+            {
+                case NaiveMesher n:
+                    prefix = "Naive";
+                    break;
+                case CullingMesher m:
+                    prefix = "Culling";
+                    break;
+                case GreedyMesher g:
+                    prefix = "Greedy";
+                    break;
+                default:
+                    throw new Exception("Unrecongised mesher");
+            }
 
-            //Culling
-            RemoveComponentsOfTypeThatAreNotSubtype<AbstractMesherComponent, CullingMesher>();
-            Common();
-            yield return null;
+            var provider = chunkManager.GetComponent<AbstractProviderComponent>();
+            var chunkDataType = ChunkDataFactory.ChunkDataType.FlatArray;
+            switch (provider)
+            {
+                case DebugProvider d:
+                    chunkDataType = d.chunkDataFactory.typeToCreate;
+                    break;
+                case NoisyProvider n:
+                    chunkDataType = n.chunkDataFactory.typeToCreate;
+                    break;
+                default:
+                    throw new Exception("Unrecognised provider");
+            }
+
+            string suffix = chunkDataType.ToString();
+
+            return prefix + "_" + suffix;
+
         }
 
-        private void Common() 
+
+        public class PassDetails 
         {
-            RemoveComponentsOfTypeThatAreNotSubtype<AbstractProviderComponent, DebugProvider>();
-            chunkManager.gameObject.GetComponent<DebugProvider>().worldType = DebugProvider.WorldType.flat;
+            public string GroupName;
+            public string TechniqueName;
         }
+
     }
 }

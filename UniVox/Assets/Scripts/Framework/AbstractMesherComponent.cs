@@ -12,7 +12,7 @@ namespace UniVox.Framework
     public abstract class AbstractMesherComponent : MonoBehaviour, IChunkMesher, IDisposable
     {
 
-        public bool IsMeshDependentOnNeighbourChunks { get; protected set; } = false;
+        public bool CullFaces { get; protected set; } = false;
 
         //TODO remove, testing only
         public bool Parrallel = true;
@@ -66,22 +66,8 @@ namespace UniVox.Framework
 
 
             NeighbourData neighbourData = new NeighbourData();
-            //Cache neighbour data if necessary
-
-            
-            if (IsMeshDependentOnNeighbourChunks)
-            {
-                neighbourData = JobUtils.CacheNeighbourData(chunkID, chunkManager);
-            }
-            else
-            {
-                //Initialise neighbour data with small blank arrays if not needed
-                for (int i = 0; i < DirectionExtensions.numDirections; i++)
-                {
-                    neighbourData.Add((Direction)i, new NativeArray<VoxelTypeID>(1, Allocator.Persistent));
-                    neighbourData.Add((Direction)i, new NativeArray<LightValue>(1, Allocator.Persistent));
-                }
-            }            
+            //Cache neighbour data          
+            neighbourData = JobUtils.CacheNeighbourData(chunkID, chunkManager);                  
 
 
             var meshingJob = createMeshingJob(new MeshJobData(chunkDimensions.ToNative(),
@@ -178,7 +164,7 @@ namespace UniVox.Framework
         {
             var job = new MeshingJob();
             job.data = data;
-            job.cullfaces = IsMeshDependentOnNeighbourChunks;
+            job.cullfaces = CullFaces;
             job.directionHelper = directionRotator;
             return job;
         }

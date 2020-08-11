@@ -10,8 +10,7 @@ namespace UniVox.Implementations.Meshers
         public override void Initialise(VoxelTypeManager voxelTypeManager, IChunkManager chunkManager, FrameworkEventManager eventManager) 
         {
             base.Initialise(voxelTypeManager, chunkManager,eventManager);
-            //Culling mesher depends on neighbouring chunks for meshing
-            IsMeshDependentOnNeighbourChunks = true;
+            CullFaces = true;
         }
     }
 }

@@ -6,7 +6,7 @@ namespace UniVox.Framework
 {
     public interface IChunkMesher
     {
-        bool IsMeshDependentOnNeighbourChunks { get; }
+        bool CullFaces { get; }
 
         AbstractPipelineJob<MeshDescriptor> CreateMeshJob(Vector3Int chunkID);
         AbstractPipelineJob<Mesh> ApplyCollisionMeshJob(Vector3Int chunkID);

@@ -8,6 +8,7 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.SceneManagement;
 using UnityStandardAssets.CrossPlatformInput;
+using UniVox.Framework;
 using UniVox.Gameplay;
 using UniVox.MessagePassing;
 
@@ -25,7 +26,7 @@ namespace PerformanceTesting
         public string FileExtension = ".csv";
         public uint NumRepeats = 0;
 
-        private List<string> chunkManagerNames = new List<string>();
+        private string chunkManagerName;
 
         public static VirtualPlayerInput virtualPlayer;
 
@@ -61,7 +62,8 @@ namespace PerformanceTesting
                 if (chunkManager != null)
                 {
                     var obj = child.gameObject;
-                    chunkManagerNames.Add(obj.name);
+                    chunkManagerName = obj.name;
+                    break;
                 }
             }
 
@@ -75,56 +77,55 @@ namespace PerformanceTesting
             player.enabled = false;
             using (StreamWriter log = new StreamWriter(@TestResultPath + @LogFileName + @FileExtension))
             {
-
-                //For each test
-                foreach (var test in GetComponentsInChildren<IPerformanceTest>())
+                foreach (var testSuite in GetComponentsInChildren<AbstractTestSuite>())
                 {
-                    var testDirectory = $@"{@TestResultPath}{@test.TestName}\";
-                    EnsureDirectoryExists(testDirectory);
-
+                    testSuite.Initialise();
+                    var suiteName = testSuite.SuiteName;
+                    //For each repeat
                     for (int repeatIndex = 0; repeatIndex <= NumRepeats; repeatIndex++)
                     {
-                        var fileName = $"{test.TestName}_R{repeatIndex}";
-                        var completeFilePath = @testDirectory + @fileName + @FileExtension;
 
-                        Debug.Log($"Running test {test.TestName} repeat {repeatIndex} of {NumRepeats}");
-
-                        using (StreamWriter testResults = new StreamWriter(completeFilePath))
+                        //Run all tests in the suite
+                        for (int testIndex = 0; testIndex < testSuite.Tests.Length; testIndex++)
                         {
-                            log.WriteLine($"\n\n\nTest {fileName}:");
-                            float startTime = Time.unscaledTime;
-                            //For each chunk manager
-                            for (int i = 0; i < chunkManagerNames.Count; i++)
+                            var managerObj = Worlds.Find(chunkManagerName).gameObject;
+                            var manager = managerObj.GetComponent<ChunkManager>();
+                            testSuite.SetManagerForNextPass(manager);
+
+                            //Run all passes in the suite
+                            foreach (var passDetails in testSuite.Passes())
                             {
-                                Debug.Log($"Starting test for {chunkManagerNames[i]}");
+                                float startTime = Time.unscaledTime;
 
-                                var gameObj = Worlds.Find(chunkManagerNames[i]).gameObject;
-                                var manager = gameObj.GetComponent<ITestableChunkManager>();
+                                var groupName = passDetails.GroupName;
+                                var test = testSuite.Tests[testIndex];
+                                var testDirectory = $@"{@TestResultPath}{@suiteName}\{groupName}\";
+                                EnsureDirectoryExists(testDirectory);
 
-                                //Reset virtual input
-                                virtualPlayer = new VirtualPlayerInput();
-                                CrossPlatformInputManager.SetActiveInputMethod(virtualPlayer);
+                                var fileName = $"{test.TestName}";
+                                var completeFilePath = @testDirectory + @fileName + @FileExtension;
 
-                                gameObj.SetActive(true);
-                                player.enabled = true; ;
-
-                                float subtestStartTime = Time.unscaledTime;                                
-
-                                //Run the test
-                                yield return StartCoroutine(test.Run(manager));
-
-                                float subtestDuration = Time.unscaledTime - subtestStartTime;
-
-                                log.WriteLine($"\nWith chunk manager {gameObj.name} took {subtestDuration} seconds");
-
-                                //Write to log
-                                foreach (var line in test.GetLogLines())
+                                using (StreamWriter testResults = new StreamWriter(completeFilePath))
                                 {
-                                    log.WriteLine(line);
+                                    log.WriteLine($"\n\n\nTest {suiteName}\\{groupName}\\{fileName}:");
+
+                                    Debug.Log($"Starting test for {suiteName}\\{groupName}\\{fileName}");
+
+                                    //Reset virtual input
+                                    virtualPlayer = new VirtualPlayerInput();
+                                    CrossPlatformInputManager.SetActiveInputMethod(virtualPlayer);
+
+                                    managerObj.SetActive(true);
+                                    player.enabled = true;
+
+                                    //Run the test
+                                    yield return StartCoroutine(test.Run(manager));
+
+                                    
+                                    //Write outputs
+                                    WriteTestLog(log, test);
+                                    WriteTestResults(testResults, test, repeatIndex == 0 && testIndex == 0, passDetails.TechniqueName, repeatIndex);
                                 }
-
-                                WriteTestResults(testResults, test, i == 0, gameObj.name);
-
                                 //Cleanup
                                 //reload the scene
                                 yield return SceneManager.LoadSceneAsync(SceneManager.GetActiveScene().buildIndex);
@@ -136,13 +137,19 @@ namespace PerformanceTesting
                                 yield return new WaitForSecondsRealtime(2);
                                 //Locate Worlds object in scene
                                 Worlds = GameObject.Find("VoxelWorlds").transform;
+                                //Locate manager again for next pass
+                                managerObj = Worlds.Find(chunkManagerName).gameObject;
+                                manager = managerObj.GetComponent<ChunkManager>();
+                                testSuite.SetManagerForNextPass(manager);
+
+                                float duration = Time.unscaledTime - startTime;
+                                log.WriteLine($"\nFinished after total time of {duration}");
                             }
-                            float duration = Time.unscaledTime - startTime;
-                            log.WriteLine($"\nFinished after total time of {duration}");
                         }
                     }
 
                 }
+
             }
 
             Debug.Log("All tests done");
@@ -156,7 +163,15 @@ namespace PerformanceTesting
 
         }
 
-        private void WriteTestResults(StreamWriter testResults, IPerformanceTest test, bool withHeader, string techniqueName)
+        private void WriteTestLog(StreamWriter log,IPerformanceTest test) 
+        {
+            foreach (var line in test.GetLogLines())
+            {
+                log.WriteLine(line);
+            }
+        }
+
+        private void WriteTestResults(StreamWriter testResults, IPerformanceTest test, bool withHeader, string techniqueName,int repeatNumber)
         {
             var data = test.GetPerFrameData();
             if (data.Count < 1)
@@ -175,6 +190,7 @@ namespace PerformanceTesting
                     sb.Append($",{variableNames[i]}");
                 }
                 sb.Append($",Technique");
+                sb.Append($",RepeatNumber");
                 testResults.WriteLine(sb.ToString());
             }
 
@@ -198,6 +214,7 @@ namespace PerformanceTesting
                 }
 
                 line.Append($",{techniqueName}");
+                line.Append($",{repeatNumber}");
 
                 testResults.WriteLine(line.ToString());
             }

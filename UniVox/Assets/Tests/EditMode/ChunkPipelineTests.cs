@@ -19,7 +19,7 @@ namespace Tests
     {
         class MockMesher : IChunkMesher
         {
-            public bool IsMeshDependentOnNeighbourChunks { get; set; } = false;
+            public bool CullFaces { get; set; } = false;
 
             Func<Vector3Int, MockChunkComponent> mockGetComponent;
 
@@ -184,7 +184,7 @@ namespace Tests
         {
             EditorSceneManager.NewScene(NewSceneSetup.EmptyScene);
             mockMesher = new MockMesher(mockGetComponent);
-            mockMesher.IsMeshDependentOnNeighbourChunks = true;//by default mesher is dependent on neighbour, as only the naive mesher is not
+            mockMesher.CullFaces = true;//by default mesher is dependent on neighbour, as only the naive mesher is not
             mockProvider = new MockProvider();
             mockComponentStorage = new Dictionary<Vector3Int, MockChunkComponent>();
             mockPlayChunkID = Vector3Int.zero;
@@ -342,7 +342,7 @@ namespace Tests
         [Test]
         public void CompletePassNoChunkDependenciesNoStructures()
         {
-            mockMesher.IsMeshDependentOnNeighbourChunks = false;
+            mockMesher.CullFaces = false;
             MakePipeline(6, 1, 1);
 
             var testChunkID = new Vector3Int(0, 0, 0);
@@ -626,7 +626,7 @@ namespace Tests
         public void PriorityCorrectOrderTest()
         {
             //No dependencies for easy order testing
-            mockMesher.IsMeshDependentOnNeighbourChunks = false;
+            mockMesher.CullFaces = false;
             //Only allow 1 chunk to move at a time
             MakePipeline(1, 1, 1);
 
@@ -659,7 +659,7 @@ namespace Tests
         public void ChunkRemovedWhileScheduledForData()
         {
             //No dependencies for easy testing
-            mockMesher.IsMeshDependentOnNeighbourChunks = false;
+            mockMesher.CullFaces = false;
             MakePipeline(1, 1, 1);
 
             var testId = new Vector3Int(10, 0, 0);
@@ -693,7 +693,7 @@ namespace Tests
         [Test]
         public void ChunkRemovedWhileScheduledForMeshWithDependencies()
         {
-            mockMesher.IsMeshDependentOnNeighbourChunks = true;
+            mockMesher.CullFaces = true;
             MakePipeline(20, 1, 1);
 
             var zeroId = new Vector3Int(0, 0, 0);
@@ -756,7 +756,7 @@ namespace Tests
         [Test]
         public void OneOfNeighboursRemovedWhileScheduledForMesh()
         {
-            mockMesher.IsMeshDependentOnNeighbourChunks = true;
+            mockMesher.CullFaces = true;
             MakePipeline(20, 1, 1);
 
             var zeroId = new Vector3Int(0, 0, 0);
@@ -812,7 +812,7 @@ namespace Tests
         public void NeighbourAndSelfRemovedWhileScheduledForMesh()
         {
             int maxData = 100;
-            mockMesher.IsMeshDependentOnNeighbourChunks = true;
+            mockMesher.CullFaces = true;
             MakePipeline(maxData, 1, 1);
 
             var zeroId = new Vector3Int(0, 1000, 0);

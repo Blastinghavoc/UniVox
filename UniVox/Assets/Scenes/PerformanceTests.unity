@@ -824,6 +824,54 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 721499352}
   m_CullTransparentMesh: 0
+--- !u!114 &744646595
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 744646605}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 987630f5cbe063042b7dca0c207bff37, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SuiteName: FlatWorld
+--- !u!4 &744646604
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 744646605}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1891284304056896708}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &744646605
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 744646604}
+  - component: {fileID: 744646595}
+  - component: {fileID: 3931490297584528311}
+  - component: {fileID: 1207089178402899393}
+  - component: {fileID: 5249918510155528912}
+  - component: {fileID: 1554380369347279605}
+  m_Layer: 0
+  m_Name: FlatWorldTests
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
 --- !u!1 &903461874
 GameObject:
   m_ObjectHideFlags: 0
@@ -2291,90 +2339,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: be5049919f4729849b15364b55787089, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!1001 &1608099419
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 1891284302693198467, guid: be7499a4df5757f4dab9c9b5c0bc5cd8,
-        type: 3}
-      propertyPath: m_Name
-      value: TestFacilitator
-      objectReference: {fileID: 0}
-    - target: {fileID: 1891284302693198467, guid: be7499a4df5757f4dab9c9b5c0bc5cd8,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1891284302693198494, guid: be7499a4df5757f4dab9c9b5c0bc5cd8,
-        type: 3}
-      propertyPath: NumRepeats
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 1891284302693198494, guid: be7499a4df5757f4dab9c9b5c0bc5cd8,
-        type: 3}
-      propertyPath: TestResultPath
-      value: C:\Users\Jacob Taylor.MSI\source\repos\Masters Project\UniVox\TestResults\
-      objectReference: {fileID: 0}
-    - target: {fileID: 1891284302693198495, guid: be7499a4df5757f4dab9c9b5c0bc5cd8,
-        type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1891284302693198495, guid: be7499a4df5757f4dab9c9b5c0bc5cd8,
-        type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1891284302693198495, guid: be7499a4df5757f4dab9c9b5c0bc5cd8,
-        type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1891284302693198495, guid: be7499a4df5757f4dab9c9b5c0bc5cd8,
-        type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1891284302693198495, guid: be7499a4df5757f4dab9c9b5c0bc5cd8,
-        type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1891284302693198495, guid: be7499a4df5757f4dab9c9b5c0bc5cd8,
-        type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1891284302693198495, guid: be7499a4df5757f4dab9c9b5c0bc5cd8,
-        type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1891284302693198495, guid: be7499a4df5757f4dab9c9b5c0bc5cd8,
-        type: 3}
-      propertyPath: m_RootOrder
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1891284302693198495, guid: be7499a4df5757f4dab9c9b5c0bc5cd8,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1891284302693198495, guid: be7499a4df5757f4dab9c9b5c0bc5cd8,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1891284302693198495, guid: be7499a4df5757f4dab9c9b5c0bc5cd8,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: be7499a4df5757f4dab9c9b5c0bc5cd8, type: 3}
 --- !u!1 &1610795995
 GameObject:
   m_ObjectHideFlags: 0
@@ -3218,6 +3182,98 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2108475594}
   m_CullTransparentMesh: 0
+--- !u!114 &1207089178402899393
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 744646605}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30e047e87ad74324ca36fe70903481fa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  testName: WalkForward
+  WalkDistance: 100
+--- !u!114 &1554380369347279605
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 744646605}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c926d4c1f97070c4bbe99750d88e2004, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  testName: PlaceDeleteManyBlocks
+  cubeDimension: 30
+  voxelTypeToPlace: {fileID: 11400000, guid: a03c76065d9f24749ae1e10da8247535, type: 2}
+  gracePeriodFrames: 10
+--- !u!4 &1891284304056896708
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1891284304056896728}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children:
+  - {fileID: 744646604}
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1891284304056896709
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1891284304056896728}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 32eac55ea901bda42994e68b8ed6814a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  TestResultPath: C:\Users\Jacob Taylor.MSI\source\repos\Masters Project\UniVox\TestResults\
+  LogFileName: Log
+  FileExtension: .csv
+  NumRepeats: 2
+--- !u!1 &1891284304056896728
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1891284304056896708}
+  - component: {fileID: 1891284304056896709}
+  m_Layer: 0
+  m_Name: TestFacilitator
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &3931490297584528311
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 744646605}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 274205f721e1e404f8099e7ddab6a626, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  testName: FirstNFrames
+  numFrames: 100
 --- !u!114 &3977850450524689990
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3248,6 +3304,22 @@ MonoBehaviour:
   MaxMeshedPerUpdate: 24
   DebugPipeline: 0
   LightManagerGO: {fileID: 1739328763}
+--- !u!114 &5249918510155528912
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 744646605}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c926d4c1f97070c4bbe99750d88e2004, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  testName: PlaceDelete1Block
+  cubeDimension: 1
+  voxelTypeToPlace: {fileID: 11400000, guid: a03c76065d9f24749ae1e10da8247535, type: 2}
+  gracePeriodFrames: 10
 --- !u!1 &6557251178069095796
 GameObject:
   m_ObjectHideFlags: 0

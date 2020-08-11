@@ -39,6 +39,12 @@ namespace PerformanceTesting
             log.Add($"Memory usage baseline: {memoryCounter.BaseLine}");
         }
 
+        public void Clear() 
+        {
+            ResetPerFrameCounters();
+            ResetLog();
+        }
+
         protected virtual void UpdatePerFrameCounters()
         {
             foreach (var counter in perFrameCounters)

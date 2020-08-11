@@ -14,7 +14,7 @@ namespace UniVox.Implementations.Meshers
         public override void Initialise(VoxelTypeManager voxelTypeManager, IChunkManager chunkManager, FrameworkEventManager eventManager)
         {
             base.Initialise(voxelTypeManager, chunkManager, eventManager);
-            IsMeshDependentOnNeighbourChunks = true;
+            CullFaces = true;
         }
 
         protected override IMeshingJob createMeshingJob(MeshJobData data)

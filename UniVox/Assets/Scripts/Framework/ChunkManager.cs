@@ -395,7 +395,7 @@ namespace UniVox.Framework
             var chunkID = chunkComponent.ChunkID;
 
             //The neighbouring chunk(s) may need remeshing
-            if (chunkMesher.IsMeshDependentOnNeighbourChunks)
+            if (chunkMesher.CullFaces)
             {
                 foreach (var dir in GetBordersVoxelIsOn(localVoxelIndex))
                 {

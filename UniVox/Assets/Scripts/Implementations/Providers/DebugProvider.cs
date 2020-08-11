@@ -21,7 +21,7 @@ namespace UniVox.Implementations.Providers
         private ushort dirtID;
         public SOVoxelTypeDefinition grassType;
         private ushort grassID;
-        [SerializeField] private ChunkDataFactory chunkDataFactory = null;
+        public ChunkDataFactory chunkDataFactory = null;
 
         public override void Initialise(VoxelTypeManager voxelTypeManager,IChunkManager chunkManager, FrameworkEventManager eventManager)
         {

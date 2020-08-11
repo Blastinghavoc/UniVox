@@ -22,7 +22,7 @@ namespace UniVox.Implementations.Providers
 {
     public class NoisyProvider : AbstractProviderComponent, IDisposable
     {
-        [SerializeField] private ChunkDataFactory chunkDataFactory = null;
+        public ChunkDataFactory chunkDataFactory = null;
 
         [SerializeField] private WorldSettings worldSettings = new WorldSettings();
         [SerializeField] private TreeSettings treeSettings = new TreeSettings();

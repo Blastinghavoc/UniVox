@@ -17,7 +17,7 @@ namespace PerformanceTesting
         void Awake()
         {
 
-            SaveUtils.DoSave = DoSave && !TestMode;//Test mode never saves
+            SaveUtils.DoSave = DoSave && !TestMode;//Test mode never saves in the normal way
 
             if (TestMode)
             {

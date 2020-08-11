@@ -80,7 +80,7 @@ namespace UniVox.Framework.ChunkPipeline
 
             bool lighting = lightManager != null;
 
-            bool meshDependentOnNeighbours = chunkMesher.IsMeshDependentOnNeighbourChunks || lighting;
+            bool meshDependentOnNeighbours = chunkMesher.CullFaces || lighting;
 
             Func<Vector3Int,float> priorityFunc = chunkManager.GetManhattanDistanceFromPlayer;
 
