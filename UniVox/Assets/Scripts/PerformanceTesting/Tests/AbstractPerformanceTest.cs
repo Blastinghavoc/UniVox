@@ -45,6 +45,9 @@ namespace PerformanceTesting
             log.Add($"Memory usage baseline: {memoryCounter.BaseLine}");
         }
 
+        /// <summary>
+        /// Clear memory used by the test
+        /// </summary>
         public void Clear() 
         {
             ResetPerFrameCounters();

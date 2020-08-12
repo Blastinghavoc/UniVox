@@ -31,6 +31,8 @@ namespace PerformanceTesting
 
         private Transform Worlds;
 
+        private HashSet<string> filesWithHeader;
+
         void Awake()
         {
             if (instance == null)
@@ -44,6 +46,8 @@ namespace PerformanceTesting
             }
 
             DontDestroyOnLoad(gameObject);
+
+            filesWithHeader = new HashSet<string>();
 
             if (SceneMessagePasser.TryConsumeMessage<PerformanceTestFilepathMessage>(out var message))
             {
@@ -74,6 +78,9 @@ namespace PerformanceTesting
         {
             VoxelPlayer player = FindObjectOfType<VoxelPlayer>();
             player.enabled = false;
+            GameObject managerObj;
+            ChunkManager manager;
+
             foreach (var testSuite in GetComponentsInChildren<AbstractTestSuite>())
             {
                 testSuite.Initialise();
@@ -85,8 +92,8 @@ namespace PerformanceTesting
                     //Run all tests in the suite
                     for (int testIndex = 0; testIndex < testSuite.Tests.Length; testIndex++)
                     {
-                        var managerObj = Worlds.Find(chunkManagerName).gameObject;
-                        var manager = managerObj.GetComponent<ChunkManager>();
+                        managerObj = Worlds.Find(chunkManagerName).gameObject;
+                        manager = managerObj.GetComponent<ChunkManager>();
                         testSuite.SetManagerForNextPass(manager);
 
                         //Run all passes in the suite
@@ -118,14 +125,18 @@ namespace PerformanceTesting
                                 //Run the test
                                 yield return StartCoroutine(test.Run(manager));
 
+                                bool makeHeader = !filesWithHeader.Contains(completeFilePath);
+
                                 //Write outputs
                                 using (StreamWriter testResults = new StreamWriter(completeFilePath,true))
                                 {
                                     WriteTestLog(log, test);
-                                    WriteTestResults(testResults, test, repeatIndex == 0 && testIndex == 0, passDetails.TechniqueName, repeatIndex);
+                                    WriteTestResults(testResults, test, makeHeader, passDetails.TechniqueName, repeatIndex);
+                                    filesWithHeader.Add(completeFilePath);
                                 }
 
-                                //Cleanup
+                                ///Cleanup--------------
+                                test.Clear();
                                 //reload the scene
                                 yield return SceneManager.LoadSceneAsync(SceneManager.GetActiveScene().buildIndex);
                                 //Do garbage collection
@@ -150,16 +161,15 @@ namespace PerformanceTesting
 
             }
 
-
             Debug.Log("All tests done");
-#if UNITY_EDITOR
-            // Application.Quit() does not work in the editor so
-            // UnityEditor.EditorApplication.isPlaying need to be set to false to end the game
-            UnityEditor.EditorApplication.isPlaying = false;
-#else
-         Application.Quit();
-#endif
 
+            ///Must initalise manager, as it is not guaranteed to exit correctly otherwise
+            ///(Stuff needs disposing)
+            managerObj = Worlds.Find(chunkManagerName).gameObject;
+            manager = managerObj.GetComponent<ChunkManager>();
+            manager.Initialise();
+            
+            SceneManager.LoadScene("MainMenu");
         }
 
         private void WriteTestLog(StreamWriter log, IPerformanceTest test)

@@ -43,5 +43,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 30e047e87ad74324ca36fe70903481fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  testName: WalkForward
-  WalkDistance: 100
+  testName: FlyForward
+  WalkDistance: 160
+  Altitude: 40

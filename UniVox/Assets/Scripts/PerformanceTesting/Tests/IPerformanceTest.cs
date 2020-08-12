@@ -23,5 +23,6 @@ namespace PerformanceTesting
         /// </summary>
         /// <returns></returns>
         Dictionary<string, List<string>> GetPerFrameData();
+        void Clear();
     }
 }

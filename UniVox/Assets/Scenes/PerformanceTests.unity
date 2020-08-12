@@ -3396,6 +3396,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: TimeToLoadTest
       objectReference: {fileID: 0}
+    - target: {fileID: 3106979209819046881, guid: 3683c8dfe98dd884fb7a0d205003b9d3,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3683c8dfe98dd884fb7a0d205003b9d3, type: 3}
 --- !u!1001 &3813409653860374252
@@ -3409,11 +3414,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: FlyForwardTest
-      objectReference: {fileID: 0}
-    - target: {fileID: 3813409653519321411, guid: a07674666321f1c46b6fdda2096b8779,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3813409653519321436, guid: a07674666321f1c46b6fdda2096b8779,
         type: 3}
