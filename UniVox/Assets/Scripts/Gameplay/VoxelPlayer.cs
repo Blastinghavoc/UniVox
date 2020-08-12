@@ -9,6 +9,7 @@ namespace UniVox.Gameplay
     [RequireComponent(typeof(Rigidbody))]
     public class VoxelPlayer : MonoBehaviour,IVoxelPlayer 
     {
+        [SerializeField] private Vector3 StartLocation = new Vector3(0.5f,0,0.5f);
         private VoxelWorldInterface WorldInterface;
         [SerializeField] private GameObject underwaterOverlay = null;
         [SerializeField] private SOVoxelTypeDefinition waterType = null;
@@ -19,8 +20,10 @@ namespace UniVox.Gameplay
 
         public Vector3 Position { get => rigidbody.position; set => rigidbody.position = value; }
 
+
         private void Start()
         {
+            Position = StartLocation;
             WorldInterface = FindObjectOfType<VoxelWorldInterface>();
             Assert.IsNotNull(WorldInterface, $"A {typeof(VoxelPlayer)} must have a reference to a VoxelWorldInterface to operate");
 

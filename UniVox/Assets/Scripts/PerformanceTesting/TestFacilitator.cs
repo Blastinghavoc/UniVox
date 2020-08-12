@@ -78,8 +78,7 @@ namespace PerformanceTesting
 
         private IEnumerator RunTests()
         {
-            VoxelPlayer player = FindObjectOfType<VoxelPlayer>();
-            player.enabled = false;
+            VoxelPlayer player;            
             GameObject managerObj;
             ChunkManager manager;
 
@@ -101,6 +100,8 @@ namespace PerformanceTesting
                         //Run all passes in the suite
                         foreach (var passDetails in testSuite.Passes())
                         {
+                            yield return null;//Give time for component removals from pass to be applied
+
                             float startTime = Time.unscaledTime;
 
                             var groupName = passDetails.GroupName;
@@ -122,6 +123,7 @@ namespace PerformanceTesting
                                 CrossPlatformInputManager.SetActiveInputMethod(virtualPlayer);
 
                                 managerObj.SetActive(true);
+                                player = FindObjectOfType<VoxelPlayer>();
                                 player.enabled = true;
 
                                 //Run the test
@@ -143,8 +145,6 @@ namespace PerformanceTesting
                                 yield return SceneManager.LoadSceneAsync(SceneManager.GetActiveScene().buildIndex);
                                 //Do garbage collection
                                 GC.Collect(GC.MaxGeneration, GCCollectionMode.Default, true);
-                                player = FindObjectOfType<VoxelPlayer>();
-                                player.enabled = false;
 
                                 yield return new WaitForSecondsRealtime(2);
                                 //Locate Worlds object in scene

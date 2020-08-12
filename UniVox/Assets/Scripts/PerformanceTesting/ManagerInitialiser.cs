@@ -2,6 +2,7 @@
 using System.Collections;
 using UniVox.Framework;
 using UniVox.Framework.Serialisation;
+using UniVox.Gameplay;
 
 namespace PerformanceTesting
 {
@@ -14,6 +15,7 @@ namespace PerformanceTesting
     {
         public bool TestMode;
         public bool DoSave;
+
         void Awake()
         {
 
@@ -25,6 +27,9 @@ namespace PerformanceTesting
 
             if (TestMode)
             {
+                //Disable player, as the chunk manager won't immediately be ready for them
+                VoxelPlayer player = FindObjectOfType<VoxelPlayer>();
+                player.enabled = false;
 
                 foreach (Transform child in transform)
                 {
