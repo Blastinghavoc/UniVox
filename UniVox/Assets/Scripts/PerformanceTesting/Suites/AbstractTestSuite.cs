@@ -156,7 +156,7 @@ namespace PerformanceTesting
 
         }
 
-        protected PassDetails EndPass(string groupName) 
+        protected virtual PassDetails EndPass(string groupName) 
         { 
             PassDetails details = new PassDetails() { GroupName = groupName, TechniqueName = GetTechniqueName() };
             Clear();
