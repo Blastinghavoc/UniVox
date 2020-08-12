@@ -1,13 +1,21 @@
-﻿namespace PerformanceTesting
+﻿using System.Collections.Generic;
+
+namespace PerformanceTesting
 {
-    public class NoParallelismSuite : ProceduralSuite 
+
+    public class NoParallelismSuite : AbstractFixedAlgorithmsSuite
     {
-        protected override PassDetails EndPass(string groupName)
+        public override IEnumerable<PassDetails> Passes()
         {
+            SetupPass();
             provider.Parrallel = false;
             mesher.Parrallel = false;
+            yield return EndPass("ParrallelOff");
 
-            return base.EndPass(groupName);
+            SetupPass();
+            provider.Parrallel = true;
+            mesher.Parrallel = true;
+            yield return EndPass("ParrallelOn");
         }
     }
 }
