@@ -58,6 +58,13 @@ namespace UniVox.UI
             }
         }
 
+        private void OnDestroy()
+        {
+            //Make sure the cursor becomes usable again
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
+
         [System.Serializable]
         private class KeyMenuPair 
         {

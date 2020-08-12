@@ -3222,7 +3222,7 @@ PrefabInstance:
     - target: {fileID: 300928909997506360, guid: 8facb091c90ad764da3999def9fcca6a,
         type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 300928909997506361, guid: 8facb091c90ad764da3999def9fcca6a,
         type: 3}
@@ -3311,7 +3311,7 @@ MonoBehaviour:
   TestResultPath: C:\Users\Jacob Taylor.MSI\source\repos\Masters Project\UniVox\TestResults\
   LogFileName: Log
   FileExtension: .csv
-  NumRepeats: 1
+  NumRepeats: 0
 --- !u!1 &1891284304056896728
 GameObject:
   m_ObjectHideFlags: 0
@@ -3414,6 +3414,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: FlyForwardTest
+      objectReference: {fileID: 0}
+    - target: {fileID: 3813409653519321411, guid: a07674666321f1c46b6fdda2096b8779,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3813409653519321436, guid: a07674666321f1c46b6fdda2096b8779,
         type: 3}

@@ -1,0 +1,72 @@
+
+
+
+Test FlatWorld\MeshingComparisons\PlaceDelete1Block\Naive_FlatArray\R0:
+Memory usage baseline: 2152096617
+Grace period 10 frames
+Num Blocks: 1
+Break time millis: 183.6548
+Place time millis: 181.6788
+Peak memory: 8870392
+
+Finished after total time of 35.46983
+
+
+
+Test FlatWorld\MeshingComparisons\PlaceDelete1Block\Culling_FlatArray\R0:
+Memory usage baseline: 4088621457
+Grace period 10 frames
+Num Blocks: 1
+Break time millis: 184.1393
+Place time millis: 184.6046
+Peak memory: 7641098
+
+Finished after total time of 19.87464
+
+
+
+Test FlatWorld\MeshingComparisons\PlaceDelete1Block\Greedy_FlatArray\R0:
+Memory usage baseline: 4090111377
+Grace period 10 frames
+Num Blocks: 1
+Break time millis: 184.0515
+Place time millis: 182.2891
+Peak memory: 7933789
+
+Finished after total time of 19.78576
+
+
+
+Test FlatWorld\StorageComparisons\PlaceDelete1Block\Greedy_FlatArray\R0:
+Memory usage baseline: 4091032657
+Grace period 10 frames
+Num Blocks: 1
+Break time millis: 195.9534
+Place time millis: 191.5207
+Peak memory: 8245440
+
+Finished after total time of 20.37484
+
+
+
+Test FlatWorld\StorageComparisons\PlaceDelete1Block\Greedy_Octree\R0:
+Memory usage baseline: 4093137025
+Grace period 10 frames
+Num Blocks: 1
+Break time millis: 184.3414
+Place time millis: 184.8297
+Peak memory: 7578426
+
+Finished after total time of 37.39063
+
+
+
+Test FlatWorld\StorageComparisons\PlaceDelete1Block\Greedy_RLE\R0:
+Memory usage baseline: 4096654977
+Grace period 10 frames
+Num Blocks: 1
+Break time millis: 195.6177
+Place time millis: 289.9475
+Peak memory: 12653784
+
+Finished after total time of 23.62956

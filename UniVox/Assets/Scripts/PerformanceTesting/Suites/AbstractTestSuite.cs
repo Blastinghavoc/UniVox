@@ -89,6 +89,36 @@ namespace PerformanceTesting
             return DesiredObject;
         }
 
+        public static SubType RemoveComponentsOfTypeExceptSubtype<Type, SubType>(GameObject obj)
+            where Type : UnityEngine.Object where SubType : UnityEngine.Object
+        {
+            Type[] components = obj.GetComponents<Type>();
+
+            SubType DesiredObject = null;
+
+            for (int i = 0; i < components.Length; i++)
+            {
+                var comp = components[i];
+                if (comp is SubType desired)
+                {
+                    if (DesiredObject == null)
+                    {
+                        DesiredObject = desired;
+                    }
+                    else
+                    {
+                        throw new Exception("More than one component of the subtype was found");
+                    }
+                }
+                else
+                {
+                    Destroy(comp);
+                }
+            }
+
+            return DesiredObject;
+        }
+
         protected string GetTechniqueName() 
         {
             string prefix = "";

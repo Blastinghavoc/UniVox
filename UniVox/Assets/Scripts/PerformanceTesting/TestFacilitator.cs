@@ -9,6 +9,8 @@ using UnityEngine.SceneManagement;
 using UnityStandardAssets.CrossPlatformInput;
 using UniVox.Framework;
 using UniVox.Gameplay;
+using UniVox.Implementations.Meshers;
+using UniVox.Implementations.Providers;
 using UniVox.MessagePassing;
 
 namespace PerformanceTesting
@@ -166,10 +168,23 @@ namespace PerformanceTesting
             ///Must initalise manager, as it is not guaranteed to exit correctly otherwise
             ///(Stuff needs disposing)
             managerObj = Worlds.Find(chunkManagerName).gameObject;
+
+            ///Ensure manager is in a valid configuration (only one provider and one mesher component)
+            AbstractTestSuite.RemoveComponentsOfTypeExceptSubtype<AbstractProviderComponent, DebugProvider>(managerObj);
+            AbstractTestSuite.RemoveComponentsOfTypeExceptSubtype<AbstractMesherComponent, CullingMesher>(managerObj);
+
+            managerObj.SetActive(true);
             manager = managerObj.GetComponent<ChunkManager>();
             manager.Initialise();
-            
-            SceneManager.LoadScene("MainMenu");
+
+            manager = null;
+            managerObj = null;
+            yield return SceneManager.LoadSceneAsync("MainMenu");
+            //Do garbage collection
+            GC.Collect(GC.MaxGeneration, GCCollectionMode.Default, true);
+
+            //Destroy this object
+            Destroy(gameObject);
         }
 
         private void WriteTestLog(StreamWriter log, IPerformanceTest test)
