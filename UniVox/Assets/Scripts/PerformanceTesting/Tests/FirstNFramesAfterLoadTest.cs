@@ -1,5 +1,4 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections;
 using System.Linq;
 using UniVox.Framework;
 using System.Text;
@@ -10,7 +9,8 @@ using UnityEngine.Profiling;
 namespace PerformanceTesting
 {
     /// <summary>
-    /// Record data for the first N frames after the world loads
+    /// Record data for the first N frames after the world loads.
+    /// Made somewhat redundant by the TimeToLoad test
     /// </summary>
     public class FirstNFramesAfterLoadTest : AbstractPerformanceTest
     {

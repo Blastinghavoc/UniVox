@@ -11,5 +11,7 @@ namespace PerformanceTesting
         string VariableName { get; }
 
         List<string> Data { get; }
+
+        long EstimateMemoryUsageBytes();
     }
 }

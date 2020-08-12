@@ -3,6 +3,7 @@ using System.Collections;
 using UnityEngine.UI;
 using UnityEngine.Profiling;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace PerformanceTesting
 {
@@ -26,5 +27,14 @@ namespace PerformanceTesting
             memoryPerFrame.Add(Profiler.GetTotalAllocatedMemoryLong() - BaseLine);
         }
 
+        public void Update(long memoryUsedByStatsCollecting) 
+        {
+            memoryPerFrame.Add((Profiler.GetTotalAllocatedMemoryLong() - BaseLine)-memoryUsedByStatsCollecting);
+        }
+
+        public long EstimateMemoryUsageBytes()
+        {
+            return memoryPerFrame.Count * sizeof(long);
+        }
     }
 }

@@ -13,13 +13,9 @@ namespace PerformanceTesting
 
         public List<string> Data { get => CSVUtils.ListToStringList(FrameTimesMillis); }
 
-        public string[] ToCSVLines()
+        public long EstimateMemoryUsageBytes()
         {
-            return new string[]
-            {
-                "FrameTimesMillis:",
-                CSVUtils.MakeCSVString(FrameTimesMillis),
-            };
+            return FrameTimesMillis.Count * sizeof(float);
         }
 
         /// <summary>

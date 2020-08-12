@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.Events;
+using UnityEngine.Profiling;
 
 namespace PerformanceTesting
 {
@@ -18,14 +19,18 @@ namespace PerformanceTesting
 
         protected List<IStatsCollector> perFrameCounters;
 
+        private long logSize = 0;
+
         protected void Log(string s)
         {
             log.Add(s);
+            logSize += s.Length * sizeof(char);
         }
 
         protected void ResetLog()
         {
             log = new List<string>();
+            logSize = 0;
         }
 
         protected virtual void ResetPerFrameCounters()
@@ -48,10 +53,19 @@ namespace PerformanceTesting
 
         protected virtual void UpdatePerFrameCounters()
         {
+            long estimatedMemoryUsage = logSize;
             foreach (var counter in perFrameCounters)
             {
+                estimatedMemoryUsage += counter.EstimateMemoryUsageBytes();
+                if (counter == memoryCounter)
+                {
+                    continue;//Skip update for now
+                }
                 counter.Update();
             }
+            ///Update the memory counter last, with the estimated memory usage of the other counters
+            ///and the current log size
+            memoryCounter.Update(estimatedMemoryUsage);
         }
 
         public List<string> GetLogLines()
