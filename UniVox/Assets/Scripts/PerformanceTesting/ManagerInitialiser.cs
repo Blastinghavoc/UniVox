@@ -30,6 +30,7 @@ namespace PerformanceTesting
                 //Disable player, as the chunk manager won't immediately be ready for them
                 VoxelPlayer player = FindObjectOfType<VoxelPlayer>();
                 player.enabled = false;
+                player.gameObject.GetComponent<Rigidbody>().useGravity = false;
 
                 foreach (Transform child in transform)
                 {

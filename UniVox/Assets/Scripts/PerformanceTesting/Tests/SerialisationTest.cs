@@ -20,6 +20,12 @@ namespace PerformanceTesting
             Assert.IsTrue(SaveUtils.DoSave);
             Assert.IsFalse(string.IsNullOrEmpty(SaveUtils.WorldName),"World name cannot be empty for serialisation test");
 
+            //Ensure save does not already exist by deleting it if it does
+            if (Directory.Exists(SaveUtils.CurrentWorldSaveDirectory))
+            {
+                SaveUtils.DeleteSave(SaveUtils.WorldName);
+            }
+
             ResetLog();
             ResetPerFrameCounters();
 
