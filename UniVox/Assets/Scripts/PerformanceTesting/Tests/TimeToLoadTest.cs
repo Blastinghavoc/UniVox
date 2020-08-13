@@ -6,6 +6,7 @@ namespace PerformanceTesting
 {
     /// <summary>
     /// Records performance statistics while the world loads.
+    /// Also records vertex and triangle count of meshes once the world has loaded.
     /// </summary>
     public class TimeToLoadTest : AbstractPerformanceTest
     {
@@ -34,6 +35,16 @@ namespace PerformanceTesting
             Log($"Peak memory usage of {memoryCounter.memoryPerFrame.Max()}");
             Log($"Time to load was {duration} seconds");
             Log($"Time limit was {MaxRealTimeSeconds} seconds");
+
+            long vertexCount = 0;
+            long triangleCount = 0;
+            foreach (var meshfilter in FindObjectsOfType<MeshFilter>())
+            {
+                vertexCount += meshfilter.mesh.vertices.Length;
+                //Triangles array contains 3 indices per triangle
+                triangleCount += meshfilter.mesh.triangles.Length / 3;
+            }
+            Log($"Active meshes contained {vertexCount} vertices across {triangleCount} triangles");
         }
     }
 }
