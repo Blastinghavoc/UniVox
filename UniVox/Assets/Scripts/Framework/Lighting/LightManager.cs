@@ -502,10 +502,6 @@ namespace UniVox.Framework.Lighting
                 processed++;
             }
 
-            if (processed > 0)
-            {
-                Debug.Log($"Removal processed {processed}");
-            }
             Profiler.EndSample();
         }
 
@@ -567,10 +563,6 @@ namespace UniVox.Framework.Lighting
                 processed++;
             }
 
-            if (processed > 0)
-            {
-                Debug.Log($"Remove Sunlight processed {processed}");
-            }
             Profiler.EndSample();
         }
 
@@ -607,10 +599,6 @@ namespace UniVox.Framework.Lighting
                 }
             }
 
-            if (processed > 0)
-            {
-                Debug.Log($"Propagation processed {processed}");
-            }
             Profiler.EndSample();
         }
 
@@ -650,10 +638,6 @@ namespace UniVox.Framework.Lighting
 
             }
 
-            if (processed > 0)
-            {
-                Debug.Log($"Sun Propagation processed {processed}");
-            }
             Profiler.EndSample();
         }
 

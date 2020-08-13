@@ -1,6 +1,4 @@
-﻿using Boo.Lang;
-using System.IO;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UniVox.Framework.Serialisation;
@@ -11,7 +9,7 @@ namespace UniVox.UI
     public class ChooseSaveGameController : MonoBehaviour
     {
         public MainMenuController mainMenu;
-        public SavedGameListController saveGameList;
+        public ToggleListController saveGameList;
         public ConfirmationDialog dialog;
 
         private Button[] buttons;
@@ -19,7 +17,7 @@ namespace UniVox.UI
         // Start is called before the first frame update
         void Start()
         {
-            saveGameList.Populate();
+            saveGameList.Populate(SaveUtils.GetAllWorldNames());
             buttons = GetComponentsInChildren<Button>();
         }
 
@@ -47,7 +45,7 @@ namespace UniVox.UI
             }
         }
 
-        public void OnDeleteSelectedClicked() 
+        public void OnDeleteSelectedClicked()
         {
             if (saveGameList.TryGetSelected(out var worldName))
             {
@@ -68,13 +66,13 @@ namespace UniVox.UI
             }
         }
 
-        private void DeleteSave(string worldName) 
+        private void DeleteSave(string worldName)
         {
             SaveUtils.DeleteSave(worldName);
             saveGameList.DeleteSelected();
         }
 
-        private void SetButtonsInteractable(bool value) 
+        private void SetButtonsInteractable(bool value)
         {
             foreach (var button in buttons)
             {

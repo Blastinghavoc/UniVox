@@ -12,6 +12,7 @@ using UniVox.Gameplay;
 using UniVox.Implementations.Meshers;
 using UniVox.Implementations.Providers;
 using UniVox.MessagePassing;
+using Utils;
 
 namespace PerformanceTesting
 {
@@ -34,6 +35,7 @@ namespace PerformanceTesting
         private Transform Worlds;
 
         private HashSet<string> filesWithHeader;
+        private HashSet<string> selectedTestSuiteNames;
 
         void Awake()
         {
@@ -51,10 +53,19 @@ namespace PerformanceTesting
 
             filesWithHeader = new HashSet<string>();
 
-            if (SceneMessagePasser.TryConsumeMessage<PerformanceTestFilepathMessage>(out var message))
+            if (SceneMessagePasser.TryConsumeMessage<PerformanceTestParametersMessage>(out var message))
             {
                 TestResultPath = message.filepath;
+                selectedTestSuiteNames = new HashSet<string>(message.selectedTestSuiteNames);
+                Debug.Log($"Running test suites: {message.selectedTestSuiteNames.ArrayToString()}");
+                NumRepeats = (uint)message.numRepeats;
+                Debug.Log($"Num repeats {message.numRepeats}");
             }
+            else
+            {
+                selectedTestSuiteNames = null;
+            }
+
 
             if (Worlds == null)
             {
@@ -84,6 +95,11 @@ namespace PerformanceTesting
 
             foreach (var testSuite in GetComponentsInChildren<AbstractTestSuite>())
             {
+                if (selectedTestSuiteNames != null && !selectedTestSuiteNames.Contains(testSuite.gameObject.name))
+                {
+                    continue;//Skip any test suites that were not selected
+                }
+
                 testSuite.Initialise();
                 var suiteName = testSuite.SuiteName;
                 //For each repeat
