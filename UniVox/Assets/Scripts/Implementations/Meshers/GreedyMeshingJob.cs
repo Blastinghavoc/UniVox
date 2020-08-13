@@ -41,6 +41,12 @@ namespace UniVox.Implementations.Meshers
         public NativeHashMap<int, VoxelRotation> rotatedVoxelsMap;
         public NativeDirectionRotator directionRotator;
 
+        public NativeList<DoLater> nonCollidableQueue;
+        //Masks in the positive and negative directions
+        public NativeArray<FaceDescriptor> maskPositive;
+        public NativeArray<FaceDescriptor> maskNegative;
+
+
         //Private locals
         private MaterialRunTracker runTracker;
         private FaceDescriptor nullFace;//The empty face
@@ -50,6 +56,9 @@ namespace UniVox.Implementations.Meshers
         {
             data.Dispose();
             rotatedVoxelsMap.Dispose();
+            nonCollidableQueue.Dispose();
+            maskPositive.Dispose();
+            maskNegative.Dispose();
         }
 
         public void Execute()
@@ -64,7 +73,6 @@ namespace UniVox.Implementations.Meshers
             nullFace = default;
             dxdy = data.dimensions.x * data.dimensions.y;
             runTracker = new MaterialRunTracker();
-            NativeList<Dolater> nonCollidable = new NativeList<Dolater>(Allocator.Temp);
 
             //Initialise rotated voxels map from list
             for (int i = 0; i < data.rotatedVoxels.Length; i++)
@@ -103,11 +111,7 @@ namespace UniVox.Implementations.Meshers
 
                 int3 workingCoordinates = new int3();
                 int3 axisVector = new int3();
-
-                //Masks in the positive and negative directions
-                NativeArray<FaceDescriptor> maskPositive = new NativeArray<FaceDescriptor>((size + 1) * (size + 1), Allocator.Temp);
-                NativeArray<FaceDescriptor> maskNegative = new NativeArray<FaceDescriptor>((size + 1) * (size + 1), Allocator.Temp);
-
+                
                 axisVector[axis] = 1;
 
                 //Compute the direction we are currently meshing
@@ -136,6 +140,8 @@ namespace UniVox.Implementations.Meshers
                 {
                     int maskIndex = 0;
                     // Compute the mask for this plane
+                    ///NOTE assumes and requires that both masks are clear (full of nullface)
+                    ///before this point
                     for (workingCoordinates[tertiaryAxis] = 0; workingCoordinates[tertiaryAxis] < size; ++workingCoordinates[tertiaryAxis])
                     {
                         for (workingCoordinates[secondaryAxis] = 0; workingCoordinates[secondaryAxis] < size; ++workingCoordinates[secondaryAxis], ++maskIndex)
@@ -150,6 +156,7 @@ namespace UniVox.Implementations.Meshers
                             bool negativeFaceInThisChunk = (workingCoordinates[axis] < size - 1);
                             FaceDescriptor negativeFace = negativeFaceInThisChunk ? maskData(workingCoordinates + axisVector, negativeAxisDirection, workingCoordinates)
                                 : GetFaceInNeighbour(workingCoordinates + axisVector, positiveAxisDirection, negativeAxisDirection, axis,workingCoordinates);
+                           
 
                             if (positiveFaceInThisChunk && IncludeFace(positiveFace, negativeFace))
                             {
@@ -160,7 +167,6 @@ namespace UniVox.Implementations.Meshers
                             {
                                 maskNegative[maskIndex] = negativeFace;
                             }
-
                         }
                     }
 
@@ -219,7 +225,7 @@ namespace UniVox.Implementations.Meshers
 
                                     if (data.voxelTypeDatabase.voxelTypeToIsPassableMap[currentMaskValue.typeId])
                                     {
-                                        nonCollidable.Add(new Dolater(currentMaskValue, workingCoordinates,
+                                        nonCollidableQueue.Add(new DoLater(currentMaskValue, workingCoordinates,
                                             axis, secondaryAxis, tertiaryAxis, width, height, flip, flipNormals));
                                     }
                                     else
@@ -232,7 +238,7 @@ namespace UniVox.Implementations.Meshers
 
                                 /// Zero-out mask for this section
                                 /// This is necessary to prevent the same area being meshed multiple times,
-                                /// and also clears the mask for the next pass
+                                /// and also to ensure the mask is clear for the next pass
                                 for (int l = 0; l < height; ++l)
                                 {
                                     for (int k = 0; k < width; ++k)
@@ -254,9 +260,9 @@ namespace UniVox.Implementations.Meshers
             runTracker.EndRun(data.materialRuns, data.allTriangleIndices);
 
             //Process non collidable sections
-            for (int j = 0; j < nonCollidable.Length; j++)
+            for (int j = 0; j < nonCollidableQueue.Length; j++)
             {
-                var item = nonCollidable[j];
+                var item = nonCollidableQueue[j];
                 ProcessSection(item.currentMaskValue, item.workingCoordinates,
                     item.primaryAxis, item.secondaryAxis, item.tertiaryAxis, item.width, item.height, item.flip, item.flipNormals);
             }
@@ -279,7 +285,7 @@ namespace UniVox.Implementations.Meshers
         /// Holds the parameters for a call to ProcessSection
         /// to execute it later on.
         /// </summary>
-        private struct Dolater
+        public struct DoLater
         {
             public FaceDescriptor currentMaskValue;
             public int3 workingCoordinates;
@@ -291,7 +297,7 @@ namespace UniVox.Implementations.Meshers
             public bool flip;
             public bool flipNormals;
 
-            public Dolater(FaceDescriptor currentMaskValue,
+            public DoLater(FaceDescriptor currentMaskValue,
                 int3 workingCoordinates,
                 byte primaryAxis,
                 byte secondaryAxis,
@@ -586,7 +592,7 @@ namespace UniVox.Implementations.Meshers
             return faceDescriptor;
         }
 
-        private struct FaceDescriptor : IEquatable<FaceDescriptor>
+        public struct FaceDescriptor : IEquatable<FaceDescriptor>
         {
             public VoxelTypeID typeId;
             //The direction of the face, accounting for any rotation

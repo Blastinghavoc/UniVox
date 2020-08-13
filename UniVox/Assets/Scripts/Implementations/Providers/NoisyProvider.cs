@@ -225,26 +225,27 @@ namespace UniVox.Implementations.Providers
             mainGenJob.job.chunkData = new NativeArray<VoxelTypeID>(arrayLength, Allocator.Persistent);
 
             //Setup ore generation job
-            var oreGenJob = new JobWrapper<OreGenJob>();
-            oreGenJob.job.seed = (uint)heightmapNoise.Seed;
-            oreGenJob.job.chunkData = mainGenJob.job.chunkData;
-            oreGenJob.job.chunkPosition = mainGenJob.job.chunkPosition;
-            oreGenJob.job.dimensions = worldSettings.ChunkDimensions;
-            oreGenJob.job.heightMap = nativeNoiseMaps.heightMap;
-            oreGenJob.job.stoneId = biomeDatabaseComponent.BiomeDatabase.defaultVoxelType;
-            oreGenJob.job.oreSettings = oreSettings.Native;
+            var oreGenJob = new OreGenJob();
+            oreGenJob.seed = (uint)heightmapNoise.Seed;
+            oreGenJob.chunkData = mainGenJob.job.chunkData;
+            oreGenJob.chunkPosition = mainGenJob.job.chunkPosition;
+            oreGenJob.dimensions = worldSettings.ChunkDimensions;
+            oreGenJob.heightMap = nativeNoiseMaps.heightMap;
+            oreGenJob.stoneId = biomeDatabaseComponent.BiomeDatabase.defaultVoxelType;
+            oreGenJob.oreSettings = oreSettings.Native;
+            oreGenJob.offsets = new NativeArray<float3>(oreSettings.Native.Length, Allocator.Persistent);
 
             //Setup ocean generation job
-            var oceanGenJob = new JobWrapper<OceanGenJob>();
-            oceanGenJob.job.config = oceanGenConfig;
-            oceanGenJob.job.dimensions = worldSettings.ChunkDimensions;
-            oceanGenJob.job.chunkPosition = mainGenJob.job.chunkPosition;
-            oceanGenJob.job.chunkData = mainGenJob.job.chunkData;
-            oceanGenJob.job.heightMap = nativeNoiseMaps.heightMap;
-            oceanGenJob.job.biomeMap = nativeNoiseMaps.biomeMap;
+            var oceanGenJob = new OceanGenJob();
+            oceanGenJob.config = oceanGenConfig;
+            oceanGenJob.dimensions = worldSettings.ChunkDimensions;
+            oceanGenJob.chunkPosition = mainGenJob.job.chunkPosition;
+            oceanGenJob.chunkData = mainGenJob.job.chunkData;
+            oceanGenJob.heightMap = nativeNoiseMaps.heightMap;
+            oceanGenJob.biomeMap = nativeNoiseMaps.biomeMap;
 
             //Setup check if empty job
-            var checkIfEmptyJob = new CheckIfChunkDataEmptyJob(oceanGenJob.job.chunkData, Allocator.Persistent);
+            var checkIfEmptyJob = new CheckIfChunkDataEmptyJob(oceanGenJob.chunkData, Allocator.Persistent);
 
             Func<IChunkData> cleanup = () =>
             {
@@ -269,11 +270,12 @@ namespace UniVox.Implementations.Providers
                 else
                 {
                     //Pass data only if not empty
-                    ChunkData = chunkDataFactory.Create(chunkID, chunkDimensions.ToBasic(), oceanGenJob.job.chunkData.ToArray());
+                    ChunkData = chunkDataFactory.Create(chunkID, chunkDimensions.ToBasic(), oceanGenJob.chunkData.ToArray());
                 }
 
                 //Dispose of native arrays
-                oreGenJob.job.chunkData.Dispose();
+                oreGenJob.chunkData.Dispose();
+                oreGenJob.offsets.Dispose();
                 checkIfEmptyJob.Dispose();
 
                 //Handle reference counting on noise maps
@@ -334,16 +336,16 @@ namespace UniVox.Implementations.Providers
         {
             float3 worldPos = chunkManager.ChunkToWorldPosition(new Vector3Int(columnId.x, 0, columnId.y));
 
-            var noiseGenJob = new JobWrapper<NoiseMapGenerationJob>();
-            noiseGenJob.job.worldSettings = worldSettings;
-            noiseGenJob.job.treeSettings = treeSettings;
-            noiseGenJob.job.biomeDatabase = biomeDatabaseComponent.BiomeDatabase;
-            noiseGenJob.job.chunkPositionXZ = worldPos.xz;
-            noiseGenJob.job.heightmapNoise = heightmapNoise;
-            noiseGenJob.job.moisturemapNoise = moisturemapNoise;
-            noiseGenJob.job.treemapNoise = treemapNoise;
+            var noiseGenJob = new NoiseMapGenerationJob();
+            noiseGenJob.worldSettings = worldSettings;
+            noiseGenJob.treeSettings = treeSettings;
+            noiseGenJob.biomeDatabase = biomeDatabaseComponent.BiomeDatabase;
+            noiseGenJob.chunkPositionXZ = worldPos.xz;
+            noiseGenJob.heightmapNoise = heightmapNoise;
+            noiseGenJob.moisturemapNoise = moisturemapNoise;
+            noiseGenJob.treemapNoise = treemapNoise;
             var nativeNoiseMaps = new NativeChunkColumnNoiseMaps(chunkDimensions.x * chunkDimensions.z, Allocator.Persistent);
-            noiseGenJob.job.noiseMaps = nativeNoiseMaps;
+            noiseGenJob.noiseMaps = nativeNoiseMaps;
 
             JobHandle handle = default;
             if (Parrallel)

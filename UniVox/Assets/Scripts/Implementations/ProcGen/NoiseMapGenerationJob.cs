@@ -58,8 +58,7 @@ namespace UniVox.Implementations.ProcGen
             var minPossibleHmValue = worldSettings.minPossibleHmValue;
 
             //Compute moisture map in range 0->1
-            NativeArray<float> moistureMap = new NativeArray<float>(dimensions.x * dimensions.y, Allocator.Temp);
-            ComputeMoistureMap(ref moistureMap, dimensions);
+            ComputeMoistureMap(dimensions);
 
             int i = 0;
             for (int z = 0; z < dimensions.z; z++)
@@ -68,21 +67,21 @@ namespace UniVox.Implementations.ProcGen
                 {
                     var elevationPercentage = math.unlerp(minPossibleHmValue, maxPossibleHmValue, noiseMaps.heightMap[i]);
                     //Assumes moisture map is already in 0->1 range
-                    var moisturePercentage = moistureMap[i];
+                    var moisturePercentage = noiseMaps.moistureMap[i];
                     noiseMaps.biomeMap[i] = biomeDatabase.GetBiomeID(elevationPercentage, moisturePercentage);
                     i++;
                 }
             }
         }
 
-        private void ComputeMoistureMap(ref NativeArray<float> moistureMap, int3 dimensions)
+        private void ComputeMoistureMap(int3 dimensions)
         {
             int i = 0;
             for (int z = 0; z < dimensions.z; z++)
             {
                 for (int x = 0; x < dimensions.x; x++)
                 {
-                    moistureMap[i] = ZeroToOne(
+                    noiseMaps.moistureMap[i] = ZeroToOne(
                         moisturemapNoise.Sample(
                             new float2(x + chunkPositionXZ.x, z + chunkPositionXZ.y) * worldSettings.MoistureMapScale)
                         );

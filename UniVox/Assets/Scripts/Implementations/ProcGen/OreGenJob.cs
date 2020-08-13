@@ -21,6 +21,9 @@ namespace UniVox.Implementations.ProcGen
         //Input and Output
         public NativeArray<VoxelTypeID> chunkData;
 
+        //Temporary
+        public NativeArray<float3> offsets;
+
         [ReadOnly] public NativeArray<int> heightMap;
 
         public void Execute()
@@ -29,7 +32,6 @@ namespace UniVox.Implementations.ProcGen
             adjustedSeed = adjustedSeed == 0 ? adjustedSeed + 1 : adjustedSeed;
             Random random = new Random(adjustedSeed);
 
-            NativeArray<float3> offsets = new NativeArray<float3>(oreSettings.Length, Allocator.Temp);
             for (int i = 0; i < offsets.Length; i++)
             {
                 offsets[i] = random.NextFloat3();

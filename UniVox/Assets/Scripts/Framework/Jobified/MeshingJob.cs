@@ -23,10 +23,12 @@ namespace UniVox.Framework.Jobified
 
         public MeshJobData data { get; set; }
 
+        public NativeList<DoLater> nonCollidableQueue;
+
         //Private temporaries
         private MaterialRunTracker runTracker;
 
-        private struct DoLater 
+        public struct DoLater 
         {
             public int3 position;
             public ushort typeID;
@@ -46,6 +48,7 @@ namespace UniVox.Framework.Jobified
         {
             //Dispose the data
             data.Dispose();
+            nonCollidableQueue.Dispose();
         }        
 
         public void Execute()
@@ -56,8 +59,6 @@ namespace UniVox.Framework.Jobified
                 data.rotatedVoxels.Sort(new RotatedVoxelComparer());
             }
             int currentRotatedIndex = 0;
-
-            var nonCollidable = new NativeList<DoLater>(Allocator.Temp);
 
             runTracker = new MaterialRunTracker();
 
@@ -85,7 +86,7 @@ namespace UniVox.Framework.Jobified
                             if (data.voxelTypeDatabase.voxelTypeToIsPassableMap[voxelTypeID])
                             {
                                 //Save non-collidable voxels for later, so that they appear contiguously in the mesh arrays
-                                nonCollidable.Add(new DoLater() { position = new int3(x, y, z),
+                                nonCollidableQueue.Add(new DoLater() { position = new int3(x, y, z),
                                     typeID = voxelTypeID,
                                     rotated = rotated,
                                     rotation = rotation
@@ -107,9 +108,9 @@ namespace UniVox.Framework.Jobified
             runTracker.EndRun(data.materialRuns, data.allTriangleIndices);
 
             //Process non collidable section
-            for (int j = 0; j < nonCollidable.Length; j++)
+            for (int j = 0; j < nonCollidableQueue.Length; j++)
             {
-                var item = nonCollidable[j];
+                var item = nonCollidableQueue[j];
                 AddMeshDataForVoxel(item.typeID, item.position, item.rotated,item.rotation);
             }
 

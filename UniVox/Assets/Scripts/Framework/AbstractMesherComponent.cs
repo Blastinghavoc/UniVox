@@ -161,6 +161,8 @@ namespace UniVox.Framework
             job.data = data;
             job.cullfaces = CullFaces;
             job.directionHelper = directionRotator;
+            //TODO use allocator temp job if job can be guaranteed to take less than 4 frames
+            job.nonCollidableQueue = new NativeList<MeshingJob.DoLater>(Allocator.Persistent);
             return job;
         }
 

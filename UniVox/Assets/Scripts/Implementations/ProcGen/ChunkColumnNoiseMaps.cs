@@ -22,11 +22,13 @@ namespace UniVox.Implementations.ProcGen
             public NativeArray<int> heightMap;
             public NativeArray<int> biomeMap;
             public NativeArray<float> treeMap;
+            public NativeArray<float> moistureMap;
             public void Dispose() 
             {
                 heightMap.SmartDispose();
                 biomeMap.SmartDispose();
                 treeMap.SmartDispose();
+                moistureMap.SmartDispose();
             }
 
             public NativeChunkColumnNoiseMaps(int flatSize,Allocator allocator = Allocator.Persistent) 
@@ -34,6 +36,7 @@ namespace UniVox.Implementations.ProcGen
                 heightMap = new NativeArray<int>(flatSize, allocator);
                 biomeMap = new NativeArray<int>(flatSize, allocator);
                 treeMap = new NativeArray<float>(flatSize, allocator);
+                moistureMap = new NativeArray<float>(flatSize, allocator);
             }
         }
 
