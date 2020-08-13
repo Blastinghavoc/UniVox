@@ -43,5 +43,17 @@ namespace UniVox.Framework.Serialisation
                 return new string[0];
             }
         }
+
+        public static void DeleteSave(string worldName)
+        {
+            try
+            {
+                Directory.Delete(SaveDirectoryForWorldName(worldName), true);                
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"Error trying to delete world {worldName}. Message {e.Message}");
+            }
+        }
     }
 }

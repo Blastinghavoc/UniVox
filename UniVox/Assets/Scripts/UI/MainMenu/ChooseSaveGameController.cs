@@ -70,15 +70,8 @@ namespace UniVox.UI
 
         private void DeleteSave(string worldName) 
         {
-            try
-            {
-                Directory.Delete(SaveUtils.SaveDirectoryForWorldName(worldName), true);
-                saveGameList.DeleteSelected();
-            }
-            catch (System.Exception e)
-            {
-                Debug.LogError($"Error trying to delete world {worldName}. Message {e.Message}");
-            }
+            SaveUtils.DeleteSave(worldName);
+            saveGameList.DeleteSelected();
         }
 
         private void SetButtonsInteractable(bool value) 
