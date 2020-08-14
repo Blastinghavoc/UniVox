@@ -1,5 +1,6 @@
 ﻿using System;
 using Unity.Mathematics;
+using UnityEngine;
 
 namespace UniVox.Implementations.ProcGen
 {
@@ -9,7 +10,12 @@ namespace UniVox.Implementations.ProcGen
         public float seed;
         public float HeightmapScale;
         public float MoistureMapScale;
+
+        [Range(0,128)]
         public float MaxHeightmapHeight;
+        [Range(-128,0)]
+        [NonSerialized] public float MinHeightmapHeight;
+
         public float HeightmapExponentPositive;
         public float HeightmapExponentNegative;
         public int HeightmapYOffset;
@@ -32,8 +38,10 @@ namespace UniVox.Implementations.ProcGen
             MoistureMapScale = 1 / MoistureMapScale;
             CaveScale = 1 / CaveScale;
 
+            MinHeightmapHeight = -1 * MaxHeightmapHeight;
+
             maxPossibleHmValue = MaxHeightmapHeight + HeightmapYOffset;
-            minPossibleHmValue = -1 * MaxHeightmapHeight + HeightmapYOffset;
+            minPossibleHmValue = MinHeightmapHeight + HeightmapYOffset;
         }
     }
 }

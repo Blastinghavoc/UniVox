@@ -90,7 +90,7 @@ namespace UniVox.Implementations.Providers
             biomeDatabaseComponent.Initialise();
 
             oceanGenConfig.oceanID = biomeDatabaseComponent.GetBiomeID(oceanBiome);
-            oceanGenConfig.sealevel = math.floor(math.unlerp(worldSettings.minPossibleHmValue, worldSettings.maxPossibleHmValue, biomeDatabaseComponent.GetMaxElevationFraction(oceanBiome)));
+            oceanGenConfig.sealevel = math.floor(math.lerp(worldSettings.minPossibleHmValue, worldSettings.maxPossibleHmValue, biomeDatabaseComponent.GetMaxElevationFraction(oceanBiome)));
             oceanGenConfig.waterID = waterID;
 
             noiseMaps = new Dictionary<Vector2Int, ChunkColumnNoiseMaps>();

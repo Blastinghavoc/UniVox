@@ -36,22 +36,23 @@ namespace PerformanceTesting
             CommonForMeshTests();
             yield return EndPass("MeshingComparisons");
 
-            ///Then, for each storage type, but with fixed meshing algorithm
 
-            //Flat array
-            CommonForStorageTests();
-            chunkManager.gameObject.GetComponent<DebugProvider>().chunkDataFactory.typeToCreate = ChunkDataFactory.ChunkDataType.FlatArray;
-            yield return EndPass("StorageComparisons");
+            ///NOTE excluding storage tests for flatworld, these will be run in procedural world only
 
-            //Octree
-            CommonForStorageTests();
-            chunkManager.gameObject.GetComponent<DebugProvider>().chunkDataFactory.typeToCreate = ChunkDataFactory.ChunkDataType.Octree;
-            yield return EndPass("StorageComparisons");
+            ////Flat array
+            //CommonForStorageTests();
+            //chunkManager.gameObject.GetComponent<DebugProvider>().chunkDataFactory.typeToCreate = ChunkDataFactory.ChunkDataType.FlatArray;
+            //yield return EndPass("StorageComparisons");
 
-            //RLE
-            CommonForStorageTests();
-            chunkManager.gameObject.GetComponent<DebugProvider>().chunkDataFactory.typeToCreate = ChunkDataFactory.ChunkDataType.RLE;
-            yield return EndPass("StorageComparisons");
+            ////Octree
+            //CommonForStorageTests();
+            //chunkManager.gameObject.GetComponent<DebugProvider>().chunkDataFactory.typeToCreate = ChunkDataFactory.ChunkDataType.Octree;
+            //yield return EndPass("StorageComparisons");
+
+            ////RLE
+            //CommonForStorageTests();
+            //chunkManager.gameObject.GetComponent<DebugProvider>().chunkDataFactory.typeToCreate = ChunkDataFactory.ChunkDataType.RLE;
+            //yield return EndPass("StorageComparisons");
         }
 
         private void CommonForStorageTests() 

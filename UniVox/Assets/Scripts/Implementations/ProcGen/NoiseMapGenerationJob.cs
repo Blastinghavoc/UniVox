@@ -31,8 +31,7 @@ namespace UniVox.Implementations.ProcGen
 
             int3 dimensions = worldSettings.ChunkDimensions;
 
-            ComputeHeightMap(dimensions);
-            ComputeBiomeMap(dimensions);
+            ComputeBiomeMapAndHeightMap(dimensions);
             ComputeTreeMap(dimensions);
 
         }
@@ -52,7 +51,7 @@ namespace UniVox.Implementations.ProcGen
             }
         }
 
-        private void ComputeBiomeMap(int3 dimensions)
+        private void ComputeBiomeMapAndHeightMap(int3 dimensions)
         {
             var maxPossibleHmValue = worldSettings.maxPossibleHmValue;
             var minPossibleHmValue = worldSettings.minPossibleHmValue;
@@ -65,7 +64,10 @@ namespace UniVox.Implementations.ProcGen
             {
                 for (int x = 0; x < dimensions.x; x++)
                 {
-                    var elevationPercentage = math.unlerp(minPossibleHmValue, maxPossibleHmValue, noiseMaps.heightMap[i]);
+                    var hmFloat = CalculateHeightMapAt(new float2(x + chunkPositionXZ.x, z + chunkPositionXZ.y));
+                    noiseMaps.heightMap[i] = (int)math.floor(hmFloat);
+
+                    var elevationPercentage = math.unlerp(minPossibleHmValue, maxPossibleHmValue, hmFloat);
                     //Assumes moisture map is already in 0->1 range
                     var moisturePercentage = noiseMaps.moistureMap[i];
                     noiseMaps.biomeMap[i] = biomeDatabase.GetBiomeID(elevationPercentage, moisturePercentage);
@@ -90,22 +92,21 @@ namespace UniVox.Implementations.ProcGen
             }
         }
 
-        private void ComputeHeightMap(int3 dimensions)
-        {
-            int i = 0;
-            for (int z = 0; z < dimensions.z; z++)
-            {
-                for (int x = 0; x < dimensions.x; x++)
-                {
-                    noiseMaps.heightMap[i] = CalculateHeightMapAt(new float2(x + chunkPositionXZ.x, z + chunkPositionXZ.y));
-                    i++;
-                }
-            }
-        }
+        //private void ComputeHeightMap(int3 dimensions)
+        //{
+        //    int i = 0;
+        //    for (int z = 0; z < dimensions.z; z++)
+        //    {
+        //        for (int x = 0; x < dimensions.x; x++)
+        //        {
+        //            noiseMaps.heightMap[i] = CalculateHeightMapAt(new float2(x + chunkPositionXZ.x, z + chunkPositionXZ.y));
+        //            i++;
+        //        }
+        //    }
+        //}
 
         /// <summary>
         /// Changes the distribution of the input noise value (assumed to be in range -1->1)
-        /// Range is unchanged.
         /// </summary>
         /// <param name="val"></param>
         /// <returns></returns>
@@ -113,22 +114,20 @@ namespace UniVox.Implementations.ProcGen
         {
             if (val > 0)
             {
-                return math.pow(val, worldSettings.HeightmapExponentPositive);
+                return math.pow(val, worldSettings.HeightmapExponentPositive) * worldSettings.MaxHeightmapHeight;
             }
             else
             {
                 //Negative exponent
-                return -1 * math.pow(-1 * val, worldSettings.HeightmapExponentNegative);
+                return math.pow(-1 * val, worldSettings.HeightmapExponentNegative) * worldSettings.MinHeightmapHeight;
             }
         }
 
-        public int CalculateHeightMapAt(float2 pos)
+        public float CalculateHeightMapAt(float2 pos)
         {
 
-            int rawHeightmap = (int)math.floor(
-                AdjustHeightMapNoiseValue(heightmapNoise.Sample(pos * worldSettings.HeightmapScale))
-                * worldSettings.MaxHeightmapHeight
-                );
+            float rawHeightmap = 
+                AdjustHeightMapNoiseValue(heightmapNoise.Sample(pos * worldSettings.HeightmapScale));
 
             //add the raw heightmap to the base ground height
             return worldSettings.HeightmapYOffset + rawHeightmap;

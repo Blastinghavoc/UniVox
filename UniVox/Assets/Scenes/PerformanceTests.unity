@@ -652,7 +652,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2f568bfa1bc8a12488d51c12fe1ef120, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  config: {fileID: 11400000, guid: 69c27e57ecc1a744c9f5c0aa59170259, type: 2}
+  config: {fileID: 11400000, guid: 3a4fd862410f5734f929a1d0fc0c4286, type: 2}
 --- !u!114 &662032199
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3424,15 +3424,15 @@ MonoBehaviour:
     lazy: 1
   worldSettings:
     seed: 1337
-    HeightmapScale: 125
+    HeightmapScale: 240
     MoistureMapScale: 1000
-    MaxHeightmapHeight: 96
-    HeightmapExponentPositive: 1.5
-    HeightmapExponentNegative: 5
+    MaxHeightmapHeight: 95
+    HeightmapExponentPositive: 2
+    HeightmapExponentNegative: 1.2
     HeightmapYOffset: 0
     MakeCaves: 1
     CaveThreshold: 0.35
-    CaveScale: 100
+    CaveScale: 60
   treeSettings:
     TreemapScale: 1
     TreeThreshold: 0.9
@@ -3441,18 +3441,18 @@ MonoBehaviour:
     Persistence: 0.5
     Lacunarity: 2
   heightmapNoise:
-    Octaves: 3
-    Persistence: 0.5
-    Lacunarity: 2
+    Octaves: 5
+    Persistence: 0.9
+    Lacunarity: 1.5
   moisturemapNoise:
-    Octaves: 3
+    Octaves: 1
     Persistence: 0.5
     Lacunarity: 2
   bedrockType: {fileID: 11400000, guid: 3b5947e841c3a4845b8c9cbf0efbbebc, type: 2}
   waterType: {fileID: 11400000, guid: 29a81a7c3885cee43ad6f88a9ba44766, type: 2}
   oceanBiome: {fileID: 11400000, guid: bc7732a614701f04ca9c506c02132cc4, type: 2}
-  biomeDatabaseComponent: {fileID: 662032198}
-  oreSettings: {fileID: 662032197}
+  biomeDatabaseComponent: {fileID: 0}
+  oreSettings: {fileID: 0}
 --- !u!114 &6557251178069095798
 MonoBehaviour:
   m_ObjectHideFlags: 0
