@@ -3445,14 +3445,14 @@ MonoBehaviour:
     Persistence: 0.9
     Lacunarity: 1.5
   moisturemapNoise:
-    Octaves: 1
+    Octaves: 2
     Persistence: 0.5
-    Lacunarity: 2
+    Lacunarity: 4
   bedrockType: {fileID: 11400000, guid: 3b5947e841c3a4845b8c9cbf0efbbebc, type: 2}
   waterType: {fileID: 11400000, guid: 29a81a7c3885cee43ad6f88a9ba44766, type: 2}
   oceanBiome: {fileID: 11400000, guid: bc7732a614701f04ca9c506c02132cc4, type: 2}
-  biomeDatabaseComponent: {fileID: 0}
-  oreSettings: {fileID: 0}
+  biomeDatabaseComponent: {fileID: 662032198}
+  oreSettings: {fileID: 662032197}
 --- !u!114 &6557251178069095798
 MonoBehaviour:
   m_ObjectHideFlags: 0
