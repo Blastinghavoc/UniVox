@@ -14,9 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   defaultVoxelType: {fileID: 11400000, guid: a8aff50ee8c68ea4192732a3ece092b4, type: 2}
   elevationLowToHigh:
-  - Name: Sea
+  - Name: Ocean
     moistureLevelsLowToHigh:
     - biomeDefinition: {fileID: 11400000, guid: bc7732a614701f04ca9c506c02132cc4,
+        type: 2}
+      max: 0.66
+    - biomeDefinition: {fileID: 11400000, guid: d88ab0bf81ced4840ac40f17587399b7,
         type: 2}
       max: 1
     max: 0.5

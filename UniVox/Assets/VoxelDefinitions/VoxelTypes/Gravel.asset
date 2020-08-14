@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 36add9c34f86f4e4c849947280fc7666, type: 3}
+  m_Name: Gravel
+  m_EditorClassIdentifier: 
+  DisplayName: Gravel
+  FaceTextures:
+  - {fileID: 2800000, guid: 41d9069408d772a40944a18381e9028d, type: 3}
+  - {fileID: 2800000, guid: 41d9069408d772a40944a18381e9028d, type: 3}
+  - {fileID: 2800000, guid: 41d9069408d772a40944a18381e9028d, type: 3}
+  - {fileID: 2800000, guid: 41d9069408d772a40944a18381e9028d, type: 3}
+  - {fileID: 2800000, guid: 41d9069408d772a40944a18381e9028d, type: 3}
+  - {fileID: 2800000, guid: 41d9069408d772a40944a18381e9028d, type: 3}
+  meshDefinition: {fileID: 11400000, guid: ceb9d116af1d072479bb06beaf15efac, type: 2}
+  material: {fileID: 2100000, guid: 2b40641d357875449a01958e36c0f6ba, type: 2}
+  isPassable: 0
+  isReplaceable: 0
+  rotationConfiguration: {fileID: 0}
+  lightConfiguration: {fileID: 11400000, guid: da2475bc2d3d8b840b5ba5ba6f8031dc, type: 2}

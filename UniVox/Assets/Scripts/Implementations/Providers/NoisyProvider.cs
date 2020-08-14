@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
@@ -36,7 +37,6 @@ namespace UniVox.Implementations.Providers
         [SerializeField] private SOVoxelTypeDefinition waterType = null;
         private ushort waterID;
 
-        [SerializeField] private SOBiomeDefinition oceanBiome = null;
         private OceanGenConfig oceanGenConfig = new OceanGenConfig();
 
         private int minY = int.MinValue;
@@ -64,7 +64,6 @@ namespace UniVox.Implementations.Providers
 
             Assert.IsNotNull(bedrockType, $"{typeof(NoisyProvider)} must have a valid reference to a bedrock block type");
             Assert.IsNotNull(waterType, $"{typeof(NoisyProvider)} must have a valid reference to a water block type");
-            Assert.IsNotNull(oceanBiome, $"{typeof(NoisyProvider)} must have a valid reference to an ocean biome");
             Assert.IsNotNull(biomeDatabaseComponent, $"{typeof(NoisyProvider)} must have a valid reference to a biome database component");
 
             if (SceneMessagePasser.TryConsumeMessage<SeedMessage>(out var message))
@@ -89,9 +88,24 @@ namespace UniVox.Implementations.Providers
 
             biomeDatabaseComponent.Initialise();
 
-            oceanGenConfig.oceanID = biomeDatabaseComponent.GetBiomeID(oceanBiome);
-            oceanGenConfig.sealevel = math.floor(math.lerp(worldSettings.minPossibleHmValue, worldSettings.maxPossibleHmValue, biomeDatabaseComponent.GetMaxElevationFraction(oceanBiome)));
-            oceanGenConfig.waterID = waterID;
+            //Setup ocean config
+            try
+            {
+                var oceanZone = biomeDatabaseComponent.config.elevationLowToHigh.Find((zone) => zone.Name.Equals("Ocean"));
+                var oceanBiomes = oceanZone.moistureLevelsLowToHigh.Select((def) => def.biomeDefinition).ToArray();
+
+                oceanGenConfig.oceanIDs = new NativeArray<int>(oceanBiomes.Length, Allocator.Persistent);
+                for (int i = 0; i < oceanBiomes.Length; i++)
+                {
+                    oceanGenConfig.oceanIDs[i] = biomeDatabaseComponent.GetBiomeID(oceanBiomes[i]);
+                }
+                oceanGenConfig.sealevel = math.floor(math.lerp(worldSettings.minPossibleHmValue, worldSettings.maxPossibleHmValue, biomeDatabaseComponent.GetMaxElevationFraction(oceanBiomes[0])));
+                oceanGenConfig.waterID = waterID;
+            }
+            catch (Exception e)
+            {
+                throw new Exception($"Failed to find any ocean biomes for biome config {biomeDatabaseComponent.config.name}. Cause {e.Message}");
+            }
 
             noiseMaps = new Dictionary<Vector2Int, ChunkColumnNoiseMaps>();
             numActiveChunksInColumn = new Dictionary<Vector2Int, int>();
@@ -113,6 +127,7 @@ namespace UniVox.Implementations.Providers
             eventManager.OnChunkDeactivated -= OnChunkDeactivated;
             oreSettings.Dispose();
             biomeDatabaseComponent.Dispose();
+            oceanGenConfig.Dispose();
         }
 
         private void OnChunkActivated(object sender, ChunkActivatedArgs args)

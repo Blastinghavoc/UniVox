@@ -32,7 +32,7 @@ namespace UniVox.Implementations.ProcGen
             {
                 for (int x = 0; x < dimensions.x; x++, i++)
                 {
-                    if (biomeMap[i] == config.oceanID)
+                    if (config.oceanIDs.Contains(biomeMap[i]))
                     {
                         if (heightMap[i] <= config.sealevel)
                         {

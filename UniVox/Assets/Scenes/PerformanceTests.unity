@@ -1503,17 +1503,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 2310299740901447961, guid: a25dffd42c0abbc41abf6bb991749b65,
-        type: 3}
-      propertyPath: VoxelTypes.Array.size
-      value: 22
-      objectReference: {fileID: 0}
-    - target: {fileID: 2310299740901447961, guid: a25dffd42c0abbc41abf6bb991749b65,
-        type: 3}
-      propertyPath: VoxelTypes.Array.data[21]
-      value: 
-      objectReference: {fileID: 11400000, guid: de60f55576c5b2b4fafe93ce51892259,
-        type: 2}
     - target: {fileID: 2310299740901447966, guid: a25dffd42c0abbc41abf6bb991749b65,
         type: 3}
       propertyPath: m_Name
