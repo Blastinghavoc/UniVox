@@ -59,9 +59,6 @@ namespace UniVox.Framework
         [Range(1, 100)]
         [SerializeField] protected ushort MaxMeshedPerUpdate = 1;
 
-        //TODO remove DEBUG
-        [SerializeField] protected bool DebugPipeline = false;
-
         [SerializeField] protected GameObject LightManagerGO = null;
 
         #endregion        
@@ -132,14 +129,6 @@ namespace UniVox.Framework
 
         protected virtual void Update()
         {
-
-            //TODO remove DEBUG
-            pipeline.DebugMode = DebugPipeline;
-            if (DebugPipeline)
-            {
-                //Activates the pipeline debug for one frame only.
-                DebugPipeline = false;
-            }
 
             playArea.Update();
             var chunksTouchedByLightingUpdate = lightManager.Update();
@@ -603,8 +592,6 @@ namespace UniVox.Framework
             //ChunkManager must be located at world origin
             Assert.AreEqual(Vector3.zero, transform.position);
             Assert.AreEqual(Quaternion.Euler(0, 0, 0), transform.rotation);
-
-            //TODO replace body with call to Utils.Helpers.AdjustForBounds ?
 
             Vector3Int floor = new Vector3Int();
             floor.x = Mathf.FloorToInt(pos.x);

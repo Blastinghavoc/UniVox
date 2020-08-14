@@ -16,8 +16,5 @@ namespace UniVox.Framework
         void RemoveRenderMesh();
         void SetCollisionMesh(Mesh mesh);
         void SetRenderMesh(MeshDescriptor meshDesc);
-
-        //TODO remove DEBUG
-        void SetPipelineStagesDebug(ChunkStageData chunkStageData);
     }
 }

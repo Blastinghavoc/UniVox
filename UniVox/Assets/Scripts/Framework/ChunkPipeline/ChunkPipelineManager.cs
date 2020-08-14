@@ -41,9 +41,6 @@ namespace UniVox.Framework.ChunkPipeline
         public int RenderedStage { get; private set; }
         public int CompleteStage { get; private set; }
 
-        //TODO remove DEBUG
-        public bool DebugMode = false;
-
         public IChunkProvider chunkProvider { get; private set; }
         public IChunkMesher chunkMesher { get; private set; }
 
@@ -293,16 +290,6 @@ namespace UniVox.Framework.ChunkPipeline
             Profiler.BeginSample("ScheduleBatchedJobs");
             JobHandle.ScheduleBatchedJobs();//Ensure all jobs are scheduled
             Profiler.EndSample();
-
-            if (DebugMode)
-            {
-                foreach (var item in chunkStageMap)
-                {
-                    var Component = getChunkComponent(item.Key);
-                    Component.SetPipelineStagesDebug(item.Value);
-                }
-            }
-
         }
 
         private void CheckLockBeforeExternalOperation()

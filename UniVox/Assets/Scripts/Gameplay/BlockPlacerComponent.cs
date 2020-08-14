@@ -66,16 +66,6 @@ namespace UniVox.Gameplay
             RaycastHit raycastHit;
             bool hitAnything = Physics.Raycast(ray, out raycastHit, MaxPlacementDistance, LayerMask.GetMask("Voxels"));
 
-            //TODO remove, testing 
-            if (Input.GetKeyDown(KeyCode.G))
-            {
-                foreach (var item in Utils.Helpers.CuboidalArea(transform.position.ToInt(), new Vector3Int(5, 5, 5), new Vector3Int(5, 5, 5)))
-                {
-                    WorldInterface.PlaceVoxel(item, blockToPlace);
-                }
-            }
-
-
             if (hitAnything)
             {
                 Indicator.SetActive(true);

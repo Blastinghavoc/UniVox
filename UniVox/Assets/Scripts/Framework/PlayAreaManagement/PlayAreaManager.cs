@@ -260,15 +260,9 @@ namespace UniVox.Framework.PlayAreaManagement
             //Do the whole update at once
             var iterator = SetAllTargetsProcess(playerChunkID, prevPlayerChunkID);
 
-            //TODO remove DEBUG
-            int count = 0;
-
             while (iterator.MoveNext())
             {
-                count++;
             }
-
-            //Debug.Log($"UpdateWholePlayArea did {count} updates");
 
             Profiler.EndSample();
         }

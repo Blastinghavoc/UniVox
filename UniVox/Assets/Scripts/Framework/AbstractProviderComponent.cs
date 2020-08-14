@@ -13,7 +13,6 @@ namespace UniVox.Framework
 
         protected BinarySerialiser serialiser;
 
-        //TODO remove, testing only
         public bool Parrallel = true;
 
         /// <summary>

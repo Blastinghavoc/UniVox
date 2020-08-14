@@ -16,38 +16,6 @@ namespace UniVox.Framework
 
     }
 
-    //TODO remove if not doing job-based structure gen. Otherwise, reorder to be consistent with DiagonalDirections enum
-    public struct NativeChunkNeighbourhood
-    {
-        public NativeChunkData up;
-        public NativeChunkData down;
-        public NativeChunkData north;
-        public NativeChunkData south;
-        public NativeChunkData east;
-        public NativeChunkData west;
-        public NativeChunkData NE;
-        public NativeChunkData NW;
-        public NativeChunkData SE;
-        public NativeChunkData SW;
-        public NativeChunkData upN;
-        public NativeChunkData upS;
-        public NativeChunkData upE;
-        public NativeChunkData upW;
-        public NativeChunkData downN;
-        public NativeChunkData downS;
-        public NativeChunkData downE;
-        public NativeChunkData downW;
-        public NativeChunkData upNE;
-        public NativeChunkData upNW;
-        public NativeChunkData upSE;
-        public NativeChunkData upSW;
-        public NativeChunkData downNE;
-        public NativeChunkData downNW;
-        public NativeChunkData downSE;
-        public NativeChunkData downSW;
-
-    }
-
     public class ChunkNeighbourhood
     {
         private Dictionary<Vector3Int, IChunkData> data;

@@ -131,12 +131,6 @@ namespace Tests
                 CollisionMesh = mesh;
             }
 
-            //TODO remove DEBUG
-            public void SetPipelineStagesDebug(ChunkStageData chunkStageData)
-            {
-                throw new NotImplementedException();
-            }
-
             public void SetRenderMesh(MeshDescriptor meshDesc)
             {
                 RenderMesh = meshDesc.mesh;

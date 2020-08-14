@@ -464,8 +464,6 @@ namespace UniVox.Framework.Lighting
             initialLightValue.Dynamic = 0;
             neighbourhood.SetLight(localCoords.x, localCoords.y, localCoords.z, initialLightValue);
 
-            int processed = 0;//TODO remove DEBUG
-
             while (removalQueue.Count > 0)
             {
                 var node = removalQueue.Dequeue();
@@ -498,7 +496,6 @@ namespace UniVox.Framework.Lighting
 
                     }
                 }
-                processed++;
             }
 
             Profiler.EndSample();
@@ -523,8 +520,6 @@ namespace UniVox.Framework.Lighting
 
             initialLightValue.Sun = 0;
             neighbourhood.SetLight(localCoords.x, localCoords.y, localCoords.z, initialLightValue);
-
-            int processed = 0;//TODO remove DEBUG
 
             while (removalQueue.Count > 0)
             {
@@ -559,7 +554,6 @@ namespace UniVox.Framework.Lighting
 
                     }
                 }
-                processed++;
             }
 
             Profiler.EndSample();
@@ -569,7 +563,6 @@ namespace UniVox.Framework.Lighting
         {
             Profiler.BeginSample("PropagateDynamic");
 
-            int processed = 0;//TODO remove DEBUG
             while (queue.Count > 0)
             {
                 var node = queue.Dequeue();
@@ -594,7 +587,6 @@ namespace UniVox.Framework.Lighting
                         }
                     }
 
-                    processed++;
                 }
             }
 
@@ -605,7 +597,6 @@ namespace UniVox.Framework.Lighting
         {
             Profiler.BeginSample("PropagateSun");
 
-            int processed = 0;//TODO remove DEBUG
             while (queue.Count > 0)
             {
                 var node = queue.Dequeue();
@@ -632,7 +623,6 @@ namespace UniVox.Framework.Lighting
                         queue.Enqueue(child);
                     }
 
-                    processed++;
                 }
 
             }
@@ -655,7 +645,7 @@ namespace UniVox.Framework.Lighting
             return chunkManager.IsChunkFullyGenerated(chunkId) && !chunkManager.WorldLimits.ChunkOutsideVerticalLimits(chunkId);
         }
 
-        //TODO decrease GC allocations in this method
+        //TODO decrease GC allocations in this method?
         private IEnumerable<PropagationNode> GetAllValidChildrenForPropagation(PropagationNode parent, ChunkNeighbourhood neighbourhood)
         {
             for (int i = 0; i < DirectionExtensions.Vectors.Length; i++)

@@ -63,18 +63,6 @@ namespace UniVox.Framework
         {
             meshCollider.sharedMesh = null;
         }
-
-        //TODO remove DEBUG
-        public ChunkStageData stageData;
-        public void SetPipelineStagesDebug(ChunkStageData chunkStageData)
-        {
-            stageData = new ChunkStageData()
-            {
-                maxStage = chunkStageData.maxStage,
-                minStage = chunkStageData.minStage,
-                targetStage = chunkStageData.targetStage
-            };
-        }
     }
 
     public class MeshDescriptor

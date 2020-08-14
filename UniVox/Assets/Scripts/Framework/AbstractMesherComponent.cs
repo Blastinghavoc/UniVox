@@ -12,7 +12,6 @@ namespace UniVox.Framework
 
         public bool CullFaces { get; protected set; } = false;
 
-        //TODO remove, testing only
         public bool Parrallel = true;
 
         protected VoxelTypeManager voxelTypeManager;
