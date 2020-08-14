@@ -16,7 +16,7 @@ namespace UniVox.Framework.ChunkPipeline
 
         protected override void OnJobDone(Vector3Int chunkId, IChunkData result)
         {
-            pipeline.getChunkComponent(chunkId).Data = result;            
+            pipeline.getChunkComponent(chunkId).Data = result;
         }
     }
 }

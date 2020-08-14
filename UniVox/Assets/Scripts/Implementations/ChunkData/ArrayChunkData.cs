@@ -1,8 +1,5 @@
 ﻿using UnityEngine;
-using System.Collections;
-using UnityEngine.Assertions;
 using UniVox.Framework;
-using Unity.Collections;
 
 namespace UniVox.Implementations.ChunkData
 {
@@ -14,7 +11,7 @@ namespace UniVox.Implementations.ChunkData
     {
         MultiDimensionalArrayVoxelStorage storage;
 
-        public ArrayChunkData(Vector3Int ID, Vector3Int chunkDimensions,VoxelTypeID[] initialData = null) : base(ID, chunkDimensions,initialData) 
+        public ArrayChunkData(Vector3Int ID, Vector3Int chunkDimensions, VoxelTypeID[] initialData = null) : base(ID, chunkDimensions, initialData)
         {
             storage = new MultiDimensionalArrayVoxelStorage();
             if (initialData == null)
@@ -23,7 +20,7 @@ namespace UniVox.Implementations.ChunkData
             }
             else
             {
-                storage.InitialiseWithData(chunkDimensions,initialData);
+                storage.InitialiseWithData(chunkDimensions, initialData);
             }
         }
 

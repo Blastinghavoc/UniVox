@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 using UniVox.Framework;
 using UniVox.Framework.Serialisation;
@@ -10,7 +8,7 @@ namespace UniVox.UI
     public class PauseMenuController : AbstractUIController
     {
         public override void SetVisibility(bool visible)
-        {            
+        {
             if (visible)
             {
                 Open();
@@ -25,14 +23,14 @@ namespace UniVox.UI
         {
             IsVisible = true;
             gameObject.SetActive(true);
-            Time.timeScale = 0;            
+            Time.timeScale = 0;
         }
 
         public void Close()
         {
             IsVisible = false;
             gameObject.SetActive(false);
-            Time.timeScale = 1;            
+            Time.timeScale = 1;
         }
 
         public void OnResumeButtonClicked()

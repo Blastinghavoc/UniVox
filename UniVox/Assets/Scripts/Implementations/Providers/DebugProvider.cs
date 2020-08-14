@@ -1,17 +1,15 @@
 ﻿using UnityEngine;
-using System.Collections;
 using UniVox.Framework;
-using UniVox.Implementations.ChunkData;
 using UniVox.Framework.ChunkPipeline.VirtualJobs;
-using UniVox.Framework.Jobified;
 using UniVox.Framework.Serialisation;
+using UniVox.Implementations.ChunkData;
 
 namespace UniVox.Implementations.Providers
 {
     public class DebugProvider : AbstractProviderComponent
     {
-        public enum WorldType 
-        { 
+        public enum WorldType
+        {
             flat,
             flatWithHoles,
             singleBlock
@@ -23,9 +21,9 @@ namespace UniVox.Implementations.Providers
         private ushort grassID;
         public ChunkDataFactory chunkDataFactory = null;
 
-        public override void Initialise(VoxelTypeManager voxelTypeManager,IChunkManager chunkManager, FrameworkEventManager eventManager)
+        public override void Initialise(VoxelTypeManager voxelTypeManager, IChunkManager chunkManager, FrameworkEventManager eventManager)
         {
-            base.Initialise(voxelTypeManager,chunkManager,eventManager);
+            base.Initialise(voxelTypeManager, chunkManager, eventManager);
             dirtID = voxelTypeManager.GetId(dirtType);
             grassID = voxelTypeManager.GetId(grassType);
         }
@@ -42,15 +40,15 @@ namespace UniVox.Implementations.Providers
                     return new BasicFunctionJob<IChunkData>(() => SingleBlock(chunkID, chunkManager.ChunkDimensions));
                 default:
                     throw new System.Exception("Invalid world type");
-            }            
+            }
         }
 
-        private IChunkData FlatWorld(Vector3Int chunkID, Vector3Int chunkDimensions) 
+        private IChunkData FlatWorld(Vector3Int chunkID, Vector3Int chunkDimensions)
         {
             var ChunkData = chunkDataFactory.Create(chunkID, chunkDimensions);
 
             int groundHeight = 0;
-            int chunkYCuttoff = (groundHeight + chunkDimensions.y)/chunkDimensions.y;
+            int chunkYCuttoff = (groundHeight + chunkDimensions.y) / chunkDimensions.y;
 
             var chunkPosition = chunkManager.ChunkToWorldPosition(chunkID);
 
@@ -115,7 +113,7 @@ namespace UniVox.Implementations.Providers
             return ChunkData;
         }
 
-        private IChunkData SingleBlock(Vector3Int chunkID, Vector3Int chunkDimensions) 
+        private IChunkData SingleBlock(Vector3Int chunkID, Vector3Int chunkDimensions)
         {
             var ChunkData = chunkDataFactory.Create(chunkID, chunkDimensions);
 
@@ -175,13 +173,13 @@ namespace UniVox.Implementations.Providers
 
         public override AbstractPipelineJob<ChunkNeighbourhood> GenerateStructuresForNeighbourhood(Vector3Int centerChunkID, ChunkNeighbourhood neighbourhood)
         {
-            return new BasicFunctionJob<ChunkNeighbourhood>(()=>neighbourhood);
+            return new BasicFunctionJob<ChunkNeighbourhood>(() => neighbourhood);
         }
 
         public override int[] GetHeightMapForColumn(Vector2Int columnId)
         {
             //Ground height assumed to be 0.
-            return new int[chunkManager.ChunkDimensions.x * chunkManager.ChunkDimensions.z];            
+            return new int[chunkManager.ChunkDimensions.x * chunkManager.ChunkDimensions.z];
         }
 
         protected override IChunkData InitialiseChunkDataFromSaved(ChunkSaveData chunkSaveData, Vector3Int chunkId)

@@ -7,9 +7,9 @@ using UniVox.Framework;
 namespace UniVox.Gameplay
 {
     [RequireComponent(typeof(Rigidbody))]
-    public class VoxelPlayer : MonoBehaviour,IVoxelPlayer 
+    public class VoxelPlayer : MonoBehaviour, IVoxelPlayer
     {
-        [SerializeField] private Vector3 StartLocation = new Vector3(0.5f,0,0.5f);
+        [SerializeField] private Vector3 StartLocation = new Vector3(0.5f, 0, 0.5f);
         private VoxelWorldInterface WorldInterface;
         [SerializeField] private GameObject underwaterOverlay = null;
         [SerializeField] private SOVoxelTypeDefinition waterType = null;
@@ -30,20 +30,20 @@ namespace UniVox.Gameplay
             Assert.IsNotNull(waterType, $"A {typeof(VoxelPlayer)} must have a reference to a water type to operate");
             Assert.IsNotNull(underwaterOverlay, $"A {typeof(VoxelPlayer)} must have a reference to an underwater overlay to operate");
             playercam = Camera.main;
-            camPos = playercam.transform.position;            
+            camPos = playercam.transform.position;
             rigidbody.useGravity = false;
             StartCoroutine(SpawnpointFinder());
         }
 
-        private IEnumerator SpawnpointFinder() 
+        private IEnumerator SpawnpointFinder()
         {
             //Wait for chunk to have data
-            while (!WorldInterface.IsChunkFullyGenerated(WorldInterface.WorldToChunkPosition(rigidbody.position))) 
+            while (!WorldInterface.IsChunkFullyGenerated(WorldInterface.WorldToChunkPosition(rigidbody.position)))
             {
                 yield return null;
             }
 
-            while (WorldInterface.TryGetVoxelType(rigidbody.position, out var voxelType)&& voxelType!=null)
+            while (WorldInterface.TryGetVoxelType(rigidbody.position, out var voxelType) && voxelType != null)
             {
                 rigidbody.MovePosition(rigidbody.position + Vector3.up);
                 yield return null;
@@ -54,9 +54,9 @@ namespace UniVox.Gameplay
                 }
             }
             rigidbody.useGravity = true;
-        } 
+        }
 
-        public void AllowMove(bool allow) 
+        public void AllowMove(bool allow)
         {
             if (allow)
             {
@@ -66,7 +66,7 @@ namespace UniVox.Gameplay
             else
             {
                 rigidbody.constraints |= RigidbodyConstraints.FreezePosition;
-            }                
+            }
         }
 
         private void Update()
@@ -75,10 +75,10 @@ namespace UniVox.Gameplay
             prevCamPos = camPos;
             camPos = playercam.transform.position;
 
-            if (camPos!=prevCamPos)
+            if (camPos != prevCamPos)
             {
                 //Moved
-                if (WorldInterface.TryGetVoxelType(camPos,out var voxelType))
+                if (WorldInterface.TryGetVoxelType(camPos, out var voxelType))
                 {
                     if (voxelType == waterType)
                     {
@@ -90,7 +90,7 @@ namespace UniVox.Gameplay
                     }
                 }
 
-            }            
+            }
 
             Profiler.EndSample();
         }

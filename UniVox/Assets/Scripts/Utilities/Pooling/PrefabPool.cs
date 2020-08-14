@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Utils.Pooling
 {
@@ -29,7 +27,7 @@ namespace Utils.Pooling
             }
             else
             {
-                nextObj = Object.Instantiate(prefab,parent);
+                nextObj = Object.Instantiate(prefab, parent);
             }
             return nextObj;
         }

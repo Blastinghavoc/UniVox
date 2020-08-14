@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace UniVox.UI
 {
-    public class ToggleListController : MonoBehaviour 
+    public class ToggleListController : MonoBehaviour
     {
         public GameObject itemTemplate;
 
@@ -36,7 +36,7 @@ namespace UniVox.UI
             }
         }
 
-        private void OnToggleChanged() 
+        private void OnToggleChanged()
         {
             OnChanged.Invoke();
         }
@@ -60,7 +60,7 @@ namespace UniVox.UI
             return false;
         }
 
-        public string[] GetAllSelected() 
+        public string[] GetAllSelected()
         {
             List<string> list = new List<string>();
             for (int i = 0; i < toggles.Count; i++)

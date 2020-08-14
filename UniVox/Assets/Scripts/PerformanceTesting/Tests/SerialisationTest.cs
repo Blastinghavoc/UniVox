@@ -18,7 +18,7 @@ namespace PerformanceTesting
         public override IEnumerator Run(ITestableChunkManager chunkManager)
         {
             Assert.IsTrue(SaveUtils.DoSave);
-            Assert.IsFalse(string.IsNullOrEmpty(SaveUtils.WorldName),"World name cannot be empty for serialisation test");
+            Assert.IsFalse(string.IsNullOrEmpty(SaveUtils.WorldName), "World name cannot be empty for serialisation test");
 
             //Ensure save does not already exist by deleting it if it does
             if (Directory.Exists(SaveUtils.CurrentWorldSaveDirectory))
@@ -76,11 +76,11 @@ namespace PerformanceTesting
 
             var chunkDirectory = SaveUtils.CurrentWorldSaveDirectory + "chunks/";
 
-            Assert.IsTrue(Directory.Exists(chunkDirectory),"Directory does not exist!");
+            Assert.IsTrue(Directory.Exists(chunkDirectory), "Directory does not exist!");
 
             long totalFileSize = 0;
             int numFiles = 0;
-            foreach (var fileName in Directory.GetFiles(chunkDirectory,"*.*",SearchOption.AllDirectories))
+            foreach (var fileName in Directory.GetFiles(chunkDirectory, "*.*", SearchOption.AllDirectories))
             {
                 numFiles++;
                 totalFileSize += new FileInfo(fileName).Length;

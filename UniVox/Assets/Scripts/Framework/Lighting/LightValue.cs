@@ -1,6 +1,5 @@
 ﻿using System;
 using Unity.Burst;
-using Unity.Mathematics;
 using UnityEngine;
 
 namespace UniVox.Framework.Lighting
@@ -15,15 +14,15 @@ namespace UniVox.Framework.Lighting
         //ddddssss
         private byte bits;
 
-        public int Sun { get => bits& 0xF; set => bits = (byte)((bits&0xF0)|value); }
-        public int Dynamic { get => (bits>>4)& 0xF; set => bits = (byte)((bits&0xF)|value<<4); }
+        public int Sun { get => bits & 0xF; set => bits = (byte)((bits & 0xF0) | value); }
+        public int Dynamic { get => (bits >> 4) & 0xF; set => bits = (byte)((bits & 0xF) | value << 4); }
 
 
-        public Color ToVertexColour() 
+        public Color ToVertexColour()
         {
-            var dynamicIntensity = (1f / (IntensityRange - 1)) *Dynamic;
+            var dynamicIntensity = (1f / (IntensityRange - 1)) * Dynamic;
             var sunIntensity = (1f / (IntensityRange - 1)) * Sun;
-            Color col = new Color(dynamicIntensity,dynamicIntensity,dynamicIntensity,sunIntensity);
+            Color col = new Color(dynamicIntensity, dynamicIntensity, dynamicIntensity, sunIntensity);
             return col;
         }
 
@@ -42,4 +41,4 @@ namespace UniVox.Framework.Lighting
             return bits.GetHashCode();
         }
     }
-} 
+}

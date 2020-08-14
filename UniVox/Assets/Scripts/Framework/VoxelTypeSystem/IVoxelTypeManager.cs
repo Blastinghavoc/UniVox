@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace UniVox.Framework
 {
-    public interface IVoxelTypeManager:IDisposable
+    public interface IVoxelTypeManager : IDisposable
     {
         ushort LastVoxelID { get; }
 

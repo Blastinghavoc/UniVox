@@ -1,14 +1,11 @@
-﻿using System;
-using Unity.Collections;
+﻿using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
-using UniVox.Framework;
-using UniVox.Framework.Jobified;
 
 namespace Utils
 {
     public static class NativeExtensions
-    {      
+    {
 
         public static Vector3[] ToBasic(this float3[] arr)
         {

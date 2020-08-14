@@ -1,7 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
-using System;
-using System.Collections.Generic;
 using UniVox.Framework.ChunkPipeline;
 
 namespace UniVox.Framework
@@ -11,7 +8,7 @@ namespace UniVox.Framework
     /// The Component managing the operation of a Chunk GameObject
     /// </summary>
     [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider))]
-    public class ChunkComponent : MonoBehaviour, 
+    public class ChunkComponent : MonoBehaviour,
         IChunkComponent
     {
         public IChunkData Data { get; set; }
@@ -26,14 +23,14 @@ namespace UniVox.Framework
         public void Initialise(Vector3Int id, Vector3 position)
         {
             ChunkID = id;
-            this.name = $"Chunk ({id.x},{id.y},{id.z})";
+            name = $"Chunk ({id.x},{id.y},{id.z})";
             transform.position = position;
 
             SetRenderMesh(null);
             SetCollisionMesh(null);
         }
 
-        public Mesh GetRenderMesh() 
+        public Mesh GetRenderMesh()
         {
             return meshFilter.mesh;
         }
@@ -47,7 +44,7 @@ namespace UniVox.Framework
             }
             meshFilter.mesh = meshDesc.mesh;
             meshDescriptor = meshDesc;
-            if (meshDesc.materialsBySubmesh!=null)
+            if (meshDesc.materialsBySubmesh != null)
             {
                 meshRenderer.materials = meshDesc.materialsBySubmesh;
             }
@@ -80,7 +77,7 @@ namespace UniVox.Framework
         }
     }
 
-    public class MeshDescriptor 
+    public class MeshDescriptor
     {
         public Mesh mesh;
         public Material[] materialsBySubmesh;

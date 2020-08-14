@@ -24,7 +24,7 @@ namespace UniVox.Framework.Lighting
         public NativeQueue<int3> dynamicPropagationQueue { get; set; }
         public NativeQueue<int3> sunlightPropagationQueue { get; set; }
 
-        public void Dispose() 
+        public void Dispose()
         {
             sunlightFromBorder.Dispose();
             dynamicFromBorder.Dispose();

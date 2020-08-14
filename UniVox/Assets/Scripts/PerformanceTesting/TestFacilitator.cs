@@ -89,7 +89,7 @@ namespace PerformanceTesting
 
         private IEnumerator RunTests()
         {
-            VoxelPlayer player;            
+            VoxelPlayer player;
             GameObject managerObj;
             ChunkManager manager;
 
@@ -127,7 +127,7 @@ namespace PerformanceTesting
 
                             var fileName = $"{test.TestName}";
                             var completeFilePath = @testDirectory + @fileName + @FileExtension;
-                            using (StreamWriter log = new StreamWriter(@TestResultPath + @LogFileName + @FileExtension,true))
+                            using (StreamWriter log = new StreamWriter(@TestResultPath + @LogFileName + @FileExtension, true))
                             {
 
                                 var testRunIdentifier = $"{suiteName}\\{groupName}\\{fileName}\\{passDetails.TechniqueName}\\R{repeatIndex}";
@@ -148,7 +148,7 @@ namespace PerformanceTesting
                                 bool makeHeader = !filesWithHeader.Contains(completeFilePath);
 
                                 //Write outputs
-                                using (StreamWriter testResults = new StreamWriter(completeFilePath,true))
+                                using (StreamWriter testResults = new StreamWriter(completeFilePath, true))
                                 {
                                     WriteTestLog(log, test);
                                     WriteTestResults(testResults, test, makeHeader, passDetails.TechniqueName, repeatIndex);

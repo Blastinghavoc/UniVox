@@ -28,7 +28,7 @@ namespace UniVox.Implementations.ProcGen
 
         public void Execute()
         {
-            var adjustedSeed = (uint)seed;
+            var adjustedSeed = seed;
             adjustedSeed = adjustedSeed == 0 ? adjustedSeed + 1 : adjustedSeed;
             Random random = new Random(adjustedSeed);
 
@@ -38,13 +38,13 @@ namespace UniVox.Implementations.ProcGen
             }
 
 
-            var mapDimensions = new int2 (dimensions.x , dimensions.z);
+            var mapDimensions = new int2(dimensions.x, dimensions.z);
             int flatIndex = 0;
             for (int z = 0; z < dimensions.z; z++)
             {
                 for (int y = 0; y < dimensions.y; y++)
                 {
-                    for (int x = 0; x < dimensions.x; x++,flatIndex++)
+                    for (int x = 0; x < dimensions.x; x++, flatIndex++)
                     {
                         var mapIndex = MultiIndexToFlat(x, z, mapDimensions);
                         var worldPos = new float3(x, y, z) + chunkPosition;
@@ -62,7 +62,7 @@ namespace UniVox.Implementations.ProcGen
                             if (depth >= ore.settings.depthMin && depth <= ore.settings.depthMax)
                             {
                                 //try to generate ore from noise
-                                var noiseValue = ZeroToOne(noise.snoise(worldPos*ore.settings.noiseScale + offsets[i]));
+                                var noiseValue = ZeroToOne(noise.snoise(worldPos * ore.settings.noiseScale + offsets[i]));
                                 if (noiseValue < ore.settings.threshold)
                                 {
                                     chunkData[flatIndex] = ore.voxelType;

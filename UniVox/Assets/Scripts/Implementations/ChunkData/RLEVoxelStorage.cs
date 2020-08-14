@@ -19,7 +19,7 @@ namespace UniVox.Implementations.ChunkData
             base.InitialiseWithData(dimensions, initialData);
         }
 
-        private void InitialiseSelf(Vector3Int dimensions) 
+        private void InitialiseSelf(Vector3Int dimensions)
         {
             dx = dimensions.x;
             dxdy = dimensions.x * dimensions.y;

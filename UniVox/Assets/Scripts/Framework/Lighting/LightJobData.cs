@@ -19,7 +19,7 @@ namespace UniVox.Framework.Lighting
 
         [ReadOnly] public NeighbourData neighbourData;//neighbour voxel and light data
         [ReadOnly] public NativeArray<bool> directionsValid;//for each neighbour direction, has that chunk been fully generated yet
-               
+
 
         //Externally allocated and managed
         [ReadOnly] public NativeArray<int> voxelTypeToEmissionMap;
@@ -60,9 +60,10 @@ namespace UniVox.Framework.Lighting
         public NativeList<int3> east;
         public NativeList<int3> west;
 
-        public NativeList<int3> this[Direction dir] 
+        public NativeList<int3> this[Direction dir]
         {
-            get {
+            get
+            {
                 switch (dir)
                 {
                     case Direction.up:

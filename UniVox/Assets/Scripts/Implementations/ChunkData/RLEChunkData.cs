@@ -1,5 +1,4 @@
-﻿using System;
-using Unity.Collections;
+﻿using Unity.Collections;
 using UnityEngine;
 using UniVox.Framework;
 using Utils;
@@ -15,7 +14,7 @@ namespace UniVox.Implementations.ChunkData
         {
             if (initialData != null)
             {
-                rle = new RLEArray<VoxelTypeID>(chunkDimensions,initialData);
+                rle = new RLEArray<VoxelTypeID>(chunkDimensions, initialData);
             }
             else
             {
@@ -26,7 +25,7 @@ namespace UniVox.Implementations.ChunkData
 
         protected override VoxelTypeID GetVoxelID(int x, int y, int z)
         {
-            return rle.Get(MultiIndexToFlat(x,y,z,Dimensions.x,dxdy));
+            return rle.Get(MultiIndexToFlat(x, y, z, Dimensions.x, dxdy));
         }
 
         protected override void SetVoxelID(int x, int y, int z, VoxelTypeID voxel)

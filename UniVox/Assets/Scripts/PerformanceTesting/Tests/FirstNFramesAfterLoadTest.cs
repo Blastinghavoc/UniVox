@@ -1,10 +1,5 @@
 ﻿using System.Collections;
 using System.Linq;
-using UniVox.Framework;
-using System.Text;
-using UnityEditor;
-using System.Collections.Generic;
-using UnityEngine.Profiling;
 
 namespace PerformanceTesting
 {

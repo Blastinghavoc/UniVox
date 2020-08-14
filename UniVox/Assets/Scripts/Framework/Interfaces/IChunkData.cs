@@ -1,8 +1,5 @@
-﻿using UnityEngine;
-using System.Collections;
-using System;
-using Unity.Collections;
-using System.Collections.Generic;
+﻿using Unity.Collections;
+using UnityEngine;
 using UniVox.Framework.Common;
 using UniVox.Framework.Lighting;
 using UniVox.Framework.Serialisation;
@@ -13,7 +10,7 @@ namespace UniVox.Framework
     /// <summary>
     /// The data representation of a Chunk
     /// </summary>
-    public interface IChunkData: ISaveable
+    public interface IChunkData : ISaveable
     {
         Vector3Int ChunkID { get; set; }
 
@@ -49,7 +46,7 @@ namespace UniVox.Framework
         LightValue GetLight(int x, int y, int z);
         LightValue GetLight(Vector3Int pos);
         void SetLight(int x, int y, int z, LightValue lightValue);
-        void SetLight(Vector3Int pos,LightValue lightValue);
+        void SetLight(Vector3Int pos, LightValue lightValue);
         NativeArray<LightValue> LightToNative(Allocator allocator = Allocator.Persistent);
         void SetLightMap(LightValue[] lights);
     }

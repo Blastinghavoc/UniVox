@@ -9,7 +9,7 @@ using static Utils.Helpers;
 
 namespace UniVox.Framework
 {
-    public struct NativeChunkData 
+    public struct NativeChunkData
     {
         public NativeArray<VoxelTypeID> voxelTypes;
         public NativeHashMap<int, VoxelRotation> rotationData;
@@ -17,7 +17,7 @@ namespace UniVox.Framework
     }
 
     //TODO remove if not doing job-based structure gen. Otherwise, reorder to be consistent with DiagonalDirections enum
-    public struct NativeChunkNeighbourhood 
+    public struct NativeChunkNeighbourhood
     {
         public NativeChunkData up;
         public NativeChunkData down;
@@ -56,24 +56,27 @@ namespace UniVox.Framework
 
         private Func<Vector3Int, IChunkData> getData;
 
-        public VoxelTypeID this[int x, int y, int z] {
-            get {
+        public VoxelTypeID this[int x, int y, int z]
+        {
+            get
+            {
                 var chunkData = extendedIndex(ref x, ref y, ref z);
                 return chunkData[x, y, z];
             }
-            set {
+            set
+            {
                 var chunkData = extendedIndex(ref x, ref y, ref z);
                 chunkData[x, y, z] = value;
             }
         }
 
-        public VoxelTypeID GetVoxel(int x, int y, int z) 
+        public VoxelTypeID GetVoxel(int x, int y, int z)
         {
             var chunkData = extendedIndex(ref x, ref y, ref z);
             return chunkData[x, y, z];
         }
 
-        public void SetVoxel(int x, int y, int z,VoxelTypeID value)
+        public void SetVoxel(int x, int y, int z, VoxelTypeID value)
         {
             var chunkData = extendedIndex(ref x, ref y, ref z);
             chunkData[x, y, z] = value;
@@ -82,25 +85,25 @@ namespace UniVox.Framework
         public LightValue GetLight(int x, int y, int z)
         {
             var chunkData = extendedIndex(ref x, ref y, ref z);
-            return chunkData.GetLight(x,y,z);
+            return chunkData.GetLight(x, y, z);
         }
 
         public void SetLight(int x, int y, int z, LightValue value)
         {
             var chunkData = extendedIndex(ref x, ref y, ref z);
-            chunkData.SetLight(x,y,z,value);
+            chunkData.SetLight(x, y, z, value);
         }
 
-        public void SetIfUnoccupied(int x, int y, int z,VoxelTypeID typeID) 
+        public void SetIfUnoccupied(int x, int y, int z, VoxelTypeID typeID)
         {
-            var chunkData = extendedIndex(ref x,ref y,ref z);
-            if (chunkData[x,y,z] == VoxelTypeID.AIR_ID)
+            var chunkData = extendedIndex(ref x, ref y, ref z);
+            if (chunkData[x, y, z] == VoxelTypeID.AIR_ID)
             {
                 chunkData[x, y, z] = typeID;
             }
         }
 
-        public ChunkNeighbourhood(IChunkData center, Func<Vector3Int, IChunkData> getData) 
+        public ChunkNeighbourhood(IChunkData center, Func<Vector3Int, IChunkData> getData)
         {
             data = new Dictionary<Vector3Int, IChunkData>();
             this.center = center;
@@ -132,7 +135,7 @@ namespace UniVox.Framework
             Profiler.EndSample();
         }
 
-        public List<Vector3Int> GetAllUsedNeighbourIds() 
+        public List<Vector3Int> GetAllUsedNeighbourIds()
         {
             return data.Keys.ToList();
         }
@@ -183,7 +186,7 @@ namespace UniVox.Framework
             return ChunkId;
         }
 
-        public IChunkData GetChunkData(Vector3Int chunkId) 
+        public IChunkData GetChunkData(Vector3Int chunkId)
         {
             if (chunkId != center.ChunkID)
             {
@@ -201,13 +204,13 @@ namespace UniVox.Framework
             return center;
         }
 
-        private IChunkData extendedIndex(ref int x,ref int y,ref int z) 
+        private IChunkData extendedIndex(ref int x, ref int y, ref int z)
         {
             var ChunkId = extendedIndexChunkId(ref x, ref y, ref z);
 
-            if (ChunkId!= center.ChunkID)
+            if (ChunkId != center.ChunkID)
             {
-                if (data.TryGetValue(ChunkId,out var chunkData))
+                if (data.TryGetValue(ChunkId, out var chunkData))
                 {
                     return chunkData;
                 }

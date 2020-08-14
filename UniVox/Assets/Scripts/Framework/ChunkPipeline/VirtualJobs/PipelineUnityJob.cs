@@ -1,7 +1,6 @@
 ﻿using System;
 using Unity.Jobs;
 using UnityEngine.Profiling;
-using UniVox.Framework.Jobified;
 
 namespace UniVox.Framework.ChunkPipeline.VirtualJobs
 {
@@ -11,10 +10,13 @@ namespace UniVox.Framework.ChunkPipeline.VirtualJobs
     public class PipelineUnityJob<T> : AbstractPipelineJob<T>
     {
         private JobHandle handle;
-        private Func<T> cleanup ;
+        private Func<T> cleanup;
 
         private bool cleanedUp = false;
-        public override bool Done { get {
+        public override bool Done
+        {
+            get
+            {
                 Profiler.BeginSample("handleIsCompleted");
                 if (handle.IsCompleted)
                 {
@@ -29,8 +31,8 @@ namespace UniVox.Framework.ChunkPipeline.VirtualJobs
                 {
                     Profiler.EndSample();
                 }
-                return false; 
-            } 
+                return false;
+            }
         }
 
         /// <summary>

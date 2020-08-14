@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
-using UniVox.Framework;
+﻿using UniVox.Framework;
 
 namespace UniVox.Gameplay.Inventory
 {

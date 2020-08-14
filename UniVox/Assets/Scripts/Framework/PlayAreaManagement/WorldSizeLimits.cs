@@ -3,7 +3,7 @@
 namespace UniVox.Framework.PlayAreaManagement
 {
     [System.Serializable]
-    public class WorldSizeLimits 
+    public class WorldSizeLimits
     {
         //Should the world height be limited (like minecraft)
         [SerializeField] private bool limitWorldHeight = false;
@@ -20,14 +20,14 @@ namespace UniVox.Framework.PlayAreaManagement
         public int MaxChunkY { get; private set; }
         public int MinChunkY { get; private set; }
         public int HeightLimit { get => verticalChunkLimit; }
-        public void Initalise() 
+        public void Initalise()
         {
             //Set up world height limits
             MaxChunkY = limitWorldHeight ? verticalChunkLimit - 1 : int.MaxValue;
             MinChunkY = limitWorldHeight ? -verticalChunkLimit : int.MinValue;
         }
 
-        public bool ChunkOutsideVerticalLimits(Vector3Int chunkID) 
+        public bool ChunkOutsideVerticalLimits(Vector3Int chunkID)
         {
             return chunkID.y > MaxChunkY || chunkID.y < MinChunkY;
         }

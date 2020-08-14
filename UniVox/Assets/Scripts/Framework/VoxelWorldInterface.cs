@@ -1,11 +1,7 @@
-﻿using UnityEngine;
-using System.Collections;
-using System;
-using UnityEngine.UIElements;
-using PerformanceTesting;
-using UniVox.UI;
+﻿using PerformanceTesting;
+using UnityEngine;
 using UniVox.Framework.Lighting;
-using UniVox.Gameplay.Inventory;
+using UniVox.UI;
 
 namespace UniVox.Framework
 {
@@ -13,7 +9,7 @@ namespace UniVox.Framework
     /// <summary>
     /// Global interface to the voxel world to be accessed by gameplay scripts
     /// </summary>
-    public class VoxelWorldInterface : MonoBehaviour,IDebugWorld
+    public class VoxelWorldInterface : MonoBehaviour, IDebugWorld
     {
         protected ITestableChunkManager chunkManager;
         protected VoxelTypeManager voxelTypeManager;
@@ -24,7 +20,7 @@ namespace UniVox.Framework
             this.voxelTypeManager = voxelTypeManager;
         }
 
-        public void PlaceVoxel(Vector3 position, SOVoxelTypeDefinition voxelType,VoxelRotation rotation = default)
+        public void PlaceVoxel(Vector3 position, SOVoxelTypeDefinition voxelType, VoxelRotation rotation = default)
         {
             if (voxelType == null)
             {
@@ -33,7 +29,7 @@ namespace UniVox.Framework
 
             bool replaceExisting = false;
             SOVoxelTypeDefinition existingVoxelType;
-            if (TryGetVoxelType(position, out existingVoxelType) && existingVoxelType != null) 
+            if (TryGetVoxelType(position, out existingVoxelType) && existingVoxelType != null)
             {
                 replaceExisting = existingVoxelType.isReplaceable;
             }
@@ -46,7 +42,7 @@ namespace UniVox.Framework
                 }
                 else
                 {
-                    chunkManager.TrySetVoxel(position, voxelTypeManager.GetId(voxelType),overrideExisting:replaceExisting);
+                    chunkManager.TrySetVoxel(position, voxelTypeManager.GetId(voxelType), overrideExisting: replaceExisting);
                 }
             }
             else
@@ -55,7 +51,7 @@ namespace UniVox.Framework
                 {
                     Debug.Log($"Placed voxel {voxelType.DisplayName} with rotation x:{rotation.x}, y:{rotation.y}, z{rotation.z}");
 
-                    chunkManager.TrySetVoxel(position, voxelTypeManager.GetId(voxelType),rotation,replaceExisting);
+                    chunkManager.TrySetVoxel(position, voxelTypeManager.GetId(voxelType), rotation, replaceExisting);
                 }
                 else
                 {
@@ -66,7 +62,7 @@ namespace UniVox.Framework
 
         public void RemoveVoxel(Vector3 position)
         {
-            chunkManager.TrySetVoxel(position, (VoxelTypeID)VoxelTypeID.AIR_ID,default, true);
+            chunkManager.TrySetVoxel(position, (VoxelTypeID)VoxelTypeID.AIR_ID, default, true);
         }
 
         public Vector3 CenterOfVoxelAt(Vector3 position)
@@ -74,10 +70,10 @@ namespace UniVox.Framework
             return chunkManager.SnapToVoxelCenter(position);
         }
 
-        public bool TryGetVoxelType(Vector3 position,out SOVoxelTypeDefinition voxelType) 
+        public bool TryGetVoxelType(Vector3 position, out SOVoxelTypeDefinition voxelType)
         {
             voxelType = null;
-            if (chunkManager.TryGetVoxel(position,out var voxelID))
+            if (chunkManager.TryGetVoxel(position, out var voxelID))
             {
                 voxelType = voxelTypeManager.GetDefinition(voxelID);
                 return true;
@@ -85,7 +81,7 @@ namespace UniVox.Framework
             return false;
         }
 
-        public bool TryGetVoxelTypeAndID(Vector3 position, out SOVoxelTypeDefinition voxelType,out VoxelTypeID voxelID) 
+        public bool TryGetVoxelTypeAndID(Vector3 position, out SOVoxelTypeDefinition voxelType, out VoxelTypeID voxelID)
         {
             if (chunkManager.TryGetVoxel(position, out voxelID))
             {
@@ -97,12 +93,12 @@ namespace UniVox.Framework
             return false;
         }
 
-        public bool TryGetLightLevel(Vector3 position,out LightValue lightValue) 
+        public bool TryGetLightLevel(Vector3 position, out LightValue lightValue)
         {
             return chunkManager.TryGetLightLevel(position, out lightValue);
         }
 
-        public Vector3Int WorldToChunkPosition(Vector3 pos) 
+        public Vector3Int WorldToChunkPosition(Vector3 pos)
         {
             return chunkManager.WorldToChunkPosition(pos);
         }
@@ -112,12 +108,12 @@ namespace UniVox.Framework
             return chunkManager.GetPipelineStatus();
         }
 
-        public void GetPlayAreaProcessingStatus(out int waitingForUpdate) 
+        public void GetPlayAreaProcessingStatus(out int waitingForUpdate)
         {
             waitingForUpdate = chunkManager.PlayArea.ProcessesQueued;
         }
 
-        public bool IsChunkComplete(Vector3Int chunkId) 
+        public bool IsChunkComplete(Vector3Int chunkId)
         {
             return chunkManager.IsChunkComplete(chunkId);
         }

@@ -17,7 +17,7 @@ namespace UniVox.Implementations.ChunkData
             }
             else
             {
-                octree = new OctreeVoxelStorage(chunkDimensions,initialData);                
+                octree = new OctreeVoxelStorage(chunkDimensions, initialData);
             }
         }
 

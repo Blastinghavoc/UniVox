@@ -3,7 +3,7 @@ using Unity.Mathematics;
 
 namespace Utils.Noise
 {
-    public static class Helpers 
+    public static class Helpers
     {
         /// <summary>
         /// Transform a noise value from the -1->1 range that the noise functions

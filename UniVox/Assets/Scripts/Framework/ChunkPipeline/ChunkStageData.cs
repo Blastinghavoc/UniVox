@@ -13,5 +13,5 @@
         {
             return $"min {minStage}, max {maxStage}, targ {targetStage}, wip {WorkInProgress}";
         }
-    }    
+    }
 }

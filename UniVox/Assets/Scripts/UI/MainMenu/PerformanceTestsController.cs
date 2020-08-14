@@ -1,10 +1,8 @@
-﻿using Newtonsoft.Json.Bson;
-using PerformanceTesting;
+﻿using PerformanceTesting;
 using System.IO;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using UniVox.Framework.Serialisation;
 using UniVox.MessagePassing;
 
 namespace UniVox.UI
@@ -63,7 +61,7 @@ namespace UniVox.UI
             UpdateRunButtonState();
         }
 
-        public void OnNumRepeatsChanged(string value)         
+        public void OnNumRepeatsChanged(string value)
         {
             numRepeatsEmpty = string.IsNullOrEmpty(value);
             if (!numRepeatsEmpty)
@@ -76,20 +74,20 @@ namespace UniVox.UI
 
         private void UpdateRunButtonState()
         {
-            runButton.interactable = !filePathEmpty && 
-                IsFilePathValid() && 
-                suitesList.TryGetSelected(out var _)&&
+            runButton.interactable = !filePathEmpty &&
+                IsFilePathValid() &&
+                suitesList.TryGetSelected(out var _) &&
                 !numRepeatsEmpty;
         }
 
-        private bool IsFilePathValid() 
+        private bool IsFilePathValid()
         {
             bool valid = false;
             try
             {
                 if (Directory.Exists(filePath))
                 {
-                    if (filePath.EndsWith(@"\")||filePath.EndsWith("/"))
+                    if (filePath.EndsWith(@"\") || filePath.EndsWith("/"))
                     {
                         valid = true;
                     }
@@ -102,8 +100,10 @@ namespace UniVox.UI
         }
 
         public void OnRunClicked()
-        {         
-            SceneMessagePasser.SetMessage(new PerformanceTestParametersMessage() { filepath = filePath,
+        {
+            SceneMessagePasser.SetMessage(new PerformanceTestParametersMessage()
+            {
+                filepath = filePath,
                 selectedTestSuiteNames = suitesList.GetAllSelected(),
                 numRepeats = numRepeats
             });

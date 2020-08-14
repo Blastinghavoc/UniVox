@@ -7,7 +7,7 @@ namespace UniVox.Implementations.ProcGen
     [CreateAssetMenu(menuName = "UniVox/TreeDefinition")]
     public class SOTreeDefinition : ScriptableObject
     {
-        [Range(1,15)]
+        [Range(1, 15)]
         public int maxHeight;
         [Range(1, 15)]
         public int minHeight;
@@ -20,14 +20,14 @@ namespace UniVox.Implementations.ProcGen
         public SOVoxelTypeDefinition logType;
 
         public treeStyle Style;
-        public enum treeStyle 
-        { 
+        public enum treeStyle
+        {
             oak,
             spruce,
             cactus
         }
 
-        public NativeTreeDefinition ToNative(VoxelTypeManager typeManager) 
+        public NativeTreeDefinition ToNative(VoxelTypeManager typeManager)
         {
             NativeTreeDefinition def = new NativeTreeDefinition();
             def.maxHeight = maxHeight;
@@ -40,7 +40,7 @@ namespace UniVox.Implementations.ProcGen
         }
     }
 
-    public struct NativeTreeDefinition 
+    public struct NativeTreeDefinition
     {
         public int maxHeight;
         public int minHeight;

@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UniVox.Framework;
+using UniVox.Implementations.ChunkData;
 using UniVox.Implementations.Meshers;
 using UniVox.Implementations.Providers;
-using UniVox.Implementations.ChunkData;
 
 namespace PerformanceTesting
 {
@@ -15,7 +14,7 @@ namespace PerformanceTesting
     /// The individual tests should be added as components to the test suite
     /// game object
     /// </summary>
-    public abstract class AbstractTestSuite : MonoBehaviour 
+    public abstract class AbstractTestSuite : MonoBehaviour
     {
 
         public string SuiteName;
@@ -40,12 +39,12 @@ namespace PerformanceTesting
         /// <returns></returns>
         public abstract IEnumerable<PassDetails> Passes();
 
-        public void SetManagerForNextPass(ChunkManager managerForNextPass) 
+        public void SetManagerForNextPass(ChunkManager managerForNextPass)
         {
             chunkManager = managerForNextPass;
         }
 
-        protected void Clear() 
+        protected void Clear()
         {
             chunkManager = null;
             mesher = null;
@@ -59,8 +58,8 @@ namespace PerformanceTesting
         /// <typeparam name="Type"></typeparam>
         /// <typeparam name="SubType"></typeparam>
         /// <returns></returns>
-        protected SubType RemoveComponentsOfTypeExceptSubtype<Type,SubType>()
-            where Type: UnityEngine.Object where SubType: UnityEngine.Object
+        protected SubType RemoveComponentsOfTypeExceptSubtype<Type, SubType>()
+            where Type : UnityEngine.Object where SubType : UnityEngine.Object
         {
             Type[] components = chunkManager.gameObject.GetComponents<Type>();
 
@@ -119,7 +118,7 @@ namespace PerformanceTesting
             return DesiredObject;
         }
 
-        protected string GetTechniqueName() 
+        protected string GetTechniqueName()
         {
             string prefix = "";
             switch (mesher)
@@ -156,15 +155,15 @@ namespace PerformanceTesting
 
         }
 
-        protected virtual PassDetails EndPass(string groupName) 
-        { 
+        protected virtual PassDetails EndPass(string groupName)
+        {
             PassDetails details = new PassDetails() { GroupName = groupName, TechniqueName = GetTechniqueName() };
             Clear();
             return details;
         }
 
 
-        public class PassDetails 
+        public class PassDetails
         {
             public string GroupName;
             public string TechniqueName;

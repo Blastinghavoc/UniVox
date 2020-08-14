@@ -6,7 +6,6 @@ using Unity.Mathematics;
 using UniVox.Framework.Common;
 using UniVox.Framework.Lighting;
 using Utils;
-using static UniVox.Framework.VoxelTypeManager;
 
 namespace UniVox.Framework.Jobified
 {
@@ -264,9 +263,9 @@ namespace UniVox.Framework.Jobified
         [ReadOnly] public NativeArray<LightValue> northLight;
         [ReadOnly] public NativeArray<LightValue> southLight;
         [ReadOnly] public NativeArray<LightValue> eastLight;
-        [ReadOnly] public NativeArray<LightValue> westLight;        
+        [ReadOnly] public NativeArray<LightValue> westLight;
 
-        public NativeArray<VoxelTypeID> GetVoxels(Direction dir) 
+        public NativeArray<VoxelTypeID> GetVoxels(Direction dir)
         {
             switch (dir)
             {
@@ -287,7 +286,7 @@ namespace UniVox.Framework.Jobified
             }
         }
 
-        public NativeArray<LightValue> GetLightValues(Direction dir) 
+        public NativeArray<LightValue> GetLightValues(Direction dir)
         {
             switch (dir)
             {
@@ -388,7 +387,7 @@ namespace UniVox.Framework.Jobified
         /// the center chunk or one of the 6 neighbours.
         /// </summary>
         /// <param name="pos"></param>
-        public void AdjustLocalPos(ref int3 pos, out bool isInChunk, out Direction directionOfNeighbour,int3 dimensions)
+        public void AdjustLocalPos(ref int3 pos, out bool isInChunk, out Direction directionOfNeighbour, int3 dimensions)
         {
             isInChunk = true;
             directionOfNeighbour = new Direction();

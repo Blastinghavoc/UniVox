@@ -6,7 +6,7 @@ using UniVox.Framework.Common;
 namespace UniVox.Implementations.ProcGen
 {
     [BurstCompile]
-    public struct NativeBiomeDatabase 
+    public struct NativeBiomeDatabase
     {
         /// <summary>
         /// What to fill remaining space with after all layers in a biome
@@ -41,10 +41,10 @@ namespace UniVox.Implementations.ProcGen
         /// <param name="elevationPercentage"></param>
         /// <param name="moisturePercentage"></param>
         /// <returns></returns>
-        public int GetBiomeID(float elevationPercentage, float moisturePercentage) 
+        public int GetBiomeID(float elevationPercentage, float moisturePercentage)
         {
             //Simple linear search through elevation zones
-            StartEndRange moisturelevels = new StartEndRange() { start = 0, end = 0};
+            StartEndRange moisturelevels = new StartEndRange() { start = 0, end = 0 };
             for (int i = 0; i < allElevationZones.Length; i++)
             {
                 var zone = allElevationZones[i];
@@ -70,19 +70,19 @@ namespace UniVox.Implementations.ProcGen
         }
     }
 
-    public struct NativeVoxelRange 
+    public struct NativeVoxelRange
     {
         public ushort voxelID;
         public int depth;
     }
 
-    public struct NativeElevationZone 
+    public struct NativeElevationZone
     {
         public StartEndRange moistureLevels;
         public float maxElevationPercentage;
     }
 
-    public struct NativeBiomeMoistureDefinition 
+    public struct NativeBiomeMoistureDefinition
     {
         public int biomeID;
         public float maxMoisturePercentage;

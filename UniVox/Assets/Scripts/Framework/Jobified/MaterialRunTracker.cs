@@ -4,15 +4,15 @@ using Unity.Collections;
 namespace UniVox.Framework.Jobified
 {
     [BurstCompile]
-    public struct MaterialRunTracker 
+    public struct MaterialRunTracker
     {
         MaterialRun currentRun;
 
-        public void Update(ushort materialID, NativeList<MaterialRun> materialRuns, NativeList<int> allTriangleIndices) 
+        public void Update(ushort materialID, NativeList<MaterialRun> materialRuns, NativeList<int> allTriangleIndices)
         {
             if (materialID != currentRun.materialID)
             {
-                EndRun(materialRuns,allTriangleIndices);
+                EndRun(materialRuns, allTriangleIndices);
                 currentRun.materialID = materialID;
             }
         }
@@ -20,7 +20,7 @@ namespace UniVox.Framework.Jobified
         /// <summary>
         /// End the current run
         /// </summary>
-        public void EndRun(NativeList<MaterialRun> materialRuns, NativeList<int> allTriangleIndices) 
+        public void EndRun(NativeList<MaterialRun> materialRuns, NativeList<int> allTriangleIndices)
         {
             currentRun.range.end = allTriangleIndices.Length;
             materialRuns.Add(currentRun);

@@ -184,7 +184,7 @@ namespace UniVox.Framework.Lighting
         /// these chunks will pick up the information later if and when they become valid.
         /// </summary>
         /// <param name="coords"></param>
-        private void NotifyBordersOfUpdatedValue(int3 coords) 
+        private void NotifyBordersOfUpdatedValue(int3 coords)
         {
             for (int axis = 0; axis < 3; axis++)
             {
@@ -210,7 +210,7 @@ namespace UniVox.Framework.Lighting
                 {
                     lightsChangedOnBorder[(int)negativeAxisDirection] = true;
                 }
-                else if(coords[axis] == maxIndices[axis] && data.directionsValid[(int)positiveAxisDirection])
+                else if (coords[axis] == maxIndices[axis] && data.directionsValid[(int)positiveAxisDirection])
                 {
                     lightsChangedOnBorder[(int)positiveAxisDirection] = true;
                 }

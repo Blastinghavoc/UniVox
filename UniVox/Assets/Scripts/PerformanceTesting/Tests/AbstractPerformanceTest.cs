@@ -1,8 +1,6 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using UnityEngine.Events;
-using UnityEngine.Profiling;
+using UnityEngine;
 
 namespace PerformanceTesting
 {
@@ -10,7 +8,7 @@ namespace PerformanceTesting
     public abstract class AbstractPerformanceTest : MonoBehaviour, IPerformanceTest
     {
         [SerializeField] private string testName = "";
-        public string TestName { get =>testName; }
+        public string TestName { get => testName; }
 
         protected List<string> log;
 
@@ -48,7 +46,7 @@ namespace PerformanceTesting
         /// <summary>
         /// Clear memory used by the test
         /// </summary>
-        public void Clear() 
+        public void Clear()
         {
             ResetPerFrameCounters();
             ResetLog();

@@ -1,6 +1,6 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections;
 using System.Linq;
+using UnityEngine;
 
 namespace PerformanceTesting
 {
@@ -10,7 +10,7 @@ namespace PerformanceTesting
     /// </summary>
     public class TimeToLoadTest : AbstractPerformanceTest
     {
-        [Range(0,300)]
+        [Range(0, 300)]
         public int MaxRealTimeSeconds = 60;
         public override IEnumerator Run(ITestableChunkManager chunkManager)
         {

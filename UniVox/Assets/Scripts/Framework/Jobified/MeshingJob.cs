@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 using UniVox.Framework.Common;
-using UniVox.Framework.Lighting;
 using Utils;
 using static UniVox.Framework.Jobified.JobUtils;
 
@@ -17,7 +15,7 @@ namespace UniVox.Framework.Jobified
     [BurstCompile]
     public struct MeshingJob : IMeshingJob
     {
-        [ReadOnly] public bool cullfaces;       
+        [ReadOnly] public bool cullfaces;
         [ReadOnly] private const int numDirections = DirectionExtensions.numDirections;
         [ReadOnly] public NativeDirectionRotator directionHelper;
 
@@ -28,7 +26,7 @@ namespace UniVox.Framework.Jobified
         //Private temporaries
         private MaterialRunTracker runTracker;
 
-        public struct DoLater 
+        public struct DoLater
         {
             public int3 position;
             public ushort typeID;
@@ -49,7 +47,7 @@ namespace UniVox.Framework.Jobified
             //Dispose the data
             data.Dispose();
             nonCollidableQueue.Dispose();
-        }        
+        }
 
         public void Execute()
         {
@@ -86,7 +84,9 @@ namespace UniVox.Framework.Jobified
                             if (data.voxelTypeDatabase.voxelTypeToIsPassableMap[voxelTypeID])
                             {
                                 //Save non-collidable voxels for later, so that they appear contiguously in the mesh arrays
-                                nonCollidableQueue.Add(new DoLater() { position = new int3(x, y, z),
+                                nonCollidableQueue.Add(new DoLater()
+                                {
+                                    position = new int3(x, y, z),
                                     typeID = voxelTypeID,
                                     rotated = rotated,
                                     rotation = rotation
@@ -94,7 +94,7 @@ namespace UniVox.Framework.Jobified
                             }
                             else
                             {
-                                AddMeshDataForVoxel(voxelTypeID, new int3(x, y, z), rotated,rotation);
+                                AddMeshDataForVoxel(voxelTypeID, new int3(x, y, z), rotated, rotation);
                             }
                         }
 
@@ -111,13 +111,13 @@ namespace UniVox.Framework.Jobified
             for (int j = 0; j < nonCollidableQueue.Length; j++)
             {
                 var item = nonCollidableQueue[j];
-                AddMeshDataForVoxel(item.typeID, item.position, item.rotated,item.rotation);
+                AddMeshDataForVoxel(item.typeID, item.position, item.rotated, item.rotation);
             }
 
             runTracker.EndRun(data.materialRuns, data.allTriangleIndices);
         }
 
-        private void AdvanceRotatedIndex(ref int currentRotatedIndex) 
+        private void AdvanceRotatedIndex(ref int currentRotatedIndex)
         {
             var nextIndex = currentRotatedIndex + 1;
             if (nextIndex < data.rotatedVoxels.Length)
@@ -126,7 +126,7 @@ namespace UniVox.Framework.Jobified
             }
         }
 
-        private void AddMeshDataForVoxel(ushort id, int3 position, bool rotated,VoxelRotation rotation)
+        private void AddMeshDataForVoxel(ushort id, int3 position, bool rotated, VoxelRotation rotation)
         {
             var meshID = data.meshDatabase.voxelTypeToMeshTypeMap[id];
             var faceZRange = data.voxelTypeDatabase.voxelTypeToZIndicesRangeMap[id];
@@ -137,14 +137,14 @@ namespace UniVox.Framework.Jobified
             //Update the material run tracker
             runTracker.Update(materialID, data.materialRuns, data.allTriangleIndices);
 
-            
+
             if (rotated)
             {
                 //Add single rotated voxels data
                 for (byte dir = 0; dir < numDirections; dir++)
                 {
                     var rotatedDirection = (byte)directionHelper.GetDirectionAfterRotation((Direction)dir, rotation);
-                    var faceIsSolid = data.meshDatabase.isFaceSolid[meshRange.start + rotatedDirection];                    
+                    var faceIsSolid = data.meshDatabase.isFaceSolid[meshRange.start + rotatedDirection];
                     if (IncludeFace(id, position, rotatedDirection, faceIsSolid))
                     {
                         AddFaceRotated(meshID, data.voxelTypeDatabase.zIndicesPerFace[faceZRange.start + dir], dir, position, rotation);
@@ -157,7 +157,7 @@ namespace UniVox.Framework.Jobified
                 for (int dir = 0; dir < numDirections; dir++)
                 {
                     var faceIsSolid = data.meshDatabase.isFaceSolid[meshRange.start + dir];
-                    if (IncludeFace(id,position, dir,faceIsSolid))
+                    if (IncludeFace(id, position, dir, faceIsSolid))
                     {
                         AddFace(meshID, data.voxelTypeDatabase.zIndicesPerFace[faceZRange.start + dir], dir, position);
                     }
@@ -165,14 +165,14 @@ namespace UniVox.Framework.Jobified
             }
         }
 
-        private void AddFaceRotated(int meshID, float uvZ, int direction, int3 position, VoxelRotation rotation) 
+        private void AddFaceRotated(int meshID, float uvZ, int direction, int3 position, VoxelRotation rotation)
         {
             //Lighting
             Color vertexColourValue = new Color();
             if (data.includeLighting)
             {
                 var directionVector = directionHelper.DirectionVectors[direction];
-                var lightForFace = GetLightValue(position + directionVector,data.lights,data.dimensions,data.neighbourData);
+                var lightForFace = GetLightValue(position + directionVector, data.lights, data.dimensions, data.neighbourData);
                 vertexColourValue = lightForFace.ToVertexColour();
             }
 
@@ -191,7 +191,7 @@ namespace UniVox.Framework.Jobified
             for (int i = usedNodesSlice.start; i < usedNodesSlice.end; i++)
             {
                 var node = data.meshDatabase.allMeshNodes[i];
-                var rotatedVert = math.mul(rotationQuat, node.vertex-rotationOffset)+rotationOffset;
+                var rotatedVert = math.mul(rotationQuat, node.vertex - rotationOffset) + rotationOffset;
                 var adjustedVert = rotatedVert + position;
                 data.vertices.Add(adjustedVert);
 
@@ -260,14 +260,14 @@ namespace UniVox.Framework.Jobified
             if (data.meshDatabase.meshIdToIncludeBackfacesMap[meshID])
             {
                 //Generate backface by adding the triangle indices again in reverse
-                for (int i = relativeTrianglesSlice.end-1; i >= relativeTrianglesSlice.start; i--)
+                for (int i = relativeTrianglesSlice.end - 1; i >= relativeTrianglesSlice.start; i--)
                 {
                     data.allTriangleIndices.Add(data.meshDatabase.allRelativeTriangles[i] + currentIndex);
-                }                
+                }
             }
-        }        
+        }
 
-        private bool IncludeFace(ushort voxelID,int3 position, int directionIndex,bool faceIsSolid)
+        private bool IncludeFace(ushort voxelID, int3 position, int directionIndex, bool faceIsSolid)
         {
             if (!cullfaces)
             {
@@ -276,8 +276,8 @@ namespace UniVox.Framework.Jobified
             var directionVector = directionHelper.DirectionVectors[directionIndex];
             var adjacentVoxelIndex = position + directionVector;
 
-            var adjacentId = GetVoxel(adjacentVoxelIndex,data.voxels,data.dimensions,data.neighbourData);
-            return (voxelID!=adjacentId) && IncludeFaceOfAdjacentWithID(adjacentId, directionIndex);
+            var adjacentId = GetVoxel(adjacentVoxelIndex, data.voxels, data.dimensions, data.neighbourData);
+            return (voxelID != adjacentId) && IncludeFaceOfAdjacentWithID(adjacentId, directionIndex);
         }
 
         private bool IncludeFaceOfAdjacentWithID(ushort voxelTypeID, int direction)
@@ -301,7 +301,7 @@ namespace UniVox.Framework.Jobified
         }
         public JobHandle Schedule(JobHandle dependsOn = default)
         {
-            return IJobExtensions.Schedule(this,dependsOn);
+            return IJobExtensions.Schedule(this, dependsOn);
         }
     }
 
@@ -309,7 +309,7 @@ namespace UniVox.Framework.Jobified
     /// Struct describing where in each of the arrays (vertices, triangles,materials) the 
     /// collidable part of the mesh ends.
     /// </summary>
-    public struct CollisionSubmeshDescriptor: IDisposable 
+    public struct CollisionSubmeshDescriptor : IDisposable
     {
         //Single element arrays to be passed to later jobs
         public NativeArray<int> collisionMeshLengthVertices;
@@ -323,7 +323,7 @@ namespace UniVox.Framework.Jobified
             collisionMeshMaterialRunLength = new NativeArray<int>(1, allocator);
         }
 
-        public void Record(int verticesLength, int trianglesLength, int materialsLength) 
+        public void Record(int verticesLength, int trianglesLength, int materialsLength)
         {
             collisionMeshLengthVertices[0] = verticesLength;
             collisionMeshLengthTriangleIndices[0] = trianglesLength;

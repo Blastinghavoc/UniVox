@@ -1,10 +1,10 @@
-﻿using Utils.Noise;
-using static Utils.Noise.Helpers;
+﻿using Unity.Burst;
+using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
-using Unity.Collections;
-using Unity.Burst;
+using Utils.Noise;
 using static UniVox.Implementations.ProcGen.ChunkColumnNoiseMaps;
+using static Utils.Noise.Helpers;
 
 namespace UniVox.Implementations.ProcGen
 {
@@ -36,15 +36,15 @@ namespace UniVox.Implementations.ProcGen
 
         }
 
-        private void ComputeTreeMap(int3 dimensions) 
+        private void ComputeTreeMap(int3 dimensions)
         {
             int i = 0;
             for (int z = 0; z < dimensions.z; z++)
             {
-                for (int x = 0; x < dimensions.x; x++,i++)
+                for (int x = 0; x < dimensions.x; x++, i++)
                 {
-                    var samplePoint = new float2(x + chunkPositionXZ.x, z + chunkPositionXZ.y)* treeSettings.TreemapScale;
-                    var sample = treemapNoise.Sample(samplePoint); 
+                    var samplePoint = new float2(x + chunkPositionXZ.x, z + chunkPositionXZ.y) * treeSettings.TreemapScale;
+                    var sample = treemapNoise.Sample(samplePoint);
 
                     noiseMaps.treeMap[i] = sample;
                 }
@@ -126,7 +126,7 @@ namespace UniVox.Implementations.ProcGen
         public float CalculateHeightMapAt(float2 pos)
         {
 
-            float rawHeightmap = 
+            float rawHeightmap =
                 AdjustHeightMapNoiseValue(heightmapNoise.Sample(pos * worldSettings.HeightmapScale));
 
             //add the raw heightmap to the base ground height

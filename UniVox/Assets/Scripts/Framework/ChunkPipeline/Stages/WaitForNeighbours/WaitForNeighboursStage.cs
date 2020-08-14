@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Assertions;
 using UniVox.Framework.Common;
 
 namespace UniVox.Framework.ChunkPipeline.WaitForNeighbours
@@ -66,7 +65,7 @@ namespace UniVox.Framework.ChunkPipeline.WaitForNeighbours
         /// </summary>
         /// <param name="chunkId"></param>
         /// <param name="newTarget"></param>
-        private void WhenChunkTargetStageDecreased(Vector3Int chunkId, int newTarget) 
+        private void WhenChunkTargetStageDecreased(Vector3Int chunkId, int newTarget)
         {
             if (TerminateHereCondition(newTarget))
             {
@@ -111,15 +110,15 @@ namespace UniVox.Framework.ChunkPipeline.WaitForNeighbours
         /// </summary>
         /// <param name="chunkId"></param>
         /// <param name="newMinStage"></param>
-        private void WhenChunkMinStageDecreased(Vector3Int chunkId, int newMinStage) 
+        private void WhenChunkMinStageDecreased(Vector3Int chunkId, int newMinStage)
         {
             if (newMinStage < StageID)
-            {                
+            {
                 UpdateStatusOfNeighbours(chunkId, false);
             }
         }
 
-        public override void Add(Vector3Int incoming,ChunkStageData stageData)
+        public override void Add(Vector3Int incoming, ChunkStageData stageData)
         {
 
             if (!TerminateHereCondition(stageData))
@@ -131,8 +130,8 @@ namespace UniVox.Framework.ChunkPipeline.WaitForNeighbours
                     var incomingStatus = ComputeStatus(incoming);
                     neighbourStatuses.Add(incoming, incomingStatus);
 
-                    CheckIfWaitOver(incoming, incomingStatus); 
-                }                
+                    CheckIfWaitOver(incoming, incomingStatus);
+                }
             }
 
             if (stageData.minStage > prevStageId)
@@ -144,7 +143,7 @@ namespace UniVox.Framework.ChunkPipeline.WaitForNeighbours
                 UpdateStatusOfNeighbours(incoming, true);
             }
         }
-        
+
 
         private void UpdateStatusOfNeighbours(Vector3Int chunkId, bool operationIsAdd)
         {
@@ -163,7 +162,7 @@ namespace UniVox.Framework.ChunkPipeline.WaitForNeighbours
                         }
                         else
                         {
-                            neighbourStatus.RemoveNeighbour(directionFromNeighboursPerspective);                            
+                            neighbourStatus.RemoveNeighbour(directionFromNeighboursPerspective);
                         }
                     }
                     if (!operationIsAdd)
@@ -247,9 +246,9 @@ namespace UniVox.Framework.ChunkPipeline.WaitForNeighbours
 
             foreach (var item in waitEndedSet)
             {
-                if (neighbourStatuses.TryGetValue(item,out var status))
+                if (neighbourStatuses.TryGetValue(item, out var status))
                 {
-                    if (status.AllValid) 
+                    if (status.AllValid)
                     {
                         if (CheckAndResolvePreconditionsBeforeExit(item))
                         {
@@ -288,7 +287,7 @@ namespace UniVox.Framework.ChunkPipeline.WaitForNeighbours
             return true;
         }
 
-        
+
     }
 
 }

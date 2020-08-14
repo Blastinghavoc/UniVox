@@ -1,25 +1,24 @@
 ﻿using Unity.Collections;
 using UnityEngine;
-using UnityEngine.Assertions;
 using UniVox.Framework;
 using Utils;
 
 namespace UniVox.Implementations.ChunkData
 {
-    public class LazyChunkData<StorageImplementation> : AbstractChunkData, IChunkStorageOwner<VoxelTypeID> where StorageImplementation: IChunkStorageImplementation<VoxelTypeID>, new()
+    public class LazyChunkData<StorageImplementation> : AbstractChunkData, IChunkStorageOwner<VoxelTypeID> where StorageImplementation : IChunkStorageImplementation<VoxelTypeID>, new()
     {
         private IChunkStorageImplementation<VoxelTypeID> storage;
         public LazyChunkData(Vector3Int ID, Vector3Int chunkDimensions, VoxelTypeID[] initialData = null) : base(ID, chunkDimensions, initialData)
         {
-            
+
             if (initialData != null)
             {
                 storage = new StorageImplementation();
-                storage.InitialiseWithData(chunkDimensions,initialData);
+                storage.InitialiseWithData(chunkDimensions, initialData);
             }
             else
             {
-                storage = new LazyStorageImplementation<LazyChunkData<StorageImplementation>,VoxelTypeID>(this);
+                storage = new LazyStorageImplementation<LazyChunkData<StorageImplementation>, VoxelTypeID>(this);
             }
         }
 

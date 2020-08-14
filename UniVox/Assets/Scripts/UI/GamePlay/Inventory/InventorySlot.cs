@@ -7,7 +7,7 @@ using UniVox.Gameplay.Inventory;
 namespace UniVox.UI
 {
     [RequireComponent(typeof(Image))]
-    public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler,IPointerExitHandler
+    public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
     {
         [SerializeField] private Image image;
         private IInventorySystem inventorySystem;
@@ -42,8 +42,8 @@ namespace UniVox.UI
         }
 
         public void SetHighlight(Color color)
-        {            
-            image.color = color;            
+        {
+            image.color = color;
         }
 
         private void UpdateIconImage()

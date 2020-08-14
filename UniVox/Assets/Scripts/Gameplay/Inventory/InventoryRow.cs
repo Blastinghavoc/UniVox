@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UniVox.UI;
 
 namespace UniVox.Gameplay.Inventory
@@ -14,6 +12,6 @@ namespace UniVox.Gameplay.Inventory
         void Awake()
         {
             Slots = GetComponentsInChildren<InventorySlot>(true);
-        }        
+        }
     }
 }

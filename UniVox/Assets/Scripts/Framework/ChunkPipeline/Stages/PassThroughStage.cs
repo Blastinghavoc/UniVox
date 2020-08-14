@@ -1,7 +1,5 @@
 ﻿using System;
 using UnityEngine;
-using static UniVox.Framework.ChunkPipeline.ChunkPipelineManager;
-using static UniVox.Framework.ChunkPipeline.IPipelineStage;
 
 namespace UniVox.Framework.ChunkPipeline
 {
@@ -11,7 +9,7 @@ namespace UniVox.Framework.ChunkPipeline
     /// is free for them. If either condition is violated, the chunk terminates here.
     /// </summary>
     public class PassThroughStage : AbstractPipelineStage
-    {       
+    {
         /// <summary>
         /// Passthrough stage never contains anything
         /// </summary>
@@ -20,9 +18,9 @@ namespace UniVox.Framework.ChunkPipeline
         /// <summary>
         /// Passthrough stage does not limit the number of items that can be added to it.
         /// </summary>
-        public override int EntryLimit { get => int.MaxValue; }        
+        public override int EntryLimit { get => int.MaxValue; }
 
-        public PassThroughStage(string name, int stageId,IChunkPipeline pipeline):base(name,stageId,pipeline)
+        public PassThroughStage(string name, int stageId, IChunkPipeline pipeline) : base(name, stageId, pipeline)
         {
         }
 
@@ -57,7 +55,7 @@ namespace UniVox.Framework.ChunkPipeline
     public class PassThroughApplyFunctionStage : PassThroughStage
     {
         Action<Vector3Int> func;
-        public PassThroughApplyFunctionStage(string name, int stageId, IChunkPipeline pipeline,Action<Vector3Int> func) : base(name, stageId, pipeline)
+        public PassThroughApplyFunctionStage(string name, int stageId, IChunkPipeline pipeline, Action<Vector3Int> func) : base(name, stageId, pipeline)
         {
             this.func = func;
         }

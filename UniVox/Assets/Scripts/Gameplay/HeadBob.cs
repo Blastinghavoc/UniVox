@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityStandardAssets.Characters.FirstPerson;
 using UnityStandardAssets.Utility;
 
 namespace UniVox.Gameplay

@@ -1,15 +1,10 @@
-﻿using System;
-using Unity.Collections;
-using UnityEngine;
-using UnityEngine.Profiling;
+﻿using Unity.Collections;
 using UniVox.Framework;
-using UniVox.Framework.ChunkPipeline.VirtualJobs;
 using UniVox.Framework.Jobified;
-using Utils;
 
 namespace UniVox.Implementations.Meshers
 {
-    public class GreedyMesher : AbstractMesherComponent 
+    public class GreedyMesher : AbstractMesherComponent
     {
         public override void Initialise(VoxelTypeManager voxelTypeManager, IChunkManager chunkManager, FrameworkEventManager eventManager)
         {
@@ -28,8 +23,8 @@ namespace UniVox.Implementations.Meshers
             var size = data.dimensions.x;
             job.maskPositive = new NativeArray<GreedyMeshingJob.FaceDescriptor>((size + 1) * (size + 1), Allocator.Persistent);
             job.maskNegative = new NativeArray<GreedyMeshingJob.FaceDescriptor>((size + 1) * (size + 1), Allocator.Persistent);
-            
+
             return job;
-        }        
+        }
     }
 }

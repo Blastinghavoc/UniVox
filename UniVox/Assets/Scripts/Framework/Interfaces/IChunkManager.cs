@@ -22,8 +22,8 @@ namespace UniVox.Framework
 
         void Initialise();
 
-        bool TrySetVoxel(Vector3 worldPos, VoxelTypeID voxelTypeID,VoxelRotation voxelRotation = default, bool overrideExisting = false);
-        bool TryGetVoxel(Vector3 worldPos,out VoxelTypeID voxelTypeID);
+        bool TrySetVoxel(Vector3 worldPos, VoxelTypeID voxelTypeID, VoxelRotation voxelRotation = default, bool overrideExisting = false);
+        bool TryGetVoxel(Vector3 worldPos, out VoxelTypeID voxelTypeID);
         bool TryGetVoxel(Vector3Int chunkID, Vector3Int localVoxelIndex, out VoxelTypeID voxelTypeID);
 
         bool TryGetLightLevel(Vector3 worldPos, out LightValue lightValue);
@@ -50,7 +50,7 @@ namespace UniVox.Framework
 
 
         bool IsChunkComplete(Vector3Int chunkId);
-        void SetTargetStageOfChunk(Vector3Int chunkID, int targetStage,TargetUpdateMode updateMode = TargetUpdateMode.any);
+        void SetTargetStageOfChunk(Vector3Int chunkID, int targetStage, TargetUpdateMode updateMode = TargetUpdateMode.any);
         bool TryDeactivateChunk(Vector3Int chunkID);
         Vector3Int[] GetAllLoadedChunkIds();
         bool IsChunkFullyGenerated(Vector3Int chunkId);

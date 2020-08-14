@@ -9,25 +9,26 @@ namespace UniVox.Framework
     /// </summary>
     [BurstCompile]
     [Serializable]
-    public struct VoxelRotation: IEquatable<VoxelRotation> 
+    public struct VoxelRotation : IEquatable<VoxelRotation>
     {
         //first 6 bits encode values 00xxyyzz
         private byte val;
 
         //Rotation around X axis
-        public int x { get => (val>>4)&0x3; set => val = (byte)((val & 0xF) | value << 4); }
+        public int x { get => (val >> 4) & 0x3; set => val = (byte)((val & 0xF) | value << 4); }
 
         //Rotation around Y axis
-        public int y { get => (val>>2)&0x3; set => val = (byte)((val & 0x33) | value << 2); }
+        public int y { get => (val >> 2) & 0x3; set => val = (byte)((val & 0x33) | value << 2); }
 
         //Rotation around Z axis
         public int z { get => val & 0x3; set => val = (byte)((val & 0x3C) | value); }
 
         public bool isBlank { get => (val & 0x3F) == 0; }
 
-        public int this[int axis] 
+        public int this[int axis]
         {
-            get {
+            get
+            {
                 switch (axis)
                 {
                     case 0:
@@ -41,7 +42,7 @@ namespace UniVox.Framework
                 }
             }
 
-            set 
+            set
             {
                 switch (axis)
                 {
@@ -70,7 +71,7 @@ namespace UniVox.Framework
             return $"({x},{y},{z})";
         }
 
-        public VoxelRotation Inverse() 
+        public VoxelRotation Inverse()
         {
             VoxelRotation rot = this;
             rot.x = (4 - x) % 4;
@@ -79,6 +80,6 @@ namespace UniVox.Framework
             return rot;
         }
     }
-    
+
 
 }

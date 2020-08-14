@@ -14,12 +14,12 @@ namespace Utils
     public static class Helpers
     {
         #region 3D index flattening
-        public static int MultiIndexToFlat(int x, int y, int z,Vector3Int dimensions)
+        public static int MultiIndexToFlat(int x, int y, int z, Vector3Int dimensions)
         {
-            return MultiIndexToFlat(x, y, z, dimensions.x,dimensions.x*dimensions.y);
+            return MultiIndexToFlat(x, y, z, dimensions.x, dimensions.x * dimensions.y);
         }
 
-        public static void FlatIndexToMulti(int flat,Vector3Int dimensions,out int x,out int y, out int z) 
+        public static void FlatIndexToMulti(int flat, Vector3Int dimensions, out int x, out int y, out int z)
         {
             FlatIndexToMulti(flat, new int3(dimensions.x, dimensions.y, dimensions.z), out x, out y, out z);
         }
@@ -39,9 +39,9 @@ namespace Utils
         /// <param name="dxdy"></param>
         /// <returns></returns>
         [BurstCompile]
-        public static int MultiIndexToFlat(int x, int y, int z, int dx, int dxdy) 
+        public static int MultiIndexToFlat(int x, int y, int z, int dx, int dxdy)
         {
-            return x + dx*y + dxdy * z;
+            return x + dx * y + dxdy * z;
         }
 
         [BurstCompile]
@@ -71,19 +71,19 @@ namespace Utils
         }
 
         [BurstCompile]
-        public static int MultiIndexToFlat(int x,int y,int2 dimensions) 
+        public static int MultiIndexToFlat(int x, int y, int2 dimensions)
         {
             return x + dimensions.x * y;
         }
 
-        public static void FlatIndexToMulti(int flat,int2 dimensions,out int x, out int y) 
+        public static void FlatIndexToMulti(int flat, int2 dimensions, out int x, out int y)
         {
             y = flat / dimensions.x;
             x = flat % dimensions.x;
         }
         #endregion
 
-        public static T[,,] Expand<T>(this T[] flat, Vector3Int dimensions) 
+        public static T[,,] Expand<T>(this T[] flat, Vector3Int dimensions)
         {
             var result = new T[dimensions.x, dimensions.y, dimensions.z];
             int i = 0;
@@ -102,7 +102,7 @@ namespace Utils
             return result;
         }
 
-        public static T[] Flatten<T>(this T[,,] threeD) 
+        public static T[] Flatten<T>(this T[,,] threeD)
         {
             var dimensions = new Vector3Int(threeD.GetLength(0), threeD.GetLength(1), threeD.GetLength(2));
             var result = new T[threeD.Length];
@@ -174,7 +174,7 @@ namespace Utils
         }
 
 
-        public static IEnumerable<Vector3Int> CuboidalArea(Vector3Int center, Vector3Int endRadii) 
+        public static IEnumerable<Vector3Int> CuboidalArea(Vector3Int center, Vector3Int endRadii)
         {
             for (int x = 0; x <= endRadii.x; x++)
             {
@@ -238,7 +238,7 @@ namespace Utils
 
                     for (int z = 0; z <= endRadii.z; z++)
                     {
-                        foreach (var point in AllPointsOfSymmetry3D(center,x,y,z))
+                        foreach (var point in AllPointsOfSymmetry3D(center, x, y, z))
                         {
                             yield return point;
                         }
@@ -254,7 +254,7 @@ namespace Utils
         /// <param name="cuboidCenter"></param>
         /// <param name="cuboidRadii"></param>
         /// <returns></returns>
-        public static bool InsideCuboid(Vector3Int point, Vector3Int cuboidCenter, Vector3Int cuboidRadii) 
+        public static bool InsideCuboid(Vector3Int point, Vector3Int cuboidCenter, Vector3Int cuboidRadii)
         {
             var displacementFromCenter = point - cuboidCenter;
             var absDisplacement = displacementFromCenter.ElementWise(Mathf.Abs);
@@ -262,7 +262,7 @@ namespace Utils
             return absDisplacement.All((a, b) => a <= b, cuboidRadii);
         }
 
-        private static IEnumerable<Vector3Int> AllPointsOfSymmetry3D(Vector3Int center,int x, int y, int z) 
+        private static IEnumerable<Vector3Int> AllPointsOfSymmetry3D(Vector3Int center, int x, int y, int z)
         {
             //By symmetry we have the points in all 8 3d octants
             yield return new Vector3Int(x + center.x, y + center.y, z + center.z);
@@ -302,19 +302,19 @@ namespace Utils
             }
         }
 
-        public static void Swap<T>(ref T v1, ref T v2) 
+        public static void Swap<T>(ref T v1, ref T v2)
         {
             var tmp = v1;
             v1 = v2;
             v2 = tmp;
         }
 
-        public static bool SameSign(int a, int b) 
+        public static bool SameSign(int a, int b)
         {
             return (a ^ b) >= 0;//Bitwise xor
         }
 
-        public static string ArrayToString<T>(this T[] arr) 
+        public static string ArrayToString<T>(this T[] arr)
         {
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < arr.Length; i++)
@@ -355,7 +355,7 @@ namespace Utils
                     throw new ArgumentException($"direction {dir} was not recognised");
             }
 
-          
+
             for (int z = zRange.start; z < zRange.end; z++)
             {
                 for (int y = yRange.start; y < yRange.end; y++)
@@ -368,16 +368,16 @@ namespace Utils
             }
         }
 
-        public static void AdjustForBounds(ref Vector3Int localPos,ref Vector3Int chunkId,Vector3Int chunkDimensions)
+        public static void AdjustForBounds(ref Vector3Int localPos, ref Vector3Int chunkId, Vector3Int chunkDimensions)
         {
             //Result is elementwise integer division by the Chunk dimensions
-            var offset = localPos.ElementWise((a, b) => Mathf.FloorToInt(a/(float)b), chunkDimensions);
+            var offset = localPos.ElementWise((a, b) => Mathf.FloorToInt(a / (float)b), chunkDimensions);
             chunkId += offset;
 
-            localPos = ModuloChunkDimensions(localPos,chunkDimensions);
+            localPos = ModuloChunkDimensions(localPos, chunkDimensions);
         }
 
-        public static Vector3Int ModuloChunkDimensions(Vector3Int position,Vector3Int chunkDimensions)
+        public static Vector3Int ModuloChunkDimensions(Vector3Int position, Vector3Int chunkDimensions)
         {
             var remainder = position.ElementWise((a, b) => a % b, chunkDimensions);
             //Local voxel index is the remainder, with negatives adjusted
@@ -403,14 +403,14 @@ namespace Utils
             return remainder;
         }
 
-        public static bool IsInsideChunkId(Vector3Int worldPos, Vector3Int chunkId,Vector3Int chunkDimensions)
+        public static bool IsInsideChunkId(Vector3Int worldPos, Vector3Int chunkId, Vector3Int chunkDimensions)
         {
             var chunkLB = chunkId * chunkDimensions;
             var chunkUB = (chunkId + Vector3Int.one) * chunkDimensions;
             return worldPos.All((a, b) => a >= b, chunkLB) && worldPos.All((a, b) => a < b, chunkUB);
         }
 
-        public static bool LocalPositionInsideChunkBounds(Vector3Int localPos, Vector3Int chunkDimensions) 
+        public static bool LocalPositionInsideChunkBounds(Vector3Int localPos, Vector3Int chunkDimensions)
         {
             var chunkLB = Vector3Int.zero;
             var chunkUB = chunkDimensions;

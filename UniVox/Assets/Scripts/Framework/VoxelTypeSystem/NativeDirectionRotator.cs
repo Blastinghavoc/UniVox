@@ -2,14 +2,13 @@
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Mathematics;
-using UnityEngine;
 using UniVox.Framework.Common;
 using Utils;
 
 namespace UniVox.Framework
 {
     [BurstCompile]
-    public struct NativeDirectionRotator :IDisposable
+    public struct NativeDirectionRotator : IDisposable
     {
         [ReadOnly] public NativeArray<int3> DirectionVectors;
         [ReadOnly] public NativeArray<Direction> DirectionOpposites;
@@ -20,7 +19,7 @@ namespace UniVox.Framework
 
         private const float PI_2 = math.PI / 2;
 
-        public Direction GetDirectionAfterRotation(Direction dir, VoxelRotation rot) 
+        public Direction GetDirectionAfterRotation(Direction dir, VoxelRotation rot)
         {
             for (int i = 0; i < rot.y; i++)
             {
@@ -40,7 +39,7 @@ namespace UniVox.Framework
             return dir;
         }
 
-        public Direction GetDirectionBeforeRotation(Direction dir, VoxelRotation rot) 
+        public Direction GetDirectionBeforeRotation(Direction dir, VoxelRotation rot)
         {
             rot = rot.Inverse();//Opposite rotation
 
@@ -63,7 +62,7 @@ namespace UniVox.Framework
             return dir;
         }
 
-        public quaternion GetRotationQuat(VoxelRotation rotation) 
+        public quaternion GetRotationQuat(VoxelRotation rotation)
         {
             return quaternion.Euler(PI_2 * rotation.x, PI_2 * rotation.y, PI_2 * rotation.z, math.RotationOrder.YXZ);
         }
@@ -78,9 +77,9 @@ namespace UniVox.Framework
         }
     }
 
-    public static class DirectionRotatorExtensions 
+    public static class DirectionRotatorExtensions
     {
-        public static NativeDirectionRotator Create() 
+        public static NativeDirectionRotator Create()
         {
             NativeDirectionRotator native = new NativeDirectionRotator();
 
@@ -113,11 +112,11 @@ namespace UniVox.Framework
             }
 
             native.XRotationMatix = xArr.ToNative(Allocator.Persistent);
-            native.YRotationMatix =yArr.ToNative(Allocator.Persistent);
+            native.YRotationMatix = yArr.ToNative(Allocator.Persistent);
             native.ZRotationMatix = zArr.ToNative(Allocator.Persistent);
 
             return native;
-        }        
+        }
 
         /// <summary>
         /// Rotate 90 degrees clockwise about the Y axis

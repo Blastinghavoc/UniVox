@@ -33,13 +33,13 @@ namespace UniVox.Framework.Jobified
 
             var collidableRuns = materialRuns.GetSubArray(0, collidableRunLength);
             collidableRuns.Sort(comparer);
-            
+
             var nonCollidableRuns = materialRuns.GetSubArray(collidableRunLength, materialRuns.Length - collidableRunLength);
             nonCollidableRuns.Sort(comparer);
 
 
             //Resize packedIndices list to required capacity
-            packedIndices.Capacity = allTriangleIndices.Length;            
+            packedIndices.Capacity = allTriangleIndices.Length;
 
             //Apply the ordering of the runs to the triangle indices
             MaterialRun currentPackedRun = new MaterialRun();

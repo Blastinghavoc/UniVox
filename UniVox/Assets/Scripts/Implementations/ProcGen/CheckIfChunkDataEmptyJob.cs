@@ -1,8 +1,8 @@
-﻿using UniVox.Framework;
-using Unity.Jobs;
-using Unity.Collections;
+﻿using System;
 using Unity.Burst;
-using System;
+using Unity.Collections;
+using Unity.Jobs;
+using UniVox.Framework;
 using Utils;
 
 namespace UniVox.Implementations.ProcGen
@@ -13,13 +13,13 @@ namespace UniVox.Implementations.ProcGen
         [ReadOnly] public NativeArray<VoxelTypeID> chunkData;
         public NativeArray<bool> isEmpty;
 
-        public CheckIfChunkDataEmptyJob(NativeArray<VoxelTypeID> chunkData,Allocator allocator)
+        public CheckIfChunkDataEmptyJob(NativeArray<VoxelTypeID> chunkData, Allocator allocator)
         {
             this.chunkData = chunkData;
             isEmpty = new NativeArray<bool>(1, allocator);
         }
 
-        public void Dispose() 
+        public void Dispose()
         {
             isEmpty.SmartDispose();
         }

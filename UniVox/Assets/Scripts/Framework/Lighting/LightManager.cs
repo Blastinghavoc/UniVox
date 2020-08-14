@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json.Bson;
-using PerformanceTesting;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Jobs;
@@ -65,7 +63,7 @@ namespace UniVox.Framework.Lighting
             directionVectors = dVecs.ToNative(Allocator.Persistent);
         }
 
-        public void Dispose() 
+        public void Dispose()
         {
             voxelTypeToEmissionMap.SmartDispose();
             voxelTypeToAbsorptionMap.SmartDispose();
@@ -77,7 +75,7 @@ namespace UniVox.Framework.Lighting
         /// and returns a set of the chunk ids alterred by these updates.
         /// </summary>
         /// <returns></returns>
-        public HashSet<Vector3Int> Update() 
+        public HashSet<Vector3Int> Update()
         {
             Profiler.BeginSample("LightManagerUpdate");
             //Process a finite number of the pending updates.
@@ -94,7 +92,7 @@ namespace UniVox.Framework.Lighting
                 pendingLightUpdatesByChunk.Remove(chunkId);
 
                 if (!chunkManager.IsChunkFullyGenerated(chunkId))
-                {                    
+                {
                     //skip, as this chunk is no longer valid for updates
                     continue;
                 }
@@ -111,10 +109,10 @@ namespace UniVox.Framework.Lighting
                 var sunlightPropagationQueue = new NativeQueue<int3>(Allocator.Persistent);
 
                 BorderResolutionJob[] borderResolutionJobs = new BorderResolutionJob[chunkUpdate.borderUpdateRequests.Count];
- 
+
                 for (int i = 0; i < chunkUpdate.borderUpdateRequests.Count; i++)
                 {
-                    var borderUpdate = chunkUpdate.borderUpdateRequests[i];      
+                    var borderUpdate = chunkUpdate.borderUpdateRequests[i];
 
                     BorderResolutionJob borderJob = new BorderResolutionJob()
                     {
@@ -155,10 +153,10 @@ namespace UniVox.Framework.Lighting
                     {
                         handle = borderResolutionJobs[i].Schedule(handle);
                     }
-                    
+
                     handle = propJob.Schedule(handle);
                     updateJob.handle = handle;
-                    jobsInProgress.Enqueue(updateJob); 
+                    jobsInProgress.Enqueue(updateJob);
                 }
                 else
                 {
@@ -192,7 +190,7 @@ namespace UniVox.Framework.Lighting
                 processedThisUpdate++;
             }
 
-            Assert.AreEqual(pendingLightUpdatesOrder.Count,pendingLightUpdatesByChunk.Count);
+            Assert.AreEqual(pendingLightUpdatesOrder.Count, pendingLightUpdatesByChunk.Count);
 
             //Complete the jobs
             while (jobsInProgress.Count > 0)
@@ -216,7 +214,7 @@ namespace UniVox.Framework.Lighting
                     var neighbourChunkId = chunkId + DirectionExtensions.Vectors[i];
                     if (wip.propJob.lightsChangedOnBorder[i])
                     {
-                        touchedByUpdate.Add(neighbourChunkId);                        
+                        touchedByUpdate.Add(neighbourChunkId);
                     }
                 }
 
@@ -235,11 +233,11 @@ namespace UniVox.Framework.Lighting
             public JobHandle handle;
         }
 
-        public AbstractPipelineJob<LightmapGenerationJobResult> CreateGenerationJob(Vector3Int chunkId) 
+        public AbstractPipelineJob<LightmapGenerationJobResult> CreateGenerationJob(Vector3Int chunkId)
         {
             int[] heightMap = heightMapProvider.GetHeightMapForColumn(new Vector2Int(chunkId.x, chunkId.z));
 
-            var jobData = getJobData(chunkId);           
+            var jobData = getJobData(chunkId);
 
             var generationJob = new LightGenerationJob()
             {
@@ -256,10 +254,11 @@ namespace UniVox.Framework.Lighting
                 dynamicPropagationQueue = generationJob.dynamicPropagationQueue,
                 sunlightNeighbourUpdates = new LightJobNeighbourUpdates(Allocator.Persistent),
                 dynamicNeighbourUpdates = new LightJobNeighbourUpdates(Allocator.Persistent),
-                lightsChangedOnBorder = new NativeArray<bool>(DirectionExtensions.numDirections,Allocator.Persistent)
+                lightsChangedOnBorder = new NativeArray<bool>(DirectionExtensions.numDirections, Allocator.Persistent)
             };
 
-            Func<LightmapGenerationJobResult> cleanup = () => {
+            Func<LightmapGenerationJobResult> cleanup = () =>
+            {
                 var result = new LightmapGenerationJobResult();
 
                 result.lights = jobData.lights.ToArray();
@@ -278,7 +277,7 @@ namespace UniVox.Framework.Lighting
                     }
                 }
 
-                propagationJob.Dispose();                
+                propagationJob.Dispose();
 
                 return result;
             };
@@ -300,7 +299,7 @@ namespace UniVox.Framework.Lighting
 
         }
 
-        private void QueuePropagationUpdates(LightPropagationJob propJob) 
+        private void QueuePropagationUpdates(LightPropagationJob propJob)
         {
             var chunkId = propJob.data.chunkId.ToBasic();
             for (Direction dir = 0; (int)dir < DirectionExtensions.numDirections; dir++)
@@ -312,9 +311,9 @@ namespace UniVox.Framework.Lighting
                 borderUpdate.dynamic = propJob.dynamicNeighbourUpdates[dir].ToArray();
 
                 if (borderUpdate.dynamic.Length > 0 || borderUpdate.sunlight.Length > 0)
-                {                   
+                {
 
-                    if (pendingLightUpdatesByChunk.TryGetValue(UpdateChunkId,out var chunkUpdateRequest))
+                    if (pendingLightUpdatesByChunk.TryGetValue(UpdateChunkId, out var chunkUpdateRequest))
                     {
                         chunkUpdateRequest.borderUpdateRequests.Add(borderUpdate);
                     }
@@ -330,25 +329,25 @@ namespace UniVox.Framework.Lighting
             }
         }
 
-        private class ChunkUpdateRequest 
+        private class ChunkUpdateRequest
         {
             public List<BorderUpdateRequest> borderUpdateRequests;
         }
 
-        private class BorderUpdateRequest 
-        {            
+        private class BorderUpdateRequest
+        {
             public Direction borderDirection;
             public int3[] sunlight;
             public int3[] dynamic;
-        }        
+        }
 
-        public void ApplyGenerationResult(Vector3Int chunkId, LightmapGenerationJobResult result) 
+        public void ApplyGenerationResult(Vector3Int chunkId, LightmapGenerationJobResult result)
         {
             var chunkData = chunkManager.GetChunkData(chunkId);
             chunkData.SetLightMap(result.lights);
-        }    
+        }
 
-        private LightJobData getJobData(Vector3Int chunkId) 
+        private LightJobData getJobData(Vector3Int chunkId)
         {
             NativeArray<bool> directionsValid = new NativeArray<bool>(DirectionExtensions.numDirections, Allocator.Persistent);
 
@@ -375,7 +374,7 @@ namespace UniVox.Framework.Lighting
                 );
             return jobData;
         }
-       
+
         public List<Vector3Int> UpdateLightOnVoxelSet(ChunkNeighbourhood neighbourhood, Vector3Int localCoords, VoxelTypeID voxelType, VoxelTypeID previousType)
         {
             Profiler.BeginSample("LightOnVoxelSet");
@@ -540,7 +539,7 @@ namespace UniVox.Framework.Lighting
                     if (TryGetRemovalNode(neighbourCoord, node.chunkData, neighbourhood, out var newNode))
                     {
                         var neighLv = newNode.lv;
-                        if ((neighLv.Sun != 0 && neighLv.Sun < currentLv.Sun)||
+                        if ((neighLv.Sun != 0 && neighLv.Sun < currentLv.Sun) ||
                             (currentLv.Sun == LightValue.MaxIntensity) && offset.y == -1)//Also remove sunlight below max sunlight
                         {
                             //this neighbour must be removed
@@ -634,7 +633,7 @@ namespace UniVox.Framework.Lighting
                     }
 
                     processed++;
-                }                
+                }
 
             }
 
@@ -657,7 +656,7 @@ namespace UniVox.Framework.Lighting
         }
 
         //TODO decrease GC allocations in this method
-        private IEnumerable<PropagationNode> GetAllValidChildrenForPropagation(PropagationNode parent,ChunkNeighbourhood neighbourhood) 
+        private IEnumerable<PropagationNode> GetAllValidChildrenForPropagation(PropagationNode parent, ChunkNeighbourhood neighbourhood)
         {
             for (int i = 0; i < DirectionExtensions.Vectors.Length; i++)
             {
@@ -665,7 +664,7 @@ namespace UniVox.Framework.Lighting
 
                 PropagationNode child = parent;
                 child.worldPos = parent.worldPos + offset;
-                
+
                 var chunkId = child.chunkData.ChunkID;
                 child.localPosition += offset;
                 if (LocalPositionInsideChunkBounds(child.localPosition, chunkDimensions))
@@ -684,7 +683,7 @@ namespace UniVox.Framework.Lighting
                         child.chunkData = neighbourhood.GetChunkData(chunkId);
                         yield return child;
                     }
-                }                
+                }
             }
         }
 
@@ -706,7 +705,7 @@ namespace UniVox.Framework.Lighting
                 Profiler.EndSample();
                 return true;
             }
-            else 
+            else
             {
                 Profiler.BeginSample("ChunkWritable");
                 var writable = ChunkWritable(chunkId, neighbourhood);
@@ -759,7 +758,7 @@ namespace UniVox.Framework.Lighting
             return false;
         }
 
-        private struct PropagationNode:IEquatable<PropagationNode>
+        private struct PropagationNode : IEquatable<PropagationNode>
         {
             public Vector3Int localPosition;
             public IChunkData chunkData;

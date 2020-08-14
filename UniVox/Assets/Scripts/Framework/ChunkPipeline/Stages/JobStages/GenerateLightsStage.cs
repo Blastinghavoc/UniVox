@@ -32,7 +32,7 @@ namespace UniVox.Framework.ChunkPipeline
         /// <returns></returns>
         public override bool FreeFor(Vector3Int chunkId, HashSet<Vector3Int> pendingEntry)
         {
-            return !Utils.Helpers.GetNeighboursDirectOnly(chunkId).Any((neigh) => Contains(neigh)||pendingEntry.Contains(neigh));
+            return !Utils.Helpers.GetNeighboursDirectOnly(chunkId).Any((neigh) => Contains(neigh) || pendingEntry.Contains(neigh));
         }
     }
 }

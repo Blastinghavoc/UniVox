@@ -1,13 +1,9 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.Assertions;
-using System;
-using Unity.Collections;
-using UniVox.Framework.Jobified;
-using System.Data;
-using Utils;
 using UniVox.Framework.Common;
+using UniVox.Framework.Jobified;
 
 namespace UniVox.Framework
 {
@@ -22,7 +18,7 @@ namespace UniVox.Framework
 
         private Material[] materialIdToMaterialMap;
 
-        public ushort LastVoxelID { get => (ushort)(typeData.Count-1); }
+        public ushort LastVoxelID { get => (ushort)(typeData.Count - 1); }
 
         #region Job Compatibility
         public NativeMeshDatabase nativeMeshDatabase;
@@ -143,7 +139,7 @@ namespace UniVox.Framework
         /// </summary>
         /// <param name="voxelType"></param>
         /// <returns>EmissionIntensity,DiminishLightAmount</returns>
-        public (int,int) GetLightProperties(VoxelTypeID voxelType)
+        public (int, int) GetLightProperties(VoxelTypeID voxelType)
         {
             try
             {
@@ -153,10 +149,10 @@ namespace UniVox.Framework
                     var lightConfig = def.lightConfiguration;
                     if (lightConfig != null)
                     {
-                        return (lightConfig.EmissionIntensity,lightConfig.DiminishLightAmount);
+                        return (lightConfig.EmissionIntensity, lightConfig.DiminishLightAmount);
                     }
                 }
-                return (0,1);
+                return (0, 1);
             }
             catch (IndexOutOfRangeException e)
             {

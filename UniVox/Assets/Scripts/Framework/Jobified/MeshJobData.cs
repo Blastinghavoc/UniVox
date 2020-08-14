@@ -4,7 +4,6 @@ using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 using UniVox.Framework.Lighting;
-using UniVox.Framework.Common;
 
 namespace UniVox.Framework.Jobified
 {
@@ -91,7 +90,7 @@ namespace UniVox.Framework.Jobified
         /// </summary>
         /// <param name="pos"></param>
         /// <returns>inChunk</returns>
-        private bool TryGetIndexOf(int3 pos,out int index)
+        private bool TryGetIndexOf(int3 pos, out int index)
         {
             if (pos.x >= 0 && pos.x < dimensions.x &&
                 pos.y >= 0 && pos.y < dimensions.y &&
@@ -102,6 +101,6 @@ namespace UniVox.Framework.Jobified
             }
             index = 0;
             return false;
-        }        
+        }
     }
 }

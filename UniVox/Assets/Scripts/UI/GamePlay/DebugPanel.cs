@@ -37,7 +37,7 @@ namespace UniVox.UI
                 display.text = $"{name}: {value}";
             }
 
-            public void Update(string value) 
+            public void Update(string value)
             {
                 this.value = value;
                 Apply();
@@ -58,7 +58,7 @@ namespace UniVox.UI
                 new DebugItem("LookingAtLightLevel"),
                 new DebugItem("WaitingForUpdateCheck"),
                 new DebugItem("Pipeline Status")
-                
+
             };
 
             foreach (var item in items)
@@ -77,7 +77,7 @@ namespace UniVox.UI
         private void Update()
         {
             if (IsVisible)
-            {                
+            {
                 debugItems["Coords"].Update(player.position.ToString());
                 debugItems["ChunkID"].Update(world.WorldToChunkPosition(player.position).ToString());
 
@@ -110,7 +110,7 @@ namespace UniVox.UI
         }
     }
 
-    public interface IDebugWorld 
+    public interface IDebugWorld
     {
         string GetPipelineStatus();
     }

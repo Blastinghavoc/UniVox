@@ -1,11 +1,7 @@
-﻿using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
-using UniVox.Implementations.ChunkData;
-using UniVox.Framework.ChunkPipeline.VirtualJobs;
-using System;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.Profiling;
-using UniVox.Framework.Jobified;
+using UniVox.Framework.ChunkPipeline.VirtualJobs;
 using UniVox.Framework.Serialisation;
 
 namespace UniVox.Framework
@@ -29,19 +25,19 @@ namespace UniVox.Framework
 
         protected FrameworkEventManager eventManager;
 
-        public virtual void Initialise(VoxelTypeManager voxelTypeManager,IChunkManager chunkManager, FrameworkEventManager eventManager)
+        public virtual void Initialise(VoxelTypeManager voxelTypeManager, IChunkManager chunkManager, FrameworkEventManager eventManager)
         {
             this.voxelTypeManager = voxelTypeManager;
             this.chunkManager = chunkManager;
             this.eventManager = eventManager;
             if (SaveUtils.DoSave)
             {
-                serialiser = new BinarySerialiser(SaveUtils.CurrentWorldSaveDirectory+"chunks/",".chnk");
+                serialiser = new BinarySerialiser(SaveUtils.CurrentWorldSaveDirectory + "chunks/", ".chnk");
             }
         }
 
         //Add or replace modified data for the given chunk
-        public void StoreModifiedChunkData(Vector3Int chunkID, IChunkData data) 
+        public void StoreModifiedChunkData(Vector3Int chunkID, IChunkData data)
         {
             if (SaveUtils.DoSave)
             {
@@ -60,7 +56,7 @@ namespace UniVox.Framework
             if (SaveUtils.DoSave)
             {
                 Profiler.BeginSample("LoadingSavedChunkData");
-                if (serialiser.TryLoad(chunkID.ToString(),out var data))
+                if (serialiser.TryLoad(chunkID.ToString(), out var data))
                 {
                     storedData = InitialiseChunkDataFromSaved((ChunkSaveData)data, chunkID);
                     storedData.FullyGenerated = false;//This prevents saving it again if nothing changes.
@@ -81,7 +77,7 @@ namespace UniVox.Framework
             return false;
         }
 
-        protected abstract IChunkData InitialiseChunkDataFromSaved(ChunkSaveData chunkSaveData,Vector3Int chunkId);
+        protected abstract IChunkData InitialiseChunkDataFromSaved(ChunkSaveData chunkSaveData, Vector3Int chunkId);
 
         /// <summary>
         /// To be implemented by derived classes, returning a pipeline job to generatie the chunk data.

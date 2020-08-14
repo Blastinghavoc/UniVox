@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
 using Unity.Burst;
 using Unity.Collections;
 using Utils;
@@ -10,20 +9,20 @@ namespace UniVox.Implementations.ProcGen
     /// Holds all 2D noise maps for a column of chunks,
     /// including heightmap, biomemap, tree map etc.
     /// </summary>
-    public class ChunkColumnNoiseMaps 
+    public class ChunkColumnNoiseMaps
     {
         public int[] heightMap;
         public int[] biomeMap;
         public float[] treeMap;
 
         [BurstCompile]
-        public struct NativeChunkColumnNoiseMaps:IDisposable
+        public struct NativeChunkColumnNoiseMaps : IDisposable
         {
             public NativeArray<int> heightMap;
             public NativeArray<int> biomeMap;
             public NativeArray<float> treeMap;
             public NativeArray<float> moistureMap;
-            public void Dispose() 
+            public void Dispose()
             {
                 heightMap.SmartDispose();
                 biomeMap.SmartDispose();
@@ -31,7 +30,7 @@ namespace UniVox.Implementations.ProcGen
                 moistureMap.SmartDispose();
             }
 
-            public NativeChunkColumnNoiseMaps(int flatSize,Allocator allocator = Allocator.Persistent) 
+            public NativeChunkColumnNoiseMaps(int flatSize, Allocator allocator = Allocator.Persistent)
             {
                 heightMap = new NativeArray<int>(flatSize, allocator);
                 biomeMap = new NativeArray<int>(flatSize, allocator);
@@ -40,16 +39,16 @@ namespace UniVox.Implementations.ProcGen
             }
         }
 
-        public NativeChunkColumnNoiseMaps ToNative(Allocator allocator = Allocator.Persistent) 
+        public NativeChunkColumnNoiseMaps ToNative(Allocator allocator = Allocator.Persistent)
         {
             NativeChunkColumnNoiseMaps native = new NativeChunkColumnNoiseMaps();
             native.heightMap = heightMap.ToNative(allocator);
             native.biomeMap = biomeMap.ToNative(allocator);
-            native.treeMap = treeMap.ToNative(allocator);     
+            native.treeMap = treeMap.ToNative(allocator);
             return native;
         }
 
-        public ChunkColumnNoiseMaps (NativeChunkColumnNoiseMaps maps) 
+        public ChunkColumnNoiseMaps(NativeChunkColumnNoiseMaps maps)
         {
             heightMap = maps.heightMap.ToArray();
             biomeMap = maps.biomeMap.ToArray();

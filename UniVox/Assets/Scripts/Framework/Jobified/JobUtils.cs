@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Mathematics;
@@ -10,9 +9,9 @@ using UniVox.Framework.Lighting;
 namespace UniVox.Framework.Jobified
 {
     [BurstCompile]
-    public static class JobUtils 
+    public static class JobUtils
     {
-        public static VoxelTypeID GetVoxel(int3 pos,NativeArray<VoxelTypeID> voxels,int3 dimensions,NeighbourData neighbourData)
+        public static VoxelTypeID GetVoxel(int3 pos, NativeArray<VoxelTypeID> voxels, int3 dimensions, NeighbourData neighbourData)
         {
             neighbourData.AdjustLocalPos(ref pos, out var InChunk, out var DirectionOfNeighbour, dimensions);
             if (InChunk)
@@ -50,7 +49,7 @@ namespace UniVox.Framework.Jobified
             }
         }
 
-        public static NeighbourData CacheNeighbourData(Vector3Int chunkId,IChunkManager chunkManager)         
+        public static NeighbourData CacheNeighbourData(Vector3Int chunkId, IChunkManager chunkManager)
         {
             UnityEngine.Profiling.Profiler.BeginSample("CacheNeighbourData");
 
@@ -77,7 +76,7 @@ namespace UniVox.Framework.Jobified
                     }
                     throw new Exception($"Failed to get neighbour data for chunk {chunkId}." +
                         $"Manager had this chunk = {managerHad}, pipeline had it = {pipelinehad}." +
-                        $" Min pipeline stage {minStage}, max {maxStage} ."+
+                        $" Min pipeline stage {minStage}, max {maxStage} ." +
                         $"Cause: {e.Message}", e);
                 }
             }

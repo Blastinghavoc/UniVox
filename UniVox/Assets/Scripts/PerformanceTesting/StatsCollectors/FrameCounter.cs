@@ -1,10 +1,9 @@
-﻿using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace PerformanceTesting
 {
-    public class FrameCounter:IStatsCollector
+    public class FrameCounter : IStatsCollector
     {
 
         public List<float> FrameTimesMillis { get; private set; } = new List<float>();
@@ -22,8 +21,8 @@ namespace PerformanceTesting
         /// To be called from an Update function (i.e once per frame)
         /// </summary>
         public void Update()
-        {            
-            FrameTimesMillis.Add(Time.unscaledDeltaTime*1000);
+        {
+            FrameTimesMillis.Add(Time.unscaledDeltaTime * 1000);
         }
     }
 }

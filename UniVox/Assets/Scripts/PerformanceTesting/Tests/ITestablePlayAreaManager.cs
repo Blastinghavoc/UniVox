@@ -2,7 +2,7 @@
 
 namespace PerformanceTesting
 {
-    public interface ITestablePlayAreaManager 
+    public interface ITestablePlayAreaManager
     {
         void SetRenderedChunkRadii(Vector3Int radii);
     }

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,18 +9,18 @@ namespace UniVox.UI
         public Action<bool> ChoiceMadeCallback;
         public Text Message;
 
-        public void OnChoiceMade(bool choice) 
+        public void OnChoiceMade(bool choice)
         {
             ChoiceMadeCallback(choice);
             Close();
         }
 
-        public void Open() 
+        public void Open()
         {
             gameObject.SetActive(true);
         }
 
-        public void Close() 
+        public void Close()
         {
             gameObject.SetActive(false);
         }

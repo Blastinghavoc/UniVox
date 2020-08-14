@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
 using UniVox.Framework;
+using UniVox.Implementations.ChunkData;
 using UniVox.Implementations.Meshers;
 using UniVox.Implementations.Providers;
-using UniVox.Implementations.ChunkData;
 using UniVox.MessagePassing;
 
 namespace PerformanceTesting
 {
-    public class ProceduralSuite : AbstractTestSuite 
+    public class ProceduralSuite : AbstractTestSuite
     {
         public int seed;
         public override IEnumerable<PassDetails> Passes()

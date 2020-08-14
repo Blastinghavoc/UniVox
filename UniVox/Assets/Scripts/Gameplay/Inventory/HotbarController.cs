@@ -71,7 +71,7 @@ namespace UniVox.Gameplay.Inventory
             }
         }
 
-        public void SetCurrentItem(InventoryItem item) 
+        public void SetCurrentItem(InventoryItem item)
         {
             row.Slots[selectedSlotIndex].Item = item;
         }

@@ -1,9 +1,6 @@
-﻿using System.Runtime.CompilerServices;
-using Unity.Collections;
+﻿using Unity.Collections;
 using UnityEngine;
-using UnityEngine.Assertions;
 using UniVox.Framework;
-using UniVox.Framework.Jobified;
 using Utils;
 
 namespace UniVox.Implementations.ChunkData
@@ -12,11 +9,11 @@ namespace UniVox.Implementations.ChunkData
     /// Similar to arrayChunkData, but implented with a flat array.
     /// This allows it to be easily constructed from the result of a job.
     /// </summary>
-    public class FlatArrayChunkData : AbstractChunkData 
+    public class FlatArrayChunkData : AbstractChunkData
     {
         protected FlatArrayStorage<VoxelTypeID> storage;
-            
-        public FlatArrayChunkData(Vector3Int ID, Vector3Int chunkDimensions,VoxelTypeID[] initialData = null) : base(ID, chunkDimensions,initialData) 
+
+        public FlatArrayChunkData(Vector3Int ID, Vector3Int chunkDimensions, VoxelTypeID[] initialData = null) : base(ID, chunkDimensions, initialData)
         {
             storage = new FlatArrayStorage<VoxelTypeID>();
             if (initialData == null)
@@ -25,13 +22,13 @@ namespace UniVox.Implementations.ChunkData
             }
             else
             {
-                storage.InitialiseWithData(chunkDimensions,initialData);
+                storage.InitialiseWithData(chunkDimensions, initialData);
             }
         }
 
         protected override VoxelTypeID GetVoxelID(int x, int y, int z)
         {
-            return storage.Get(x,y,z);
+            return storage.Get(x, y, z);
         }
 
         protected override void SetVoxelID(int x, int y, int z, VoxelTypeID voxel)

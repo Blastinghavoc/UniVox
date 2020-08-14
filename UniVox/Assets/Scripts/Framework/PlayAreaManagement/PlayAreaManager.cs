@@ -15,7 +15,7 @@ namespace UniVox.Framework.PlayAreaManagement
     /// player moves
     /// </summary>
     [System.Serializable]
-    public class PlayAreaManager: ITestablePlayAreaManager
+    public class PlayAreaManager : ITestablePlayAreaManager
     {
         [SerializeField] private Vector3Int collidableChunksRadii;
         [SerializeField] private Vector3Int renderedChunksRadii;
@@ -75,8 +75,8 @@ namespace UniVox.Framework.PlayAreaManagement
         public void Initialise(IChunkManager chunkManager, IChunkPipeline pipeline, IVoxelPlayer player)
         {
             this.chunkManager = chunkManager;
-            this.Player = player;
-            worldLimits = chunkManager.WorldLimits;            
+            Player = player;
+            worldLimits = chunkManager.WorldLimits;
 
             IncrementalDone = true;
 
@@ -189,7 +189,7 @@ namespace UniVox.Framework.PlayAreaManagement
                 Debug.LogWarning($"Player teleported (moved more than 1 chunk per update) with absolute chunk difference {absChunkDifference}" +
                     $", brute force play area update used");
                 ResolveTeleport();
-                
+
                 //throw new NotImplementedException();
                 //This does not deactivate chunks at the moment!
                 //incrementalProcessIterator = SetAllTargetsProcess(playerChunkID, prevPlayerChunkID);
@@ -273,7 +273,7 @@ namespace UniVox.Framework.PlayAreaManagement
             Profiler.EndSample();
         }
 
-        protected void ResolveTeleport() 
+        protected void ResolveTeleport()
         {
             Profiler.BeginSample("UpdateWholePlayArea");
 
@@ -381,17 +381,18 @@ namespace UniVox.Framework.PlayAreaManagement
             bool thereIsPreviousWork = currentPlayerChunkIdAtTimeOfExecution != newChunkId;
             ///Ensures that the above two variables always remain correct,
             ///irrespective of when the iterator yields (and external values change)
-            Action afterYield = () => {
+            Action afterYield = () =>
+            {
                 currentPlayerChunkIdAtTimeOfExecution = playerChunkID;
-                thereIsPreviousWork = (sequenceIndex > 0)? currentPlayerChunkIdAtTimeOfExecution != newChunkId
+                thereIsPreviousWork = (sequenceIndex > 0) ? currentPlayerChunkIdAtTimeOfExecution != newChunkId
                     : false;//There cannot be any previous work if this is the first stage
             };
 
             foreach (var offset in CuboidalArea(Vector3Int.zero, endRadii, startRadii))
-            {           
+            {
 
                 var chunkIdFromOldPos = oldChunkId + offset;
-                var chunkIdFromNewPos = newChunkId + offset;                
+                var chunkIdFromNewPos = newChunkId + offset;
 
                 ///By definition, the chunk id according to the current pos is in the new area
                 ///Check if it is also in the old area, because if it is not then it is a 
@@ -412,7 +413,7 @@ namespace UniVox.Framework.PlayAreaManagement
                 ///If it is, nothing needs to be done, but if it is not, that chunk Id
                 ///needs to be downgraded one stage.
                 if (!InsideCuboid(chunkIdFromOldPos, newChunkId, endRadii))
-                {                  
+                {
 
                     ///Prevent overwriting previous work
                     if (!thereIsPreviousWork || !InsideCuboid(chunkIdFromOldPos, currentPlayerChunkIdAtTimeOfExecution, prevStageRadii))

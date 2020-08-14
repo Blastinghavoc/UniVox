@@ -11,9 +11,9 @@ namespace UniVox.Implementations.ProcGen
         public float HeightmapScale;
         public float MoistureMapScale;
 
-        [Range(0,128)]
+        [Range(0, 128)]
         public float MaxHeightmapHeight;
-        [Range(-128,0)]
+        [Range(-128, 0)]
         [NonSerialized] public float MinHeightmapHeight;
 
         public float HeightmapExponentPositive;

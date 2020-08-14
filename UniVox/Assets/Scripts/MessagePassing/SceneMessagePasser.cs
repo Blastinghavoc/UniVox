@@ -1,7 +1,5 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
-using System;
 
 namespace UniVox.MessagePassing
 {
@@ -12,7 +10,7 @@ namespace UniVox.MessagePassing
     {
         private static Dictionary<Type, object> messages;
 
-        public static void SetMessage<T>(T message) 
+        public static void SetMessage<T>(T message)
         {
             if (messages == null)
             {
@@ -21,15 +19,15 @@ namespace UniVox.MessagePassing
             messages.Add(typeof(T), message);
         }
 
-        public static void RemoveMessage<T>() 
+        public static void RemoveMessage<T>()
         {
-            if (messages!=null)
+            if (messages != null)
             {
                 messages.Remove(typeof(T));
             }
         }
 
-        public static bool TryConsumeMessage<T>(out T message) 
+        public static bool TryConsumeMessage<T>(out T message)
         {
             var result = TryGetMessage<T>(out message);
             if (result)
@@ -38,7 +36,7 @@ namespace UniVox.MessagePassing
             }
             return result;
         }
-        public static bool TryGetMessage<T>(out T message) 
+        public static bool TryGetMessage<T>(out T message)
         {
             if (messages == null)
             {

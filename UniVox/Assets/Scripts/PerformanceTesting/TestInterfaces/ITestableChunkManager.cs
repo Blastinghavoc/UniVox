@@ -1,12 +1,9 @@
-﻿using UnityEngine;
-using System.Collections;
-using UniVox.Framework;
-using System;
+﻿using UniVox.Framework;
 using UniVox.Framework.PlayAreaManagement;
 
 namespace PerformanceTesting
 {
-    public interface ITestableChunkManager:IChunkManager
+    public interface ITestableChunkManager : IChunkManager
     {
         PlayAreaManager PlayArea { get; }
 

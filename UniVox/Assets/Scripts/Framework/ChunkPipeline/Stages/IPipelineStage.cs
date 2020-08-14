@@ -29,7 +29,7 @@ namespace UniVox.Framework.ChunkPipeline
         /// <param name="chunkId"></param>
         /// <param name="pendingEntry"></param>
         /// <returns></returns>
-        bool FreeFor(Vector3Int chunkId,HashSet<Vector3Int> pendingEntry);
+        bool FreeFor(Vector3Int chunkId, HashSet<Vector3Int> pendingEntry);
 
         void Update();
 

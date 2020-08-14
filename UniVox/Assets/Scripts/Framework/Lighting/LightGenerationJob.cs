@@ -4,7 +4,6 @@ using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UniVox.Framework.Common;
-using Utils;
 using static UniVox.Framework.Jobified.JobUtils;
 using static Utils.Helpers;
 
@@ -27,7 +26,7 @@ namespace UniVox.Framework.Lighting
         private int dx;
         private int dxdy;
 
-        public void Dispose() 
+        public void Dispose()
         {
             heightmap.Dispose();
         }
@@ -90,11 +89,11 @@ namespace UniVox.Framework.Lighting
             {
                 for (int y = 0; y < data.dimensions.y; y++)
                 {
-                    for (int x = 0; x < data.dimensions.x; x++,flat++)
+                    for (int x = 0; x < data.dimensions.x; x++, flat++)
                     {
 
                         var emission = data.voxelTypeToEmissionMap[data.voxels[flat]];
-  
+
                         //Check if voxel emits light, add to propagation queue if it does.
                         if (emission > 1)
                         {
@@ -103,7 +102,7 @@ namespace UniVox.Framework.Lighting
                             data.lights[flat] = lv;
 
                             var pos = new int3(x, y, z);
-                            dynamicPropagationQueue.Enqueue(pos);                           
+                            dynamicPropagationQueue.Enqueue(pos);
                         }
                     }
                 }
@@ -121,7 +120,7 @@ namespace UniVox.Framework.Lighting
                 Direction dir = (Direction)i;
                 if (data.directionsValid[(int)dir])
                 {
-                    var offset = data.directionVectors[i];   
+                    var offset = data.directionVectors[i];
 
                     StartEndRange xRange = new StartEndRange() { start = 0, end = data.dimensions.x };
                     StartEndRange yRange = new StartEndRange() { start = 0, end = data.dimensions.y };
@@ -175,9 +174,9 @@ namespace UniVox.Framework.Lighting
 
                                     if (next > localLv.Dynamic)
                                     {
-                                        localLv.Dynamic = next;                                        
+                                        localLv.Dynamic = next;
                                         dynamicPropagationQueue.Enqueue(localPos);
-                                    }                                    
+                                    }
                                 }
 
                                 //Check sun propagation
@@ -212,6 +211,6 @@ namespace UniVox.Framework.Lighting
             }
         }
 
-       
+
     }
 }

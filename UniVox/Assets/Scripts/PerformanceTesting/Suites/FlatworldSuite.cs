@@ -1,11 +1,9 @@
 ﻿using System.Collections.Generic;
+using UnityEngine;
 using UniVox.Framework;
+using UniVox.Implementations.ChunkData;
 using UniVox.Implementations.Meshers;
 using UniVox.Implementations.Providers;
-using UniVox.Implementations.ChunkData;
-using UnityEngine;
-using UnityEngine.Assertions;
-using UnityEditor.VersionControl;
 
 namespace PerformanceTesting
 {
@@ -20,7 +18,7 @@ namespace PerformanceTesting
         public override IEnumerable<PassDetails> Passes()
         {
             ///For each mesh algorithm, with fixed storage type (flat array)
-            
+
             //Naive
             mesher = RemoveComponentsOfTypeExceptSubtype<AbstractMesherComponent, NaiveMesher>();
             CommonForMeshTests();
@@ -55,14 +53,14 @@ namespace PerformanceTesting
             //yield return EndPass("StorageComparisons");
         }
 
-        private void CommonForStorageTests() 
+        private void CommonForStorageTests()
         {
             //Use the greedy mesher for storage tests
             mesher = RemoveComponentsOfTypeExceptSubtype<AbstractMesherComponent, GreedyMesher>();
-            CommonForMeshTests();            
+            CommonForMeshTests();
         }
 
-        private void CommonForMeshTests() 
+        private void CommonForMeshTests()
         {
             provider = RemoveComponentsOfTypeExceptSubtype<AbstractProviderComponent, DebugProvider>();
             var debugProvider = provider as DebugProvider;

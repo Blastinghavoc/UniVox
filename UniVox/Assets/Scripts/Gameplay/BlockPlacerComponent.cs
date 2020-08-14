@@ -1,10 +1,9 @@
 ﻿using UnityEngine;
-using System.Collections;
 using UnityEngine.Assertions;
 using UnityEngine.UIElements;
 using UniVox.Framework;
-using UniVox.UI;
 using UniVox.Gameplay.Inventory;
+using UniVox.UI;
 
 namespace UniVox.Gameplay
 {
@@ -116,7 +115,7 @@ namespace UniVox.Gameplay
             {
                 if (hitAnything)
                 {
-                    if (WorldInterface.TryGetVoxelTypeAndID(LocationToDeleteBlock, out var voxelType,out var ID))
+                    if (WorldInterface.TryGetVoxelTypeAndID(LocationToDeleteBlock, out var voxelType, out var ID))
                     {
                         hotbar.SetCurrentItem(new InventoryItem() { ID = ID, typeDefinition = voxelType });
                     }

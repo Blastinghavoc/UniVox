@@ -52,7 +52,7 @@ namespace Utils.FSM
     public class Transition
     {
         public State NextState { get; private set; }
-        public Func<object,bool> Condition { get; private set; }
+        public Func<object, bool> Condition { get; private set; }
 
         public Transition(State nextState, Func<object, bool> condition)
         {

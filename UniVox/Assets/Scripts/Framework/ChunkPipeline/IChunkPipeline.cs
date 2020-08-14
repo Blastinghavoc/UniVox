@@ -3,11 +3,11 @@ using UnityEngine;
 
 namespace UniVox.Framework.ChunkPipeline
 {
-    public interface IChunkPipeline 
+    public interface IChunkPipeline
     {
         event Action<Vector3Int> OnChunkRemovedFromPipeline;
         //args: id, added at stage
-        event Action<Vector3Int,int> OnChunkAddedToPipeline;
+        event Action<Vector3Int, int> OnChunkAddedToPipeline;
         //args: id, new min stage
         event Action<Vector3Int, int> OnChunkMinStageDecreased;
         //args: id, new target stage

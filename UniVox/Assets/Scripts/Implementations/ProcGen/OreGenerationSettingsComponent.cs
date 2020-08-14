@@ -8,10 +8,10 @@ using Utils;
 namespace UniVox.Implementations.ProcGen
 {
     [System.Serializable]
-    public class OreGenerationSettingsComponent :MonoBehaviour,IDisposable
+    public class OreGenerationSettingsComponent : MonoBehaviour, IDisposable
     {
         [System.Serializable]
-        private class OreSettingsPair 
+        private class OreSettingsPair
         {
             public SOVoxelTypeDefinition voxelType = null;
             public OreSettings settings = default;
@@ -21,7 +21,7 @@ namespace UniVox.Implementations.ProcGen
 
         public NativeArray<NativeOreSettingsPair> Native { get; private set; }
 
-        public void Initialise(VoxelTypeManager typeManager,Allocator allocator = Allocator.Persistent) 
+        public void Initialise(VoxelTypeManager typeManager, Allocator allocator = Allocator.Persistent)
         {
             NativeArray<NativeOreSettingsPair> oreSettings = new NativeArray<NativeOreSettingsPair>(ores.Count, allocator);
             for (int i = 0; i < ores.Count; i++)

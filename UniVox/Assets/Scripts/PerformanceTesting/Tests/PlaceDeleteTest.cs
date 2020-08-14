@@ -49,7 +49,7 @@ namespace PerformanceTesting
                         worldInterface.RemoveVoxel(basePosition + new Vector3(i, -j, k));
                     }
                 }
-            }            
+            }
 
             //Wait until all chunks are complete
             while (!chunkManager.PipelineIsSettled())
@@ -76,7 +76,7 @@ namespace PerformanceTesting
                 {
                     for (int k = 0; k < cubeDimension; k++)
                     {
-                        worldInterface.PlaceVoxel(basePosition + new Vector3(i, -j, k),voxelTypeToPlace);
+                        worldInterface.PlaceVoxel(basePosition + new Vector3(i, -j, k), voxelTypeToPlace);
                     }
                 }
             }

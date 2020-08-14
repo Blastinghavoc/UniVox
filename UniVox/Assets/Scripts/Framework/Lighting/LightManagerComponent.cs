@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UniVox.Framework.ChunkPipeline.VirtualJobs;
 
@@ -17,13 +16,13 @@ namespace UniVox.Framework.Lighting
 
         [SerializeField] private ShaderVariable[] shaderVariables = new ShaderVariable[0];
 
-        [Range(-180,180)]
+        [Range(-180, 180)]
         public float TimeOfDay;
 
         public Light sunLight;
         public Material skyboxMaterial;
         public bool parallel;
-        [Range(0,100)]
+        [Range(0, 100)]
         public int MaxGenPerUpdate = 24;
         [Range(0, 400)]
         public int MaxPropPerUpdate = 48;
@@ -34,17 +33,17 @@ namespace UniVox.Framework.Lighting
 
         public int MaxChunksGeneratedPerUpdate => MaxGenPerUpdate;
 
-        public void Initialise(IVoxelTypeManager voxelTypeManager, IChunkManager chunkManager,IHeightMapProvider heightMapProvider)
+        public void Initialise(IVoxelTypeManager voxelTypeManager, IChunkManager chunkManager, IHeightMapProvider heightMapProvider)
         {
             var lm = new LightManager();
             lm.Parallel = parallel;
             lm.MaxChunksGeneratedPerUpdate = MaxChunksGeneratedPerUpdate;
             lm.MaxLightUpdates = MaxPropPerUpdate;
             lightManager = lm;
-            lightManager.Initialise(voxelTypeManager, chunkManager,heightMapProvider);            
+            lightManager.Initialise(voxelTypeManager, chunkManager, heightMapProvider);
         }
 
-        public void Dispose() 
+        public void Dispose()
         {
             if (!disposed)
             {
@@ -68,12 +67,12 @@ namespace UniVox.Framework.Lighting
         void Update()
         {
             sunLight.transform.rotation = Quaternion.Euler(TimeOfDay, 0, 0);
-            GlobalLightValue = Mathf.InverseLerp(-1,1, Mathf.Sin(Mathf.Deg2Rad * TimeOfDay));
+            GlobalLightValue = Mathf.InverseLerp(-1, 1, Mathf.Sin(Mathf.Deg2Rad * TimeOfDay));
             skyboxMaterial.SetFloat("_Exposure", GlobalLightValue);
 
             Shader.SetGlobalFloat(LightLevelVariable, GlobalLightValue);
 
-            LightDirection =  (-1*sunLight.transform.forward).normalized;
+            LightDirection = (-1 * sunLight.transform.forward).normalized;
 
             Shader.SetGlobalVector(LightDirectionVariable, LightDirection);
 
@@ -85,7 +84,7 @@ namespace UniVox.Framework.Lighting
 
         }
 
-        HashSet<Vector3Int> ILightManager.Update() 
+        HashSet<Vector3Int> ILightManager.Update()
         {
             return lightManager.Update();
         }
@@ -102,7 +101,7 @@ namespace UniVox.Framework.Lighting
     }
 
     [System.Serializable]
-    public class ShaderVariable 
+    public class ShaderVariable
     {
         public string name;
         public float value;

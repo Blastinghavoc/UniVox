@@ -4,7 +4,7 @@ namespace UniVox.Framework
 {
     [BurstCompile]
     [System.Serializable]
-    public struct RotatedVoxelEntry 
+    public struct RotatedVoxelEntry
     {
         public int flatIndex;
         public VoxelRotation rotation;

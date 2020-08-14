@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-using System.Collections;
-using Unity.Jobs;
+﻿using Unity.Jobs;
 
 namespace UniVox.Framework.Jobified
 {
@@ -21,12 +19,12 @@ namespace UniVox.Framework.Jobified
             this.job = job;
         }
 
-        public void Run() 
+        public void Run()
         {
             job.Run();
         }
 
-        public JobHandle Schedule() 
+        public JobHandle Schedule()
         {
             return job.Schedule();
         }

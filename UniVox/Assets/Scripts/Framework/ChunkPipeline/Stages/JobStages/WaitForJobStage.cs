@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using Unity.Jobs;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Profiling;
 using UniVox.Framework.ChunkPipeline.VirtualJobs;
-using UniVox.Framework.ChunkPipeline.WaitForNeighbours;
 
 namespace UniVox.Framework.ChunkPipeline
 {
-    public abstract class WaitForJobStage<T> : AbstractPipelineStage, IDisposable,IWaitForJobStage
+    public abstract class WaitForJobStage<T> : AbstractPipelineStage, IDisposable, IWaitForJobStage
     {
         Dictionary<Vector3Int, AbstractPipelineJob<T>> jobs = new Dictionary<Vector3Int, AbstractPipelineJob<T>>();
 
@@ -22,23 +19,23 @@ namespace UniVox.Framework.ChunkPipeline
 
         public override int EntryLimit => MaxInStage - Count;
 
-        public WaitForJobStage(string name, int order, IChunkPipeline pipeline, 
-            int maxInStage) : base(name, order,pipeline)
+        public WaitForJobStage(string name, int order, IChunkPipeline pipeline,
+            int maxInStage) : base(name, order, pipeline)
         {
             MaxInStage = maxInStage;
         }
 
         protected abstract AbstractPipelineJob<T> MakeJob(Vector3Int chunkId);
-        protected abstract void OnJobDone(Vector3Int chunkId,T result);
+        protected abstract void OnJobDone(Vector3Int chunkId, T result);
 
         public override void Update()
-        {            
+        {
             base.Update();
 
             foreach (var pair in jobs)
             {
                 var chunkId = pair.Key;
-                var job = pair.Value;                
+                var job = pair.Value;
                 if (job.Done)
                 {
                     if (CheckAndResolvePreconditionsBeforeExit(chunkId))
@@ -50,7 +47,7 @@ namespace UniVox.Framework.ChunkPipeline
                         //Remove this id from the stage, as it's moving on
                         removalHelper.Add(chunkId);
                     }
-                }                
+                }
             }
 
             foreach (var item in removalHelper)
@@ -80,18 +77,18 @@ namespace UniVox.Framework.ChunkPipeline
             return true;
         }
 
-        public override void Add(Vector3Int incoming,ChunkStageData stageData)
+        public override void Add(Vector3Int incoming, ChunkStageData stageData)
         {
             if (!TerminateHereCondition(stageData))
             {
-                Assert.IsFalse(jobs.ContainsKey(incoming),$"Job stages do not support duplicates," +
+                Assert.IsFalse(jobs.ContainsKey(incoming), $"Job stages do not support duplicates," +
                     $" tried to add {incoming} when it already existed in stage {Name}");
 
-                AddJob(incoming);                
+                AddJob(incoming);
             }
         }
 
-        private void AddJob(Vector3Int item) 
+        private void AddJob(Vector3Int item)
         {
             var job = MakeJob(item);
             jobs.Add(item, job);
@@ -102,14 +99,14 @@ namespace UniVox.Framework.ChunkPipeline
         /// This means waiting for any UnityJobs (IJobs)
         /// to finish
         /// </summary>
-        public void Dispose() 
+        public void Dispose()
         {
             //Debug.Log($"Disposing of {Count} unfinished jobs in stage {Name}");
             foreach (var job in jobs.Values)
             {
                 job.Dispose();
             }
-            jobs.Clear();            
+            jobs.Clear();
         }
 
         public override bool Contains(Vector3Int chunkID)
@@ -119,8 +116,8 @@ namespace UniVox.Framework.ChunkPipeline
     }
 
     //Symbolic interface
-    public interface IWaitForJobStage 
-    { 
-    
+    public interface IWaitForJobStage
+    {
+
     }
 }

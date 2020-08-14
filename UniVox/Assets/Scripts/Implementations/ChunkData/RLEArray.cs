@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using Unity;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Profiling;
@@ -35,19 +34,19 @@ namespace UniVox.Implementations.ChunkData
         private List<Run> runs = new List<Run>();
 
         //Empty constructor
-        public RLEArray() 
+        public RLEArray()
         {
-        
+
         }
 
         public RLEArray(Vector3Int dimensions)
-        {            
+        {
             InitialiseEmpty(dimensions);
         }
 
         public RLEArray(Vector3Int dimensions, T[] initialValues)
         {
-            InitialiseWithData(dimensions,initialValues);
+            InitialiseWithData(dimensions, initialValues);
         }
 
         public virtual void InitialiseEmpty(Vector3Int dimensions)
@@ -62,7 +61,7 @@ namespace UniVox.Implementations.ChunkData
         {
             Profiler.BeginSample("RLE From Array");
             Capacity = initialData.Length;
-            Assert.AreEqual(dimensions.x * dimensions.y * dimensions.z, Capacity,"Length of initial data must equal product of dimensions");
+            Assert.AreEqual(dimensions.x * dimensions.y * dimensions.z, Capacity, "Length of initial data must equal product of dimensions");
 
             //Initialise from array
             T currentRunValue = default;
@@ -89,7 +88,7 @@ namespace UniVox.Implementations.ChunkData
                 runs.Add(new Run() { range = range, value = currentRunValue });
             }
             Profiler.EndSample();
-        }        
+        }
 
         public T[] ToArray()
         {
@@ -279,6 +278,6 @@ namespace UniVox.Implementations.ChunkData
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
-        }        
+        }
     }
 }

@@ -95,7 +95,7 @@ namespace UniVox.Implementations.ProcGen
                             if (worldSettings.MakeCaves)
                             {
                                 //3D noise for caves
-                                float caveNoise = noise.snoise(new float4(pos * worldSettings.CaveScale,worldSettings.seed));
+                                float caveNoise = noise.snoise(new float4(pos * worldSettings.CaveScale, worldSettings.seed));
 
                                 if (caveNoise > worldSettings.CaveThreshold)
                                 {

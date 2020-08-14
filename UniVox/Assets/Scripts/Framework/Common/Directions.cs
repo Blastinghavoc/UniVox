@@ -1,9 +1,7 @@
 ﻿using UnityEngine;
-using System.Collections;
-using System.Globalization;
 
 namespace UniVox.Framework.Common
-{ 
+{
 
     public enum Direction : byte
     {

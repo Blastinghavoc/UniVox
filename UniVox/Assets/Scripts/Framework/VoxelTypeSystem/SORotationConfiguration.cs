@@ -1,6 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
 using Unity.Mathematics;
-using System.Collections.Generic;
+using UnityEngine;
 
 namespace UniVox.Framework
 {
@@ -8,7 +8,7 @@ namespace UniVox.Framework
     public class SORotationConfiguration : ScriptableObject
     {
         public bool3 AllowedRotationAxes;
-        [Range(1,3)]
+        [Range(1, 3)]
         public int MaximumSimultaneousRotations = 1;
 
         /// <summary>
@@ -19,7 +19,7 @@ namespace UniVox.Framework
         public List<AllowedRotationValue> allowedRotationsY;
         public List<AllowedRotationValue> allowedRotationsZ;
 
-        public bool RotationValid(VoxelRotation rotation) 
+        public bool RotationValid(VoxelRotation rotation)
         {
             if (!AllowedRotationAxes.x && rotation.x != 0)
             {
@@ -50,7 +50,7 @@ namespace UniVox.Framework
                 numRotationAxes++;
             }
 
-            if (numRotationAxes> MaximumSimultaneousRotations)
+            if (numRotationAxes > MaximumSimultaneousRotations)
             {
                 return false;
             }
@@ -77,11 +77,11 @@ namespace UniVox.Framework
         [System.Serializable]
         public struct AllowedRotationValue
         {
-            [Range(0,3)]
+            [Range(0, 3)]
             public byte r;
 
-            public static implicit operator AllowedRotationValue(byte b) => new AllowedRotationValue() { r = b};
-            public static explicit operator AllowedRotationValue(int i) => new AllowedRotationValue() { r = (byte)i};
+            public static implicit operator AllowedRotationValue(byte b) => new AllowedRotationValue() { r = b };
+            public static explicit operator AllowedRotationValue(int i) => new AllowedRotationValue() { r = (byte)i };
         }
     }
 }

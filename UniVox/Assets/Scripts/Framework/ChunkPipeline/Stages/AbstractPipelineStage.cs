@@ -55,7 +55,7 @@ namespace UniVox.Framework.ChunkPipeline
             return !pipeline.TargetStageGreaterThanCurrent(StageID, stageData);
         }
 
-        protected bool TerminateHereCondition(int targetStage) 
+        protected bool TerminateHereCondition(int targetStage)
         {
             return !(targetStage > StageID);
         }

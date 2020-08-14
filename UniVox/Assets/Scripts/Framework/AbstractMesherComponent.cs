@@ -3,9 +3,7 @@ using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Profiling;
 using UniVox.Framework.ChunkPipeline.VirtualJobs;
-using UniVox.Framework.Common;
 using UniVox.Framework.Jobified;
-using UniVox.Framework.Lighting;
 
 namespace UniVox.Framework
 {
@@ -62,7 +60,7 @@ namespace UniVox.Framework
 
             NeighbourData neighbourData = new NeighbourData();
             //Cache neighbour data          
-            neighbourData = JobUtils.CacheNeighbourData(chunkID, chunkManager);                  
+            neighbourData = JobUtils.CacheNeighbourData(chunkID, chunkManager);
 
 
             var meshingJob = createMeshingJob(new MeshJobData(chunkDimensions.ToNative(),

@@ -1,7 +1,5 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System;
 using Unity.Burst;
-using System;
 using Unity.Mathematics;
 
 namespace Utils.Noise
@@ -16,7 +14,7 @@ namespace Utils.Noise
         [NonSerialized] public float Seed;
         [NonSerialized] private float MaxAmplitudeCache;
 
-        public void Initialise() 
+        public void Initialise()
         {
             PrecalculateMaxNoiseAmplitude();
         }
@@ -63,7 +61,7 @@ namespace Utils.Noise
             return total / MaxAmplitudeCache;
         }
 
-        
+
     }
 
 }

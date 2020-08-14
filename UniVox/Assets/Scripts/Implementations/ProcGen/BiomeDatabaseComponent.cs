@@ -10,7 +10,7 @@ using Utils;
 
 namespace UniVox.Implementations.ProcGen
 {
-    public class BiomeDatabaseComponent: MonoBehaviour,IDisposable
+    public class BiomeDatabaseComponent : MonoBehaviour, IDisposable
     {
         public SOBiomeConfiguration config;
         public NativeBiomeDatabase BiomeDatabase { get; private set; }
@@ -21,7 +21,7 @@ namespace UniVox.Implementations.ProcGen
         private bool initialised = false;
         private bool disposed = false;
 
-        public void Initialise() 
+        public void Initialise()
         {
             if (!initialised)
             {
@@ -30,7 +30,7 @@ namespace UniVox.Implementations.ProcGen
             }
         }
 
-        public SOBiomeDefinition GetBiomeDefinition(int id) 
+        public SOBiomeDefinition GetBiomeDefinition(int id)
         {
             try
             {
@@ -42,33 +42,33 @@ namespace UniVox.Implementations.ProcGen
             }
         }
 
-        public int GetBiomeID(SOBiomeDefinition def) 
+        public int GetBiomeID(SOBiomeDefinition def)
         {
-            if (biomeIds.TryGetValue(def,out var id))
+            if (biomeIds.TryGetValue(def, out var id))
             {
                 return id;
             }
             throw new ArgumentException($"No id has been generated for biome definition {def.name}");
         }
 
-        public float GetMaxElevationFraction(SOBiomeDefinition def) 
+        public float GetMaxElevationFraction(SOBiomeDefinition def)
         {
             try
             {
                 var zonesContainingDef = config.elevationLowToHigh.Where(
                     (_) => _.moistureLevelsLowToHigh.Any(
-                        (moistDef)=>moistDef.biomeDefinition.Equals(def)
+                        (moistDef) => moistDef.biomeDefinition.Equals(def)
                         )
                     );
                 return zonesContainingDef.Select((zone) => zone.max).Max();
             }
             catch (Exception e)
             {
-                throw new ArgumentException($"A max elevation value could not be found for biome {def.name}",e);
-            }            
+                throw new ArgumentException($"A max elevation value could not be found for biome {def.name}", e);
+            }
         }
 
-        public NativeBiomeDatabase ConfigToNative(SOBiomeConfiguration config,VoxelTypeManager typeManager) 
+        public NativeBiomeDatabase ConfigToNative(SOBiomeConfiguration config, VoxelTypeManager typeManager)
         {
             List<NativeVoxelRange> allLayersList = new List<NativeVoxelRange>();
             List<StartEndRange> biomeLayersList = new List<StartEndRange>();
@@ -87,14 +87,14 @@ namespace UniVox.Implementations.ProcGen
                     NativeBiomeMoistureDefinition moistureDef = new NativeBiomeMoistureDefinition();
                     moistureDef.maxMoisturePercentage = moistureEntry.max;
 
-                    if (!biomeIds.TryGetValue(moistureEntry.biomeDefinition,out var id))
-                    {                   
+                    if (!biomeIds.TryGetValue(moistureEntry.biomeDefinition, out var id))
+                    {
                         //Create new biome data
                         id = biomeLayersList.Count;
-                        biomeIds.Add(moistureEntry.biomeDefinition,id );
+                        biomeIds.Add(moistureEntry.biomeDefinition, id);
                         biomeDefinitionsById.Add(moistureEntry.biomeDefinition);
 
-                        Assert.IsTrue(moistureEntry.biomeDefinition.topLayers.Count > 0,$"All biome definitions must have at least one layer,{moistureEntry.biomeDefinition.name} does not");
+                        Assert.IsTrue(moistureEntry.biomeDefinition.topLayers.Count > 0, $"All biome definitions must have at least one layer,{moistureEntry.biomeDefinition.name} does not");
                         StartEndRange layersForThisBiome = new StartEndRange() { start = allLayersList.Count };
 
                         foreach (var layer in moistureEntry.biomeDefinition.topLayers)
@@ -108,7 +108,7 @@ namespace UniVox.Implementations.ProcGen
                         layersForThisBiome.end = allLayersList.Count;
                         biomeLayersList.Add(layersForThisBiome);
                     }
-                    
+
                     moistureDef.biomeID = id;
 
                     allMoistureDefsList.Add(moistureDef);

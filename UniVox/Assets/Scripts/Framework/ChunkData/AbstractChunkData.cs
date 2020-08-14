@@ -251,7 +251,7 @@ namespace UniVox.Framework
 
         public LightValue GetLight(int x, int y, int z)
         {
-            return lightChunk[x,y,z];
+            return lightChunk[x, y, z];
         }
 
         public LightValue GetLight(Vector3Int pos)

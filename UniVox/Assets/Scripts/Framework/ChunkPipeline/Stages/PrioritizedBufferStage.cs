@@ -1,9 +1,7 @@
-﻿using System;
-using UnityEngine;
-using Priority_Queue;
+﻿using Priority_Queue;
+using System;
 using System.Collections.Generic;
-using UnityEngine.Profiling;
-using UnityEngine.Assertions;
+using UnityEngine;
 using UniVox.Framework.ChunkPipeline.WaitForNeighbours;
 
 namespace UniVox.Framework.ChunkPipeline
@@ -12,7 +10,7 @@ namespace UniVox.Framework.ChunkPipeline
     /// Stage that buffers items inside it until the next stage can accept them, dispatching them in
     /// a prioritised order.
     /// </summary>
-    public class PrioritizedBufferStage : AbstractPipelineStage,IDisposable
+    public class PrioritizedBufferStage : AbstractPipelineStage, IDisposable
     {
         SimplePriorityQueue<Vector3Int> queue = new SimplePriorityQueue<Vector3Int>();
 
@@ -26,15 +24,15 @@ namespace UniVox.Framework.ChunkPipeline
         /// <summary>
         /// Local list used to assist updating.
         /// </summary>
-        private List<Vector3Int> terminatingThisUpdateHelper = new List<Vector3Int>();      
+        private List<Vector3Int> terminatingThisUpdateHelper = new List<Vector3Int>();
 
-        public PrioritizedBufferStage(string name, int order, 
+        public PrioritizedBufferStage(string name, int order,
             IChunkPipeline pipeline,
             Func<Vector3Int, float> priorityFunc
             ) : base(name, order, pipeline)
         {
             getPriority = priorityFunc;
-            pipeline.OnChunkRemovedFromPipeline += WhenChunkRemovedFromPipeline;            
+            pipeline.OnChunkRemovedFromPipeline += WhenChunkRemovedFromPipeline;
         }
 
         public override void Initialise()
@@ -71,7 +69,7 @@ namespace UniVox.Framework.ChunkPipeline
         /// if the chunk is in this stage, send it back.
         /// </summary>
         /// <param name="chunkId"></param>
-        private void OnPreconditionFailure(Vector3Int chunkId) 
+        private void OnPreconditionFailure(Vector3Int chunkId)
         {
             if (queue.TryRemove(chunkId))
             {
@@ -103,7 +101,7 @@ namespace UniVox.Framework.ChunkPipeline
                 ///id should terminate here.
                 terminatingThisUpdateHelper.Add(chunkId);
                 return false;
-            }            
+            }
             return true;
         }
 
@@ -112,7 +110,7 @@ namespace UniVox.Framework.ChunkPipeline
             base.Update();
 
             //Get next stage's entry limit
-            int maxToMoveOn = pipeline.GetStage(StageID+1).EntryLimit;
+            int maxToMoveOn = pipeline.GetStage(StageID + 1).EntryLimit;
 
             int movedOn = 0;
 
@@ -122,9 +120,9 @@ namespace UniVox.Framework.ChunkPipeline
                 if (movedOn >= maxToMoveOn)
                 {
                     break;
-                }                
-                
-                if (pipeline.NextStageFreeForChunk(item,StageID))
+                }
+
+                if (pipeline.NextStageFreeForChunk(item, StageID))
                 {
                     //Just before the chunk would move on, re-check that the preconditions still hold
                     if (CheckAndResolvePreconditionsBeforeExit(item))
@@ -137,7 +135,7 @@ namespace UniVox.Framework.ChunkPipeline
                 {
                     //Otherwise, the chunk neither moves on nor terminates, it waits
                     continue;
-                }               
+                }
             }
 
             //Remove items from the queue when they move on
@@ -160,7 +158,7 @@ namespace UniVox.Framework.ChunkPipeline
             terminatingThisUpdateHelper.Clear();
         }
 
-        public override void Add(Vector3Int incoming,ChunkStageData stageData)
+        public override void Add(Vector3Int incoming, ChunkStageData stageData)
         {
             if (!TerminateHereCondition(stageData))
             {
@@ -180,6 +178,6 @@ namespace UniVox.Framework.ChunkPipeline
         public override bool Contains(Vector3Int chunkID)
         {
             return queue.Contains(chunkID);
-        }        
+        }
     }
 }

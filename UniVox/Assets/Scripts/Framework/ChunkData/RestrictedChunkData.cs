@@ -14,26 +14,16 @@ namespace UniVox.Framework
         private bool allowModifyLight;
         private bool allowModifyVoxels;
 
-        public RestrictedChunkData(IChunkData realData,bool allowModifyVoxels = false, bool allowModifyLight = false)
+        public RestrictedChunkData(IChunkData realData, bool allowModifyVoxels = false, bool allowModifyLight = false)
         {
             this.realData = realData;
             this.allowModifyVoxels = allowModifyVoxels;
             this.allowModifyLight = allowModifyLight;
         }
 
-        public VoxelTypeID this[Vector3Int index] { get => realData[index]; 
-            set {
-                if (!allowModifyVoxels)
-                {
-                    throw new System.NotImplementedException(); 
-                }
-                else
-                {
-                    realData[index] = value;
-                }
-            } 
-        }
-        public VoxelTypeID this[int i, int j, int k] { get => realData[i, j, k]; 
+        public VoxelTypeID this[Vector3Int index]
+        {
+            get => realData[index];
             set
             {
                 if (!allowModifyVoxels)
@@ -42,7 +32,22 @@ namespace UniVox.Framework
                 }
                 else
                 {
-                    realData[i,j,k] = value;
+                    realData[index] = value;
+                }
+            }
+        }
+        public VoxelTypeID this[int i, int j, int k]
+        {
+            get => realData[i, j, k];
+            set
+            {
+                if (!allowModifyVoxels)
+                {
+                    throw new System.NotImplementedException();
+                }
+                else
+                {
+                    realData[i, j, k] = value;
                 }
             }
         }

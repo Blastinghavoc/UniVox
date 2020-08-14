@@ -9,7 +9,7 @@ namespace UniVox.Implementations.ProcGen
     /// some voxel types, and then the rest is filled with a single type.
     /// </summary>
     [CreateAssetMenu(menuName = "UniVox/BiomeDefinition")]
-    public class SOBiomeDefinition : ScriptableObject 
+    public class SOBiomeDefinition : ScriptableObject
     {
         public List<VoxelRange> topLayers;
 

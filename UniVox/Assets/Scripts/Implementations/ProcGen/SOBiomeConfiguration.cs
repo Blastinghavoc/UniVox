@@ -8,22 +8,22 @@ namespace UniVox.Implementations.ProcGen
     public class SOBiomeConfiguration : ScriptableObject
     {
         public SOVoxelTypeDefinition defaultVoxelType;
-        public List<ElevationZone> elevationLowToHigh; 
+        public List<ElevationZone> elevationLowToHigh;
 
         [System.Serializable]
-        public class ElevationZone 
+        public class ElevationZone
         {
             public string Name;
             public List<BiomeMoistureDefinition> moistureLevelsLowToHigh;
-            [Range(0,1)]
+            [Range(0, 1)]
             public float max = 1;
         }
 
         [System.Serializable]
-        public class BiomeMoistureDefinition 
+        public class BiomeMoistureDefinition
         {
             public SOBiomeDefinition biomeDefinition;
-            [Range(0,1)]
+            [Range(0, 1)]
             public float max = 1;
         }
     }

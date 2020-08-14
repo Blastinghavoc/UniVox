@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using Unity.Jobs;
-using UnityEngine;
 using UnityEngine.Assertions;
 
 namespace Utils
 {
-    public class JobReferenceCounter<TypeOfKey,TypeOfResult> where TypeOfResult:struct
+    public class JobReferenceCounter<TypeOfKey, TypeOfResult> where TypeOfResult : struct
     {
-        public struct JobResultPair 
+        public struct JobResultPair
         {
             public JobHandle handle;
             public TypeOfResult result;
@@ -23,10 +22,10 @@ namespace Utils
             this.makeJob = makeJob;
         }
 
-        public void Add(TypeOfKey key, out JobHandle handle, out TypeOfResult result,out bool IsNewJob) 
+        public void Add(TypeOfKey key, out JobHandle handle, out TypeOfResult result, out bool IsNewJob)
         {
-            if (pendingJobs.TryGetValue(key,out var pair))
-            {                
+            if (pendingJobs.TryGetValue(key, out var pair))
+            {
                 counts[key] += 1;
                 IsNewJob = false;
             }
@@ -49,9 +48,9 @@ namespace Utils
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
-        public bool Done(TypeOfKey key) 
+        public bool Done(TypeOfKey key)
         {
-            if (counts.TryGetValue(key,out var count))
+            if (counts.TryGetValue(key, out var count))
             {
                 --count;
                 if (count <= 0)

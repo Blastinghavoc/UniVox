@@ -4,7 +4,7 @@ using UnityEngine;
 namespace UniVox.UI
 {
     public class UIManager : MonoBehaviour
-    {      
+    {
 
         [SerializeField] private KeyMenuPair[] menuKeybindings = null;
 
@@ -66,7 +66,7 @@ namespace UniVox.UI
         }
 
         [System.Serializable]
-        private class KeyMenuPair 
+        private class KeyMenuPair
         {
             public AbstractUIController controller = null;
             public KeyCode key = KeyCode.None;

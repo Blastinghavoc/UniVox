@@ -9,8 +9,8 @@ namespace UniVox.Implementations.ChunkData
     [System.Serializable]
     public class ChunkDataFactory
     {
-        public enum ChunkDataType 
-        { 
+        public enum ChunkDataType
+        {
             FlatArray,
             MultiArray,
             Octree,
@@ -20,7 +20,7 @@ namespace UniVox.Implementations.ChunkData
         public ChunkDataType typeToCreate;
         public bool lazy = false;
 
-        public IChunkData Create(Vector3Int chunkID,Vector3Int chunkDimensions , VoxelTypeID[] initialData = null) 
+        public IChunkData Create(Vector3Int chunkID, Vector3Int chunkDimensions, VoxelTypeID[] initialData = null)
         {
             switch (typeToCreate)
             {

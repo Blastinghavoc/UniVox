@@ -92,7 +92,7 @@ namespace UniVox.Framework
             chunkPool = new PrefabPool() { prefab = chunkPrefab };
 
             VoxelTypeManager = FindObjectOfType<VoxelTypeManager>();
-            Assert.IsNotNull(VoxelTypeManager, "Chunk Manager must have a reference to a Voxel Type Manager");            
+            Assert.IsNotNull(VoxelTypeManager, "Chunk Manager must have a reference to a Voxel Type Manager");
 
             //Initialise VoxelWorldInterface
             var worldInterface = FindObjectOfType<VoxelWorldInterface>();
@@ -176,7 +176,7 @@ namespace UniVox.Framework
             lightManager.Dispose();
 
             VoxelTypeManager.Dispose();
-        }        
+        }
 
         public bool IsChunkComplete(Vector3Int chunkId)
         {
@@ -370,7 +370,7 @@ namespace UniVox.Framework
         /// <returns></returns>
         public float GetManhattanDistanceFromPlayer(Vector3Int chunkID)
         {
-            var displacement = playArea.playerChunkID-chunkID;
+            var displacement = playArea.playerChunkID - chunkID;
             return displacement.ManhattanMagnitude();
         }
 
@@ -638,12 +638,12 @@ namespace UniVox.Framework
 
         #region Test and debug facilitating methods
 
-        public void SetRenderedRadii(Vector3Int radii) 
+        public void SetRenderedRadii(Vector3Int radii)
         {
             playArea.SetRenderedChunkRadii(radii);
         }
 
-        public void SetIncludeLighting(bool include) 
+        public void SetIncludeLighting(bool include)
         {
             includeLighting = include;
         }

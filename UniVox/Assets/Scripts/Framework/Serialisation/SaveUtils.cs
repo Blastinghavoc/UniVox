@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace UniVox.Framework.Serialisation
 {
-    public static class SaveUtils 
+    public static class SaveUtils
     {
         public static bool DoSave { get; set; } = false;
         public static string WorldName { get; set; } = null;
@@ -14,12 +14,12 @@ namespace UniVox.Framework.Serialisation
         public static string AllWorldsSaveDirectory { get => Application.persistentDataPath + $"/worlds/"; }
         public static string BasePath { get => Application.persistentDataPath; }
 
-        public static string SaveDirectoryForWorldName(string worldName) 
-        { 
+        public static string SaveDirectoryForWorldName(string worldName)
+        {
             return AllWorldsSaveDirectory + $"{worldName}/";
         }
 
-        public static string[] GetAllWorldNames() 
+        public static string[] GetAllWorldNames()
         {
             if (!Directory.Exists(AllWorldsSaveDirectory))
             {
@@ -48,7 +48,7 @@ namespace UniVox.Framework.Serialisation
         {
             try
             {
-                Directory.Delete(SaveDirectoryForWorldName(worldName), true);                
+                Directory.Delete(SaveDirectoryForWorldName(worldName), true);
             }
             catch (System.Exception e)
             {
