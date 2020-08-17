@@ -24,6 +24,8 @@ namespace UniVox.Gameplay
         private void Start()
         {
             Position = StartLocation;
+            transform.rotation = Quaternion.Euler(0, 0, 0);
+
             WorldInterface = FindObjectOfType<VoxelWorldInterface>();
             Assert.IsNotNull(WorldInterface, $"A {typeof(VoxelPlayer)} must have a reference to a VoxelWorldInterface to operate");
 

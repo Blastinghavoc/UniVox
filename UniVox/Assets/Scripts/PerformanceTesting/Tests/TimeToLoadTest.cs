@@ -40,11 +40,16 @@ namespace PerformanceTesting
             long triangleCount = 0;
             foreach (var meshfilter in FindObjectsOfType<MeshFilter>())
             {
-                vertexCount += meshfilter.mesh.vertices.Length;
+                if (meshfilter == null || meshfilter.sharedMesh == null)
+                {
+                    continue;
+                }
+                vertexCount += meshfilter.sharedMesh.vertices.Length;
                 //Triangles array contains 3 indices per triangle
-                triangleCount += meshfilter.mesh.triangles.Length / 3;
+                triangleCount += meshfilter.sharedMesh.triangles.Length / 3;
             }
             Log($"Active meshes contained {vertexCount} vertices across {triangleCount} triangles");
+            yield return null;
         }
     }
 }
