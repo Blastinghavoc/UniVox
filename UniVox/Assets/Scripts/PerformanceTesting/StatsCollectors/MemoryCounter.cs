@@ -7,25 +7,22 @@ namespace PerformanceTesting
     {
         public List<long> memoryPerFrame = new List<long>();
 
-        public long BaseLine { get; private set; }
-
         public string VariableName { get; } = "MemoryUsageBytes";
 
         public List<string> Data { get => CSVUtils.ListToStringList(memoryPerFrame); }
 
         public MemoryCounter()
         {
-            BaseLine = Profiler.GetTotalAllocatedMemoryLong();
         }
 
         public void Update()
         {
-            memoryPerFrame.Add(Profiler.GetTotalAllocatedMemoryLong() - BaseLine);
+            memoryPerFrame.Add(Profiler.GetTotalAllocatedMemoryLong());
         }
 
         public void Update(long memoryUsedByStatsCollecting)
         {
-            memoryPerFrame.Add((Profiler.GetTotalAllocatedMemoryLong() - BaseLine) - memoryUsedByStatsCollecting);
+            memoryPerFrame.Add((Profiler.GetTotalAllocatedMemoryLong()) - memoryUsedByStatsCollecting);
         }
 
         public long EstimateMemoryUsageBytes()

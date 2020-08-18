@@ -38,9 +38,6 @@ namespace PerformanceTesting
             perFrameCounters.Add(frameCounter);
             memoryCounter = new MemoryCounter();
             perFrameCounters.Add(memoryCounter);
-
-            //make sure to log the memory usage baseline
-            log.Add($"Memory usage baseline: {memoryCounter.BaseLine}");
         }
 
         /// <summary>
