@@ -14,6 +14,12 @@ namespace PerformanceTesting
             ResetLog();
 
             chunkManager.Initialise();
+            var player = chunkManager.GetPlayer();
+            //Ensure player is at start position
+            player.Position = player.StartPosition;
+            player.Rigidbody.velocity = Vector3.zero;
+            //Activate flight mode
+            TestFacilitator.virtualPlayer.SetButtonDown("ToggleFly");
 
             //Wait until all chunks are complete
             while (!chunkManager.PipelineIsSettled())
@@ -26,13 +32,10 @@ namespace PerformanceTesting
             //Start the real test, recording frame time and memory while flying up then forward
             ResetPerFrameCounters();
 
-            var player = chunkManager.GetPlayer();
 
             var distanceSqr = WalkDistance * WalkDistance;
 
             var startTime = Time.unscaledTime;
-            //Activate flight mode
-            TestFacilitator.virtualPlayer.SetButtonDown("ToggleFly");
 
             //Force the player to fly up
             TestFacilitator.virtualPlayer.SetAxis("Fly", 1);

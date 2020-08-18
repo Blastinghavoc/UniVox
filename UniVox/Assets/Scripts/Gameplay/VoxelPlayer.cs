@@ -19,6 +19,9 @@ namespace UniVox.Gameplay
         private Vector3 camPos;
 
         public Vector3 Position { get => rigidbody.position; set => rigidbody.position = value; }
+        public Vector3 StartPosition { get => StartLocation; }
+
+        public Rigidbody Rigidbody { get => rigidbody; }
 
 
         private void Start()
@@ -34,6 +37,7 @@ namespace UniVox.Gameplay
             playercam = Camera.main;
             camPos = playercam.transform.position;
             rigidbody.useGravity = false;
+            rigidbody.velocity = Vector3.zero;
             StartCoroutine(SpawnpointFinder());
         }
 
