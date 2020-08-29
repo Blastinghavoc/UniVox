@@ -24,6 +24,11 @@ namespace PerformanceTesting
             while (!chunkManager.PipelineIsSettled())
             {
                 UpdatePerFrameCounters();
+                //if (Time.realtimeSinceStartup-startTime >= MaxRealTimeSeconds)
+                //{
+                //    Log("Forcibly ended due to exceeding time limit");
+                //    break;
+                //}
                 yield return null;
             }
 

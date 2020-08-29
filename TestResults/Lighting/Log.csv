@@ -1,0 +1,252 @@
+
+
+
+Test NoLighting\LightOff\TimeToLoad\Greedy_FlatArray\R0:
+Recorded 898 frames
+Peak memory usage of 155082443
+Time to load was 15.3401 seconds
+Time limit was 60 seconds
+Active meshes contained 1176512 vertices across 600280 triangles
+
+Finished after total time of 18.1222
+
+
+
+Test NoLighting\LightOn\TimeToLoad\Greedy_FlatArray\R0:
+Recorded 1313 frames
+Peak memory usage of 233075147
+Time to load was 22.42294 seconds
+Time limit was 60 seconds
+Active meshes contained 1197264 vertices across 612386 triangles
+
+Finished after total time of 25.11059
+
+
+
+Test NoLighting\LightOff\FlyForward\Greedy_FlatArray\R0:
+Took 28.47534 seconds to fly up 42.70244 meters and 160 meters horizontally
+Frame time stats: Min 8.4748, Max 37.9913, Mean 16.72184
+Peak memory usage: 253229723
+
+Finished after total time of 47.77188
+
+
+
+Test NoLighting\LightOn\FlyForward\Greedy_FlatArray\R0:
+Took 28.6593 seconds to fly up 43.96666 meters and 160 meters horizontally
+Frame time stats: Min 6.0023, Max 40.0915, Mean 16.7214
+Peak memory usage: 273181171
+
+Finished after total time of 55.18703
+
+
+
+Test NoLighting\LightOff\PlaceDelete1Block\Greedy_FlatArray\R0:
+Grace period 10 frames
+Num Blocks: 1
+Break time millis: 33.18787
+Place time millis: 33.34045
+Peak memory: 254765052
+
+Finished after total time of 19.54543
+
+
+
+Test NoLighting\LightOn\PlaceDelete1Block\Greedy_FlatArray\R0:
+Grace period 10 frames
+Num Blocks: 1
+Break time millis: 32.97424
+Place time millis: 33.3252
+Peak memory: 235413061
+
+Finished after total time of 26.34383
+
+
+
+Test NoLighting\LightOff\PlaceDeleteManyBlocks\Greedy_FlatArray\R0:
+Grace period 10 frames
+Num Blocks: 27000
+Break time millis: 248.3063
+Place time millis: 300.0031
+Peak memory: 236636593
+
+Finished after total time of 20.37849
+
+
+
+Test NoLighting\LightOn\PlaceDeleteManyBlocks\Greedy_FlatArray\R0:
+Grace period 10 frames
+Num Blocks: 27000
+Break time millis: 503.7231
+Place time millis: 369.3542
+Peak memory: 235297293
+
+Finished after total time of 27.80992
+
+
+
+Test NoLighting\LightOff\TimeToLoad\Greedy_FlatArray\R1:
+Recorded 923 frames
+Peak memory usage of 235581125
+Time to load was 15.76974 seconds
+Time limit was 60 seconds
+Active meshes contained 1177156 vertices across 600602 triangles
+
+Finished after total time of 18.67911
+
+
+
+Test NoLighting\LightOn\TimeToLoad\Greedy_FlatArray\R1:
+Recorded 1316 frames
+Peak memory usage of 235278152
+Time to load was 22.36539 seconds
+Time limit was 60 seconds
+Active meshes contained 1197432 vertices across 612470 triangles
+
+Finished after total time of 25.12717
+
+
+
+Test NoLighting\LightOff\FlyForward\Greedy_FlatArray\R1:
+Took 28.50983 seconds to fly up 42.84291 meters and 160 meters horizontally
+Frame time stats: Min 10.0203, Max 33.0787, Mean 16.71165
+Peak memory usage: 253846479
+
+Finished after total time of 49.02167
+
+
+
+Test NoLighting\LightOn\FlyForward\Greedy_FlatArray\R1:
+Took 28.6604 seconds to fly up 43.96666 meters and 160 meters horizontally
+Frame time stats: Min 6.9035, Max 37.6669, Mean 16.72126
+Peak memory usage: 273402876
+
+Finished after total time of 55.7034
+
+
+
+Test NoLighting\LightOff\PlaceDelete1Block\Greedy_FlatArray\R1:
+Grace period 10 frames
+Num Blocks: 1
+Break time millis: 33.17261
+Place time millis: 33.41675
+Peak memory: 254931150
+
+Finished after total time of 19.06207
+
+
+
+Test NoLighting\LightOn\PlaceDelete1Block\Greedy_FlatArray\R1:
+Grace period 10 frames
+Num Blocks: 1
+Break time millis: 33.05054
+Place time millis: 33.14209
+Peak memory: 235251721
+
+Finished after total time of 26.32693
+
+
+
+Test NoLighting\LightOff\PlaceDeleteManyBlocks\Greedy_FlatArray\R1:
+Grace period 10 frames
+Num Blocks: 27000
+Break time millis: 148.6511
+Place time millis: 249.7864
+Peak memory: 237016142
+
+Finished after total time of 20.41156
+
+
+
+Test NoLighting\LightOn\PlaceDeleteManyBlocks\Greedy_FlatArray\R1:
+Grace period 10 frames
+Num Blocks: 27000
+Break time millis: 616.272
+Place time millis: 449.8901
+Peak memory: 235543187
+
+Finished after total time of 28.09348
+
+
+
+Test NoLighting\LightOff\TimeToLoad\Greedy_FlatArray\R2:
+Recorded 919 frames
+Peak memory usage of 235905127
+Time to load was 15.80862 seconds
+Time limit was 60 seconds
+Active meshes contained 1177480 vertices across 600764 triangles
+
+Finished after total time of 18.64569
+
+
+
+Test NoLighting\LightOn\TimeToLoad\Greedy_FlatArray\R2:
+Recorded 1341 frames
+Peak memory usage of 235635722
+Time to load was 22.65277 seconds
+Time limit was 60 seconds
+Active meshes contained 1197260 vertices across 612384 triangles
+
+Finished after total time of 25.39398
+
+
+
+Test NoLighting\LightOff\FlyForward\Greedy_FlatArray\R2:
+Took 28.49341 seconds to fly up 42.84291 meters and 160 meters horizontally
+Frame time stats: Min 7.0958, Max 57.0567, Mean 16.82032
+Peak memory usage: 254395706
+
+Finished after total time of 49.10486
+
+
+
+Test NoLighting\LightOn\FlyForward\Greedy_FlatArray\R2:
+Took 28.67676 seconds to fly up 44.10712 meters and 160 meters horizontally
+Frame time stats: Min 7.9872, Max 40.2872, Mean 16.71152
+Peak memory usage: 273561913
+
+Finished after total time of 55.98663
+
+
+
+Test NoLighting\LightOff\PlaceDelete1Block\Greedy_FlatArray\R2:
+Grace period 10 frames
+Num Blocks: 1
+Break time millis: 33.81348
+Place time millis: 32.77588
+Peak memory: 255490404
+
+Finished after total time of 19.6452
+
+
+
+Test NoLighting\LightOn\PlaceDelete1Block\Greedy_FlatArray\R2:
+Grace period 10 frames
+Num Blocks: 1
+Break time millis: 33.69141
+Place time millis: 33.81348
+Peak memory: 235033321
+
+Finished after total time of 26.59369
+
+
+
+Test NoLighting\LightOff\PlaceDeleteManyBlocks\Greedy_FlatArray\R2:
+Grace period 10 frames
+Num Blocks: 27000
+Break time millis: 216.6748
+Place time millis: 249.939
+Peak memory: 237170646
+
+Finished after total time of 19.89539
+
+
+
+Test NoLighting\LightOn\PlaceDeleteManyBlocks\Greedy_FlatArray\R2:
+Grace period 10 frames
+Num Blocks: 27000
+Break time millis: 472.229
+Place time millis: 299.8657
+Peak memory: 235284302
+
+Finished after total time of 27.37683

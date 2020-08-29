@@ -158,9 +158,9 @@ namespace PerformanceTesting
                                 ///Cleanup--------------
                                 test.Clear();
                                 //reload the scene
-                                yield return SceneManager.LoadSceneAsync(SceneManager.GetActiveScene().buildIndex);
+                                yield return SceneManager.LoadSceneAsync(SceneManager.GetActiveScene().buildIndex,LoadSceneMode.Single);
                                 //Do garbage collection
-                                GC.Collect(GC.MaxGeneration, GCCollectionMode.Default, true);
+                                GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true);
 
                                 yield return new WaitForSecondsRealtime(2);
                                 //Locate Worlds object in scene

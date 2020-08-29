@@ -14,6 +14,7 @@ namespace PerformanceTesting
 
         protected FrameCounter frameCounter;
         protected MemoryCounter memoryCounter;
+        protected AdjustedMemoryCounter adjustedMemoryCounter;
 
         protected List<IStatsCollector> perFrameCounters;
 
@@ -38,6 +39,8 @@ namespace PerformanceTesting
             perFrameCounters.Add(frameCounter);
             memoryCounter = new MemoryCounter();
             perFrameCounters.Add(memoryCounter);
+            adjustedMemoryCounter = new AdjustedMemoryCounter(memoryCounter);
+            perFrameCounters.Add(adjustedMemoryCounter);
         }
 
         /// <summary>

@@ -38,5 +38,14 @@ namespace Utils.Pooling
             pool.Add(obj);
         }
 
+        public void DestroyAllPooledObjects() 
+        {
+            while (pool.Count > 0)
+            {
+                var obj = pool.Next();
+                Object.Destroy(obj);
+            }
+        }
+
     }
 }

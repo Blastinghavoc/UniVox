@@ -418,6 +418,52 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 5b1c90c2d322bbf48890283c565b2b7f, type: 3}
+--- !u!114 &299326017
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6061144536889847816}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9417ea322804d09478ea1f7e0bf533a8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Parrallel: 1
+  chunkDataFactory:
+    typeToCreate: 0
+    lazy: 1
+  worldSettings:
+    seed: 1337
+    HeightmapScale: 240
+    MoistureMapScale: 1000
+    MaxHeightmapHeight: 95
+    HeightmapExponentPositive: 2
+    HeightmapExponentNegative: 1.2
+    HeightmapYOffset: 0
+    MakeCaves: 1
+    CaveThreshold: 0.35
+    CaveScale: 60
+  treeSettings:
+    TreemapScale: 1
+    TreeThreshold: 0.9
+  treemapNoise:
+    Octaves: 1
+    Persistence: 0.5
+    Lacunarity: 2
+  heightmapNoise:
+    Octaves: 5
+    Persistence: 0.9
+    Lacunarity: 1.5
+  moisturemapNoise:
+    Octaves: 2
+    Persistence: 0.5
+    Lacunarity: 4
+  bedrockType: {fileID: 11400000, guid: 3b5947e841c3a4845b8c9cbf0efbbebc, type: 2}
+  waterType: {fileID: 11400000, guid: 29a81a7c3885cee43ad6f88a9ba44766, type: 2}
+  biomeDatabaseComponent: {fileID: 8231436748876792069}
+  oreSettings: {fileID: 7262001588924966393}
 --- !u!1001 &331103219
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -853,256 +899,13 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 627715400}
   m_CullTransparentMesh: 0
---- !u!1001 &638888333
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 1998389611}
-    m_Modifications:
-    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: Player
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: renderedChunksRadii.y
-      value: 8
-      objectReference: {fileID: 0}
-    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: MaxGeneratedPerUpdate
-      value: 8
-      objectReference: {fileID: 0}
-    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: GenerateStructures
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: MaxStructurePerUpdate
-      value: 24
-      objectReference: {fileID: 0}
-    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: MaxMeshedPerUpdate
-      value: 24
-      objectReference: {fileID: 0}
-    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: playArea.collidableChunksRadii.x
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: playArea.collidableChunksRadii.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: playArea.collidableChunksRadii.z
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: playArea.renderedChunksRadii.x
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: playArea.renderedChunksRadii.y
-      value: 8
-      objectReference: {fileID: 0}
-    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: playArea.renderedChunksRadii.z
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: playArea.limitWorldHeight
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: playArea.verticalChunkLimit
-      value: 8
-      objectReference: {fileID: 0}
-    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: playArea.updateRate
-      value: 80
-      objectReference: {fileID: 0}
-    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: player
-      value: 
-      objectReference: {fileID: 1832009154}
-    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: generateStructures
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: worldSizeLimits.limitWorldHeight
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: worldSizeLimits.verticalChunkLimit
-      value: 8
-      objectReference: {fileID: 0}
-    - target: {fileID: 4046943910423824644, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: LightManagerGO
-      value: 
-      objectReference: {fileID: 1059055053}
-    - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: VoxelTypeManager
-      value: 
-      objectReference: {fileID: 398304577423018871, guid: 579d24a84d9385447b0eb6819a968722,
-        type: 3}
-    - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: Player
-      value: 
-      objectReference: {fileID: 398304578996345519, guid: 579d24a84d9385447b0eb6819a968722,
-        type: 3}
-    - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: MaxGeneratedPerUpdate
-      value: 24
-      objectReference: {fileID: 0}
-    - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: renderedChunksRadii.y
-      value: 16
-      objectReference: {fileID: 0}
-    - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: renderedChunksRadii.x
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: renderedChunksRadii.z
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: chunkDimensions.x
-      value: 16
-      objectReference: {fileID: 0}
-    - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: chunkDimensions.y
-      value: 16
-      objectReference: {fileID: 0}
-    - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: chunkDimensions.z
-      value: 16
-      objectReference: {fileID: 0}
-    - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: limitWorldHeight
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: verticalChunkLimit
-      value: 8
-      objectReference: {fileID: 0}
-    - target: {fileID: 6061144537135917620, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: MaxMeshedPerUpdate
-      value: 12
-      objectReference: {fileID: 0}
-    - target: {fileID: 6061144537135917621, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6061144537135917621, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6061144537135917621, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6061144537135917621, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: m_LocalRotation.x
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6061144537135917621, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: m_LocalRotation.y
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6061144537135917621, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: m_LocalRotation.z
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6061144537135917621, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6061144537135917621, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: m_RootOrder
-      value: 4
-      objectReference: {fileID: 0}
-    - target: {fileID: 6061144537135917621, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6061144537135917621, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6061144537135917621, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6061144537135917622, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: m_Name
-      value: CullingProceduralSVO
-      objectReference: {fileID: 0}
-    - target: {fileID: 6061144537135917622, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents:
-    - {fileID: 6061144537135917626, guid: 37b9cc2f16198bf4c84ddc72031aedb3, type: 3}
-  m_SourcePrefab: {fileID: 100100000, guid: 37b9cc2f16198bf4c84ddc72031aedb3, type: 3}
---- !u!1 &638888334 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 6061144537135917622, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-    type: 3}
-  m_PrefabInstance: {fileID: 638888333}
-  m_PrefabAsset: {fileID: 0}
 --- !u!114 &638888335
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 638888334}
+  m_GameObject: {fileID: 6061144537640567739}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9417ea322804d09478ea1f7e0bf533a8, type: 3}
@@ -1140,15 +943,8 @@ MonoBehaviour:
     Lacunarity: 4
   bedrockType: {fileID: 11400000, guid: 3b5947e841c3a4845b8c9cbf0efbbebc, type: 2}
   waterType: {fileID: 11400000, guid: 29a81a7c3885cee43ad6f88a9ba44766, type: 2}
-  oceanBiome: {fileID: 11400000, guid: bc7732a614701f04ca9c506c02132cc4, type: 2}
   biomeDatabaseComponent: {fileID: 8231436748876792069}
   oreSettings: {fileID: 7262001588924966393}
---- !u!4 &638888336 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 6061144537135917621, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
-    type: 3}
-  m_PrefabInstance: {fileID: 638888333}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
@@ -1449,6 +1245,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   text: {fileID: 100792667}
+--- !u!114 &900636019
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6061144537640567739}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3ab5b525b6386c143a010fbc46fd0390, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Parrallel: 1
 --- !u!1 &921826879
 GameObject:
   m_ObjectHideFlags: 0
@@ -1857,7 +1666,7 @@ PrefabInstance:
     - target: {fileID: 6061144537135917621, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: m_RootOrder
-      value: 5
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 6061144537135917621, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
@@ -2351,7 +2160,7 @@ PrefabInstance:
     - target: {fileID: 6061144537135917621, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: m_RootOrder
-      value: 6
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 6061144537135917621, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
@@ -2445,7 +2254,6 @@ MonoBehaviour:
     Lacunarity: 4
   bedrockType: {fileID: 11400000, guid: 3b5947e841c3a4845b8c9cbf0efbbebc, type: 2}
   waterType: {fileID: 11400000, guid: 29a81a7c3885cee43ad6f88a9ba44766, type: 2}
-  oceanBiome: {fileID: 11400000, guid: bc7732a614701f04ca9c506c02132cc4, type: 2}
   biomeDatabaseComponent: {fileID: 8231436748876792069}
   oreSettings: {fileID: 7262001588924966393}
 --- !u!4 &1141379473 stripped
@@ -3147,7 +2955,7 @@ PrefabInstance:
     - target: {fileID: 6061144537135917621, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: m_RootOrder
-      value: 3
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 6061144537135917621, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
@@ -3528,7 +3336,7 @@ PrefabInstance:
     - target: {fileID: 6061144537135917621, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
       propertyPath: m_RootOrder
-      value: 7
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 6061144537135917621, guid: 37b9cc2f16198bf4c84ddc72031aedb3,
         type: 3}
@@ -3608,7 +3416,6 @@ MonoBehaviour:
     Lacunarity: 4
   bedrockType: {fileID: 11400000, guid: 3b5947e841c3a4845b8c9cbf0efbbebc, type: 2}
   waterType: {fileID: 11400000, guid: 29a81a7c3885cee43ad6f88a9ba44766, type: 2}
-  oceanBiome: {fileID: 11400000, guid: bc7732a614701f04ca9c506c02132cc4, type: 2}
   biomeDatabaseComponent: {fileID: 8231436748876792069}
   oreSettings: {fileID: 7262001588924966393}
 --- !u!4 &1741429806 stripped
@@ -3648,7 +3455,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1998389611}
-  m_RootOrder: 1
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1777791465
 MonoBehaviour:
@@ -3719,10 +3526,11 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 2981057895866662365}
+  - {fileID: 6061144536889847819}
   - {fileID: 1777791462}
   - {fileID: 6061144535608697011}
   - {fileID: 1546963835}
-  - {fileID: 638888336}
+  - {fileID: 6061144537640567736}
   - {fileID: 1081904565}
   - {fileID: 1141379473}
   - {fileID: 1741429806}
@@ -4214,7 +4022,6 @@ MonoBehaviour:
     Lacunarity: 4
   bedrockType: {fileID: 11400000, guid: 3b5947e841c3a4845b8c9cbf0efbbebc, type: 2}
   waterType: {fileID: 11400000, guid: 29a81a7c3885cee43ad6f88a9ba44766, type: 2}
-  oceanBiome: {fileID: 11400000, guid: bc7732a614701f04ca9c506c02132cc4, type: 2}
   biomeDatabaseComponent: {fileID: 8231436748876792069}
   oreSettings: {fileID: 7262001588924966393}
 --- !u!1 &398304578072361652
@@ -4548,7 +4355,64 @@ MonoBehaviour:
   generateStructures: 1
   MaxStructurePerUpdate: 24
   MaxMeshedPerUpdate: 24
-  DebugPipeline: 0
+  LightManagerGO: {fileID: 1059055053}
+--- !u!114 &4046943909785018505
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6061144537640567739}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: adf42b26e5cc41e48babbdfb89bd2bb2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  chunkDimensions: {x: 16, y: 16, z: 16}
+  playArea:
+    collidableChunksRadii: {x: 1, y: 1, z: 1}
+    renderedChunksRadii: {x: 10, y: 8, z: 10}
+    updateRate: 80
+  worldSizeLimits:
+    limitWorldHeight: 1
+    verticalChunkLimit: 8
+  includeLighting: 1
+  player: {fileID: 1832009154}
+  chunkPrefab: {fileID: 5697091069406414600, guid: 9bd18ceaff69a844299df4d590e1d694,
+    type: 3}
+  MaxGeneratedPerUpdate: 8
+  generateStructures: 1
+  MaxStructurePerUpdate: 24
+  MaxMeshedPerUpdate: 24
+  LightManagerGO: {fileID: 1059055053}
+--- !u!114 &4046943910166614842
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6061144536889847816}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: adf42b26e5cc41e48babbdfb89bd2bb2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  chunkDimensions: {x: 16, y: 16, z: 16}
+  playArea:
+    collidableChunksRadii: {x: 1, y: 1, z: 1}
+    renderedChunksRadii: {x: 10, y: 8, z: 10}
+    updateRate: 80
+  worldSizeLimits:
+    limitWorldHeight: 1
+    verticalChunkLimit: 8
+  includeLighting: 1
+  player: {fileID: 1832009154}
+  chunkPrefab: {fileID: 5697091069406414600, guid: 9bd18ceaff69a844299df4d590e1d694,
+    type: 3}
+  MaxGeneratedPerUpdate: 8
+  generateStructures: 1
+  MaxStructurePerUpdate: 24
+  MaxMeshedPerUpdate: 24
   LightManagerGO: {fileID: 1059055053}
 --- !u!114 &4110033765651139083
 MonoBehaviour:
@@ -4591,7 +4455,6 @@ MonoBehaviour:
   generateStructures: 0
   MaxStructurePerUpdate: 10
   MaxMeshedPerUpdate: 10
-  DebugPipeline: 0
   LightManagerGO: {fileID: 1059055053}
 --- !u!1 &6061144535608697008
 GameObject:
@@ -4624,8 +4487,87 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1998389611}
-  m_RootOrder: 2
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &6061144536889847816
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6061144536889847819}
+  - component: {fileID: 4046943910166614842}
+  - component: {fileID: 6061144536889847817}
+  - component: {fileID: 299326017}
+  m_Layer: 8
+  m_Name: NaiveProcedural
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!114 &6061144536889847817
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6061144536889847816}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee8518fb812c19841ba7a855ed1439a1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Parrallel: 1
+--- !u!4 &6061144536889847819
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6061144536889847816}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1998389611}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!4 &6061144537640567736
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6061144537640567739}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1998389611}
+  m_RootOrder: 5
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &6061144537640567739
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6061144537640567736}
+  - component: {fileID: 4046943909785018505}
+  - component: {fileID: 900636019}
+  - component: {fileID: 638888335}
+  m_Layer: 8
+  m_Name: GreedyProceduralSVO
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
 --- !u!1 &6129928740833918942
 GameObject:
   m_ObjectHideFlags: 0
@@ -4728,7 +4670,6 @@ MonoBehaviour:
   generateStructures: 0
   MaxStructurePerUpdate: 10
   MaxMeshedPerUpdate: 10
-  DebugPipeline: 0
   LightManagerGO: {fileID: 1059055053}
 --- !u!114 &7859985559551744862
 MonoBehaviour:

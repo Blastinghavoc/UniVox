@@ -1,0 +1,24 @@
+
+
+
+Test SerialisationSuite\SerialisationOn\Serialisation\Greedy_FlatArray\R0:
+Took 0 millis to save 8 chunks, 
+with a total file size of 58330 bytes
+
+Finished after total time of 27.92595
+
+
+
+Test SerialisationSuite\SerialisationOn\Serialisation\Greedy_FlatArray\R1:
+Took 0 millis to save 8 chunks, 
+with a total file size of 58330 bytes
+
+Finished after total time of 28.24039
+
+
+
+Test SerialisationSuite\SerialisationOn\Serialisation\Greedy_FlatArray\R2:
+Took 0 millis to save 8 chunks, 
+with a total file size of 58330 bytes
+
+Finished after total time of 27.87598
