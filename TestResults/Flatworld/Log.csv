@@ -2,377 +2,377 @@
 
 
 Test FlatWorld\MeshingComparisons\TimeToLoad\Naive_FlatArray\R0:
-Recorded 231 frames
-Peak memory usage of 1977483985
-Time to load was 13.3424 seconds
+Recorded 248 frames
+Peak memory usage of 1972692624
+Time to load was 14.23267 seconds
 Time limit was 60 seconds
 Active meshes contained 32348160 vertices across 16174080 triangles
 
-Finished after total time of 16.68814
+Finished after total time of 17.89259
 
 
 
 Test FlatWorld\MeshingComparisons\TimeToLoad\Culling_FlatArray\R0:
-Recorded 226 frames
-Peak memory usage of 1979424781
-Time to load was 3.889153 seconds
+Recorded 250 frames
+Peak memory usage of 1979318729
+Time to load was 2.633274 seconds
 Time limit was 60 seconds
 Active meshes contained 82944 vertices across 41472 triangles
 
-Finished after total time of 6.115288
+Finished after total time of 4.967562
 
 
 
 Test FlatWorld\MeshingComparisons\TimeToLoad\Greedy_FlatArray\R0:
-Recorded 225 frames
-Peak memory usage of 89907614
-Time to load was 3.827374 seconds
+Recorded 256 frames
+Peak memory usage of 89835363
+Time to load was 2.829861 seconds
 Time limit was 60 seconds
 Active meshes contained 324 vertices across 162 triangles
 
-Finished after total time of 6.0257
+Finished after total time of 5.209301
 
 
 
 Test FlatWorld\MeshingComparisons\FlyForward\Naive_FlatArray\R0:
-Took 27.86011 seconds to fly up 38.44796 meters and 160 meters horizontally
-Frame time stats: Min 4.0487, Max 299.0096, Mean 25.49575
-Peak memory usage: 2931663789
+Took 27.83872 seconds to fly up 38.20745 meters and 160 meters horizontally
+Frame time stats: Min 2.8413, Max 346.5904, Mean 22.19404
+Peak memory usage: 2935859453
 
-Finished after total time of 44.05624
+Finished after total time of 43.56804
 
 
 
 Test FlatWorld\MeshingComparisons\FlyForward\Culling_FlatArray\R0:
-Took 27.77678 seconds to fly up 38.44796 meters and 160 meters horizontally
-Frame time stats: Min 13.5738, Max 20.7836, Mean 16.6626
-Peak memory usage: 2711004094
+Took 27.82681 seconds to fly up 38.20745 meters and 160 meters horizontally
+Frame time stats: Min 2.4178, Max 45.6167, Mean 8.770531
+Peak memory usage: 2709442701
 
-Finished after total time of 34.92493
+Finished after total time of 33.80769
 
 
 
 Test FlatWorld\MeshingComparisons\FlyForward\Greedy_FlatArray\R0:
-Took 27.7762 seconds to fly up 38.44796 meters and 160 meters horizontally
-Frame time stats: Min 14.3925, Max 19.8471, Mean 16.66269
-Peak memory usage: 97200581
+Took 27.842 seconds to fly up 38.20745 meters and 160 meters horizontally
+Frame time stats: Min 2.7941, Max 25.6082, Mean 8.530539
+Peak memory usage: 96595015
 
-Finished after total time of 35.35835
+Finished after total time of 33.62729
 
 
 
 Test FlatWorld\MeshingComparisons\PlaceDelete1Block\Naive_FlatArray\R0:
 Grace period 10 frames
 Num Blocks: 1
-Break time millis: 184.2957
-Place time millis: 183.2275
-Peak memory: 1986759521
+Break time millis: 199.8596
+Place time millis: 200.0885
+Peak memory: 1988951788
 
-Finished after total time of 18.76073
+Finished after total time of 19.41931
 
 
 
 Test FlatWorld\MeshingComparisons\PlaceDelete1Block\Culling_FlatArray\R0:
 Grace period 10 frames
 Num Blocks: 1
-Break time millis: 33.44727
-Place time millis: 33.18787
-Peak memory: 1983540573
+Break time millis: 20.27893
+Place time millis: 20.50781
+Peak memory: 1981809392
 
-Finished after total time of 7.348282
+Finished after total time of 6.140015
 
 
 
 Test FlatWorld\MeshingComparisons\PlaceDelete1Block\Greedy_FlatArray\R0:
 Grace period 10 frames
 Num Blocks: 1
-Break time millis: 33.40149
-Place time millis: 33.35571
-Peak memory: 93021173
+Break time millis: 18.89038
+Place time millis: 19.14978
+Peak memory: 91288015
 
-Finished after total time of 7.214996
+Finished after total time of 6.210617
 
 
 
 Test FlatWorld\MeshingComparisons\PlaceDeleteManyBlocks\Naive_FlatArray\R0:
 Grace period 10 frames
 Num Blocks: 27000
-Break time millis: 1015.961
-Place time millis: 1625.473
-Peak memory: 2140736129
+Break time millis: 722.1375
+Place time millis: 1212.769
+Peak memory: 2081897052
 
-Finished after total time of 21.04507
+Finished after total time of 21.14883
 
 
 
 Test FlatWorld\MeshingComparisons\PlaceDeleteManyBlocks\Culling_FlatArray\R0:
 Grace period 10 frames
 Num Blocks: 27000
-Break time millis: 419.2963
-Place time millis: 966.1255
-Peak memory: 1985590533
+Break time millis: 743.6523
+Place time millis: 867.2638
+Peak memory: 1984368908
 
-Finished after total time of 8.8311
+Finished after total time of 7.814926
 
 
 
 Test FlatWorld\MeshingComparisons\PlaceDeleteManyBlocks\Greedy_FlatArray\R0:
 Grace period 10 frames
 Num Blocks: 27000
-Break time millis: 499.4354
-Place time millis: 932.8308
-Peak memory: 95469064
+Break time millis: 483.0627
+Place time millis: 887.2681
+Peak memory: 94263924
 
-Finished after total time of 8.964569
+Finished after total time of 7.348541
 
 
 
 Test FlatWorld\MeshingComparisons\TimeToLoad\Naive_FlatArray\R1:
-Recorded 232 frames
-Peak memory usage of 1976150253
-Time to load was 14.02321 seconds
+Recorded 246 frames
+Peak memory usage of 1976119344
+Time to load was 12.78261 seconds
 Time limit was 60 seconds
 Active meshes contained 32348160 vertices across 16174080 triangles
 
-Finished after total time of 17.37918
+Finished after total time of 16.33911
 
 
 
 Test FlatWorld\MeshingComparisons\TimeToLoad\Culling_FlatArray\R1:
-Recorded 230 frames
-Peak memory usage of 1986744700
-Time to load was 3.932846 seconds
+Recorded 254 frames
+Peak memory usage of 1983308309
+Time to load was 2.628311 seconds
 Time limit was 60 seconds
 Active meshes contained 82944 vertices across 41472 triangles
 
-Finished after total time of 6.132004
+Finished after total time of 4.990677
 
 
 
 Test FlatWorld\MeshingComparisons\TimeToLoad\Greedy_FlatArray\R1:
-Recorded 219 frames
-Peak memory usage of 97194550
-Time to load was 3.822586 seconds
+Recorded 250 frames
+Peak memory usage of 93985073
+Time to load was 2.986832 seconds
 Time limit was 60 seconds
 Active meshes contained 324 vertices across 162 triangles
 
-Finished after total time of 6.031876
+Finished after total time of 5.430328
 
 
 
 Test FlatWorld\MeshingComparisons\FlyForward\Naive_FlatArray\R1:
-Took 27.86032 seconds to fly up 38.44796 meters and 160 meters horizontally
-Frame time stats: Min 3.398, Max 293.1787, Mean 25.28829
-Peak memory usage: 2947989165
+Took 27.9364 seconds to fly up 38.20745 meters and 160 meters horizontally
+Frame time stats: Min 2.3914, Max 428.276, Mean 21.66888
+Peak memory usage: 2936361028
 
-Finished after total time of 45.25601
+Finished after total time of 45.27771
 
 
 
 Test FlatWorld\MeshingComparisons\FlyForward\Culling_FlatArray\R1:
-Took 27.77673 seconds to fly up 38.44796 meters and 160 meters horizontally
-Frame time stats: Min 16.1727, Max 17.171, Mean 16.66273
-Peak memory usage: 2717336959
+Took 27.83542 seconds to fly up 38.20745 meters and 160 meters horizontally
+Frame time stats: Min 5.4343, Max 28.9141, Mean 8.770579
+Peak memory usage: 2715420218
 
-Finished after total time of 34.80844
+Finished after total time of 33.97198
 
 
 
 Test FlatWorld\MeshingComparisons\FlyForward\Greedy_FlatArray\R1:
-Took 27.7767 seconds to fly up 38.44796 meters and 160 meters horizontally
-Frame time stats: Min 13.8589, Max 19.3244, Mean 16.66269
-Peak memory usage: 103369704
+Took 27.83835 seconds to fly up 38.20745 meters and 160 meters horizontally
+Frame time stats: Min 3.5867, Max 36.3037, Mean 8.621815
+Peak memory usage: 102538499
 
-Finished after total time of 35.09134
+Finished after total time of 33.71964
 
 
 
 Test FlatWorld\MeshingComparisons\PlaceDelete1Block\Naive_FlatArray\R1:
 Grace period 10 frames
 Num Blocks: 1
-Break time millis: 183.2275
-Place time millis: 200.0732
-Peak memory: 1990921101
+Break time millis: 200.0122
+Place time millis: 199.9207
+Peak memory: 1990953289
 
-Finished after total time of 19.16217
+Finished after total time of 17.82263
 
 
 
 Test FlatWorld\MeshingComparisons\PlaceDelete1Block\Culling_FlatArray\R1:
 Grace period 10 frames
 Num Blocks: 1
-Break time millis: 33.38623
-Place time millis: 33.20313
-Peak memory: 1988091490
+Break time millis: 20.01953
+Place time millis: 20.20264
+Peak memory: 1988106213
 
-Finished after total time of 7.264832
+Finished after total time of 6.143158
 
 
 
 Test FlatWorld\MeshingComparisons\PlaceDelete1Block\Greedy_FlatArray\R1:
 Grace period 10 frames
 Num Blocks: 1
-Break time millis: 33.47778
-Place time millis: 33.29468
-Peak memory: 97572681
+Break time millis: 18.9209
+Place time millis: 19.01245
+Peak memory: 97589832
 
-Finished after total time of 7.281586
+Finished after total time of 6.135437
 
 
 
 Test FlatWorld\MeshingComparisons\PlaceDeleteManyBlocks\Naive_FlatArray\R1:
 Grace period 10 frames
 Num Blocks: 27000
-Break time millis: 799.8962
-Place time millis: 1216.339
-Peak memory: 2083518301
+Break time millis: 1178.436
+Place time millis: 1559.692
+Peak memory: 2142854140
 
-Finished after total time of 20.81161
+Finished after total time of 20.58109
 
 
 
 Test FlatWorld\MeshingComparisons\PlaceDeleteManyBlocks\Culling_FlatArray\R1:
 Grace period 10 frames
 Num Blocks: 27000
-Break time millis: 512.8479
-Place time millis: 1116.028
-Peak memory: 1988850780
+Break time millis: 656.7383
+Place time millis: 963.8367
+Peak memory: 1990087653
 
-Finished after total time of 9.231201
+Finished after total time of 8.12323
 
 
 
 Test FlatWorld\MeshingComparisons\PlaceDeleteManyBlocks\Greedy_FlatArray\R1:
 Grace period 10 frames
 Num Blocks: 27000
-Break time millis: 482.7271
-Place time millis: 949.3408
-Peak memory: 98779232
+Break time millis: 735.4126
+Place time millis: 921.5698
+Peak memory: 99886363
 
-Finished after total time of 8.897888
+Finished after total time of 7.92569
 
 
 
 Test FlatWorld\MeshingComparisons\TimeToLoad\Naive_FlatArray\R2:
-Recorded 235 frames
-Peak memory usage of 1979938781
-Time to load was 14.24643 seconds
+Recorded 250 frames
+Peak memory usage of 1982955252
+Time to load was 14.40796 seconds
 Time limit was 60 seconds
 Active meshes contained 32348160 vertices across 16174080 triangles
 
-Finished after total time of 17.84583
+Finished after total time of 17.8259
 
 
 
 Test FlatWorld\MeshingComparisons\TimeToLoad\Culling_FlatArray\R2:
-Recorded 220 frames
-Peak memory usage of 1988453198
-Time to load was 3.762146 seconds
+Recorded 247 frames
+Peak memory usage of 1988814359
+Time to load was 2.671021 seconds
 Time limit was 60 seconds
 Active meshes contained 82944 vertices across 41472 triangles
 
-Finished after total time of 5.982025
+Finished after total time of 4.984192
 
 
 
 Test FlatWorld\MeshingComparisons\TimeToLoad\Greedy_FlatArray\R2:
-Recorded 219 frames
-Peak memory usage of 98822372
-Time to load was 3.758301 seconds
+Recorded 251 frames
+Peak memory usage of 99844616
+Time to load was 2.826752 seconds
 Time limit was 60 seconds
 Active meshes contained 324 vertices across 162 triangles
 
-Finished after total time of 5.965332
+Finished after total time of 5.206055
 
 
 
 Test FlatWorld\MeshingComparisons\FlyForward\Naive_FlatArray\R2:
-Took 27.86023 seconds to fly up 38.44796 meters and 160 meters horizontally
-Frame time stats: Min 2.0396, Max 208.9045, Mean 24.61996
-Peak memory usage: 2938238349
+Took 27.9133 seconds to fly up 38.20745 meters and 160 meters horizontally
+Frame time stats: Min 4.253, Max 388.7476, Mean 21.99112
+Peak memory usage: 2951471532
 
-Finished after total time of 45.2226
+Finished after total time of 44.93411
 
 
 
 Test FlatWorld\MeshingComparisons\FlyForward\Culling_FlatArray\R2:
-Took 27.77673 seconds to fly up 38.44796 meters and 160 meters horizontally
-Frame time stats: Min 16.2605, Max 17.0152, Mean 16.66269
-Peak memory usage: 2717504259
+Took 27.8334 seconds to fly up 38.20745 meters and 160 meters horizontally
+Frame time stats: Min 4.3444, Max 29.3899, Mean 8.74505
+Peak memory usage: 2720044610
 
-Finished after total time of 34.79181
+Finished after total time of 34.02774
 
 
 
 Test FlatWorld\MeshingComparisons\FlyForward\Greedy_FlatArray\R2:
-Took 27.76013 seconds to fly up 38.44796 meters and 160 meters horizontally
-Frame time stats: Min 16.121, Max 17.2083, Mean 16.66266
-Peak memory usage: 103657913
+Took 27.82495 seconds to fly up 38.20745 meters and 160 meters horizontally
+Frame time stats: Min 3.5009, Max 24.1989, Mean 8.533021
+Peak memory usage: 107073195
 
-Finished after total time of 35.09167
+Finished after total time of 33.79712
 
 
 
 Test FlatWorld\MeshingComparisons\PlaceDelete1Block\Naive_FlatArray\R2:
 Grace period 10 frames
 Num Blocks: 1
-Break time millis: 183.4106
-Place time millis: 199.8901
-Peak memory: 1992088426
+Break time millis: 200.3174
+Place time millis: 200.1953
+Peak memory: 1993575436
 
-Finished after total time of 19.51215
+Finished after total time of 19.14655
 
 
 
 Test FlatWorld\MeshingComparisons\PlaceDelete1Block\Culling_FlatArray\R2:
 Grace period 10 frames
 Num Blocks: 1
-Break time millis: 33.5083
-Place time millis: 33.3252
-Peak memory: 1989153991
+Break time millis: 20.56885
+Place time millis: 20.38574
+Peak memory: 1990081588
 
-Finished after total time of 7.181519
+Finished after total time of 6.578308
 
 
 
 Test FlatWorld\MeshingComparisons\PlaceDelete1Block\Greedy_FlatArray\R2:
 Grace period 10 frames
 Num Blocks: 1
-Break time millis: 33.38623
-Place time millis: 33.44727
-Peak memory: 98637353
+Break time millis: 19.04297
+Place time millis: 19.04297
+Peak memory: 99562136
 
-Finished after total time of 7.248291
+Finished after total time of 6.539307
 
 
 
 Test FlatWorld\MeshingComparisons\PlaceDeleteManyBlocks\Naive_FlatArray\R2:
 Grace period 10 frames
 Num Blocks: 27000
-Break time millis: 949.9512
-Place time millis: 1674.744
-Peak memory: 2152084230
+Break time millis: 723.8159
+Place time millis: 1317.017
+Peak memory: 2168301000
 
-Finished after total time of 21.47833
+Finished after total time of 19.79065
 
 
 
 Test FlatWorld\MeshingComparisons\PlaceDeleteManyBlocks\Culling_FlatArray\R2:
 Grace period 10 frames
 Num Blocks: 27000
-Break time millis: 446.5332
-Place time millis: 999.4507
-Peak memory: 1992682723
+Break time millis: 783.7524
+Place time millis: 1301.758
+Peak memory: 1991988323
 
-Finished after total time of 8.797974
+Finished after total time of 8.250671
 
 
 
 Test FlatWorld\MeshingComparisons\PlaceDeleteManyBlocks\Greedy_FlatArray\R2:
 Grace period 10 frames
 Num Blocks: 27000
-Break time millis: 464.9658
-Place time millis: 949.4019
-Peak memory: 101869978
+Break time millis: 645.9961
+Place time millis: 1211.06
+Peak memory: 102069592
 
-Finished after total time of 8.814758
+Finished after total time of 7.870789

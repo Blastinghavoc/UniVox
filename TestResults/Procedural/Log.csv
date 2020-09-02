@@ -2,629 +2,629 @@
 
 
 Test Procedural\MeshingComparisons\TimeToLoad\Culling_FlatArray\R0:
-Recorded 1302 frames
-Peak memory usage of 315850395
-Time to load was 23.446 seconds
+Recorded 1422 frames
+Peak memory usage of 314675417
+Time to load was 21.54268 seconds
 Time limit was 60 seconds
-Active meshes contained 3601868 vertices across 2029714 triangles
+Active meshes contained 3599616 vertices across 2028588 triangles
 
-Finished after total time of 26.46901
+Finished after total time of 24.54601
 
 
 
 Test Procedural\MeshingComparisons\TimeToLoad\Greedy_FlatArray\R0:
-Recorded 1319 frames
-Peak memory usage of 388796273
-Time to load was 22.1785 seconds
+Recorded 1424 frames
+Peak memory usage of 389568073
+Time to load was 18.28676 seconds
 Time limit was 60 seconds
-Active meshes contained 1197212 vertices across 612360 triangles
+Active meshes contained 1197920 vertices across 612714 triangles
 
-Finished after total time of 24.87765
+Finished after total time of 21.31684
 
 
 
 Test Procedural\StorageComparisons\TimeToLoad\Greedy_FlatArray\R0:
-Recorded 1326 frames
-Peak memory usage of 254607462
-Time to load was 22.51962 seconds
+Recorded 1434 frames
+Peak memory usage of 254207446
+Time to load was 18.50404 seconds
 Time limit was 60 seconds
-Active meshes contained 1198220 vertices across 612864 triangles
+Active meshes contained 1197600 vertices across 612554 triangles
 
-Finished after total time of 25.24404
+Finished after total time of 21.41272
 
 
 
 Test Procedural\StorageComparisons\TimeToLoad\Greedy_Octree\R0:
-Recorded 1218 frames
-Peak memory usage of 254737119
-Time to load was 43.82659 seconds
+Recorded 1332 frames
+Peak memory usage of 252274135
+Time to load was 34.4069 seconds
 Time limit was 60 seconds
-Active meshes contained 1201472 vertices across 614494 triangles
+Active meshes contained 1201608 vertices across 614562 triangles
 
-Finished after total time of 46.90556
+Finished after total time of 37.49136
 
 
 
 Test Procedural\StorageComparisons\TimeToLoad\Greedy_RLE\R0:
-Recorded 1271 frames
-Peak memory usage of 254980368
-Time to load was 23.46721 seconds
+Recorded 1356 frames
+Peak memory usage of 253947400
+Time to load was 19.02487 seconds
 Time limit was 60 seconds
-Active meshes contained 1198112 vertices across 612810 triangles
+Active meshes contained 1197268 vertices across 612388 triangles
 
-Finished after total time of 26.36046
+Finished after total time of 21.98452
 
 
 
 Test Procedural\MeshingComparisons\FlyForward\Culling_FlatArray\R0:
-Took 28.69363 seconds to fly up 44.24759 meters and 160 meters horizontally
-Frame time stats: Min 6.0281, Max 51.9877, Mean 17.27491
-Peak memory usage: 451702826
+Took 28.67436 seconds to fly up 44.10712 meters and 160 meters horizontally
+Frame time stats: Min 5.4789, Max 83.3433, Mean 15.12619
+Peak memory usage: 451267557
 
-Finished after total time of 57.10295
+Finished after total time of 55.39485
 
 
 
 Test Procedural\MeshingComparisons\FlyForward\Greedy_FlatArray\R0:
-Took 28.65996 seconds to fly up 43.96666 meters and 160 meters horizontally
-Frame time stats: Min 6.9522, Max 45.9165, Mean 16.81948
-Peak memory usage: 459694009
+Took 28.59859 seconds to fly up 43.54525 meters and 160 meters horizontally
+Frame time stats: Min 7.7017, Max 45.5368, Mean 12.73395
+Peak memory usage: 459233959
 
-Finished after total time of 55.72026
+Finished after total time of 52.0186
 
 
 
 Test Procedural\StorageComparisons\FlyForward\Greedy_FlatArray\R0:
-Took 28.67673 seconds to fly up 44.10712 meters and 160 meters horizontally
-Frame time stats: Min 6.5598, Max 42.6801, Mean 16.80949
-Peak memory usage: 299106477
+Took 28.61627 seconds to fly up 43.68572 meters and 160 meters horizontally
+Frame time stats: Min 6.8281, Max 41.5956, Mean 12.78758
+Peak memory usage: 297645185
 
-Finished after total time of 55.93689
+Finished after total time of 53.10764
 
 
 
 Test Procedural\StorageComparisons\FlyForward\Greedy_Octree\R0:
-Took 29.21445 seconds to fly up 47.61884 meters and 160 meters horizontally
-Frame time stats: Min 4.4717, Max 141.4287, Mean 23.38601
-Peak memory usage: 296588835
+Took 29.00452 seconds to fly up 46.35462 meters and 160 meters horizontally
+Frame time stats: Min 7.0823, Max 240.2226, Mean 19.94789
+Peak memory usage: 297148353
 
-Finished after total time of 77.26492
+Finished after total time of 70.45242
 
 
 
 Test Procedural\StorageComparisons\FlyForward\Greedy_RLE\R0:
-Took 28.69077 seconds to fly up 44.10712 meters and 160 meters horizontally
-Frame time stats: Min 6.9801, Max 50.0594, Mean 16.98831
-Peak memory usage: 298387014
+Took 28.60767 seconds to fly up 43.68572 meters and 160 meters horizontally
+Frame time stats: Min 4.3178, Max 63.5077, Mean 13.11773
+Peak memory usage: 299198919
 
-Finished after total time of 56.53659
+Finished after total time of 53.53461
 
 
 
 Test Procedural\MeshingComparisons\PlaceDelete1Block\Culling_FlatArray\R0:
 Grace period 10 frames
 Num Blocks: 1
-Break time millis: 33.20313
-Place time millis: 49.92676
-Peak memory: 409266477
+Break time millis: 40.43579
+Place time millis: 40.98511
+Peak memory: 408793114
 
-Finished after total time of 28.59351
+Finished after total time of 24.8631
 
 
 
 Test Procedural\MeshingComparisons\PlaceDelete1Block\Greedy_FlatArray\R0:
 Grace period 10 frames
 Num Blocks: 1
-Break time millis: 33.3252
-Place time millis: 32.95898
-Peak memory: 390751939
+Break time millis: 29.20532
+Place time millis: 29.60205
+Peak memory: 390300233
 
-Finished after total time of 27.47672
+Finished after total time of 23.68512
 
 
 
 Test Procedural\StorageComparisons\PlaceDelete1Block\Greedy_FlatArray\R0:
 Grace period 10 frames
 Num Blocks: 1
-Break time millis: 33.14209
-Place time millis: 33.02002
-Peak memory: 255024596
+Break time millis: 29.05273
+Place time millis: 29.35791
+Peak memory: 254480919
 
-Finished after total time of 27.54352
+Finished after total time of 23.15237
 
 
 
 Test Procedural\StorageComparisons\PlaceDelete1Block\Greedy_Octree\R0:
 Grace period 10 frames
 Num Blocks: 1
-Break time millis: 32.95898
-Place time millis: 33.20313
-Peak memory: 255229425
+Break time millis: 29.29688
+Place time millis: 29.29688
+Peak memory: 254736571
 
-Finished after total time of 45.7392
+Finished after total time of 39.9072
 
 
 
 Test Procedural\StorageComparisons\PlaceDelete1Block\Greedy_RLE\R0:
 Grace period 10 frames
 Num Blocks: 1
-Break time millis: 33.56934
-Place time millis: 33.56934
-Peak memory: 255427640
+Break time millis: 29.41895
+Place time millis: 29.84619
+Peak memory: 255200368
 
-Finished after total time of 27.17688
+Finished after total time of 24.14539
 
 
 
 Test Procedural\MeshingComparisons\PlaceDeleteManyBlocks\Culling_FlatArray\R0:
 Grace period 10 frames
 Num Blocks: 27000
-Break time millis: 539.917
-Place time millis: 269.104
-Peak memory: 391790957
+Break time millis: 490.9668
+Place time millis: 359.314
+Peak memory: 391266988
 
-Finished after total time of 29.42633
+Finished after total time of 26.97589
 
 
 
 Test Procedural\MeshingComparisons\PlaceDeleteManyBlocks\Greedy_FlatArray\R0:
 Grace period 10 frames
 Num Blocks: 27000
-Break time millis: 453.3691
-Place time millis: 384.0332
-Peak memory: 391101683
+Break time millis: 375.9155
+Place time millis: 332.1533
+Peak memory: 390230876
 
-Finished after total time of 27.77686
+Finished after total time of 23.84064
 
 
 
 Test Procedural\StorageComparisons\PlaceDeleteManyBlocks\Greedy_FlatArray\R0:
 Grace period 10 frames
 Num Blocks: 27000
-Break time millis: 682.9224
-Place time millis: 349.3652
-Peak memory: 255718946
+Break time millis: 475.769
+Place time millis: 286.7432
+Peak memory: 255114148
 
-Finished after total time of 28.02679
+Finished after total time of 24.04657
 
 
 
 Test Procedural\StorageComparisons\PlaceDeleteManyBlocks\Greedy_Octree\R0:
 Grace period 10 frames
 Num Blocks: 27000
-Break time millis: 633.1177
-Place time millis: 316.4063
-Peak memory: 256413636
+Break time millis: 627.8687
+Place time millis: 395.9351
+Peak memory: 255093812
 
-Finished after total time of 46.40558
+Finished after total time of 41.2027
 
 
 
 Test Procedural\StorageComparisons\PlaceDeleteManyBlocks\Greedy_RLE\R0:
 Grace period 10 frames
 Num Blocks: 27000
-Break time millis: 199.9512
-Place time millis: 394.4092
-Peak memory: 256292617
+Break time millis: 192.3828
+Place time millis: 365.2344
+Peak memory: 254692558
 
-Finished after total time of 27.64349
+Finished after total time of 24.21509
 
 
 
 Test Procedural\MeshingComparisons\TimeToLoad\Culling_FlatArray\R1:
-Recorded 1307 frames
-Peak memory usage of 391151930
-Time to load was 23.7016 seconds
+Recorded 1423 frames
+Peak memory usage of 389953775
+Time to load was 21.70844 seconds
 Time limit was 60 seconds
-Active meshes contained 3602324 vertices across 2029942 triangles
+Active meshes contained 3600312 vertices across 2028936 triangles
 
-Finished after total time of 26.56055
+Finished after total time of 24.69031
 
 
 
 Test Procedural\MeshingComparisons\TimeToLoad\Greedy_FlatArray\R1:
-Recorded 1329 frames
-Peak memory usage of 390758152
-Time to load was 22.85339 seconds
+Recorded 1416 frames
+Peak memory usage of 390138748
+Time to load was 18.74115 seconds
 Time limit was 60 seconds
-Active meshes contained 1197356 vertices across 612432 triangles
+Active meshes contained 1197684 vertices across 612596 triangles
 
-Finished after total time of 25.54388
+Finished after total time of 21.56226
 
 
 
 Test Procedural\StorageComparisons\TimeToLoad\Greedy_FlatArray\R1:
-Recorded 1351 frames
-Peak memory usage of 255727093
-Time to load was 23.23224 seconds
+Recorded 1440 frames
+Peak memory usage of 253919870
+Time to load was 19.08527 seconds
 Time limit was 60 seconds
-Active meshes contained 1198128 vertices across 612818 triangles
+Active meshes contained 1197328 vertices across 612418 triangles
 
-Finished after total time of 26.07715
+Finished after total time of 22.02875
 
 
 
 Test Procedural\StorageComparisons\TimeToLoad\Greedy_Octree\R1:
-Recorded 1212 frames
-Peak memory usage of 255165515
-Time to load was 42.58948 seconds
+Recorded 1346 frames
+Peak memory usage of 254726478
+Time to load was 34.82837 seconds
 Time limit was 60 seconds
-Active meshes contained 1201876 vertices across 614696 triangles
+Active meshes contained 1201956 vertices across 614736 triangles
 
-Finished after total time of 45.62274
+Finished after total time of 38.12701
 
 
 
 Test Procedural\StorageComparisons\TimeToLoad\Greedy_RLE\R1:
-Recorded 1259 frames
-Peak memory usage of 255721441
-Time to load was 22.84119 seconds
+Recorded 1411 frames
+Peak memory usage of 254217266
+Time to load was 20.17548 seconds
 Time limit was 60 seconds
-Active meshes contained 1198992 vertices across 613250 triangles
+Active meshes contained 1197824 vertices across 612666 triangles
 
-Finished after total time of 25.5271
+Finished after total time of 23.06
 
 
 
 Test Procedural\MeshingComparisons\FlyForward\Culling_FlatArray\R1:
-Took 28.67712 seconds to fly up 44.10712 meters and 160 meters horizontally
-Frame time stats: Min 6.2171, Max 43.3385, Mean 17.24405
-Peak memory usage: 453060340
+Took 28.67255 seconds to fly up 44.10712 meters and 160 meters horizontally
+Frame time stats: Min 7.866, Max 42.7525, Mean 15.14088
+Peak memory usage: 452413998
 
-Finished after total time of 56.47003
+Finished after total time of 55.32959
 
 
 
 Test Procedural\MeshingComparisons\FlyForward\Greedy_FlatArray\R1:
-Took 28.67682 seconds to fly up 44.10712 meters and 160 meters horizontally
-Frame time stats: Min 5.8312, Max 45.9134, Mean 16.80944
-Peak memory usage: 459974686
+Took 28.60443 seconds to fly up 43.54525 meters and 160 meters horizontally
+Frame time stats: Min 3.5433, Max 46.2623, Mean 12.79945
+Peak memory usage: 460580012
 
-Finished after total time of 56.48669
+Finished after total time of 52.89252
 
 
 
 Test Procedural\StorageComparisons\FlyForward\Greedy_FlatArray\R1:
-Took 28.67725 seconds to fly up 44.10712 meters and 160 meters horizontally
-Frame time stats: Min 7.9926, Max 43.4967, Mean 16.84898
-Peak memory usage: 298859648
+Took 28.60938 seconds to fly up 43.54525 meters and 160 meters horizontally
+Frame time stats: Min 7.0521, Max 39.3349, Mean 12.68256
+Peak memory usage: 297660306
 
-Finished after total time of 56.0199
+Finished after total time of 52.60931
 
 
 
 Test Procedural\StorageComparisons\FlyForward\Greedy_Octree\R1:
-Took 29.1936 seconds to fly up 47.75931 meters and 160 meters horizontally
-Frame time stats: Min 6.2398, Max 160.8745, Mean 24.04708
-Peak memory usage: 298253657
+Took 29.00671 seconds to fly up 46.49509 meters and 160 meters horizontally
+Frame time stats: Min 4.5695, Max 131.6599, Mean 18.82306
+Peak memory usage: 299123882
 
-Finished after total time of 78.28149
+Finished after total time of 70.15924
 
 
 
 Test Procedural\StorageComparisons\FlyForward\Greedy_RLE\R1:
-Took 28.69324 seconds to fly up 44.24759 meters and 160 meters horizontally
-Frame time stats: Min 5.8101, Max 55.0233, Mean 17.0794
-Peak memory usage: 298569356
+Took 28.6239 seconds to fly up 43.68572 meters and 160 meters horizontally
+Frame time stats: Min 5.0977, Max 41.1302, Mean 13.13212
+Peak memory usage: 297978110
 
-Finished after total time of 56.70325
+Finished after total time of 53.04492
 
 
 
 Test Procedural\MeshingComparisons\PlaceDelete1Block\Culling_FlatArray\R1:
 Grace period 10 frames
 Num Blocks: 1
-Break time millis: 52.12402
-Place time millis: 32.95898
-Peak memory: 410185738
+Break time millis: 41.38184
+Place time millis: 40.77148
+Peak memory: 408692871
 
-Finished after total time of 27.72681
+Finished after total time of 25.41455
 
 
 
 Test Procedural\MeshingComparisons\PlaceDelete1Block\Greedy_FlatArray\R1:
 Grace period 10 frames
 Num Blocks: 1
-Break time millis: 33.20313
-Place time millis: 33.56934
-Peak memory: 390876050
+Break time millis: 29.66309
+Place time millis: 29.29688
+Peak memory: 390229052
 
-Finished after total time of 26.3938
+Finished after total time of 22.93213
 
 
 
 Test Procedural\StorageComparisons\PlaceDelete1Block\Greedy_FlatArray\R1:
 Grace period 10 frames
 Num Blocks: 1
-Break time millis: 33.56934
-Place time millis: 33.3252
-Peak memory: 255237465
+Break time millis: 29.41895
+Place time millis: 29.66309
+Peak memory: 254312835
 
-Finished after total time of 26.72717
+Finished after total time of 23.39685
 
 
 
 Test Procedural\StorageComparisons\PlaceDelete1Block\Greedy_Octree\R1:
 Grace period 10 frames
 Num Blocks: 1
-Break time millis: 33.44727
-Place time millis: 33.20313
-Peak memory: 255642378
+Break time millis: 29.41895
+Place time millis: 29.41895
+Peak memory: 254729207
 
-Finished after total time of 46.72229
+Finished after total time of 40.99622
 
 
 
 Test Procedural\StorageComparisons\PlaceDelete1Block\Greedy_RLE\R1:
 Grace period 10 frames
 Num Blocks: 1
-Break time millis: 33.44727
-Place time millis: 33.81348
-Peak memory: 256079099
+Break time millis: 29.29688
+Place time millis: 29.54102
+Peak memory: 254368080
 
-Finished after total time of 27.11035
+Finished after total time of 23.87317
 
 
 
 Test Procedural\MeshingComparisons\PlaceDeleteManyBlocks\Culling_FlatArray\R1:
 Grace period 10 frames
 Num Blocks: 27000
-Break time millis: 502.3193
-Place time millis: 322.5098
-Peak memory: 392220531
+Break time millis: 397.8271
+Place time millis: 237.5488
+Peak memory: 391467360
 
-Finished after total time of 28.59326
+Finished after total time of 26.78101
 
 
 
 Test Procedural\MeshingComparisons\PlaceDeleteManyBlocks\Greedy_FlatArray\R1:
 Grace period 10 frames
 Num Blocks: 27000
-Break time millis: 408.8135
-Place time millis: 349.9756
-Peak memory: 390973886
+Break time millis: 582.3975
+Place time millis: 389.8926
+Peak memory: 390682726
 
-Finished after total time of 27.36035
+Finished after total time of 24.3396
 
 
 
 Test Procedural\StorageComparisons\PlaceDeleteManyBlocks\Greedy_FlatArray\R1:
 Grace period 10 frames
 Num Blocks: 27000
-Break time millis: 500
-Place time millis: 349.4873
-Peak memory: 256011930
+Break time millis: 462.4023
+Place time millis: 291.3818
+Peak memory: 255179407
 
-Finished after total time of 28.80994
+Finished after total time of 24.17468
 
 
 
 Test Procedural\StorageComparisons\PlaceDeleteManyBlocks\Greedy_Octree\R1:
 Grace period 10 frames
 Num Blocks: 27000
-Break time millis: 749.7559
-Place time millis: 316.04
-Peak memory: 256708011
+Break time millis: 583.1299
+Place time millis: 292.9688
+Peak memory: 255391302
 
-Finished after total time of 44.88928
+Finished after total time of 40.78992
 
 
 
 Test Procedural\StorageComparisons\PlaceDeleteManyBlocks\Greedy_RLE\R1:
 Grace period 10 frames
 Num Blocks: 27000
-Break time millis: 184.082
-Place time millis: 450.8057
-Peak memory: 256880129
+Break time millis: 120.8496
+Place time millis: 308.3496
+Peak memory: 254961047
 
-Finished after total time of 33.19214
+Finished after total time of 24.3407
 
 
 
 Test Procedural\MeshingComparisons\TimeToLoad\Culling_FlatArray\R2:
-Recorded 1365 frames
-Peak memory usage of 390712012
-Time to load was 24.99683 seconds
+Recorded 1428 frames
+Peak memory usage of 391106995
+Time to load was 21.54492 seconds
 Time limit was 60 seconds
-Active meshes contained 3601272 vertices across 2029416 triangles
+Active meshes contained 3602772 vertices across 2030166 triangles
 
-Finished after total time of 27.86011
+Finished after total time of 24.4696
 
 
 
 Test Procedural\MeshingComparisons\TimeToLoad\Greedy_FlatArray\R2:
-Recorded 1345 frames
-Peak memory usage of 391059069
-Time to load was 22.8689 seconds
+Recorded 1404 frames
+Peak memory usage of 390588491
+Time to load was 18.79346 seconds
 Time limit was 60 seconds
-Active meshes contained 1197524 vertices across 612516 triangles
+Active meshes contained 1198048 vertices across 612778 triangles
 
-Finished after total time of 25.52722
+Finished after total time of 21.77966
 
 
 
 Test Procedural\StorageComparisons\TimeToLoad\Greedy_FlatArray\R2:
-Recorded 1329 frames
-Peak memory usage of 255645650
-Time to load was 23.20178 seconds
+Recorded 1429 frames
+Peak memory usage of 254010362
+Time to load was 19.06567 seconds
 Time limit was 60 seconds
-Active meshes contained 1197632 vertices across 612570 triangles
+Active meshes contained 1196768 vertices across 612138 triangles
 
-Finished after total time of 25.86072
+Finished after total time of 22.17932
 
 
 
 Test Procedural\StorageComparisons\TimeToLoad\Greedy_Octree\R2:
-Recorded 1259 frames
-Peak memory usage of 254138302
-Time to load was 40.85999 seconds
+Recorded 1359 frames
+Peak memory usage of 255079911
+Time to load was 36.82556 seconds
 Time limit was 60 seconds
-Active meshes contained 1202464 vertices across 614990 triangles
+Active meshes contained 1201860 vertices across 614688 triangles
 
-Finished after total time of 43.8728
+Finished after total time of 40.1261
 
 
 
 Test Procedural\StorageComparisons\TimeToLoad\Greedy_RLE\R2:
-Recorded 1317 frames
-Peak memory usage of 256092369
-Time to load was 23.69031 seconds
+Recorded 1430 frames
+Peak memory usage of 255377368
+Time to load was 20.10339 seconds
 Time limit was 60 seconds
-Active meshes contained 1198044 vertices across 612776 triangles
+Active meshes contained 1198340 vertices across 612924 triangles
 
-Finished after total time of 26.34387
+Finished after total time of 22.95398
 
 
 
 Test Procedural\MeshingComparisons\FlyForward\Culling_FlatArray\R2:
-Took 28.6936 seconds to fly up 44.2476 meters and 160 meters horizontally
-Frame time stats: Min 6.5391, Max 57.039, Mean 17.40026
-Peak memory usage: 453269236
+Took 28.68774 seconds to fly up 44.10712 meters and 160 meters horizontally
+Frame time stats: Min 7.0058, Max 52.2377, Mean 15.34335
+Peak memory usage: 451590363
 
-Finished after total time of 56.92004
+Finished after total time of 55.33508
 
 
 
 Test Procedural\MeshingComparisons\FlyForward\Greedy_FlatArray\R2:
-Took 28.69336 seconds to fly up 44.10712 meters and 160 meters horizontally
-Frame time stats: Min 7.1314, Max 45.8546, Mean 16.77
-Peak memory usage: 460308363
+Took 28.604 seconds to fly up 43.54525 meters and 160 meters horizontally
+Frame time stats: Min 4.3679, Max 38.2377, Mean 12.74212
+Peak memory usage: 459066865
 
-Finished after total time of 56.00354
+Finished after total time of 52.53687
 
 
 
 Test Procedural\StorageComparisons\FlyForward\Greedy_FlatArray\R2:
-Took 28.69214 seconds to fly up 44.10712 meters and 160 meters horizontally
-Frame time stats: Min 8.154099, Max 49.9824, Mean 16.78965
-Peak memory usage: 298718596
+Took 28.61597 seconds to fly up 43.68572 meters and 160 meters horizontally
+Frame time stats: Min 8.266399, Max 43.3338, Mean 12.88533
+Peak memory usage: 298551186
 
-Finished after total time of 56.30334
+Finished after total time of 52.90002
 
 
 
 Test Procedural\StorageComparisons\FlyForward\Greedy_Octree\R2:
-Took 29.17004 seconds to fly up 47.61884 meters and 160 meters horizontally
-Frame time stats: Min 7.1651, Max 163.9965, Mean 23.14283
-Peak memory usage: 297789866
+Took 28.99829 seconds to fly up 46.35462 meters and 160 meters horizontally
+Frame time stats: Min 6.1268, Max 147.2632, Mean 18.70815
+Peak memory usage: 297034252
 
-Finished after total time of 77.71497
+Finished after total time of 69.91821
 
 
 
 Test Procedural\StorageComparisons\FlyForward\Greedy_RLE\R2:
-Took 28.6936 seconds to fly up 44.24759 meters and 160 meters horizontally
-Frame time stats: Min 5.2654, Max 61.1531, Mean 17.0593
-Peak memory usage: 298408323
+Took 28.63708 seconds to fly up 43.82619 meters and 160 meters horizontally
+Frame time stats: Min 5.5703, Max 50.1154, Mean 13.01191
+Peak memory usage: 297898647
 
-Finished after total time of 56.66992
+Finished after total time of 53.79089
 
 
 
 Test Procedural\MeshingComparisons\PlaceDelete1Block\Culling_FlatArray\R2:
 Grace period 10 frames
 Num Blocks: 1
-Break time millis: 50.04883
-Place time millis: 33.20313
-Peak memory: 409827033
+Break time millis: 41.01563
+Place time millis: 40.77148
+Peak memory: 408789223
 
-Finished after total time of 27.67688
+Finished after total time of 25.40942
 
 
 
 Test Procedural\MeshingComparisons\PlaceDelete1Block\Greedy_FlatArray\R2:
 Grace period 10 frames
 Num Blocks: 1
-Break time millis: 33.20313
-Place time millis: 33.20313
-Peak memory: 390991666
+Break time millis: 30.0293
+Place time millis: 30.39551
+Peak memory: 389565879
 
-Finished after total time of 26.5105
+Finished after total time of 22.86804
 
 
 
 Test Procedural\StorageComparisons\PlaceDelete1Block\Greedy_FlatArray\R2:
 Grace period 10 frames
 Num Blocks: 1
-Break time millis: 33.69141
-Place time millis: 33.20313
-Peak memory: 255358058
+Break time millis: 29.1748
+Place time millis: 28.80859
+Peak memory: 254558412
 
-Finished after total time of 26.6604
+Finished after total time of 23.48083
 
 
 
 Test Procedural\StorageComparisons\PlaceDelete1Block\Greedy_Octree\R2:
 Grace period 10 frames
 Num Blocks: 1
-Break time millis: 33.20313
-Place time millis: 33.20313
-Peak memory: 255586233
+Break time millis: 29.54102
+Place time millis: 29.66309
+Peak memory: 254434195
 
-Finished after total time of 46.80542
+Finished after total time of 41.40186
 
 
 
 Test Procedural\StorageComparisons\PlaceDelete1Block\Greedy_RLE\R2:
 Grace period 10 frames
 Num Blocks: 1
-Break time millis: 33.20313
-Place time millis: 33.44727
-Peak memory: 255890173
+Break time millis: 41.74805
+Place time millis: 30.0293
+Peak memory: 254179454
 
-Finished after total time of 27.24365
+Finished after total time of 24.29321
 
 
 
 Test Procedural\MeshingComparisons\PlaceDeleteManyBlocks\Culling_FlatArray\R2:
 Grace period 10 frames
 Num Blocks: 27000
-Break time millis: 542.2363
-Place time millis: 297.1191
-Peak memory: 393066090
+Break time millis: 461.3037
+Place time millis: 239.2578
+Peak memory: 391356313
 
-Finished after total time of 28.75977
+Finished after total time of 26.59448
 
 
 
 Test Procedural\MeshingComparisons\PlaceDeleteManyBlocks\Greedy_FlatArray\R2:
 Grace period 10 frames
 Num Blocks: 27000
-Break time millis: 550.0488
-Place time millis: 349.3652
-Peak memory: 391703527
+Break time millis: 462.0361
+Place time millis: 322.3877
+Peak memory: 390055476
 
-Finished after total time of 27.87646
+Finished after total time of 23.97742
 
 
 
 Test Procedural\StorageComparisons\PlaceDeleteManyBlocks\Greedy_FlatArray\R2:
 Grace period 10 frames
 Num Blocks: 27000
-Break time millis: 510.9863
-Place time millis: 383.0566
-Peak memory: 256382566
+Break time millis: 446.6553
+Place time millis: 314.9414
+Peak memory: 254905661
 
-Finished after total time of 27.71045
+Finished after total time of 24.54028
 
 
 
 Test Procedural\StorageComparisons\PlaceDeleteManyBlocks\Greedy_Octree\R2:
 Grace period 10 frames
 Num Blocks: 27000
-Break time millis: 635.498
-Place time millis: 333.252
-Peak memory: 256943019
+Break time millis: 572.998
+Place time millis: 394.043
+Peak memory: 254608860
 
-Finished after total time of 48.28833
+Finished after total time of 42.38049
 
 
 
 Test Procedural\StorageComparisons\PlaceDeleteManyBlocks\Greedy_RLE\R2:
 Grace period 10 frames
 Num Blocks: 27000
-Break time millis: 199.707
-Place time millis: 324.4629
-Peak memory: 256982946
+Break time millis: 192.627
+Place time millis: 343.75
+Peak memory: 254841052
 
-Finished after total time of 27.52686
+Finished after total time of 25.15845
