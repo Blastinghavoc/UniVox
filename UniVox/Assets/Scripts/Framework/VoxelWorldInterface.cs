@@ -9,11 +9,16 @@ namespace UniVox.Framework
     /// <summary>
     /// Global interface to the voxel world to be accessed by gameplay scripts
     /// </summary>
-    public class VoxelWorldInterface : MonoBehaviour, IDebugWorld
+    public class VoxelWorldInterface : MonoBehaviour, IDebugWorld, IVoxelWorld
     {
         protected ITestableChunkManager chunkManager;
         protected VoxelTypeManager voxelTypeManager;
 
+        /// <summary>
+        /// Initialise the world interface
+        /// </summary>
+        /// <param name="manager"></param>
+        /// <param name="voxelTypeManager"></param>
         public void Intialise(ITestableChunkManager manager, VoxelTypeManager voxelTypeManager)
         {
             chunkManager = manager;

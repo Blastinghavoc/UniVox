@@ -6,7 +6,7 @@ namespace UniVox.Implementations.ProcGen
 {
     /// <summary>
     /// Simple biome defintion, where a biome has N layers of
-    /// some voxel types, and then the rest is filled with a single type.
+    /// some voxel types, and then the rest is filled with the default type.
     /// </summary>
     [CreateAssetMenu(menuName = "UniVox/BiomeDefinition")]
     public class SOBiomeDefinition : ScriptableObject

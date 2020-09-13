@@ -69,13 +69,13 @@ namespace UniVox.Implementations.ProcGen
             var treeDef = SOtreeDef.ToNative(typeManager);
             switch (treeDef.style)
             {
-                case SOTreeDefinition.treeStyle.oak:
+                case SOTreeDefinition.TreeStyle.oak:
                     MakeOak(neighbourhood, x, y, z, treeDef);
                     break;
-                case SOTreeDefinition.treeStyle.spruce:
+                case SOTreeDefinition.TreeStyle.spruce:
                     MakeSpruce(neighbourhood, x, y, z, treeDef);
                     break;
-                case SOTreeDefinition.treeStyle.cactus:
+                case SOTreeDefinition.TreeStyle.cactus:
                     MakeCactus(neighbourhood, x, y, z, treeDef);
                     break;
                 default:

@@ -19,8 +19,8 @@ namespace UniVox.Implementations.ProcGen
         public SOVoxelTypeDefinition leafType;
         public SOVoxelTypeDefinition logType;
 
-        public treeStyle Style;
-        public enum treeStyle
+        public TreeStyle Style;
+        public enum TreeStyle
         {
             oak,
             spruce,
@@ -49,6 +49,6 @@ namespace UniVox.Implementations.ProcGen
         public VoxelTypeID leafID;
         public VoxelTypeID logID;
 
-        public treeStyle style;
+        public TreeStyle style;
     }
 }
