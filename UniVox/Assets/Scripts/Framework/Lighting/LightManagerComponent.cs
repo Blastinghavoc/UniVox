@@ -66,6 +66,8 @@ namespace UniVox.Framework.Lighting
         // Update is called once per frame
         void Update()
         {
+            UserInput();
+
             sunLight.transform.rotation = Quaternion.Euler(TimeOfDay, 0, 0);
             GlobalLightValue = Mathf.InverseLerp(-1, 1, Mathf.Sin(Mathf.Deg2Rad * TimeOfDay));
             skyboxMaterial.SetFloat("_Exposure", GlobalLightValue);
@@ -82,6 +84,38 @@ namespace UniVox.Framework.Lighting
                 Shader.SetGlobalFloat(variable.name, variable.value);
             }
 
+        }
+
+        void UserInput() 
+        {
+            if (Input.GetKeyDown(KeyCode.N))
+            {
+                TimeOfDay = 90;//Noon
+            }
+            if (Input.GetKeyDown(KeyCode.M))
+            {
+                TimeOfDay = -90;//Midnight
+            }
+
+            //Increase time of day
+            if (Input.GetKey(KeyCode.Plus)||Input.GetKey(KeyCode.KeypadPlus))
+            {
+                TimeOfDay = TimeOfDay + 1;                
+            }
+
+            if (Input.GetKey(KeyCode.Minus) || Input.GetKey(KeyCode.KeypadMinus))
+            {
+                TimeOfDay = TimeOfDay - 1;                
+            }
+
+            if (TimeOfDay > 180)
+            {
+                TimeOfDay = -180;
+            }
+            else if (TimeOfDay < -180)
+            {
+                TimeOfDay = 180;
+            }
         }
 
         HashSet<Vector3Int> ILightManager.Update()

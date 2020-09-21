@@ -9,21 +9,20 @@
     SubShader
     {
         Tags { "RenderType"="Opaque" }
-        //LOD 100
 
         Pass
         {
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
-            // make fog work
+            // support for Unity fog
             #pragma multi_compile_fog
 
-            #pragma require 2darray//Reduire 2d array
+            #pragma require 2darray
 
-            #include "UnityCG.cginc"
+            #include "UnityCG.cginc"//Include basic Unity shader definitions
 
-            struct appdata
+            struct appdata//Per-vertex data
             {
                 float4 vertex : POSITION;
                 float3 uv : TEXCOORD0;
@@ -31,7 +30,7 @@
                 half3 normal: NORMAL;
             };
 
-            struct v2f
+            struct v2f//Vertex to fragment shader data
             {
                 float3 uv : TEXCOORD0;
                 UNITY_FOG_COORDS(1)
@@ -41,11 +40,13 @@
             };
 
             UNITY_DECLARE_TEX2DARRAY(_MainTex);
+            //Global light variables
             float GlobalLightLevel;
             float GlobalLightMinIntensity;
             float GlobalLightMaxIntensity;
             float3 GlobalLightDirection;
 
+            //Vertex shader, sets up data for fragment shader
             v2f vert (appdata v)
             {
                 v2f o;
@@ -58,31 +59,27 @@
                 return o;
             }
 
-            float inverseLerp(float lo, float hi, float val){
-                float range = hi - lo;
-                return (val - lo) / range;
-            }
-
+            //Fragment shader
             fixed4 frag (v2f i) : SV_Target
             {
-                // sample the texture
+                // Sample the texture
                 fixed4 col = UNITY_SAMPLE_TEX2DARRAY(_MainTex, i.uv);
                 
+                //Use vertex colour alpha to interporlate global sunlight value
                 float localSunIntensity = lerp(GlobalLightMinIntensity,GlobalLightMaxIntensity, GlobalLightLevel *i.color.a);
-                float3 sunlightAmbient = 0.8* float3(localSunIntensity,localSunIntensity,localSunIntensity);
+                float3 sunIntensityVector = float3(localSunIntensity,localSunIntensity,localSunIntensity);
+                //Ambient sunlight
+                float3 sunlightAmbient = 0.8* sunIntensityVector;
+                //Directional sunlight
                 float diffuseAmount = max(dot(i.worldNormal, GlobalLightDirection), 0.0);
-                float3 sunlightDiffuse = 0.2 * diffuseAmount * sunlightAmbient;     
+                float3 sunlightDiffuse = 0.2 * diffuseAmount * sunIntensityVector;     
+
                 float3 totalSunlight = sunlightDiffuse + sunlightAmbient;
 
                 float3 dynamicLight = i.color.xyz;
 
-                col.xyz = (clamp(totalSunlight+dynamicLight,0,1))*col.xyz;         
-
-                //stupid AO approximation
-                // float3 up = float3(0,1,0);
-                // float dotProd = dot(i.worldNormal, up);
-                // float scale = lerp(0.8,1, inverseLerp(-1,1,dotProd));
-                // col.xyz = scale * col.xyz;       
+                //Clamp final light colour and blend with texture colour
+                col.xyz = (clamp(totalSunlight+dynamicLight,0,1))*col.xyz;             
 
                 // apply fog
                 UNITY_APPLY_FOG(i.fogCoord, col);

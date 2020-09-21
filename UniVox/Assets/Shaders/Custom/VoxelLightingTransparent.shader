@@ -59,31 +59,21 @@
                 return o;
             }
 
-            float inverseLerp(float lo, float hi, float val){
-                float range = hi - lo;
-                return (val - lo) / range;
-            }
-
             fixed4 frag (v2f i) : SV_Target
             {
                 // sample the texture
                 fixed4 col = UNITY_SAMPLE_TEX2DARRAY(_MainTex, i.uv);
                 
                 float localSunIntensity = lerp(GlobalLightMinIntensity,GlobalLightMaxIntensity, GlobalLightLevel *i.color.a);
-                float3 sunlightAmbient = 0.8* float3(localSunIntensity,localSunIntensity,localSunIntensity);
+                float3 sunIntensityVector = float3(localSunIntensity,localSunIntensity,localSunIntensity);
+                float3 sunlightAmbient = 0.8* sunIntensityVector;
                 float diffuseAmount = max(dot(i.worldNormal, GlobalLightDirection), 0.0);
-                float3 sunlightDiffuse = 0.2 * diffuseAmount * sunlightAmbient;     
+                float3 sunlightDiffuse = 0.2 * diffuseAmount * sunIntensityVector;     
                 float3 totalSunlight = sunlightDiffuse + sunlightAmbient;
 
                 float3 dynamicLight = i.color.xyz;
 
-                col.xyz = (clamp(totalSunlight+dynamicLight,0,1))*col.xyz;         
-
-                //stupid AO approximation
-                // float3 up = float3(0,1,0);
-                // float dotProd = dot(i.worldNormal, up);
-                // float scale = lerp(0.8,1, inverseLerp(-1,1,dotProd));
-                // col.xyz = scale * col.xyz;       
+                col.xyz = (clamp(totalSunlight+dynamicLight,0,1))*col.xyz;               
 
                 // apply fog
                 UNITY_APPLY_FOG(i.fogCoord, col);
