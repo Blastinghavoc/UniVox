@@ -96,8 +96,30 @@ namespace UniVox.Gameplay
             {
                 if (hitAnything)
                 {
-                    WorldInterface.PlaceVoxel(LocationToPlaceBlock, blockToPlace,
-                        new VoxelRotation() { x = rotationX, y = rotationY, z = rotationZ });
+                    //Simple rotation calculation based on the normal of the face the player is looking at
+
+                    rotationZ = Mathf.RoundToInt(Vector3.Dot(raycastHit.normal, Vector3.left));
+                    if (rotationZ == -1)
+                    {
+                        rotationZ = 3;
+                    }
+                    rotationX = Mathf.RoundToInt(Vector3.Dot(raycastHit.normal, Vector3.forward));
+                    if (rotationX == -1)
+                    {
+                        rotationX = 3;
+                    }
+                    rotationY = 0;
+
+                    var rotation = new VoxelRotation() { x = rotationX, y = rotationY, z = rotationZ };
+
+                    if (blockToPlace.rotationConfiguration != null && blockToPlace.rotationConfiguration.RotationValid(rotation))
+                    {
+                        WorldInterface.PlaceVoxel(LocationToPlaceBlock, blockToPlace, rotation);
+                    }
+                    else
+                    {
+                        WorldInterface.PlaceVoxel(LocationToPlaceBlock, blockToPlace);
+                    }
                 }
             }
 
