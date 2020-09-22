@@ -46,6 +46,20 @@ namespace UniVox.Implementations.ProcGen
                             int flatIndex = MultiIndexToFlat(x, y, z, dx, dxdy);
                             while (y >= 0 && chunkData[flatIndex] == VoxelTypeID.AIR_ID)
                             {
+                                if (chunkPosition.y+y < heightMap[i])
+                                {
+                                    //Prevent filling below the heightmap
+
+                                    ///NOTE: Without this break check, all caves underneath oceans get filled 
+                                    ///with water, even if they do not connect to the ocean at all, 
+                                    ///but with it water can be "floating" over caves that carve out space 
+                                    ///directly under the seabed.
+                                    ///Neither of these solutions is ideal, a proper water propagation
+                                    ///system would need to be implemented to get "correct" looking
+                                    ///water.                                
+
+                                    break;
+                                }
                                 chunkData[flatIndex] = new VoxelTypeID(config.waterID);
                                 y--;
                                 flatIndex = MultiIndexToFlat(x, y, z, dx, dxdy);
